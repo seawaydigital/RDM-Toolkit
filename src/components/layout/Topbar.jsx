@@ -1,0 +1,64 @@
+import { useState, useEffect } from 'react';
+import { Lock, Menu, HelpCircle, Search } from 'lucide-react';
+import SearchBar from '../ui/SearchBar';
+
+export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, currentPage, onNavigate }) {
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Global keyboard shortcut: Ctrl+K / Cmd+K
+  useEffect(() => {
+    function onKeyDown(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+      }
+    }
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
+
+  return (
+    <>
+      <header className="topbar">
+        <div className="topbar-left">
+          {showMenuButton && (
+            <button className="topbar-menu-btn" onClick={onMenuToggle} aria-label="Toggle sidebar">
+              <Menu size={20} />
+            </button>
+          )}
+          <span className="topbar-logo" onClick={onLogoClick} style={{ cursor: 'pointer' }}>RDM Toolkit</span>
+          <span className="topbar-subtitle">Research Data Management Toolkit</span>
+        </div>
+        <div className="topbar-right">
+          <button
+            className="topbar-search-btn"
+            onClick={() => setSearchOpen(true)}
+            aria-label="Search tools (Ctrl+K)"
+            title="Search tools (Ctrl+K)"
+          >
+            <Search size={16} />
+            <span className="topbar-search-label">Search</span>
+            <kbd className="topbar-search-kbd">Ctrl+K</kbd>
+          </button>
+          <a
+            href="#how-this-works"
+            className={`topbar-htw-link ${currentPage === 'how-this-works' ? 'topbar-htw-link--active' : ''}`}
+          >
+            <HelpCircle size={15} />
+            How This Works
+          </a>
+          <span className="topbar-badge">
+            <Lock size={14} />
+            100% Browser-Based
+          </span>
+        </div>
+      </header>
+
+      <SearchBar
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onNavigate={onNavigate}
+      />
+    </>
+  );
+}

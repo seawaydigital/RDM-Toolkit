@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npx vite:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(where node:*)",
+      "Bash(where npm.cmd)",
+      "WebSearch",
+      "Bash(gh auth:*)",
+      "Bash(gh api:*)"
+    ]
+  }
+}
