@@ -93,6 +93,23 @@ const RDM_TOOLS = [
     ],
     bestFor: 'Researchers needing secure, collaborative file storage that stays in Canada',
   },
+  {
+    id: 'globus',
+    name: 'Globus',
+    icon: Zap,
+    color: '#EF4444',
+    tagline: 'High-speed large data transfer',
+    url: 'https://globus.alliancecan.ca',
+    description: 'Globus enables fast, reliable, automated file transfers between HPC systems, campus clusters, lab servers, and laptops — all through a browser interface. Required for uploading large datasets to FRDR.',
+    stats: 'TB-scale transfers in minutes',
+    tags: ['Required for FRDR uploads', 'Automated & resumable', 'Cross-institution'],
+    useCases: [
+      'Uploading large datasets to FRDR for deposit',
+      'Transferring data between national clusters and your workstation',
+      'Automating recurring data movement between systems',
+    ],
+    bestFor: 'Any researcher moving large files to/from national HPC or FRDR',
+  },
 ];
 
 function Upload(props) {
@@ -153,6 +170,22 @@ const ARC_SYSTEMS = [
     status: 'active',
     specs: 'CPU + GPU nodes · General-purpose',
     note: 'Full-featured HPC cluster; available to all eligible Canadian researchers.',
+  },
+  {
+    name: 'Killarney',
+    operator: 'Vector Institute / SciNet · University of Toronto',
+    type: 'AI / GPU',
+    status: 'new',
+    specs: '168 nodes × 4 NVIDIA L40s (672 GPUs) + 10 nodes × 8 NVIDIA H100 SXM (80 GPUs)',
+    note: 'AI-dedicated cluster built for large-scale machine learning and deep learning workloads. Part of the Pan-Canadian AI Compute Environment (PAICE).',
+  },
+  {
+    name: 'MonarQ',
+    operator: 'Calcul Québec · École de technologie supérieure, Montréal',
+    type: 'Quantum',
+    status: 'active',
+    specs: '24-qubit superconducting quantum processor · Integrated with HPC cluster',
+    note: 'Canada\'s national quantum computer, available to researchers through the Alliance. Seamlessly blends quantum and classical HPC workflows.',
   },
 ];
 
@@ -243,6 +276,13 @@ const GETTING_STARTED = [
     detail: 'The Alliance has 200+ technical experts at 38 campuses. Contact them via the national helpdesk or ask your institutional RDM team.',
     link: 'https://docs.alliancecan.ca/wiki/Technical_support',
     linkText: 'Contact support',
+  },
+  {
+    step: 5,
+    title: 'Build your skills with Explora',
+    detail: 'Explora is the Alliance\'s national training portal — browse workshops, online courses, and webinars covering HPC, RDM, research software, and more. Free for all eligible Canadian researchers.',
+    link: 'https://explora.alliancecan.ca',
+    linkText: 'Browse Explora training',
   },
 ];
 
@@ -366,6 +406,18 @@ export default function DRACServices() {
             })}
           </div>
 
+          {/* Sensitive Data Toolkit callout */}
+          <div className="drac-sensitive-callout">
+            <div className="drac-sensitive-header">
+              <Info size={16} />
+              <strong>Working with human participant data?</strong>
+            </div>
+            <p>The Alliance's <strong>Sensitive Data Toolkit</strong> provides practical guidance for researchers collecting personal or identifiable data — including a Human Participant Research Data Risk Matrix, de-identification guidance, and RDM language templates for informed consent forms.</p>
+            <a href="https://alliancecan.ca/en/services/research-data-management/sensitive-data" target="_blank" rel="noopener noreferrer" className="drac-rdm-link" style={{ marginTop: '8px', display: 'inline-flex' }}>
+              View Sensitive Data Toolkit <ExternalLink size={12} />
+            </a>
+          </div>
+
           {/* Lifecycle diagram */}
           <div className="drac-lifecycle">
             <h3>Which tool do I use when?</h3>
@@ -438,7 +490,7 @@ export default function DRACServices() {
                     <div className="drac-system-name-wrap">
                       <strong className="drac-system-name">{sys.name}</strong>
                       {sys.status === 'new' && <span className="drac-system-badge drac-system-badge--new">New</span>}
-                      <span className={`drac-system-type drac-system-type--${sys.type === 'Cloud (IaaS)' ? 'cloud' : 'hpc'}`}>{sys.type}</span>
+                      <span className={`drac-system-type drac-system-type--${sys.type === 'Cloud (IaaS)' ? 'cloud' : sys.type === 'Quantum' ? 'quantum' : sys.type === 'AI / GPU' ? 'ai' : 'hpc'}`}>{sys.type}</span>
                     </div>
                     <span className="drac-system-operator">{sys.operator}</span>
                     <ChevronRight size={14} className={`drac-system-chevron${isOpen ? ' drac-system-chevron--open' : ''}`} />

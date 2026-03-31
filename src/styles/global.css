@@ -6120,6 +6120,8 @@ input:focus, textarea:focus, select:focus {
 .drac-system-type { font-size: 10px; padding: 2px 7px; border-radius: 8px; }
 .drac-system-type--hpc { background: rgba(59,130,246,0.12); color: #60A5FA; }
 .drac-system-type--cloud { background: rgba(168,85,247,0.12); color: #C084FC; }
+.drac-system-type--ai { background: rgba(16,185,129,0.12); color: #34D399; }
+.drac-system-type--quantum { background: rgba(251,191,36,0.12); color: #FCD34D; }
 .drac-system-operator { font-size: 12px; color: var(--text-muted); flex: 1; }
 .drac-system-chevron { color: var(--text-muted); flex-shrink: 0; transition: transform 0.2s; }
 .drac-system-chevron--open { transform: rotate(90deg); }
@@ -6136,6 +6138,17 @@ input:focus, textarea:focus, select:focus {
 }
 .drac-arc-note svg { color: var(--accent-cyan); flex-shrink: 0; margin-top: 1px; }
 .drac-arc-note p { margin: 0; line-height: 1.6; }
+
+/* ── Sensitive Data Toolkit callout ── */
+.drac-sensitive-callout {
+  background: rgba(251, 191, 36, 0.06); border: 1px solid rgba(251, 191, 36, 0.25);
+  border-radius: var(--radius-md); padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+.drac-sensitive-header { display: flex; align-items: center; gap: var(--space-xs); margin-bottom: var(--space-xs); }
+.drac-sensitive-header svg { color: var(--accent-cyan); flex-shrink: 0; }
+.drac-sensitive-header strong { font-size: 14px; color: var(--text-primary); }
+.drac-sensitive-callout p { font-size: 13px; color: var(--text-secondary); margin: 0 0 var(--space-xs); line-height: 1.6; }
 
 /* ── Software ── */
 .drac-software-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-xl); }
