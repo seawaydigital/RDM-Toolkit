@@ -5649,55 +5649,575 @@ input:focus, textarea:focus, select:focus {
   background: var(--bg-tertiary);
 }
 
-/* Deposit flowchart */
-.tap-flow {
+/* ── Deposit Decision Flowchart (fc-*) ── */
+.fc {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-sm);
   margin-bottom: var(--space-xl);
-}
-.tap-flow-arrow { color: var(--text-muted); }
-.tap-flow-node {
   width: 100%;
-  max-width: 680px;
-  padding: var(--space-md) var(--space-lg);
-  border-radius: var(--radius-md);
+}
+
+/* Diamond question nodes */
+.fc-diamond-wrap {
   display: flex;
-  align-items: flex-start;
-  gap: var(--space-md);
+  justify-content: center;
+  width: 100%;
 }
-.tap-flow-node--question {
+
+.fc-diamond {
+  position: relative;
+  width: 260px;
+  min-height: 80px;
   background: var(--bg-secondary);
-  border: 1px solid var(--border);
-}
-.tap-flow-node--action {
-  background: rgba(16,185,129,0.08);
-  border: 1px solid rgba(16,185,129,0.3);
-}
-.tap-flow-node-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--bg-tertiary);
+  border: 2px solid var(--accent-cyan);
+  border-radius: 6px;
+  transform: rotate(45deg);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--accent-cyan);
 }
-.tap-flow-node--action .tap-flow-node-icon { color: var(--accent-green); background: rgba(16,185,129,0.1); }
-.tap-flow-node strong { font-size: 14px; color: var(--text-primary); display: block; margin-bottom: var(--space-xs); }
-.tap-flow-node p { font-size: 13px; color: var(--text-secondary); margin: 4px 0 0; line-height: 1.5; }
-.tap-flow-node-choices {
+
+.fc-diamond span {
+  display: block;
+  transform: rotate(-45deg);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  padding: 8px 14px;
+  line-height: 1.4;
+  width: 200px;
+}
+
+/* Branch row for YES/NO exits */
+.fc-branch-row {
   display: flex;
-  gap: var(--space-md);
-  flex-wrap: wrap;
-  margin-top: var(--space-sm);
+  align-items: flex-start;
+  width: 100%;
+  max-width: 680px;
+  gap: 0;
 }
-.tap-flow-choice { font-size: 12px; padding: 3px 10px; border-radius: 12px; }
-.tap-flow-choice--yes { background: rgba(16,185,129,0.12); color: var(--accent-green); }
-.tap-flow-choice--no  { background: rgba(239,68,68,0.1);  color: #F87171; }
+
+/* YES path — centered, going down */
+.fc-yes-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 50%;
+}
+
+/* NO path — going right to an outcome */
+.fc-no-col {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  padding-top: 20px;
+}
+
+/* Connector lines */
+.fc-line-v {
+  width: 2px;
+  height: 24px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.fc-line-h {
+  height: 2px;
+  flex: 0 0 24px;
+  background: var(--border);
+}
+
+/* YES / NO labels */
+.fc-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.fc-label--yes {
+  background: rgba(16,185,129,0.15);
+  color: var(--accent-green);
+}
+.fc-label--no {
+  background: rgba(239,68,68,0.1);
+  color: #F87171;
+  margin: 0 6px;
+}
+
+/* Outcome terminal boxes */
+.fc-outcome {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  flex: 1;
+  font-size: 13px;
+}
+.fc-outcome span { font-size: 20px; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+.fc-outcome strong { display: block; font-size: 13px; color: var(--text-primary); margin-bottom: 3px; }
+.fc-outcome p { font-size: 12px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+
+.fc-outcome--stop {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.25);
+}
+.fc-outcome--wait {
+  background: rgba(251,191,36,0.08);
+  border: 1px solid rgba(251,191,36,0.25);
+}
+.fc-outcome--restricted {
+  background: rgba(168,85,247,0.08);
+  border: 1px solid rgba(168,85,247,0.25);
+}
+.fc-outcome--open {
+  background: rgba(59,130,246,0.08);
+  border: 1px solid rgba(59,130,246,0.25);
+}
+
+/* Q3 splits both YES and NO downward */
+.fc-split-row {
+  display: flex;
+  width: 100%;
+  max-width: 680px;
+  gap: var(--space-md);
+}
+.fc-split-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.fc-split-col .fc-outcome { width: 100%; }
+
+/* Merge line above final action */
+.fc-merge-line {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  justify-content: center;
+  padding: 0 calc(25% + var(--space-md)/2);
+}
+.fc-merge-line-inner {
+  width: 2px;
+  height: 24px;
+  background: var(--border);
+}
+
+/* Final action box */
+.fc-action {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: rgba(16,185,129,0.08);
+  border: 2px solid var(--accent-green);
+  border-radius: var(--radius-md);
+  width: 100%;
+  max-width: 680px;
+}
+.fc-action svg { color: var(--accent-green); flex-shrink: 0; margin-top: 2px; }
+.fc-action strong { display: block; font-size: 14px; color: var(--text-primary); margin-bottom: 4px; }
+.fc-action p { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+
+/* Mobile: stack NO branches below on small screens */
+@media (max-width: 580px) {
+  .fc-diamond { width: 200px; }
+  .fc-diamond span { width: 160px; font-size: 11px; }
+  .fc-branch-row { flex-direction: column; align-items: center; }
+  .fc-yes-col { flex: 0 0 auto; }
+  .fc-no-col { flex-direction: column; align-items: center; padding-top: 0; }
+  .fc-line-h { display: none; }
+  .fc-split-row { flex-direction: column; }
+}
+
+/* ========================================
+   DRAC SERVICES PAGE
+   ======================================== */
+
+/* Layout */
+.drac { max-width: 900px; }
+
+/* Hero */
+.drac-hero {
+  text-align: center;
+  padding: var(--space-xl) 0 var(--space-lg);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-xl);
+}
+.drac-hero-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-md);
+}
+.drac-hero-logo svg { color: var(--accent-cyan); }
+.drac-title {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent-cyan);
+  margin-bottom: var(--space-sm);
+  line-height: 1.3;
+}
+.drac-subtitle {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 560px;
+  margin: 0 auto var(--space-lg);
+  line-height: 1.7;
+}
+.drac-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+.drac-stat { display: flex; flex-direction: column; align-items: center; }
+.drac-stat strong { font-size: 22px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+.drac-stat span { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+.drac-stat-div { width: 1px; height: 32px; background: var(--border); }
+.drac-hero-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--accent-cyan);
+  border: 1px solid rgba(255,194,14,0.3);
+  border-radius: 20px;
+  padding: 5px 14px;
+  transition: background 0.15s;
+}
+.drac-hero-link:hover { background: rgba(255,194,14,0.08); }
+
+/* Tab navigation */
+.drac-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 3px;
+  margin-bottom: var(--space-xl);
+  flex-wrap: wrap;
+}
+.drac-tab {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  flex: 1;
+  justify-content: center;
+  white-space: nowrap;
+}
+.drac-tab:hover { color: var(--text-primary); background: var(--bg-tertiary); }
+.drac-tab--active {
+  background: var(--bg-tertiary);
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+/* Content area */
+.drac-content-intro {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--space-lg);
+}
+.drac-subsection-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: var(--space-xl) 0 var(--space-md);
+}
+.drac-inline-link {
+  color: var(--accent-cyan);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* ── RDM Tool Cards ── */
+.drac-rdm-grid { display: flex; flex-direction: column; gap: var(--space-sm); margin-bottom: var(--space-xl); }
+
+.drac-rdm-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--tool-color, var(--accent-cyan));
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.drac-rdm-card--open { background: var(--bg-tertiary); }
+
+.drac-rdm-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.drac-rdm-card-header:hover { background: rgba(255,255,255,0.02); }
+
+.drac-rdm-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--tool-color, var(--accent-cyan));
+  flex-shrink: 0;
+}
+.drac-rdm-header-text { flex: 1; min-width: 0; }
+.drac-rdm-header-text strong { display: block; font-size: 15px; color: var(--text-primary); }
+.drac-rdm-header-text span { font-size: 12px; color: var(--text-secondary); }
+.drac-rdm-stat { font-size: 11px; color: var(--text-muted); font-family: var(--font-mono); flex-shrink: 0; }
+.drac-rdm-chevron { color: var(--text-muted); flex-shrink: 0; transition: transform 0.2s; }
+.drac-rdm-chevron--open { transform: rotate(180deg); }
+
+.drac-rdm-body { padding: 0 var(--space-md) var(--space-md); border-top: 1px solid var(--border); margin-top: 0; padding-top: var(--space-md); }
+.drac-rdm-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: var(--space-sm); }
+.drac-rdm-tags { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-bottom: var(--space-md); }
+.drac-rdm-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255,194,14,0.1);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(255,194,14,0.2);
+}
+.drac-rdm-details { margin-bottom: var(--space-md); }
+.drac-rdm-details h4 { font-size: 12px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: var(--space-xs); }
+.drac-rdm-details ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.drac-rdm-details li { display: flex; align-items: flex-start; gap: var(--space-xs); font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+.drac-rdm-details li svg { color: var(--accent-green); flex-shrink: 0; margin-top: 1px; }
+.drac-rdm-best-for {
+  display: flex; align-items: flex-start; gap: var(--space-xs);
+  font-size: 12px; color: var(--text-muted);
+  background: var(--bg-secondary); border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm); margin-top: var(--space-sm);
+}
+.drac-rdm-best-for svg { color: var(--accent-cyan); flex-shrink: 0; margin-top: 1px; }
+.drac-rdm-link {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 13px; font-weight: 500;
+  color: var(--tool-color, var(--accent-cyan));
+  border: 1px solid var(--tool-color, var(--accent-cyan));
+  border-radius: var(--radius-sm);
+  padding: 5px 12px;
+  transition: background 0.15s;
+  opacity: 0.9;
+}
+.drac-rdm-link:hover { background: rgba(255,255,255,0.05); opacity: 1; }
+
+/* Lifecycle flow */
+.drac-lifecycle {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+.drac-lifecycle h3 { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-md); }
+.drac-lifecycle-flow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+.drac-lifecycle-step { display: flex; align-items: center; gap: var(--space-xs); }
+.drac-lifecycle-node {
+  display: flex; flex-direction: column; align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--lc-color, var(--border));
+  border-top: 3px solid var(--lc-color, var(--accent-cyan));
+  border-radius: var(--radius-md);
+  min-width: 120px;
+}
+.drac-lifecycle-stage { font-size: 10px; font-weight: 700; color: var(--lc-color, var(--text-muted)); text-transform: uppercase; letter-spacing: 0.06em; }
+.drac-lifecycle-tool { font-size: 12px; color: var(--text-primary); margin-top: 3px; text-align: center; line-height: 1.3; }
+.drac-lifecycle-arrow { color: var(--text-muted); flex-shrink: 0; }
+
+/* ── ARC Access Tiers ── */
+.drac-access-tiers { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-xl); }
+@media (max-width: 640px) { .drac-access-tiers { grid-template-columns: 1fr; } }
+
+.drac-tier-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--tier-color, var(--accent-cyan));
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex; flex-direction: column; gap: var(--space-sm);
+}
+.drac-tier-header { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
+.drac-tier-badge {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: 10px;
+  background: rgba(255,255,255,0.05);
+  color: var(--tier-color, var(--accent-cyan));
+  border: 1px solid var(--tier-color, var(--accent-cyan));
+  flex-shrink: 0;
+}
+.drac-tier-header strong { font-size: 14px; color: var(--text-primary); }
+.drac-tier-card > p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0; }
+.drac-tier-includes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.drac-tier-includes li { display: flex; align-items: flex-start; gap: var(--space-xs); font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.drac-tier-includes li svg { color: var(--tier-color, var(--accent-green)); flex-shrink: 0; margin-top: 1px; }
+.drac-tier-ideal { font-size: 12px; color: var(--text-muted); padding: var(--space-xs) var(--space-sm); background: var(--bg-tertiary); border-radius: var(--radius-sm); margin-top: auto; }
+.drac-tier-ideal strong { color: var(--text-secondary); }
+.drac-tier-link { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--tier-color, var(--accent-cyan)); }
+.drac-tier-link:hover { text-decoration: underline; }
+
+/* ── Systems list ── */
+.drac-systems-list { display: flex; flex-direction: column; gap: 2px; }
+.drac-system-row {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.drac-system-row--open { background: var(--bg-tertiary); }
+.drac-system-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.drac-system-header:hover { background: rgba(255,255,255,0.02); }
+.drac-system-name-wrap { display: flex; align-items: center; gap: var(--space-xs); flex-shrink: 0; min-width: 140px; }
+.drac-system-name { font-size: 14px; color: var(--text-primary); font-family: var(--font-mono); }
+.drac-system-badge { font-size: 10px; padding: 2px 6px; border-radius: 8px; font-weight: 700; }
+.drac-system-badge--new { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+.drac-system-type { font-size: 10px; padding: 2px 7px; border-radius: 8px; }
+.drac-system-type--hpc { background: rgba(59,130,246,0.12); color: #60A5FA; }
+.drac-system-type--cloud { background: rgba(168,85,247,0.12); color: #C084FC; }
+.drac-system-operator { font-size: 12px; color: var(--text-muted); flex: 1; }
+.drac-system-chevron { color: var(--text-muted); flex-shrink: 0; transition: transform 0.2s; }
+.drac-system-chevron--open { transform: rotate(90deg); }
+.drac-system-body { padding: 0 var(--space-md) var(--space-md); border-top: 1px solid var(--border); padding-top: var(--space-sm); }
+.drac-system-specs { display: flex; align-items: center; gap: var(--space-xs); font-size: 12px; color: var(--accent-cyan); font-family: var(--font-mono); margin-bottom: var(--space-xs); }
+.drac-system-body p { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.6; }
+
+.drac-arc-note {
+  display: flex; align-items: flex-start; gap: var(--space-sm);
+  font-size: 13px; color: var(--text-secondary);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: var(--radius-md); margin-top: var(--space-lg);
+}
+.drac-arc-note svg { color: var(--accent-cyan); flex-shrink: 0; margin-top: 1px; }
+.drac-arc-note p { margin: 0; line-height: 1.6; }
+
+/* ── Software ── */
+.drac-software-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-xl); }
+.drac-software-card {
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: var(--space-md);
+  display: flex; flex-direction: column; gap: var(--space-sm);
+}
+.drac-software-card--highlight { border-color: var(--accent-cyan); background: rgba(255,194,14,0.04); }
+.drac-software-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--bg-tertiary); display: flex; align-items: center; justify-content: center; color: var(--accent-cyan); }
+.drac-software-card h3 { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 0; }
+.drac-software-card p { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.6; flex: 1; }
+.drac-software-link { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--accent-cyan); margin-top: auto; }
+.drac-software-link:hover { text-decoration: underline; }
+
+.drac-software-strategy {
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: var(--space-lg);
+}
+.drac-software-strategy h3 { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-md); }
+.drac-strategy-pillars { display: flex; flex-direction: column; gap: var(--space-sm); }
+.drac-strategy-pillar {
+  display: flex; align-items: flex-start; gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-tertiary); border-radius: var(--radius-sm);
+}
+.drac-strategy-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--accent-cyan); color: #0A1628;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.drac-strategy-pillar strong { display: block; font-size: 13px; color: var(--text-primary); }
+.drac-strategy-pillar p { font-size: 12px; color: var(--text-secondary); margin: 3px 0 0; line-height: 1.5; }
+
+/* ── Getting Started ── */
+.drac-start-steps { display: flex; flex-direction: column; gap: 0; position: relative; margin-bottom: var(--space-xl); }
+.drac-start-step {
+  display: flex; gap: var(--space-md);
+  padding: var(--space-md) 0;
+  position: relative;
+}
+.drac-start-step:not(:last-child)::after {
+  content: ''; position: absolute;
+  left: 17px; top: 52px; bottom: 0;
+  width: 2px; background: var(--border);
+}
+.drac-start-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent-cyan); color: #0A1628;
+  font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; position: relative; z-index: 1;
+}
+.drac-start-body { flex: 1; padding-bottom: var(--space-md); }
+.drac-start-body strong { display: block; font-size: 14px; color: var(--text-primary); margin-bottom: 4px; }
+.drac-start-body p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin: 0 0 var(--space-sm); }
+.drac-start-link { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--accent-cyan); border: 1px solid rgba(255,194,14,0.3); border-radius: 10px; padding: 3px 10px; transition: background 0.15s; }
+.drac-start-link:hover { background: rgba(255,194,14,0.08); }
+
+/* Eligibility */
+.drac-eligibility { margin-bottom: var(--space-xl); }
+.drac-eligibility h3 { font-size: 15px; font-weight: 600; color: var(--text-primary); margin-bottom: var(--space-md); }
+.drac-eligibility-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-sm); }
+.drac-elig-card {
+  display: flex; align-items: flex-start; gap: var(--space-sm);
+  padding: var(--space-md); border-radius: var(--radius-md);
+  background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.2);
+}
+.drac-elig-card svg { color: var(--accent-green); flex-shrink: 0; margin-top: 2px; }
+.drac-elig-card strong { display: block; font-size: 13px; color: var(--text-primary); margin-bottom: 3px; }
+.drac-elig-card p { font-size: 12px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+
+/* Contact */
+.drac-contact {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-sm);
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: var(--space-lg);
+}
+.drac-contact-item { display: flex; flex-direction: column; gap: 4px; }
+.drac-contact-item strong { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
 
 /* Repository grid */
 .tap-repos { margin-top: var(--space-lg); }

@@ -8,6 +8,7 @@ import RequestATool from './components/pages/RequestATool';
 import DataClassification from './components/pages/DataClassification';
 import StorageCalculator from './components/pages/StorageCalculator';
 import TriAgencyPolicy from './components/pages/TriAgencyPolicy';
+import DRACServices from './components/pages/DRACServices';
 import RelatedTools from './components/ui/RelatedTools';
 import ToolSkeleton from './components/ui/ToolSkeleton';
 import { ALL_TOOLS } from './data/toolRegistry';
@@ -101,7 +102,7 @@ const toolComponents = {
   'uuid-generator': lazy(() => import('./tools/developer/UUIDGenerator.jsx')),
 };
 
-const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy']);
+const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy', 'drac-services']);
 
 function getRouteFromHash() {
   const hash = window.location.hash.slice(1);
@@ -289,6 +290,7 @@ export default function App() {
           {currentPage === 'data-classification' && <DataClassification />}
           {currentPage === 'storage-calculator' && <StorageCalculator />}
           {currentPage === 'tri-agency-policy' && <TriAgencyPolicy />}
+          {currentPage === 'drac-services' && <DRACServices />}
           {currentToolId && ToolComponent && (
             <ErrorBoundary
               resetKey={errorResetKey}

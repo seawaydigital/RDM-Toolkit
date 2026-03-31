@@ -396,56 +396,121 @@ export default function TriAgencyPolicy() {
       <section className="tap-section">
         <h2 className="tap-section-title">Do I Need to Deposit My Data?</h2>
         <p className="tap-section-intro">
-          Use this decision flow when you are ready to publish. "Deposit" means uploading to a
-          repository — it does not necessarily mean making data public.
+          Follow the arrows from top to bottom. Each diamond is a yes/no question — your path
+          ends at a coloured outcome box. "Deposit" means uploading to a repository, not
+          necessarily making data public.
         </p>
-        <div className="tap-flow">
-          <div className="tap-flow-node tap-flow-node--question" onClick={() => setDepositStep('q1')}>
-            <div className="tap-flow-node-icon"><FileText size={18} /></div>
-            <div>
-              <strong>Is this research funded by CIHR, NSERC, or SSHRC?</strong>
-            </div>
-            <div className="tap-flow-node-choices">
-              <span className="tap-flow-choice tap-flow-choice--yes">Yes →</span>
-              <span className="tap-flow-choice tap-flow-choice--no">No → Policy does not apply</span>
+
+        <div className="fc">
+
+          {/* ── Q1 ── */}
+          <div className="fc-diamond-wrap">
+            <div className="fc-diamond">
+              <span>Is your research funded by CIHR, NSERC, or SSHRC?</span>
             </div>
           </div>
 
-          <ArrowDown size={16} className="tap-flow-arrow" />
-
-          <div className="tap-flow-node tap-flow-node--question">
-            <div className="tap-flow-node-icon"><BookOpen size={18} /></div>
-            <div>
-              <strong>Are you publishing a journal article or pre-print from this research?</strong>
+          {/* Q1 branches */}
+          <div className="fc-branch-row">
+            {/* YES: continue down */}
+            <div className="fc-yes-col">
+              <div className="fc-line-v" />
+              <span className="fc-label fc-label--yes">YES</span>
+              <div className="fc-line-v" />
             </div>
-            <div className="tap-flow-node-choices">
-              <span className="tap-flow-choice tap-flow-choice--yes">Yes → Deposit is required</span>
-              <span className="tap-flow-choice tap-flow-choice--no">No → Deposit not yet triggered</span>
-            </div>
-          </div>
-
-          <ArrowDown size={16} className="tap-flow-arrow" />
-
-          <div className="tap-flow-node tap-flow-node--question">
-            <div className="tap-flow-node-icon"><Shield size={18} /></div>
-            <div>
-              <strong>Does your data contain personal information, have an NDA, or involve Indigenous communities?</strong>
-            </div>
-            <div className="tap-flow-node-choices">
-              <span className="tap-flow-choice tap-flow-choice--yes">Yes → Deposit in a restricted-access repository; open sharing is NOT required</span>
-              <span className="tap-flow-choice tap-flow-choice--no">No → Deposit in an appropriate repository with open or licensed access</span>
+            {/* NO: exit right */}
+            <div className="fc-no-col">
+              <div className="fc-line-h" />
+              <span className="fc-label fc-label--no">NO</span>
+              <div className="fc-outcome fc-outcome--stop">
+                <span>🚫</span>
+                <div>
+                  <strong>Policy does not apply</strong>
+                  <p>This policy only covers Tri-Agency–funded research.</p>
+                </div>
+              </div>
             </div>
           </div>
 
-          <ArrowDown size={16} className="tap-flow-arrow" />
-
-          <div className="tap-flow-node tap-flow-node--action">
-            <div className="tap-flow-node-icon"><Upload size={18} /></div>
-            <div>
-              <strong>Deposit data, metadata, and code by time of publication.</strong>
-              <p>Link the deposit to your publication using a persistent identifier (e.g., DOI). Lakehead researchers can use <strong>Borealis (Dataverse)</strong> or a disciplinary repository.</p>
+          {/* ── Q2 ── */}
+          <div className="fc-diamond-wrap">
+            <div className="fc-diamond">
+              <span>Are you publishing a journal article or pre-print from this research?</span>
             </div>
           </div>
+
+          {/* Q2 branches */}
+          <div className="fc-branch-row">
+            <div className="fc-yes-col">
+              <div className="fc-line-v" />
+              <span className="fc-label fc-label--yes">YES</span>
+              <div className="fc-line-v" />
+            </div>
+            <div className="fc-no-col">
+              <div className="fc-line-h" />
+              <span className="fc-label fc-label--no">NO</span>
+              <div className="fc-outcome fc-outcome--wait">
+                <span>⏳</span>
+                <div>
+                  <strong>Not yet required</strong>
+                  <p>Deposit is triggered at time of publication. Keep managing your data and revisit this when you publish.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Q3 ── */}
+          <div className="fc-diamond-wrap">
+            <div className="fc-diamond">
+              <span>Does your data involve personal information, an NDA, or Indigenous community data?</span>
+            </div>
+          </div>
+
+          {/* Q3 splits into two outcome columns */}
+          <div className="fc-split-row">
+            <div className="fc-split-col">
+              <div className="fc-line-v" />
+              <span className="fc-label fc-label--yes">YES</span>
+              <div className="fc-line-v" />
+              <div className="fc-outcome fc-outcome--restricted">
+                <span>🔒</span>
+                <div>
+                  <strong>Restricted deposit required</strong>
+                  <p>Choose a repository that supports access controls. You are <em>not</em> required to share data openly.</p>
+                </div>
+              </div>
+            </div>
+            <div className="fc-split-col">
+              <div className="fc-line-v" />
+              <span className="fc-label fc-label--no">NO</span>
+              <div className="fc-line-v" />
+              <div className="fc-outcome fc-outcome--open">
+                <span>🌐</span>
+                <div>
+                  <strong>Open or licensed deposit</strong>
+                  <p>Deposit with appropriate access (open, Creative Commons, or discipline-standard licence).</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Merge line → final action */}
+          <div className="fc-merge-line">
+            <div className="fc-merge-line-inner" />
+          </div>
+
+          {/* ── Final action ── */}
+          <div className="fc-action">
+            <Upload size={18} />
+            <div>
+              <strong>Deposit data, metadata &amp; code by time of publication</strong>
+              <p>
+                Link your deposit to the publication with a persistent identifier (DOI).
+                Lakehead researchers can use <strong>Borealis (Dataverse Canada)</strong> or a disciplinary repository — see options below.
+              </p>
+            </div>
+          </div>
+
         </div>
 
         {/* Repository options */}
