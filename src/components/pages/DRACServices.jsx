@@ -76,6 +76,23 @@ const RDM_TOOLS = [
     ],
     bestFor: 'Researchers looking to find and reuse existing Canadian datasets',
   },
+  {
+    id: 'nextcloud',
+    name: 'Nextcloud',
+    icon: Cloud,
+    color: '#0082C9',
+    tagline: 'Secure cloud storage & collaboration',
+    url: 'https://nextcloud.alliancecan.ca',
+    description: 'A national Nextcloud instance hosted by the Alliance — secure, Canadian-sovereign cloud storage for researchers. Sync files across devices, share with collaborators, and work on documents in real time without data leaving Canada.',
+    stats: '100 GB default per user',
+    tags: ['Canadian data sovereignty', 'File sync & share', 'No institutional VPN needed'],
+    useCases: [
+      'Storing and sharing active research files during a project',
+      'Collaborating with team members at other institutions',
+      'Keeping sensitive data within Canadian jurisdiction',
+    ],
+    bestFor: 'Researchers needing secure, collaborative file storage that stays in Canada',
+  },
 ];
 
 function Upload(props) {
@@ -202,7 +219,7 @@ const GETTING_STARTED = [
   {
     step: 1,
     title: 'Access the national platforms',
-    detail: 'All DRAC national platforms — CCDB (HPC), FRDR (large datasets), DMP Assistant, and Borealis — are accessed from one login page. New users can create a free account there. Faculty can register directly; students and staff must be sponsored by a faculty supervisor.',
+    detail: 'All DRAC national platforms — CCDB (HPC), FRDR (large datasets), DMP Assistant, Borealis, and Nextcloud — are accessed from one login page. New users can create a free account there. Faculty can register directly; students and staff must be sponsored by a faculty supervisor.',
     link: 'https://www.alliancecan.ca/en/login',
     linkText: 'Log in to national platforms',
   },
@@ -297,8 +314,8 @@ export default function DRACServices() {
       {activeTab === 'rdm' && (
         <div className="drac-content">
           <p className="drac-content-intro">
-            The Alliance provides four national platforms that cover every stage of the
-            research data lifecycle — from planning, to deposit, to discovery.
+            The Alliance provides national platforms that cover every stage of the
+            research data lifecycle — from planning and active storage, to deposit, to discovery.
           </p>
 
           <div className="drac-rdm-grid">
@@ -355,7 +372,7 @@ export default function DRACServices() {
             <div className="drac-lifecycle-flow">
               {[
                 { stage: 'Plan', tool: 'DMP Assistant', color: '#FFC20E' },
-                { stage: 'Collect & Manage', tool: 'Your own systems + Borealis', color: '#10B981' },
+                { stage: 'Collect & Manage', tool: 'Nextcloud + Borealis', color: '#0082C9' },
                 { stage: 'Deposit', tool: 'FRDR or Borealis', color: '#3B82F6' },
                 { stage: 'Discover', tool: 'Lunaris', color: '#8B5CF6' },
               ].map((item, i, arr) => (
