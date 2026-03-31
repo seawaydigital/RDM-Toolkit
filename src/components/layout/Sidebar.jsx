@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal } from 'lucide-react';
+import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen } from 'lucide-react';
 import { PRIMARY_CATEGORIES, MORE_CATEGORIES, CATEGORIES } from '../../data/toolRegistry';
 
 export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen, onClose }) {
@@ -111,6 +111,14 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
           >
             <ShieldCheck size={16} />
             Classify Your Data
+          </a>
+          <a
+            href="#tri-agency-policy"
+            className={`sidebar-htw-link ${currentPage === 'tri-agency-policy' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <BookOpen size={16} />
+            Tri-Agency RDM Policy
           </a>
           <a
             href="#how-this-works"

@@ -7,6 +7,7 @@ import HowThisWorks from './components/pages/HowThisWorks';
 import RequestATool from './components/pages/RequestATool';
 import DataClassification from './components/pages/DataClassification';
 import StorageCalculator from './components/pages/StorageCalculator';
+import TriAgencyPolicy from './components/pages/TriAgencyPolicy';
 import RelatedTools from './components/ui/RelatedTools';
 import ToolSkeleton from './components/ui/ToolSkeleton';
 import { ALL_TOOLS } from './data/toolRegistry';
@@ -100,7 +101,7 @@ const toolComponents = {
   'uuid-generator': lazy(() => import('./tools/developer/UUIDGenerator.jsx')),
 };
 
-const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator']);
+const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy']);
 
 function getRouteFromHash() {
   const hash = window.location.hash.slice(1);
@@ -287,6 +288,7 @@ export default function App() {
           {currentPage === 'request-a-tool' && <RequestATool />}
           {currentPage === 'data-classification' && <DataClassification />}
           {currentPage === 'storage-calculator' && <StorageCalculator />}
+          {currentPage === 'tri-agency-policy' && <TriAgencyPolicy />}
           {currentToolId && ToolComponent && (
             <ErrorBoundary
               resetKey={errorResetKey}
