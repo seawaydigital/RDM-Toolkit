@@ -5946,6 +5946,41 @@ input:focus, textarea:focus, select:focus {
   color: var(--text-primary);
   margin: var(--space-xl) 0 var(--space-md);
 }
+/* ── Cluster concepts grid ── */
+.drac-concepts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+.drac-concept-card {
+  background: var(--bg-secondary); border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: var(--space-md);
+  display: flex; flex-direction: column; gap: 6px;
+}
+.drac-concept-icon {
+  width: 36px; height: 36px; border-radius: var(--radius-sm);
+  background: rgba(255,194,14,0.1); color: var(--accent-cyan);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 4px; flex-shrink: 0;
+}
+.drac-concept-card h4 { font-size: 14px; font-weight: 600; color: var(--text-primary); margin: 0; }
+.drac-concept-card p { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.6; }
+.drac-concept-card code.drac-concept-code {
+  display: block; font-family: var(--font-mono); font-size: 11px;
+  background: var(--bg-tertiary); color: var(--accent-cyan);
+  padding: 6px 10px; border-radius: var(--radius-sm);
+  white-space: pre; margin-top: 4px;
+}
+.drac-concept-list { margin: 4px 0 0; padding-left: 16px; font-size: 13px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px; }
+.drac-concept-list li { line-height: 1.5; }
+.drac-concept-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; color: var(--accent-cyan); margin-top: 4px;
+  text-decoration: none;
+}
+.drac-concept-link:hover { text-decoration: underline; }
+
 .drac-inline-link {
   color: var(--accent-cyan);
   text-decoration: underline;

@@ -2,7 +2,8 @@ import { useState } from 'react';
 import {
   Server, Database, Code2, BookOpen, ChevronDown, ChevronRight,
   ExternalLink, Users, Cpu, HardDrive, Cloud, Search, FileText,
-  Globe, Zap, ArrowRight, Star, CheckCircle, Info
+  Globe, Zap, ArrowRight, Star, CheckCircle, Info, Terminal,
+  FolderOpen, Layers, LayoutDashboard, Bot
 } from 'lucide-react';
 
 // ── Data ──────────────────────────────────────────────────────────────────
@@ -258,27 +259,34 @@ const GETTING_STARTED = [
   },
   {
     step: 2,
-    title: 'Get immediate access (RAS)',
-    detail: 'Once approved, your account includes Rapid Access Service — modest compute and storage on all national clusters, no application needed.',
+    title: 'Request access to clusters',
+    detail: 'Once your account is approved, log in to CCDB and use the "Access Systems" page to request access to the clusters you need: Narval, Nibi, Rorqual, Fir, Trillium, or Arbutus (cloud). Access is usually granted within a few minutes.',
+    link: 'https://ccdb.alliancecan.ca',
+    linkText: 'Log in to CCDB',
+  },
+  {
+    step: 3,
+    title: 'Get immediate compute resources (RAS)',
+    detail: 'Your approved account includes Rapid Access Service — modest CPU, GPU, and storage on all national clusters with no competition required. Enough for most research projects.',
     link: 'https://docs.alliancecan.ca/wiki/Getting_started',
     linkText: 'Getting started guide',
   },
   {
-    step: 3,
+    step: 4,
     title: 'Apply for larger resources (optional)',
     detail: 'If your project needs more CPU, GPU, or storage than RAS provides, apply in the annual Resource Allocation Competition (typically September–November each year).',
     link: 'https://alliancecan.ca/en/services/advanced-research-computing/accessing-resources/resource-allocation-competition',
     linkText: 'RAC information',
   },
   {
-    step: 4,
+    step: 5,
     title: 'Get support from campus experts',
     detail: 'The Alliance has 200+ technical experts at 38 campuses. Contact them via the national helpdesk or ask your institutional RDM team.',
     link: 'https://docs.alliancecan.ca/wiki/Technical_support',
     linkText: 'Contact support',
   },
   {
-    step: 5,
+    step: 6,
     title: 'Build your skills with Explora',
     detail: 'Explora is the Alliance\'s national training portal — browse workshops, online courses, and webinars covering HPC, RDM, research software, and more. Free for all eligible Canadian researchers.',
     link: 'https://explora.alliancecan.ca',
@@ -507,6 +515,52 @@ export default function DRACServices() {
                 </div>
               );
             })}
+          </div>
+
+          {/* How clusters work */}
+          <h3 className="drac-subsection-title">How clusters work</h3>
+          <div className="drac-concepts-grid">
+            <div className="drac-concept-card">
+              <div className="drac-concept-icon"><Terminal size={18} /></div>
+              <h4>SSH Access</h4>
+              <p>Log in from any terminal using SSH. Your CCDB password works across all national clusters. A <code>/home</code> directory is created automatically on first login.</p>
+              <code className="drac-concept-code">ssh username@narval.alliancecan.ca</code>
+            </div>
+            <div className="drac-concept-card">
+              <div className="drac-concept-icon"><FolderOpen size={18} /></div>
+              <h4>Storage: Home / Scratch / Project</h4>
+              <p>Each cluster has three spaces accessible from all nodes:</p>
+              <ul className="drac-concept-list">
+                <li><strong>/home</strong> — small quota, daily backup. For dotfiles and small scripts.</li>
+                <li><strong>/scratch</strong> — large, fast, temporary. Files unused for <strong>60+ days are auto-deleted</strong> on the 15th of each month.</li>
+                <li><strong>/project</strong> — shared group storage for large datasets and outputs. Not purged.</li>
+              </ul>
+            </div>
+            <div className="drac-concept-card">
+              <div className="drac-concept-icon"><Layers size={18} /></div>
+              <h4>SLURM Job Scheduler</h4>
+              <p>All compute work runs through SLURM — you submit a job script and the scheduler allocates resources. You cannot run jobs directly on the login node.</p>
+              <code className="drac-concept-code">sbatch my_job.sh &nbsp;# submit a job<br/>squeue -u $USER &nbsp;# check your jobs</code>
+              <p style={{marginTop:'8px', fontSize:'12px', color:'var(--text-muted)'}}>Every job script must include <code>#SBATCH --time=HH:MM:SS</code></p>
+            </div>
+            <div className="drac-concept-card">
+              <div className="drac-concept-icon"><Layers size={18} /></div>
+              <h4>Environment Modules (Lmod)</h4>
+              <p>Software is managed via Lmod modules — nothing is loaded by default to prevent version conflicts. Use <code>module</code> commands to load what you need.</p>
+              <code className="drac-concept-code">module avail python &nbsp;# search<br/>module load python/3.11 &nbsp;# load</code>
+            </div>
+            <div className="drac-concept-card">
+              <div className="drac-concept-icon"><LayoutDashboard size={18} /></div>
+              <h4>Open OnDemand (No command line needed)</h4>
+              <p>A browser-based portal that lets you launch <strong>Jupyter Notebooks</strong>, <strong>RStudio</strong>, and <strong>VS Code</strong> directly on cluster compute nodes — no SSH required.</p>
+              <a href="https://ondemand.alliancecan.ca" target="_blank" rel="noopener noreferrer" className="drac-concept-link">Open OnDemand portal <ExternalLink size={11} /></a>
+            </div>
+            <div className="drac-concept-card">
+              <div className="drac-concept-icon"><Bot size={18} /></div>
+              <h4>Helpy — AI Cluster Assistant</h4>
+              <p>Helpy is the Alliance's AI concierge for cluster questions. Ask it anything about job scripts, module loading, storage, or debugging errors on the clusters.</p>
+              <a href="https://helpy.vulcan.alliancecan.ca" target="_blank" rel="noopener noreferrer" className="drac-concept-link">Ask Helpy <ExternalLink size={11} /></a>
+            </div>
           </div>
 
           <div className="drac-arc-note">
