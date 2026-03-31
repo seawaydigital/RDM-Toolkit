@@ -201,10 +201,10 @@ const SOFTWARE_AREAS = [
 const GETTING_STARTED = [
   {
     step: 1,
-    title: 'Create a free CCDB account',
-    detail: 'Any faculty member at a Canadian university can register at ccdb.alliancecan.ca. Students and staff must be sponsored by a faculty supervisor.',
-    link: 'https://ccdb.alliancecan.ca/account_application.php',
-    linkText: 'Register at CCDB',
+    title: 'Access the national platforms',
+    detail: 'All DRAC national platforms — CCDB (HPC), FRDR (large datasets), DMP Assistant, and Borealis — are accessed from one login page. New users can create a free account there. Faculty can register directly; students and staff must be sponsored by a faculty supervisor.',
+    link: 'https://www.alliancecan.ca/en/login',
+    linkText: 'Log in to national platforms',
   },
   {
     step: 2,
