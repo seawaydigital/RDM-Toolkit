@@ -413,7 +413,7 @@ export default function DRACServices() {
               <strong>Working with human participant data?</strong>
             </div>
             <p>The Alliance's <strong>Sensitive Data Toolkit</strong> provides practical guidance for researchers collecting personal or identifiable data — including a Human Participant Research Data Risk Matrix, de-identification guidance, and RDM language templates for informed consent forms.</p>
-            <a href="https://alliancecan.ca/en/services/research-data-management/sensitive-data" target="_blank" rel="noopener noreferrer" className="drac-rdm-link" style={{ marginTop: '8px', display: 'inline-flex' }}>
+            <a href="https://www.alliancecan.ca/en/our-services/research-data-management/learning-resources/training-resources" target="_blank" rel="noopener noreferrer" className="drac-rdm-link" style={{ marginTop: '8px', display: 'inline-flex' }}>
               View Sensitive Data Toolkit <ExternalLink size={12} />
             </a>
           </div>
