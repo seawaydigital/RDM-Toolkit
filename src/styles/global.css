@@ -5656,39 +5656,45 @@ input:focus, textarea:focus, select:focus {
   align-items: center;
   margin-bottom: var(--space-xl);
   width: 100%;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Diamond question nodes */
+/* Diamond question nodes — clip-path hexagon (no rotation, zero layout overflow) */
 .fc-diamond-wrap {
   display: flex;
   justify-content: center;
   width: 100%;
+  margin: 4px 0;
 }
 
+/* Outer layer = accent-colour "border" via clip-path */
 .fc-diamond {
-  position: relative;
-  width: 260px;
-  min-height: 80px;
-  background: var(--bg-secondary);
-  border: 2px solid var(--accent-cyan);
-  border-radius: 6px;
-  transform: rotate(45deg);
+  width: 300px;
+  clip-path: polygon(32px 0%, calc(100% - 32px) 0%, 100% 50%, calc(100% - 32px) 100%, 32px 100%, 0% 50%);
+  background: var(--accent-cyan);
+  padding: 2px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
   flex-shrink: 0;
 }
 
+/* Inner layer = dark fill */
 .fc-diamond span {
-  display: block;
-  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  clip-path: polygon(30px 0%, calc(100% - 30px) 0%, 100% 50%, calc(100% - 30px) 100%, 30px 100%, 0% 50%);
+  background: var(--bg-secondary);
+  padding: 14px 52px;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-primary);
   text-align: center;
-  padding: 8px 14px;
-  line-height: 1.4;
-  width: 200px;
+  line-height: 1.5;
+  transform: none;
 }
 
 /* Branch row for YES/NO exits */
@@ -5696,11 +5702,10 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   align-items: flex-start;
   width: 100%;
-  max-width: 680px;
   gap: 0;
 }
 
-/* YES path — centered, going down */
+/* YES path — centered under diamond, going down */
 .fc-yes-col {
   display: flex;
   flex-direction: column;
@@ -5708,12 +5713,12 @@ input:focus, textarea:focus, select:focus {
   flex: 0 0 50%;
 }
 
-/* NO path — going right to an outcome */
+/* NO path — going right to an outcome box */
 .fc-no-col {
   display: flex;
   align-items: center;
   flex: 1;
-  padding-top: 20px;
+  padding-top: 18px;
 }
 
 /* Connector lines */
@@ -5725,7 +5730,7 @@ input:focus, textarea:focus, select:focus {
 }
 .fc-line-h {
   height: 2px;
-  flex: 0 0 24px;
+  flex: 0 0 20px;
   background: var(--border);
 }
 
@@ -5783,7 +5788,6 @@ input:focus, textarea:focus, select:focus {
 .fc-split-row {
   display: flex;
   width: 100%;
-  max-width: 680px;
   gap: var(--space-md);
 }
 .fc-split-col {
@@ -5797,7 +5801,6 @@ input:focus, textarea:focus, select:focus {
 /* Merge line above final action */
 .fc-merge-line {
   width: 100%;
-  max-width: 680px;
   display: flex;
   justify-content: center;
   padding: 0 calc(25% + var(--space-md)/2);
@@ -5818,16 +5821,15 @@ input:focus, textarea:focus, select:focus {
   border: 2px solid var(--accent-green);
   border-radius: var(--radius-md);
   width: 100%;
-  max-width: 680px;
 }
 .fc-action svg { color: var(--accent-green); flex-shrink: 0; margin-top: 2px; }
 .fc-action strong { display: block; font-size: 14px; color: var(--text-primary); margin-bottom: 4px; }
 .fc-action p { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5; }
 
-/* Mobile: stack NO branches below on small screens */
+/* Mobile */
 @media (max-width: 580px) {
-  .fc-diamond { width: 200px; }
-  .fc-diamond span { width: 160px; font-size: 11px; }
+  .fc-diamond { width: 240px; }
+  .fc-diamond span { padding: 12px 42px; font-size: 11px; }
   .fc-branch-row { flex-direction: column; align-items: center; }
   .fc-yes-col { flex: 0 0 auto; }
   .fc-no-col { flex-direction: column; align-items: center; padding-top: 0; }
