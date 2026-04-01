@@ -401,116 +401,161 @@ export default function TriAgencyPolicy() {
           necessarily making data public.
         </p>
 
-        <div className="fc">
+        {/* SVG flowchart — proper diamonds, arrowheads, clean routing */}
+        <div style={{ width: '100%', overflowX: 'auto' }}>
+        <svg
+          viewBox="0 0 640 830"
+          width="100%"
+          style={{ maxWidth: '640px', display: 'block', margin: '0 auto' }}
+          aria-label="Flowchart: Do I Need to Deposit My Data?"
+        >
+          <defs>
+            <marker id="arr-yes" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+              <polygon points="0 0, 9 3.5, 0 7" fill="#10B981" />
+            </marker>
+            <marker id="arr-no" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+              <polygon points="0 0, 9 3.5, 0 7" fill="#EF4444" />
+            </marker>
+            <marker id="arr-gray" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+              <polygon points="0 0, 9 3.5, 0 7" fill="#4B5563" />
+            </marker>
+          </defs>
 
-          {/* ── Q1 ── */}
-          <div className="fc-diamond-wrap">
-            <div className="fc-diamond">
-              <span>Is your research funded by CIHR, NSERC, or SSHRC?</span>
+          {/* ══════════════════════════════════
+              Q1 — Tri-Agency funded?
+              Diamond: center (300,80) halfW=120 halfH=52
+          ══════════════════════════════════ */}
+          <polygon points="300,28 420,80 300,132 180,80"
+            fill="#0D1B35" stroke="#FFC20E" strokeWidth="2.5" />
+          <foreignObject x="222" y="50" width="156" height="60">
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{
+              fontSize:'11.5px', fontWeight:'600', color:'#F1F5F9',
+              textAlign:'center', lineHeight:'1.45', fontFamily:'system-ui,sans-serif'
+            }}>
+              Is your research funded by CIHR, NSERC, or SSHRC?
             </div>
-          </div>
+          </foreignObject>
 
-          {/* Q1 branches */}
-          <div className="fc-branch-row">
-            {/* YES: continue down */}
-            <div className="fc-yes-col">
-              <div className="fc-line-v" />
-              <span className="fc-label fc-label--yes">YES</span>
-              <div className="fc-line-v" />
-            </div>
-            {/* NO: exit right */}
-            <div className="fc-no-col">
-              <div className="fc-line-h" />
-              <span className="fc-label fc-label--no">NO</span>
-              <div className="fc-outcome fc-outcome--stop">
-                <span>🚫</span>
-                <div>
-                  <strong>Policy does not apply</strong>
-                  <p>This policy only covers Tri-Agency–funded research.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Q1 YES — down to Q2 */}
+          <line x1="300" y1="132" x2="300" y2="218" stroke="#10B981" strokeWidth="2" markerEnd="url(#arr-yes)" />
+          <rect x="276" y="152" width="48" height="20" rx="10" fill="rgba(16,185,129,0.18)" />
+          <text x="300" y="166" textAnchor="middle" fill="#10B981" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
 
-          {/* ── Q2 ── */}
-          <div className="fc-diamond-wrap">
-            <div className="fc-diamond">
-              <span>Are you publishing a journal article or pre-print from this research?</span>
-            </div>
-          </div>
+          {/* Q1 NO — right to Policy box */}
+          <line x1="420" y1="80" x2="446" y2="80" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
+          <rect x="424" y="68" width="36" height="20" rx="10" fill="rgba(239,68,68,0.15)" />
+          <text x="442" y="82" textAnchor="middle" fill="#EF4444" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
 
-          {/* Q2 branches */}
-          <div className="fc-branch-row">
-            <div className="fc-yes-col">
-              <div className="fc-line-v" />
-              <span className="fc-label fc-label--yes">YES</span>
-              <div className="fc-line-v" />
+          {/* Policy does not apply box */}
+          <rect x="448" y="52" width="182" height="56" rx="8"
+            fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.4)" strokeWidth="1.5" />
+          <text x="460" y="72" fill="#F1F5F9" fontSize="11.5" fontWeight="700" fontFamily="system-ui,sans-serif">🚫 Policy does not apply</text>
+          <foreignObject x="456" y="75" width="168" height="30">
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize:'10px', color:'#94A3B8', lineHeight:'1.45', fontFamily:'system-ui,sans-serif' }}>
+              Only covers Tri-Agency–funded research.
             </div>
-            <div className="fc-no-col">
-              <div className="fc-line-h" />
-              <span className="fc-label fc-label--no">NO</span>
-              <div className="fc-outcome fc-outcome--wait">
-                <span>⏳</span>
-                <div>
-                  <strong>Not yet required</strong>
-                  <p>Deposit is triggered at time of publication. Keep managing your data and revisit this when you publish.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          </foreignObject>
 
-          {/* ── Q3 ── */}
-          <div className="fc-diamond-wrap">
-            <div className="fc-diamond">
-              <span>Does your data involve personal information, an NDA, or Indigenous community data?</span>
+          {/* ══════════════════════════════════
+              Q2 — Publishing a journal article?
+              Diamond: center (300,274) halfW=120 halfH=52
+          ══════════════════════════════════ */}
+          <polygon points="300,222 420,274 300,326 180,274"
+            fill="#0D1B35" stroke="#FFC20E" strokeWidth="2.5" />
+          <foreignObject x="218" y="244" width="164" height="60">
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{
+              fontSize:'11.5px', fontWeight:'600', color:'#F1F5F9',
+              textAlign:'center', lineHeight:'1.45', fontFamily:'system-ui,sans-serif'
+            }}>
+              Are you publishing a journal article or pre-print?
             </div>
-          </div>
+          </foreignObject>
 
-          {/* Q3 splits into two outcome columns */}
-          <div className="fc-split-row">
-            <div className="fc-split-col">
-              <div className="fc-line-v" />
-              <span className="fc-label fc-label--yes">YES</span>
-              <div className="fc-line-v" />
-              <div className="fc-outcome fc-outcome--restricted">
-                <span>🔒</span>
-                <div>
-                  <strong>Restricted deposit required</strong>
-                  <p>Choose a repository that supports access controls. You are <em>not</em> required to share data openly.</p>
-                </div>
-              </div>
+          {/* Q2 YES — down to Q3 */}
+          <line x1="300" y1="326" x2="300" y2="392" stroke="#10B981" strokeWidth="2" markerEnd="url(#arr-yes)" />
+          <rect x="276" y="346" width="48" height="20" rx="10" fill="rgba(16,185,129,0.18)" />
+          <text x="300" y="360" textAnchor="middle" fill="#10B981" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
+
+          {/* Q2 NO — right to Wait box */}
+          <line x1="420" y1="274" x2="446" y2="274" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
+          <rect x="424" y="262" width="36" height="20" rx="10" fill="rgba(239,68,68,0.15)" />
+          <text x="442" y="276" textAnchor="middle" fill="#EF4444" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
+
+          {/* Not yet required box */}
+          <rect x="448" y="246" width="182" height="56" rx="8"
+            fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.4)" strokeWidth="1.5" />
+          <text x="460" y="266" fill="#F1F5F9" fontSize="11.5" fontWeight="700" fontFamily="system-ui,sans-serif">⏳ Not yet required</text>
+          <foreignObject x="456" y="269" width="168" height="32">
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize:'10px', color:'#94A3B8', lineHeight:'1.45', fontFamily:'system-ui,sans-serif' }}>
+              Deposit is triggered at publication. Revisit when you publish.
             </div>
-            <div className="fc-split-col">
-              <div className="fc-line-v" />
-              <span className="fc-label fc-label--no">NO</span>
-              <div className="fc-line-v" />
-              <div className="fc-outcome fc-outcome--open">
-                <span>🌐</span>
-                <div>
-                  <strong>Open or licensed deposit</strong>
-                  <p>Deposit with appropriate access (open, Creative Commons, or discipline-standard licence).</p>
-                </div>
-              </div>
+          </foreignObject>
+
+          {/* ══════════════════════════════════
+              Q3 — Sensitive / restricted data?
+              Diamond: center (300,466) halfW=126 halfH=72
+          ══════════════════════════════════ */}
+          <polygon points="300,394 426,466 300,538 174,466"
+            fill="#0D1B35" stroke="#FFC20E" strokeWidth="2.5" />
+          <foreignObject x="216" y="430" width="168" height="72">
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{
+              fontSize:'11px', fontWeight:'600', color:'#F1F5F9',
+              textAlign:'center', lineHeight:'1.5', fontFamily:'system-ui,sans-serif'
+            }}>
+              Does your data involve personal info, an NDA, or Indigenous community data?
             </div>
-          </div>
+          </foreignObject>
 
-          {/* Merge line → final action */}
-          <div className="fc-merge-line">
-            <div className="fc-merge-line-inner" />
-          </div>
+          {/* Q3 — vertical drop from bottom vertex then split */}
+          <line x1="300" y1="538" x2="300" y2="564" stroke="#4B5563" strokeWidth="2" />
+          {/* horizontal junction bar */}
+          <line x1="152" y1="564" x2="448" y2="564" stroke="#4B5563" strokeWidth="2" />
 
-          {/* ── Final action ── */}
-          <div className="fc-action">
-            <Upload size={18} />
-            <div>
-              <strong>Deposit data, metadata &amp; code by time of publication</strong>
-              <p>
-                Link your deposit to the publication with a persistent identifier (DOI).
-                Lakehead researchers can use <strong>Borealis (Dataverse Canada)</strong> or a disciplinary repository — see options below.
-              </p>
+          {/* YES branch — left side down */}
+          <line x1="152" y1="564" x2="152" y2="588" stroke="#10B981" strokeWidth="2" markerEnd="url(#arr-yes)" />
+          <rect x="128" y="548" width="48" height="20" rx="10" fill="rgba(16,185,129,0.18)" />
+          <text x="152" y="562" textAnchor="middle" fill="#10B981" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
+
+          {/* NO branch — right side down */}
+          <line x1="448" y1="564" x2="448" y2="588" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
+          <rect x="424" y="548" width="36" height="20" rx="10" fill="rgba(239,68,68,0.15)" />
+          <text x="442" y="562" textAnchor="middle" fill="#EF4444" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
+
+          {/* Restricted deposit box */}
+          <rect x="52" y="590" width="200" height="84" rx="8"
+            fill="rgba(168,85,247,0.08)" stroke="rgba(168,85,247,0.4)" strokeWidth="1.5" />
+          <text x="64" y="611" fill="#F1F5F9" fontSize="11.5" fontWeight="700" fontFamily="system-ui,sans-serif">🔒 Restricted deposit</text>
+          <foreignObject x="60" y="614" width="186" height="56">
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize:'10px', color:'#94A3B8', lineHeight:'1.5', fontFamily:'system-ui,sans-serif' }}>
+              Choose a repository with access controls. You are <em style={{color:'#C4B5FD'}}>not</em> required to share data openly.
             </div>
-          </div>
+          </foreignObject>
 
+          {/* Open deposit box */}
+          <rect x="348" y="590" width="200" height="84" rx="8"
+            fill="rgba(59,130,246,0.08)" stroke="rgba(59,130,246,0.4)" strokeWidth="1.5" />
+          <text x="360" y="611" fill="#F1F5F9" fontSize="11.5" fontWeight="700" fontFamily="system-ui,sans-serif">🌐 Open deposit</text>
+          <foreignObject x="356" y="614" width="186" height="56">
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize:'10px', color:'#94A3B8', lineHeight:'1.5', fontFamily:'system-ui,sans-serif' }}>
+              Deposit with a Creative Commons or discipline-standard licence. Data is publicly accessible.
+            </div>
+          </foreignObject>
+
+          {/* Merge lines from both outcome boxes → final action */}
+          <polyline points="152,674 152,726 300,726" stroke="#4B5563" strokeWidth="1.5" fill="none" />
+          <polyline points="448,674 448,726 300,726" stroke="#4B5563" strokeWidth="1.5" fill="none" />
+          <line x1="300" y1="726" x2="300" y2="744" stroke="#4B5563" strokeWidth="1.5" markerEnd="url(#arr-gray)" />
+
+          {/* Final action box */}
+          <rect x="72" y="746" width="456" height="74" rx="8"
+            fill="rgba(16,185,129,0.08)" stroke="#10B981" strokeWidth="2" />
+          <text x="300" y="770" textAnchor="middle" fill="#F1F5F9" fontSize="13" fontWeight="700" fontFamily="system-ui,sans-serif">✅ Deposit your data</text>
+          <foreignObject x="80" y="774" width="440" height="42">
+            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize:'11px', color:'#94A3B8', textAlign:'center', lineHeight:'1.5', fontFamily:'system-ui,sans-serif' }}>
+              Upload to Borealis or FRDR by time of publication and link with a DOI.
+            </div>
+          </foreignObject>
+        </svg>
         </div>
 
         {/* Repository options */}
