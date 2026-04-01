@@ -401,10 +401,10 @@ export default function TriAgencyPolicy() {
           necessarily making data public.
         </p>
 
-        {/* SVG flowchart — proper diamonds, arrowheads, clean routing */}
+        {/* SVG flowchart — SVG text/tspan throughout, no foreignObject overflow */}
         <div style={{ width: '100%', overflowX: 'auto' }}>
         <svg
-          viewBox="0 0 640 830"
+          viewBox="0 0 640 860"
           width="100%"
           style={{ maxWidth: '640px', display: 'block', margin: '0 auto' }}
           aria-label="Flowchart: Do I Need to Deposit My Data?"
@@ -421,140 +421,105 @@ export default function TriAgencyPolicy() {
             </marker>
           </defs>
 
-          {/* ══════════════════════════════════
-              Q1 — Tri-Agency funded?
-              Diamond: center (300,80) halfW=120 halfH=52
-          ══════════════════════════════════ */}
-          <polygon points="300,28 420,80 300,132 180,80"
+          {/* ── Q1: center(280,90) halfW=120 halfH=60 ── */}
+          <polygon points="280,30 400,90 280,150 160,90"
             fill="#0D1B35" stroke="#FFC20E" strokeWidth="2.5" />
-          <foreignObject x="222" y="50" width="156" height="60">
-            <div xmlns="http://www.w3.org/1999/xhtml" style={{
-              fontSize:'11.5px', fontWeight:'600', color:'#F1F5F9',
-              textAlign:'center', lineHeight:'1.45', fontFamily:'system-ui,sans-serif'
-            }}>
-              Is your research funded by CIHR, NSERC, or SSHRC?
-            </div>
-          </foreignObject>
+          <text textAnchor="middle" fill="#F1F5F9" fontSize="11" fontWeight="600" fontFamily="system-ui,sans-serif">
+            <tspan x="280" y="83">Is your research funded</tspan>
+            <tspan x="280" dy="15">by CIHR, NSERC, or SSHRC?</tspan>
+          </text>
 
-          {/* Q1 YES — down to Q2 */}
-          <line x1="300" y1="132" x2="300" y2="218" stroke="#10B981" strokeWidth="2" markerEnd="url(#arr-yes)" />
-          <rect x="276" y="152" width="48" height="20" rx="10" fill="rgba(16,185,129,0.18)" />
-          <text x="300" y="166" textAnchor="middle" fill="#10B981" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
+          {/* Q1 YES ↓ */}
+          <line x1="280" y1="150" x2="280" y2="226" stroke="#10B981" strokeWidth="2" markerEnd="url(#arr-yes)" />
+          <rect x="256" y="166" width="48" height="20" rx="10" fill="rgba(16,185,129,0.18)" />
+          <text x="280" y="180" textAnchor="middle" fill="#10B981" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
 
-          {/* Q1 NO — right to Policy box */}
-          <line x1="420" y1="80" x2="446" y2="80" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
-          <rect x="424" y="68" width="36" height="20" rx="10" fill="rgba(239,68,68,0.15)" />
-          <text x="442" y="82" textAnchor="middle" fill="#EF4444" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
+          {/* Q1 NO → Policy box */}
+          <line x1="400" y1="90" x2="444" y2="90" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
+          <rect x="408" y="78" width="36" height="20" rx="10" fill="rgba(239,68,68,0.15)" />
+          <text x="426" y="92" textAnchor="middle" fill="#EF4444" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
+          <rect x="446" y="60" width="186" height="60" rx="8" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.4)" strokeWidth="1.5" />
+          <text fontFamily="system-ui,sans-serif">
+            <tspan x="457" y="80" fill="#F1F5F9" fontSize="12" fontWeight="700">🚫 Policy does not apply</tspan>
+            <tspan x="457" dy="16" fill="#94A3B8" fontSize="10">Only covers Tri-Agency–funded</tspan>
+            <tspan x="457" dy="13" fill="#94A3B8" fontSize="10">research.</tspan>
+          </text>
 
-          {/* Policy does not apply box */}
-          <rect x="448" y="52" width="182" height="56" rx="8"
-            fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.4)" strokeWidth="1.5" />
-          <text x="460" y="72" fill="#F1F5F9" fontSize="11.5" fontWeight="700" fontFamily="system-ui,sans-serif">🚫 Policy does not apply</text>
-          <foreignObject x="456" y="75" width="168" height="30">
-            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize:'10px', color:'#94A3B8', lineHeight:'1.45', fontFamily:'system-ui,sans-serif' }}>
-              Only covers Tri-Agency–funded research.
-            </div>
-          </foreignObject>
-
-          {/* ══════════════════════════════════
-              Q2 — Publishing a journal article?
-              Diamond: center (300,274) halfW=120 halfH=52
-          ══════════════════════════════════ */}
-          <polygon points="300,222 420,274 300,326 180,274"
+          {/* ── Q2: center(280,290) halfW=120 halfH=60 ── */}
+          <polygon points="280,230 400,290 280,350 160,290"
             fill="#0D1B35" stroke="#FFC20E" strokeWidth="2.5" />
-          <foreignObject x="218" y="244" width="164" height="60">
-            <div xmlns="http://www.w3.org/1999/xhtml" style={{
-              fontSize:'11.5px', fontWeight:'600', color:'#F1F5F9',
-              textAlign:'center', lineHeight:'1.45', fontFamily:'system-ui,sans-serif'
-            }}>
-              Are you publishing a journal article or pre-print?
-            </div>
-          </foreignObject>
+          <text textAnchor="middle" fill="#F1F5F9" fontSize="11" fontWeight="600" fontFamily="system-ui,sans-serif">
+            <tspan x="280" y="283">Are you publishing a</tspan>
+            <tspan x="280" dy="15">journal article or pre-print?</tspan>
+          </text>
 
-          {/* Q2 YES — down to Q3 */}
-          <line x1="300" y1="326" x2="300" y2="392" stroke="#10B981" strokeWidth="2" markerEnd="url(#arr-yes)" />
-          <rect x="276" y="346" width="48" height="20" rx="10" fill="rgba(16,185,129,0.18)" />
-          <text x="300" y="360" textAnchor="middle" fill="#10B981" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
+          {/* Q2 YES ↓ */}
+          <line x1="280" y1="350" x2="280" y2="416" stroke="#10B981" strokeWidth="2" markerEnd="url(#arr-yes)" />
+          <rect x="256" y="366" width="48" height="20" rx="10" fill="rgba(16,185,129,0.18)" />
+          <text x="280" y="380" textAnchor="middle" fill="#10B981" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
 
-          {/* Q2 NO — right to Wait box */}
-          <line x1="420" y1="274" x2="446" y2="274" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
-          <rect x="424" y="262" width="36" height="20" rx="10" fill="rgba(239,68,68,0.15)" />
-          <text x="442" y="276" textAnchor="middle" fill="#EF4444" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
+          {/* Q2 NO → Wait box */}
+          <line x1="400" y1="290" x2="444" y2="290" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
+          <rect x="408" y="278" width="36" height="20" rx="10" fill="rgba(239,68,68,0.15)" />
+          <text x="426" y="292" textAnchor="middle" fill="#EF4444" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
+          <rect x="446" y="260" width="186" height="60" rx="8" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.4)" strokeWidth="1.5" />
+          <text fontFamily="system-ui,sans-serif">
+            <tspan x="457" y="280" fill="#F1F5F9" fontSize="12" fontWeight="700">⏳ Not yet required</tspan>
+            <tspan x="457" dy="16" fill="#94A3B8" fontSize="10">Deposit is triggered at</tspan>
+            <tspan x="457" dy="13" fill="#94A3B8" fontSize="10">publication. Revisit then.</tspan>
+          </text>
 
-          {/* Not yet required box */}
-          <rect x="448" y="246" width="182" height="56" rx="8"
-            fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.4)" strokeWidth="1.5" />
-          <text x="460" y="266" fill="#F1F5F9" fontSize="11.5" fontWeight="700" fontFamily="system-ui,sans-serif">⏳ Not yet required</text>
-          <foreignObject x="456" y="269" width="168" height="32">
-            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize:'10px', color:'#94A3B8', lineHeight:'1.45', fontFamily:'system-ui,sans-serif' }}>
-              Deposit is triggered at publication. Revisit when you publish.
-            </div>
-          </foreignObject>
-
-          {/* ══════════════════════════════════
-              Q3 — Sensitive / restricted data?
-              Diamond: center (300,466) halfW=126 halfH=72
-          ══════════════════════════════════ */}
-          <polygon points="300,394 426,466 300,538 174,466"
+          {/* ── Q3: center(280,490) halfW=130 halfH=74 ── */}
+          <polygon points="280,416 410,490 280,564 150,490"
             fill="#0D1B35" stroke="#FFC20E" strokeWidth="2.5" />
-          <foreignObject x="216" y="430" width="168" height="72">
-            <div xmlns="http://www.w3.org/1999/xhtml" style={{
-              fontSize:'11px', fontWeight:'600', color:'#F1F5F9',
-              textAlign:'center', lineHeight:'1.5', fontFamily:'system-ui,sans-serif'
-            }}>
-              Does your data involve personal info, an NDA, or Indigenous community data?
-            </div>
-          </foreignObject>
+          <text textAnchor="middle" fill="#F1F5F9" fontSize="11" fontWeight="600" fontFamily="system-ui,sans-serif">
+            <tspan x="280" y="475">Does your data involve</tspan>
+            <tspan x="280" dy="15">personal info, an NDA, or</tspan>
+            <tspan x="280" dy="15">Indigenous community data?</tspan>
+          </text>
 
-          {/* Q3 — vertical drop from bottom vertex then split */}
-          <line x1="300" y1="538" x2="300" y2="564" stroke="#4B5563" strokeWidth="2" />
-          {/* horizontal junction bar */}
-          <line x1="152" y1="564" x2="448" y2="564" stroke="#4B5563" strokeWidth="2" />
+          {/* Q3 drop → horizontal junction → YES left / NO right */}
+          <line x1="280" y1="564" x2="280" y2="594" stroke="#4B5563" strokeWidth="2" />
+          <line x1="140" y1="594" x2="420" y2="594" stroke="#4B5563" strokeWidth="2" />
+          {/* YES drop */}
+          <line x1="140" y1="594" x2="140" y2="618" stroke="#10B981" strokeWidth="2" markerEnd="url(#arr-yes)" />
+          <rect x="116" y="596" width="48" height="20" rx="10" fill="rgba(16,185,129,0.18)" />
+          <text x="140" y="610" textAnchor="middle" fill="#10B981" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
+          {/* NO drop */}
+          <line x1="420" y1="594" x2="420" y2="618" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
+          <rect x="396" y="596" width="36" height="20" rx="10" fill="rgba(239,68,68,0.15)" />
+          <text x="414" y="610" textAnchor="middle" fill="#EF4444" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
 
-          {/* YES branch — left side down */}
-          <line x1="152" y1="564" x2="152" y2="588" stroke="#10B981" strokeWidth="2" markerEnd="url(#arr-yes)" />
-          <rect x="128" y="548" width="48" height="20" rx="10" fill="rgba(16,185,129,0.18)" />
-          <text x="152" y="562" textAnchor="middle" fill="#10B981" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
+          {/* Restricted deposit box — bottom center x=140 */}
+          <rect x="36" y="620" width="208" height="88" rx="8" fill="rgba(168,85,247,0.08)" stroke="rgba(168,85,247,0.4)" strokeWidth="1.5" />
+          <text fontFamily="system-ui,sans-serif">
+            <tspan x="48" y="641" fill="#F1F5F9" fontSize="12" fontWeight="700">🔒 Restricted deposit</tspan>
+            <tspan x="48" dy="16" fill="#94A3B8" fontSize="10">Choose a repository with</tspan>
+            <tspan x="48" dy="13" fill="#94A3B8" fontSize="10">access controls. You are</tspan>
+            <tspan x="48" dy="13" fill="#94A3B8" fontSize="10">not required to share openly.</tspan>
+          </text>
 
-          {/* NO branch — right side down */}
-          <line x1="448" y1="564" x2="448" y2="588" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
-          <rect x="424" y="548" width="36" height="20" rx="10" fill="rgba(239,68,68,0.15)" />
-          <text x="442" y="562" textAnchor="middle" fill="#EF4444" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
+          {/* Open deposit box — bottom center x=420 */}
+          <rect x="356" y="620" width="208" height="88" rx="8" fill="rgba(59,130,246,0.08)" stroke="rgba(59,130,246,0.4)" strokeWidth="1.5" />
+          <text fontFamily="system-ui,sans-serif">
+            <tspan x="368" y="641" fill="#F1F5F9" fontSize="12" fontWeight="700">🌐 Open deposit</tspan>
+            <tspan x="368" dy="16" fill="#94A3B8" fontSize="10">Deposit with a Creative</tspan>
+            <tspan x="368" dy="13" fill="#94A3B8" fontSize="10">Commons or standard</tspan>
+            <tspan x="368" dy="13" fill="#94A3B8" fontSize="10">licence. Publicly accessible.</tspan>
+          </text>
 
-          {/* Restricted deposit box */}
-          <rect x="52" y="590" width="200" height="84" rx="8"
-            fill="rgba(168,85,247,0.08)" stroke="rgba(168,85,247,0.4)" strokeWidth="1.5" />
-          <text x="64" y="611" fill="#F1F5F9" fontSize="11.5" fontWeight="700" fontFamily="system-ui,sans-serif">🔒 Restricted deposit</text>
-          <foreignObject x="60" y="614" width="186" height="56">
-            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize:'10px', color:'#94A3B8', lineHeight:'1.5', fontFamily:'system-ui,sans-serif' }}>
-              Choose a repository with access controls. You are <em style={{color:'#C4B5FD'}}>not</em> required to share data openly.
-            </div>
-          </foreignObject>
-
-          {/* Open deposit box */}
-          <rect x="348" y="590" width="200" height="84" rx="8"
-            fill="rgba(59,130,246,0.08)" stroke="rgba(59,130,246,0.4)" strokeWidth="1.5" />
-          <text x="360" y="611" fill="#F1F5F9" fontSize="11.5" fontWeight="700" fontFamily="system-ui,sans-serif">🌐 Open deposit</text>
-          <foreignObject x="356" y="614" width="186" height="56">
-            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize:'10px', color:'#94A3B8', lineHeight:'1.5', fontFamily:'system-ui,sans-serif' }}>
-              Deposit with a Creative Commons or discipline-standard licence. Data is publicly accessible.
-            </div>
-          </foreignObject>
-
-          {/* Merge lines from both outcome boxes → final action */}
-          <polyline points="152,674 152,726 300,726" stroke="#4B5563" strokeWidth="1.5" fill="none" />
-          <polyline points="448,674 448,726 300,726" stroke="#4B5563" strokeWidth="1.5" fill="none" />
-          <line x1="300" y1="726" x2="300" y2="744" stroke="#4B5563" strokeWidth="1.5" markerEnd="url(#arr-gray)" />
+          {/* Merge → final action */}
+          <polyline points="140,708 140,758 280,758" stroke="#4B5563" strokeWidth="1.5" fill="none" />
+          <polyline points="420,708 420,758 280,758" stroke="#4B5563" strokeWidth="1.5" fill="none" />
+          <line x1="280" y1="758" x2="280" y2="776" stroke="#4B5563" strokeWidth="1.5" markerEnd="url(#arr-gray)" />
 
           {/* Final action box */}
-          <rect x="72" y="746" width="456" height="74" rx="8"
-            fill="rgba(16,185,129,0.08)" stroke="#10B981" strokeWidth="2" />
-          <text x="300" y="770" textAnchor="middle" fill="#F1F5F9" fontSize="13" fontWeight="700" fontFamily="system-ui,sans-serif">✅ Deposit your data</text>
-          <foreignObject x="80" y="774" width="440" height="42">
-            <div xmlns="http://www.w3.org/1999/xhtml" style={{ fontSize:'11px', color:'#94A3B8', textAlign:'center', lineHeight:'1.5', fontFamily:'system-ui,sans-serif' }}>
-              Upload to Borealis or FRDR by time of publication and link with a DOI.
-            </div>
-          </foreignObject>
+          <rect x="58" y="778" width="444" height="72" rx="8" fill="rgba(16,185,129,0.08)" stroke="#10B981" strokeWidth="2" />
+          <text textAnchor="middle" fontFamily="system-ui,sans-serif">
+            <tspan x="280" y="802" fill="#F1F5F9" fontSize="13" fontWeight="700">✅ Deposit your data</tspan>
+            <tspan x="280" dy="18" fill="#94A3B8" fontSize="10.5">Upload to Borealis or FRDR by time of publication.</tspan>
+            <tspan x="280" dy="14" fill="#94A3B8" fontSize="10.5">Link your dataset to the paper with a DOI.</tspan>
+          </text>
         </svg>
         </div>
 
