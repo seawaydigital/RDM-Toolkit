@@ -169,7 +169,7 @@ const FAQS = [
   },
   {
     q: 'Do DMPs have to follow a specific template?',
-    a: 'No fixed format is mandated, but agencies recommend using the DMP Assistant tool (assistant.portagenetwork.ca) which offers Canadian and agency-specific templates. The key is that your DMP addresses the required elements outlined in section 3.2.',
+    a: 'No fixed format is mandated, but agencies recommend using the DMP Assistant tool (dmp-pgd.ca) which offers Canadian and agency-specific templates. The key is that your DMP addresses the required elements outlined in section 3.2.',
   },
   {
     q: 'What if my research involves First Nations, Métis, or Inuit communities?',
@@ -357,7 +357,7 @@ export default function TriAgencyPolicy() {
         <p className="tap-section-intro">
           A DMP is a living document — it can change as your project evolves. Use this checklist
           to make sure your plan covers everything the agencies expect. The{' '}
-          <a href="https://assistant.portagenetwork.ca" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+          <a href="https://dmp-pgd.ca" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
             DMP Assistant tool <ExternalLink size={11} />
           </a>{' '}
           provides guided templates for Canadian researchers.
@@ -429,20 +429,20 @@ export default function TriAgencyPolicy() {
             <tspan x="280" dy="15">by CIHR, NSERC, or SSHRC?</tspan>
           </text>
 
-          {/* Q1 YES ↓ */}
+          {/* Q1 YES ↓ — label to RIGHT of line */}
           <line x1="280" y1="150" x2="280" y2="226" stroke="#10B981" strokeWidth="2" markerEnd="url(#arr-yes)" />
-          <rect x="256" y="166" width="48" height="20" rx="10" fill="rgba(16,185,129,0.18)" />
-          <text x="280" y="180" textAnchor="middle" fill="#10B981" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
+          <rect x="286" y="178" width="40" height="18" rx="9" fill="rgba(16,185,129,0.30)" />
+          <text x="306" y="191" textAnchor="middle" fill="#F1F5F9" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
 
-          {/* Q1 NO → Policy box */}
-          <line x1="400" y1="90" x2="444" y2="90" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
-          <rect x="408" y="78" width="36" height="20" rx="10" fill="rgba(239,68,68,0.15)" />
-          <text x="426" y="92" textAnchor="middle" fill="#EF4444" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
-          <rect x="446" y="60" width="186" height="60" rx="8" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.4)" strokeWidth="1.5" />
+          {/* Q1 NO → Policy box — longer arrow gives label room */}
+          <line x1="400" y1="90" x2="462" y2="90" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
+          <rect x="408" y="68" width="36" height="18" rx="9" fill="rgba(239,68,68,0.30)" />
+          <text x="426" y="81" textAnchor="middle" fill="#F1F5F9" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
+          <rect x="464" y="60" width="172" height="60" rx="8" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.4)" strokeWidth="1.5" />
           <text fontFamily="system-ui,sans-serif">
-            <tspan x="457" y="80" fill="#F1F5F9" fontSize="12" fontWeight="700">🚫 Policy does not apply</tspan>
-            <tspan x="457" dy="16" fill="#94A3B8" fontSize="10">Only covers Tri-Agency–funded</tspan>
-            <tspan x="457" dy="13" fill="#94A3B8" fontSize="10">research.</tspan>
+            <tspan x="475" y="80" fill="#F1F5F9" fontSize="12" fontWeight="700">🚫 Policy does not apply</tspan>
+            <tspan x="475" dy="16" fill="#94A3B8" fontSize="10">Only covers Tri-Agency–</tspan>
+            <tspan x="475" dy="13" fill="#94A3B8" fontSize="10">funded research.</tspan>
           </text>
 
           {/* ── Q2: center(280,290) halfW=120 halfH=60 ── */}
@@ -453,20 +453,20 @@ export default function TriAgencyPolicy() {
             <tspan x="280" dy="15">journal article or pre-print?</tspan>
           </text>
 
-          {/* Q2 YES ↓ */}
+          {/* Q2 YES ↓ — label to RIGHT of line */}
           <line x1="280" y1="350" x2="280" y2="416" stroke="#10B981" strokeWidth="2" markerEnd="url(#arr-yes)" />
-          <rect x="256" y="366" width="48" height="20" rx="10" fill="rgba(16,185,129,0.18)" />
-          <text x="280" y="380" textAnchor="middle" fill="#10B981" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
+          <rect x="286" y="378" width="40" height="18" rx="9" fill="rgba(16,185,129,0.30)" />
+          <text x="306" y="391" textAnchor="middle" fill="#F1F5F9" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
 
-          {/* Q2 NO → Wait box */}
-          <line x1="400" y1="290" x2="444" y2="290" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
-          <rect x="408" y="278" width="36" height="20" rx="10" fill="rgba(239,68,68,0.15)" />
-          <text x="426" y="292" textAnchor="middle" fill="#EF4444" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
-          <rect x="446" y="260" width="186" height="60" rx="8" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.4)" strokeWidth="1.5" />
+          {/* Q2 NO → Wait box — longer arrow gives label room */}
+          <line x1="400" y1="290" x2="462" y2="290" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
+          <rect x="408" y="268" width="36" height="18" rx="9" fill="rgba(239,68,68,0.30)" />
+          <text x="426" y="281" textAnchor="middle" fill="#F1F5F9" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
+          <rect x="464" y="260" width="172" height="60" rx="8" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.4)" strokeWidth="1.5" />
           <text fontFamily="system-ui,sans-serif">
-            <tspan x="457" y="280" fill="#F1F5F9" fontSize="12" fontWeight="700">⏳ Not yet required</tspan>
-            <tspan x="457" dy="16" fill="#94A3B8" fontSize="10">Deposit is triggered at</tspan>
-            <tspan x="457" dy="13" fill="#94A3B8" fontSize="10">publication. Revisit then.</tspan>
+            <tspan x="475" y="280" fill="#F1F5F9" fontSize="12" fontWeight="700">⏳ Not yet required</tspan>
+            <tspan x="475" dy="16" fill="#94A3B8" fontSize="10">Deposit is triggered at</tspan>
+            <tspan x="475" dy="13" fill="#94A3B8" fontSize="10">publication. Revisit then.</tspan>
           </text>
 
           {/* ── Q3: center(280,490) halfW=130 halfH=74 ── */}
@@ -481,14 +481,14 @@ export default function TriAgencyPolicy() {
           {/* Q3 drop → horizontal junction → YES left / NO right */}
           <line x1="280" y1="564" x2="280" y2="594" stroke="#4B5563" strokeWidth="2" />
           <line x1="140" y1="594" x2="420" y2="594" stroke="#4B5563" strokeWidth="2" />
-          {/* YES drop */}
+          {/* YES drop — label to LEFT of drop line, above arrowhead */}
           <line x1="140" y1="594" x2="140" y2="618" stroke="#10B981" strokeWidth="2" markerEnd="url(#arr-yes)" />
-          <rect x="116" y="596" width="48" height="20" rx="10" fill="rgba(16,185,129,0.18)" />
-          <text x="140" y="610" textAnchor="middle" fill="#10B981" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
-          {/* NO drop */}
+          <rect x="92" y="594" width="40" height="18" rx="9" fill="rgba(16,185,129,0.30)" />
+          <text x="112" y="607" textAnchor="middle" fill="#F1F5F9" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">YES</text>
+          {/* NO drop — label to RIGHT of drop line, above arrowhead */}
           <line x1="420" y1="594" x2="420" y2="618" stroke="#EF4444" strokeWidth="2" markerEnd="url(#arr-no)" />
-          <rect x="396" y="596" width="36" height="20" rx="10" fill="rgba(239,68,68,0.15)" />
-          <text x="414" y="610" textAnchor="middle" fill="#EF4444" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
+          <rect x="424" y="594" width="36" height="18" rx="9" fill="rgba(239,68,68,0.25)" />
+          <text x="442" y="607" textAnchor="middle" fill="#F1F5F9" fontSize="11" fontWeight="700" fontFamily="system-ui,sans-serif">NO</text>
 
           {/* Restricted deposit box — bottom center x=140 */}
           <rect x="36" y="620" width="208" height="88" rx="8" fill="rgba(168,85,247,0.08)" stroke="rgba(168,85,247,0.4)" strokeWidth="1.5" />
