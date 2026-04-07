@@ -161,7 +161,7 @@ const FAQS = [
   },
   {
     q: 'What counts as a "repository"?',
-    a: 'Any digital repository that provides safe storage, preservation, and curation. This could be a disciplinary repository (e.g., ICPSR for social sciences, GenBank for genomics), an institutional repository, or a general-purpose platform like Borealis (formerly Dataverse Canada) or Zenodo. The choice should reflect disciplinary norms.',
+    a: <>Any digital repository that provides safe storage, preservation, and curation. This could be a disciplinary repository (e.g., <a href="https://www.icpsr.umich.edu" target="_blank" rel="noopener noreferrer">ICPSR</a> for social sciences, <a href="https://www.ncbi.nlm.nih.gov/genbank/" target="_blank" rel="noopener noreferrer">GenBank</a> for genomics), an institutional repository, or a general-purpose platform like <a href="https://borealisdata.ca" target="_blank" rel="noopener noreferrer">Borealis</a> (formerly Dataverse Canada) or <a href="https://zenodo.org" target="_blank" rel="noopener noreferrer">Zenodo</a>. The choice should reflect disciplinary norms.</>,
   },
   {
     q: 'When does the DMP have to be submitted?',
@@ -169,11 +169,11 @@ const FAQS = [
   },
   {
     q: 'Do DMPs have to follow a specific template?',
-    a: 'No fixed format is mandated, but agencies recommend using the DMP Assistant tool (dmp-pgd.ca) which offers Canadian and agency-specific templates. The key is that your DMP addresses the required elements outlined in section 3.2.',
+    a: <>No fixed format is mandated, but agencies recommend using the <a href="https://dmp-pgd.ca/" target="_blank" rel="noopener noreferrer">DMP Assistant tool (dmp-pgd.ca)</a> which offers Canadian and agency-specific templates. The key is that your DMP addresses the required elements outlined in section 3.2.</>,
   },
   {
     q: 'What if my research involves First Nations, Métis, or Inuit communities?',
-    a: 'Special rules apply. The DMP must be co-developed with the community and recognize Indigenous data sovereignty. Communities guide how their data is collected, used, preserved, and may repatriate it. This can result in exceptions to the general data deposit requirement. Consult the FNIGC OCAP® principles and engage the community early.',
+    a: <>Special rules apply. The DMP must be co-developed with the community and recognize Indigenous data sovereignty. Communities guide how their data is collected, used, preserved, and may repatriate it. This can result in exceptions to the general data deposit requirement. Consult the <a href="https://fnigc.ca/ocap-training/" target="_blank" rel="noopener noreferrer">FNIGC OCAP® principles</a> and engage the community early.</>,
   },
   {
     q: 'What happens if I don\'t comply?',
@@ -528,22 +528,22 @@ export default function TriAgencyPolicy() {
           <h3 className="tap-repos-title">Repository Options for Lakehead Researchers</h3>
           <div className="tap-repo-grid">
             <div className="tap-repo-card">
-              <strong>Borealis (Dataverse Canada)</strong>
+              <a href="https://borealisdata.ca" target="_blank" rel="noopener noreferrer"><strong>Borealis (Dataverse Canada)</strong></a>
               <span className="tap-repo-type">General / Institutional</span>
               <p>Canada's national research data repository. Lakehead has an institutional collection. Supports restricted access.</p>
             </div>
             <div className="tap-repo-card">
-              <strong>ICPSR</strong>
+              <a href="https://www.icpsr.umich.edu" target="_blank" rel="noopener noreferrer"><strong>ICPSR</strong></a>
               <span className="tap-repo-type">Social Sciences</span>
               <p>Inter-university Consortium for Political and Social Research. Strong support for restricted and sensitive social science data.</p>
             </div>
             <div className="tap-repo-card">
-              <strong>Zenodo</strong>
+              <a href="https://zenodo.org" target="_blank" rel="noopener noreferrer"><strong>Zenodo</strong></a>
               <span className="tap-repo-type">General / Open</span>
               <p>CERN-hosted open repository. Good for code, preprints, and datasets without a disciplinary home.</p>
             </div>
             <div className="tap-repo-card">
-              <strong>Federated Research Data Repository (FRDR)</strong>
+              <a href="https://www.frdr-dfdr.ca" target="_blank" rel="noopener noreferrer"><strong>Federated Research Data Repository (FRDR)</strong></a>
               <span className="tap-repo-type">General / Canadian</span>
               <p>Canadian platform for discovering and sharing research data. Suitable for large datasets.</p>
             </div>

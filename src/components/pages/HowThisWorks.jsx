@@ -199,7 +199,7 @@ export default function HowThisWorks() {
           <div className="htw-compliance-card">
             <Lock size={20} />
             <div>
-              <h3>PIPEDA & PHIPA</h3>
+              <h3><a href="https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/" target="_blank" rel="noopener noreferrer">PIPEDA</a> &amp; <a href="https://www.ontario.ca/laws/statute/04p03" target="_blank" rel="noopener noreferrer">PHIPA</a></h3>
               <p>
                 Canadian privacy legislation requires that personal information be
                 protected from unauthorised access. Uploading files to third-party
@@ -210,7 +210,7 @@ export default function HowThisWorks() {
           <div className="htw-compliance-card">
             <Globe size={20} />
             <div>
-              <h3>GDPR</h3>
+              <h3><a href="https://gdpr.eu" target="_blank" rel="noopener noreferrer">GDPR</a></h3>
               <p>
                 The EU's data protection regulation requires a legal basis for
                 processing personal data. Free conversion sites typically don't
@@ -221,7 +221,7 @@ export default function HowThisWorks() {
           <div className="htw-compliance-card">
             <Shield size={20} />
             <div>
-              <h3>Tri-Agency RDM Policy</h3>
+              <h3><a href="https://www.science.gc.ca/site/science/en/interagency-research-funding/policies-and-guidelines/research-data-management/tri-agency-research-data-management-policy" target="_blank" rel="noopener noreferrer">Tri-Agency RDM Policy</a></h3>
               <p>
                 Canada's research funding agencies require data management plans
                 that ensure data integrity and secure handling. Using unvetted
@@ -293,7 +293,7 @@ export default function HowThisWorks() {
               <h4>Windows — 7-Zip (Free)</h4>
             </div>
             <ol className="htw-encrypt-steps">
-              <li>Download <strong>7-Zip</strong> from 7-zip.org (free, open-source)</li>
+              <li>Download <a href="https://www.7-zip.org" target="_blank" rel="noopener noreferrer"><strong>7-Zip</strong></a> from <a href="https://www.7-zip.org" target="_blank" rel="noopener noreferrer">7-zip.org</a> (free, open-source)</li>
               <li>Right-click your file or folder → <strong>7-Zip → Add to archive</strong></li>
               <li>Set format to <strong>7z</strong></li>
               <li>Set encryption method to <strong>AES-256</strong></li>
@@ -319,7 +319,7 @@ export default function HowThisWorks() {
             </ol>
             <div className="htw-encrypt-tip">
               <CheckCircle size={14} />
-              For cross-platform sharing (Mac → Windows), consider <strong>VeraCrypt</strong> for consistent results.
+              For cross-platform sharing (Mac → Windows), consider <a href="https://www.veracrypt.fr" target="_blank" rel="noopener noreferrer"><strong>VeraCrypt</strong></a> for consistent results.
             </div>
           </div>
 
@@ -366,7 +366,7 @@ export default function HowThisWorks() {
             <HardDrive size={20} />
             <div>
               <h4>USB Drives &amp; External Storage</h4>
-              <p>Never store research data on an unencrypted USB drive. Use BitLocker To Go (Windows) or the built-in Encrypt option on Mac. For cross-platform drives, use VeraCrypt (free).</p>
+              <p>Never store research data on an unencrypted USB drive. Use BitLocker To Go (Windows) or the built-in Encrypt option on Mac. For cross-platform drives, use <a href="https://www.veracrypt.fr" target="_blank" rel="noopener noreferrer">VeraCrypt</a> (free).</p>
             </div>
           </div>
         </div>
@@ -379,8 +379,8 @@ export default function HowThisWorks() {
             <div>
               <h3>Strong Passphrases</h3>
               <p>
-                Use four or more random words — "Closet lamp Bathroom Mug" is stronger than "P@ssw0rd!". The Canadian Centre for Cyber Security recommends at least 12 characters.
-                Check if your email has been in a breach at <strong>haveibeenpwned.com</strong>.
+                Use four or more random words — "Closet lamp Bathroom Mug" is stronger than "P@ssw0rd!". The <a href="https://www.cyber.gc.ca" target="_blank" rel="noopener noreferrer">Canadian Centre for Cyber Security</a> recommends at least 12 characters.
+                Check if your email has been in a breach at <a href="https://haveibeenpwned.com" target="_blank" rel="noopener noreferrer">haveibeenpwned.com</a>.
               </p>
             </div>
           </div>
@@ -389,7 +389,7 @@ export default function HowThisWorks() {
             <div>
               <h3>Password Managers</h3>
               <p>
-                Use <strong>Bitwarden</strong> (free, open-source) or <strong>1Password</strong> to generate and store unique passwords for every account. Never reuse passwords, especially for research systems.
+                Use <a href="https://bitwarden.com" target="_blank" rel="noopener noreferrer"><strong>Bitwarden</strong></a> (free, open-source) or <a href="https://1password.com" target="_blank" rel="noopener noreferrer"><strong>1Password</strong></a> to generate and store unique passwords for every account. Never reuse passwords, especially for research systems.
               </p>
             </div>
           </div>

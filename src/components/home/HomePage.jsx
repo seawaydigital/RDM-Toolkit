@@ -24,7 +24,7 @@ export default function HomePage({ onNavigate }) {
           takes place.
         </p>
         <p className="homepage-compliance">
-          Designed to meet PIPEDA, PHIPA, and GDPR data handling requirements {'\u2014'} your data never leaves your device.
+          Designed to meet <a href="https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/" target="_blank" rel="noopener noreferrer">PIPEDA</a>, <a href="https://www.ontario.ca/laws/statute/04p03" target="_blank" rel="noopener noreferrer">PHIPA</a>, and <a href="https://gdpr.eu" target="_blank" rel="noopener noreferrer">GDPR</a> data handling requirements {'\u2014'} your data never leaves your device.
         </p>
       </div>
 

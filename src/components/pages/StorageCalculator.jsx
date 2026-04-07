@@ -1353,7 +1353,7 @@ export default function StorageCalculator() {
                     </div>
                     {archivalDuration < 7 && (
                       <p style={{ fontSize: 11, color: 'var(--accent-amber)', marginTop: 4, lineHeight: 1.4 }}>
-                        Note: The LUFA Collective Agreement requires a minimum 7-year retention period after research completion. Specific funding or contract requirements may extend this.
+                        Note: The <a href="https://lufa.ca" target="_blank" rel="noopener noreferrer">LUFA Collective Agreement</a> requires a minimum 7-year retention period after research completion. Specific funding or contract requirements may extend this.
                       </p>
                     )}
                   </div>
@@ -1428,7 +1428,7 @@ export default function StorageCalculator() {
               </div>
               <div className="sc-summary-card">
                 <span className="sc-summary-label">Archival (Base &times; 2)</span>
-                <span style={{ fontSize: 10, color: 'var(--text-muted)', display: 'block', marginTop: 2 }}>Min. 7 yr per LUFA</span>
+                <span style={{ fontSize: 10, color: 'var(--text-muted)', display: 'block', marginTop: 2 }}>Min. 7 yr per <a href="https://lufa.ca" target="_blank" rel="noopener noreferrer">LUFA</a></span>
                 <span className="sc-summary-value">{formatSize(totalArchivalGB)}</span>
               </div>
             </div>
@@ -1445,7 +1445,7 @@ export default function StorageCalculator() {
                 <div className="sc-classification-level" style={{ color: classColor }}>{classificationLevel}</div>
                 <ul className="sc-classification-reqs">
                   {classificationRequirements.map((r, i) => (
-                    <li key={i}>{r}</li>
+                    <li key={i}>{r.includes('OCAP') ? <><a href="https://fnigc.ca/ocap-training/" target="_blank" rel="noopener noreferrer">OCAP®</a> principles apply (Ownership, Control, Access, Possession)</> : r}</li>
                   ))}
                 </ul>
               </div>
