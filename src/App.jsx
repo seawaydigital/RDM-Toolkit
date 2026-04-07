@@ -115,36 +115,65 @@ function getRouteFromHash() {
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
   }
   componentDidUpdate(prevProps) {
     if (prevProps.resetKey !== this.props.resetKey) {
-      this.setState({ hasError: false });
+      this.setState({ hasError: false, error: null });
     }
   }
   render() {
     if (this.state.hasError) {
-      return this.props.fallback;
+      return this.props.fallback(this.state.error);
     }
     return this.props.children;
   }
 }
 
-function ToolErrorFallback({ onReset }) {
+function ToolErrorFallback({ onReset, error }) {
+  const [showDetail, setShowDetail] = useState(false);
+  const isOffline = !navigator.onLine;
+  const message = isOffline
+    ? 'You appear to be offline. This tool\'s code hasn\'t been cached yet. Connect to the internet and reload the page once to enable full offline use.'
+    : 'Something went wrong loading this tool.';
+
   return (
     <div className="error-card" role="alert">
       <div className="error-card-header">
         <strong>Tool Error</strong>
       </div>
-      <p className="error-card-message">
-        Something went wrong loading this tool. Please try again.
-      </p>
-      <button className="action-button" onClick={onReset} style={{ marginTop: '16px', maxWidth: '200px' }}>
-        Try Again
-      </button>
+      <p className="error-card-message">{message}</p>
+      {error && (
+        <div style={{ marginTop: '8px' }}>
+          <button
+            onClick={() => setShowDetail(v => !v)}
+            style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+          >
+            {showDetail ? 'Hide details' : 'Show details'}
+          </button>
+          {showDetail && (
+            <pre style={{ marginTop: '8px', padding: '8px', background: 'var(--bg-tertiary)', borderRadius: '4px', fontSize: '0.72rem', color: 'var(--text-muted)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+              {error.message}{error.stack ? `\n\n${error.stack}` : ''}
+            </pre>
+          )}
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
+        <button className="action-button" onClick={onReset} style={{ maxWidth: '160px' }}>
+          Try Again
+        </button>
+        <a
+          href="https://github.com/seawaydigital/RDM-Toolkit/issues"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ fontSize: '0.8rem', color: 'var(--text-muted)', alignSelf: 'center', textDecoration: 'underline' }}
+        >
+          Report this issue
+        </a>
+      </div>
     </div>
   );
 }
@@ -294,7 +323,7 @@ export default function App() {
           {currentToolId && ToolComponent && (
             <ErrorBoundary
               resetKey={errorResetKey}
-              fallback={<ToolErrorFallback onReset={() => setErrorResetKey(k => k + 1)} />}
+              fallback={(err) => <ToolErrorFallback onReset={() => setErrorResetKey(k => k + 1)} error={err} />}
             >
               <Suspense fallback={<ToolSkeleton />}>
                 <div className="tool-header">

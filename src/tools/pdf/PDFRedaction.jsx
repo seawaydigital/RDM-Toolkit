@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { PDFDocument, rgb } from '@cantoo/pdf-lib';
 import InfoCard from '../../components/ui/InfoCard';
 import DropZone from '../../components/ui/DropZone';
@@ -10,6 +10,36 @@ import { X, ZoomIn, ZoomOut, AlertTriangle } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderAllThumbnails, renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+
+// Renders a single thumbnail only when it scrolls into view
+function LazyThumbnail({ pageNum, pdfJsDocRef, onRender, cached }) {
+  const ref = useRef(null);
+  const [src, setSrc] = useState(cached || null);
+
+  useEffect(() => {
+    if (src || !pdfJsDocRef.current) return;
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        try {
+          const dataUrl = await renderPageThumbnail(pdfJsDocRef.current, pageNum, 0.5);
+          setSrc(dataUrl);
+          onRender(pageNum, dataUrl);
+        } catch { /* ignore render errors */ }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [pageNum, pdfJsDocRef, src, onRender]);
+
+  return src
+    ? <img src={src} alt={`Page ${pageNum}`} className="thumbnail-image" />
+    : <div ref={ref} className="thumbnail-placeholder" />;
+}
 
 export default function PDFRedaction({ tool, navigateTo }) {
   const [file, setFile] = useState(null);
@@ -65,9 +95,7 @@ export default function PDFRedaction({ tool, navigateTo }) {
       if (pdfJsDocRef.current) pdfJsDocRef.current.destroy();
       const pdfJsDoc = await loadPdfDocument(bytesCopy.slice());
       pdfJsDocRef.current = pdfJsDoc;
-      renderAllThumbnails(pdfJsDoc, (pageNum, dataUrl) => {
-        setThumbnails(prev => ({ ...prev, [pageNum]: dataUrl }));
-      });
+      // Thumbnails are rendered lazily via IntersectionObserver — see LazyThumbnail component
     } catch (e) {
       console.error('[PDFRedaction] file load error:', e);
       setError('Something went wrong while reading the PDF. Please try a different file.');
@@ -234,6 +262,21 @@ export default function PDFRedaction({ tool, navigateTo }) {
             "For sensitive documents, consult your institution's IT security team",
           ]}
         />
+        {/* Prominent permanence warning on result screen */}
+        <div style={{
+          display: 'flex', alignItems: 'flex-start', gap: 'var(--space-sm)',
+          padding: 'var(--space-md)', marginBottom: 'var(--space-md)',
+          background: 'rgba(239,68,68,0.10)', border: '2px solid rgba(239,68,68,0.5)',
+          borderRadius: 'var(--radius-md)', fontSize: 13, color: 'var(--text-primary)',
+        }}>
+          <AlertTriangle size={18} style={{ flexShrink: 0, color: '#EF4444', marginTop: 1 }} />
+          <div>
+            <strong style={{ color: '#EF4444' }}>This is NOT legally compliant redaction.</strong>
+            <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)' }}>
+              Black rectangles hide content visually but the underlying text remains in the PDF file and can be extracted with freely available tools. Do not use this for legally sensitive, confidential, or regulated documents. Use a dedicated redaction tool (e.g., Adobe Acrobat's redaction feature) for legally binding redaction.
+            </p>
+          </div>
+        </div>
         <ResultPanel
           filename={result.filename}
           originalSize={result.originalSize}
@@ -334,11 +377,12 @@ export default function PDFRedaction({ tool, navigateTo }) {
                   }}
                   onClick={() => handleSelectPage(pageNum)}
                 >
-                  {thumbnails[pageNum] ? (
-                    <img src={thumbnails[pageNum]} alt={`Page ${pageNum}`} className="thumbnail-image" />
-                  ) : (
-                    <div className="thumbnail-placeholder" />
-                  )}
+                  <LazyThumbnail
+                    pageNum={pageNum}
+                    pdfJsDocRef={pdfJsDocRef}
+                    cached={thumbnails[pageNum]}
+                    onRender={(n, url) => setThumbnails(prev => ({ ...prev, [n]: url }))}
+                  />
                   <span className="thumbnail-label">
                     {pageNum}
                     {hasRedactions && ` (${redactions[pageNum].length})`}

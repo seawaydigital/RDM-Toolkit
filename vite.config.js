@@ -46,6 +46,8 @@ export default defineConfig({
           'pdf-lib': ['@cantoo/pdf-lib'],
           'pdfjs': ['pdfjs-dist'],
           'jszip': ['jszip'],
+          'zxcvbn': ['zxcvbn'],
+          'dompurify': ['dompurify'],
         },
       },
     },

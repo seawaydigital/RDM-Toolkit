@@ -1,25 +1,25 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Lock, Unlock, Copy, Check } from 'lucide-react';
+import zxcvbn from 'zxcvbn';
 import InfoCard from '../../components/ui/InfoCard';
 import ActionButton from '../../components/ui/ActionButton';
 import ErrorCard from '../../components/ui/ErrorCard';
 import { encryptText, decryptText } from '../../utils/crypto';
 
-function getPasswordStrength(password) {
-  if (!password) return { label: '', level: 0, color: '' };
-  let score = 0;
-  if (password.length >= 8) score++;
-  if (password.length >= 12) score++;
-  if (password.length >= 16) score++;
-  if (/[a-z]/.test(password)) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^a-zA-Z0-9]/.test(password)) score++;
+const STRENGTH_CONFIG = [
+  { label: 'Very Weak', color: 'var(--accent-red)' },
+  { label: 'Weak',      color: 'var(--accent-red)' },
+  { label: 'Fair',      color: 'var(--accent-amber)' },
+  { label: 'Strong',    color: 'var(--accent-cyan)' },
+  { label: 'Very Strong', color: 'var(--accent-green)' },
+];
 
-  if (score <= 2) return { label: 'Weak', level: 1, color: 'var(--accent-red)' };
-  if (score <= 4) return { label: 'Fair', level: 2, color: 'var(--accent-amber)' };
-  if (score <= 5) return { label: 'Good', level: 3, color: 'var(--accent-cyan)' };
-  return { label: 'Strong', level: 4, color: 'var(--accent-green)' };
+function getPasswordStrength(password) {
+  if (!password) return { label: '', level: 0, color: '', feedback: '' };
+  const result = zxcvbn(password);
+  const cfg = STRENGTH_CONFIG[result.score];
+  const suggestion = result.feedback.suggestions[0] || result.feedback.warning || '';
+  return { label: cfg.label, level: result.score, color: cfg.color, feedback: suggestion };
 }
 
 export default function EncryptDecryptText({ tool, navigateTo }) {
@@ -147,6 +147,11 @@ export default function EncryptDecryptText({ tool, navigateTo }) {
             <span className="password-strength-label" style={{ color: strength.color }}>
               {strength.label}
             </span>
+            {strength.feedback && (
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: 8 }}>
+                — {strength.feedback}
+              </span>
+            )}
           </div>
         )}
       </div>

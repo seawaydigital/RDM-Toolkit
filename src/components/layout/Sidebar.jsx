@@ -1,10 +1,21 @@
-import { useState, useEffect } from 'react';
-import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, X } from 'lucide-react';
 import { PRIMARY_CATEGORIES, MORE_CATEGORIES, CATEGORIES } from '../../data/toolRegistry';
 
 export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen, onClose }) {
   const [expanded, setExpanded] = useState(new Set());
   const [showMore, setShowMore] = useState(false);
+  const navRef = useRef(null);
+
+  // Close sidebar on Escape key when open (mobile)
+  useEffect(() => {
+    if (!isOpen) return;
+    function onKeyDown(e) {
+      if (e.key === 'Escape') onClose?.();
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [isOpen, onClose]);
 
   // Auto-expand the category containing the current tool
   useEffect(() => {
@@ -74,7 +85,17 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
   return (
     <>
       {isOpen && <div className="sidebar-backdrop" onClick={onClose} />}
-      <nav className={`sidebar ${isOpen ? 'sidebar--open' : ''}`} aria-label="Tool navigation">
+      <nav className={`sidebar ${isOpen ? 'sidebar--open' : ''}`} aria-label="Tool navigation" ref={navRef}>
+        {/* Close button — visible on mobile only */}
+        {onClose && (
+          <button
+            className="sidebar-close-btn"
+            onClick={onClose}
+            aria-label="Close navigation"
+          >
+            <X size={18} />
+          </button>
+        )}
         <div className="sidebar-scroll">
           {/* Primary categories */}
           {PRIMARY_CATEGORIES.map(renderCategory)}

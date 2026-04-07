@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Download } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import InfoCard from '../../components/ui/InfoCard';
 
 const SAMPLE_MARKDOWN = `# Markdown Preview
@@ -180,7 +181,13 @@ export default function MarkdownPreview({ tool }) {
   const [text, setText] = useState(SAMPLE_MARKDOWN);
   const [copied, setCopied] = useState(false);
 
-  const renderedHTML = useMemo(() => parseMarkdown(text), [text]);
+  const renderedHTML = useMemo(() => DOMPurify.sanitize(parseMarkdown(text), {
+    ALLOWED_TAGS: ['h1','h2','h3','h4','h5','h6','p','strong','em','del','code','pre',
+      'ul','ol','li','blockquote','hr','a','img','div','br','span'],
+    ALLOWED_ATTR: ['href','src','alt','style','target','rel'],
+    ALLOW_DATA_ATTR: false,
+    FORCE_BODY: true,
+  }), [text]);
 
   const handleCopyHTML = useCallback(async () => {
     try {
@@ -199,11 +206,26 @@ export default function MarkdownPreview({ tool }) {
     }
   }, [renderedHTML]);
 
+  const handleDownloadHTML = useCallback(() => {
+    const full = `<!DOCTYPE html>\n<html lang="en">\n<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Markdown Export</title><style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:720px;margin:40px auto;padding:0 20px;line-height:1.6;color:#1f2937}pre{background:#f3f4f6;padding:12px 16px;border-radius:6px;overflow-x:auto}code{background:#f3f4f6;padding:2px 6px;border-radius:3px;font-size:.9em}blockquote{border-left:3px solid #3b82f6;padding:8px 16px;margin:12px 0;color:#6b7280;background:#f9fafb}hr{border:none;border-top:1px solid #e5e7eb;margin:20px 0}a{color:#3b82f6}</style></head>\n<body>\n${renderedHTML}\n</body>\n</html>`;
+    const blob = new Blob([full], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'markdown-export.html';
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [renderedHTML]);
+
   return (
     <div>
       <InfoCard description="Live Markdown preview with a built-in parser. Supports headings, bold, italic, links, code blocks, lists, blockquotes, and horizontal rules. All processing happens locally in your browser." />
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginBottom: '8px' }}>
+        <button className="text-tool-copy-btn" onClick={handleDownloadHTML}>
+          <Download size={14} />
+          Download HTML
+        </button>
         <button className="text-tool-copy-btn" onClick={handleCopyHTML}>
           {copied ? <Check size={14} /> : <Copy size={14} />}
           {copied ? 'Copied HTML' : 'Copy HTML'}

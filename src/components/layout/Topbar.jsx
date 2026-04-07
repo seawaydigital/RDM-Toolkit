@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Lock, Menu, HelpCircle, Search } from 'lucide-react';
 import SearchBar from '../ui/SearchBar';
 
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
+
 export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, currentPage, onNavigate }) {
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -33,12 +35,12 @@ export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, curr
           <button
             className="topbar-search-btn"
             onClick={() => setSearchOpen(true)}
-            aria-label="Search tools (Ctrl+K)"
-            title="Search tools (Ctrl+K)"
+            aria-label={`Search tools (${isMac ? '⌘' : 'Ctrl'}+K)`}
+            title={`Search tools (${isMac ? '⌘' : 'Ctrl'}+K)`}
           >
             <Search size={16} />
             <span className="topbar-search-label">Search</span>
-            <kbd className="topbar-search-kbd">Ctrl+K</kbd>
+            <kbd className="topbar-search-kbd">{isMac ? '⌘K' : 'Ctrl+K'}</kbd>
           </button>
           <a
             href="#how-this-works"

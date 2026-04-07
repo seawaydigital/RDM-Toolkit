@@ -23,9 +23,24 @@ const STRATEGIES = [
 ];
 
 const DETECTION_PATTERNS = [
-  { type: 'email', label: 'Email Address', regex: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g },
-  { type: 'phone', label: 'Phone Number', regex: /(?:\+?1[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/g },
-  { type: 'name', label: 'Name (capitalized words)', regex: /\b[A-Z][a-z]+(?:\s[A-Z][a-z]+)+\b/g },
+  { type: 'email', label: 'Email Address',
+    regex: /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g },
+  { type: 'phone', label: 'Phone Number',
+    // North American + international formats
+    regex: /(?:\+?1[-.\s]?)?(?:\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}(?!\d)/g },
+  { type: 'name', label: 'Person Name (capitalized)',
+    // Handles: "John Smith", "Mary-Jane Watson", "O'Connor", "Dr. Smith", "van der Berg"
+    regex: /\b(?:Dr|Mr|Mrs|Ms|Prof)\.?\s+[A-Z][a-zA-Z'\-]+(?:\s+(?:van|de|der|den|le|la|les|el|al|von|zu|da|dos|das|di|du))?(?:\s+[A-Z][a-zA-Z'\-]+)+\b|\b[A-Z][a-zA-Z'\-]+(?:\s+[A-Z][a-zA-Z'\-]+)+\b/g },
+  { type: 'sin', label: 'Canadian SIN',
+    regex: /\b\d{3}[-\s]?\d{3}[-\s]?\d{3}\b/g },
+  { type: 'postalcode', label: 'Canadian Postal Code',
+    regex: /\b[A-CEGHJ-NPR-TV-Z]\d[A-CEGHJ-NPR-TV-Z][\s\-]?\d[A-CEGHJ-NPR-TV-Z]\d\b/gi },
+  { type: 'ip', label: 'IP Address',
+    regex: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g },
+  { type: 'url', label: 'URL / Website',
+    regex: /https?:\/\/[^\s,;"'<>]+/gi },
+  { type: 'date', label: 'Date (YYYY-MM-DD or similar)',
+    regex: /\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b|\b\d{1,2}[-\/]\d{1,2}[-\/]\d{4}\b/g },
 ];
 
 // Simple SHA-256 using SubtleCrypto

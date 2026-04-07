@@ -701,6 +701,9 @@ export default function DataClassification() {
           <button className="dc-action-btn dc-action-btn--secondary" onClick={handleCopy}>
             {copied ? <><Check size={16} /> Copied!</> : <><Copy size={16} /> Copy as Text</>}
           </button>
+          <button className="dc-action-btn dc-action-btn--ghost" onClick={handleBack}>
+            <ChevronLeft size={16} /> Edit Answers
+          </button>
           <button className="dc-action-btn dc-action-btn--ghost" onClick={handleStartOver}>
             <RotateCcw size={16} /> Start Over
           </button>
