@@ -9862,3 +9862,357 @@ input:focus, textarea:focus, select:focus {
     display: none;
   }
 }
+
+/* ── Add Cover Page (.acp-*) ─────────────────────────────────────────────── */
+
+.acp-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.acp-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.acp-file-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+}
+
+.acp-file-name {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  word-break: break-all;
+  flex: 1;
+}
+
+.acp-file-meta {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.acp-section {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.acp-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-xs);
+  letter-spacing: 0.02em;
+}
+
+.acp-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.acp-optional {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.acp-input,
+.acp-textarea {
+  width: 100%;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  font-size: 0.875rem;
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+.acp-input:focus,
+.acp-textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+}
+
+.acp-date-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.acp-radio-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.acp-date-input {
+  margin-top: 4px;
+  max-width: 180px;
+}
+
+/* Appearance */
+.acp-appearance-row {
+  display: flex;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+.acp-appearance-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.acp-color-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.acp-color-input {
+  width: 36px;
+  height: 36px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+  cursor: pointer;
+}
+
+.acp-color-hex {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.acp-color-presets {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.acp-color-swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.acp-color-swatch:hover {
+  transform: scale(1.15);
+}
+
+.acp-color-swatch--active {
+  border-color: var(--accent-primary);
+  transform: scale(1.15);
+}
+
+.acp-bg-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.acp-bg-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.acp-bg-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.acp-bg-btn--active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.acp-layout-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.acp-layout-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.acp-layout-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--text-muted);
+}
+
+.acp-layout-btn--active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.acp-layout-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Preview panel */
+.acp-right {
+  position: sticky;
+  top: calc(var(--topbar-height) + var(--space-md));
+}
+
+.acp-preview-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 var(--space-sm);
+}
+
+.acp-preview {
+  aspect-ratio: 8.5 / 11;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.acp-preview-bar {
+  height: 8px;
+  flex-shrink: 0;
+}
+
+.acp-preview-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 12% 8%;
+  gap: 5px;
+  min-height: 0;
+}
+
+.acp-preview-body--centered {
+  align-items: center;
+  text-align: center;
+}
+
+.acp-preview-body--left {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.acp-preview-left-ruled {
+  flex: 1;
+  border-left: 10px solid;
+  display: flex;
+  min-height: 0;
+}
+
+.acp-preview-title {
+  font-size: clamp(0.7rem, 2vw, 1rem);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.acp-preview-placeholder {
+  opacity: 0.25;
+  font-style: italic;
+}
+
+.acp-preview-subtitle {
+  font-size: clamp(0.55rem, 1.5vw, 0.75rem);
+  margin: 0;
+  opacity: 0.85;
+}
+
+.acp-preview-rule {
+  border: none;
+  border-top: 1px solid;
+  width: 60%;
+  margin: 4px 0;
+  align-self: center;
+}
+
+.acp-preview-rule--left {
+  align-self: flex-start;
+  width: 80%;
+}
+
+.acp-preview-meta-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.acp-preview-meta {
+  font-size: clamp(0.45rem, 1.2vw, 0.65rem);
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .acp-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .acp-right {
+    position: static;
+    order: -1;
+  }
+
+  .acp-preview {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}

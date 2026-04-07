@@ -20,6 +20,7 @@ export const CATEGORIES = [
       { id: 'pdf-redaction', name: 'PDF Redaction', slug: 'redacted', description: 'Black out sensitive text or areas in a PDF before sharing.', tags: ['pdf', 'privacy', 'security'], related: ['pdf-watermark', 'strip-file-metadata', 'data-anonymizer'] },
       { id: 'pdf-page-delete', name: 'Delete PDF Pages', slug: 'pages-deleted', description: 'Remove specific pages from a PDF document.', tags: ['pdf'], related: ['split-pdf', 'reorder-pages', 'rotate-pages'] },
       { id: 'pdf-to-images', name: 'PDF to Images', slug: 'as-images', description: 'Export each page of a PDF as a high-quality PNG or JPG image.', tags: ['pdf', 'image', 'conversion'], related: ['extract-images-from-pdf', 'compress-image', 'image-to-pdf'] },
+      { id: 'add-cover-page', name: 'Add Cover Page', slug: 'with-cover', description: 'Prepend a custom-designed cover page to any PDF — set a title, author, department, date, and colour scheme. Runs entirely in your browser.', tags: ['pdf', 'cover', 'documentation', 'report'], related: ['merge-pdfs', 'add-page-numbers', 'pdf-watermark'] },
     ],
   },
   {
