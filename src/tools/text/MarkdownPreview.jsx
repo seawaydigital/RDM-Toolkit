@@ -183,10 +183,12 @@ export default function MarkdownPreview({ tool }) {
 
   const renderedHTML = useMemo(() => DOMPurify.sanitize(parseMarkdown(text), {
     ALLOWED_TAGS: ['h1','h2','h3','h4','h5','h6','p','strong','em','del','code','pre',
-      'ul','ol','li','blockquote','hr','a','img','div','br','span'],
-    ALLOWED_ATTR: ['href','src','alt','style','target','rel'],
+      'ul','ol','li','blockquote','hr','a','img','br'],
+    ALLOWED_ATTR: ['href','src','alt','target','rel'],
     ALLOW_DATA_ATTR: false,
     FORCE_BODY: true,
+    // Block javascript: and data: URIs — only allow https/http/mailto/tel and relative paths
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
   }), [text]);
 
   const handleCopyHTML = useCallback(async () => {

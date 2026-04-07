@@ -6,6 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RDM Toolkit — Research Data Management Tools</title>
     <meta name="description" content="A browser-based file utility toolkit. Every tool runs entirely in your browser. No upload. No server. No account. No tracking." />
+    <!-- Content Security Policy — stopgap until host supports HTTP headers.
+         Limits script execution to same origin, blocks framing (clickjacking),
+         prevents mixed-content, disables dangerous browser features.
+         blob: and data: are required for in-browser file processing. -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self';
+      script-src 'self' 'wasm-unsafe-eval';
+      style-src 'self' 'unsafe-inline';
+      img-src 'self' blob: data:;
+      font-src 'self' data:;
+      worker-src 'self' blob:;
+      connect-src 'self';
+      frame-ancestors 'none';
+      base-uri 'self';
+      form-action 'self';
+      upgrade-insecure-requests;
+    " />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()" />
   </head>
   <body>
     <div id="root"></div>
