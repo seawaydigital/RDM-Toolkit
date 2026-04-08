@@ -117,12 +117,8 @@ export default function ExtractImagesFromPDF({ tool, navigateTo }) {
             const imageName = operatorList.argsArray[j][0];
 
             try {
-              const imgData = await new Promise((resolve, reject) => {
-                page.objs.get(imageName, (data) => {
-                  if (data) resolve(data);
-                  else reject(new Error('Image object not found'));
-                });
-              });
+              const imgData = page.objs.get(imageName);
+              if (!imgData) continue;
 
               // Skip very small images (likely artifacts or masks)
               if (imgData.width < 10 || imgData.height < 10) continue;
