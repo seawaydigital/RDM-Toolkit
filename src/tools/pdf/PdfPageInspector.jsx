@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { PDFDocument, PDFName } from '@cantoo/pdf-lib';
+import { PDFDocument } from '@cantoo/pdf-lib';
 import DropZone from '../../components/ui/DropZone.jsx';
 import InfoCard from '../../components/ui/InfoCard.jsx';
 import ErrorCard from '../../components/ui/ErrorCard.jsx';
@@ -194,16 +194,6 @@ export default function PdfPageInspector({ navigateTo }) {
         return;
       }
 
-      try {
-        // Check the PDF catalog for an AcroForm entry — more reliable than
-        // getForm().getFields(), which throws for XFA forms, complex signature
-        // fields, and other non-standard AcroForm structures.
-        const acroForm = libDoc?.catalog.lookupMaybe(PDFName.of('AcroForm'));
-        setHasFormFields(acroForm != null);
-      } catch {
-        setHasFormFields(false);
-      }
-
       setFile(selected);
       setFileBytes(bytes);
 
@@ -212,6 +202,7 @@ export default function PdfPageInspector({ navigateTo }) {
       pdfJsDocRef.current = pdfJsDoc;
       const numPages = pdfJsDoc.numPages;
       const pages = [];
+      let hasWidgets = false;
 
       for (let i = 1; i <= numPages; i++) {
         const page = await pdfJsDoc.getPage(i);
@@ -233,7 +224,21 @@ export default function PdfPageInspector({ navigateTo }) {
           isPortrait: hPt >= wPt,
           rotationDeg,
         });
+
+        // Detect form fields / signature boxes via Widget annotations.
+        // pdfjs-dist handles this more reliably than pdf-lib's catalog API
+        // for XFA forms, digital signatures, and other edge cases.
+        if (!hasWidgets) {
+          try {
+            const annotations = await page.getAnnotations();
+            if (annotations.some(a => a.subtype === 'Widget')) hasWidgets = true;
+          } catch {
+            // silently skip — annotation parsing failure doesn't block inspection
+          }
+        }
       }
+
+      setHasFormFields(hasWidgets);
 
       setPageInfo(pages);
 
@@ -400,10 +405,6 @@ export default function PdfPageInspector({ navigateTo }) {
 
   return (
     <div className="tool-page">
-      <div className="tool-page-header">
-        <h1>PDF Page Inspector</h1>
-      </div>
-
       <InfoCard description="Inspect the exact dimensions of every page in your PDF and identify pages that don't match standard formats. Optionally resize pages to Letter, A4, Legal, and more." />
 
       {error === '__encrypted__' ? (
