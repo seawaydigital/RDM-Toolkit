@@ -285,6 +285,7 @@ npx vite preview   # Serve production build locally (port 4173)
 1. **HTTP security headers** — GitHub Pages does not support custom headers. `<meta http-equiv>` CSP is a stopgap; notably `frame-ancestors 'none'` is **ignored** in meta tags (only works as HTTP header). When moving off GitHub Pages, configure real headers — Cloudflare Pages `_headers` file or Netlify `netlify.toml`.
 2. **URL-exposed config** — Storage Calculator saves state to URL hash. Hash doesn't go to server logs, but appears in browser history and shared links.
 3. **Branch protection** — enable in GitHub → Settings → Branches (require PR + review + CI pass before merging to master).
+4. **pdf-lib + AcroForm PDFs** — pdf-lib's serializer produces structurally broken output for PDFs with form fields, digital signatures, or XFA forms (Adobe Acrobat shows "error processing a page"). Tested approaches: `scaleContent()`, `embedPage()`/`drawPage()`, and canvas rasterization — all fail. PDF Page Inspector detects form fields via pdfjs Widget annotations and advises users to flatten via File → Print → Save as PDF before resizing.
 
 ---
 
@@ -335,7 +336,7 @@ All external sources are hyperlinked (`target="_blank" rel="noopener noreferrer"
 
 | Date | Change |
 |---|---|
-| 2026-04-10 | Added PDF Page Inspector tool (`#pdf-page-inspector`) — inspect exact page dimensions for every page (standard format detection with ±5pt/±20pt tolerances, in/mm toggle, lazy thumbnails), plus optional resize to Letter, A4, Legal, A3, A5, Tabloid, Executive, B5, or custom dimensions with Scale, Crop, or Pad methods; built with pdfjs-dist + pdf-lib, fully offline |
+| 2026-04-10 | Added PDF Page Inspector tool (`#pdf-page-inspector`) — inspect exact page dimensions for every page (standard format detection with ±5pt/±20pt tolerances, in/mm toggle, lazy thumbnails), plus optional resize to Letter, A4, Legal, A3, A5, Tabloid, Executive, B5, or custom dimensions with Scale, Crop, or Pad methods; resize uses `embedPage()`/`drawPage()` (XObject embedding) with `useObjectStreams: false` for broad viewer compatibility; detects AcroForm fields via pdfjs Widget annotations and shows warning with Print-to-PDF flatten guidance; built with pdfjs-dist + pdf-lib, fully offline |
 | 2026-04-08 | Upgraded pdfjs-dist v3 → v5.6.205 — patches CVE GHSA-wgrm-67xf-hhpq; updated worker import path to `.mjs`; replaced callback-based `page.objs.get()` with synchronous API in ExtractImagesFromPDF |
 | 2026-04-08 | Added CodeQL security scanning — runs on every push/PR + weekly; results in GitHub Security tab |
 | 2026-04-08 | Added Cover Page PDF tool (`#add-cover-page`) — prepend a custom cover page (title, subtitle, author, department, institution, date) with two layouts (centred/left-ruled), colour picker, live preview; built with pdf-lib, fully offline |
