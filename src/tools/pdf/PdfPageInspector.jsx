@@ -37,6 +37,7 @@ function matchSize(wPt, hPt) {
 
 export default function PdfPageInspector({ navigateTo }) {
   const [file, setFile] = useState(null);
+  // Retained for the resize pipeline — pdf-lib reloads raw bytes in Task 5
   const [fileBytes, setFileBytes] = useState(null);
   const [pageInfo, setPageInfo] = useState([]);
   const [summary, setSummary] = useState(null);
@@ -64,7 +65,6 @@ export default function PdfPageInspector({ navigateTo }) {
       const { isEncrypted } = await loadPdfLibDocument(bytes.slice(), { PDFDocument });
       if (isEncrypted) {
         setError('__encrypted__');
-        setLoading(false);
         return;
       }
 
