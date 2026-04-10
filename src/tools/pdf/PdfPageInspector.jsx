@@ -297,28 +297,26 @@ export default function PdfPageInspector({ navigateTo }) {
     };
   }, [result]);
 
+  // Render a pdfjs page to a PNG Uint8Array at the given DPI.
+  async function renderPageToImage(pdfJsDoc, pageNum, dpi = 300) {
+    const page = await pdfJsDoc.getPage(pageNum);
+    const viewport = page.getViewport({ scale: dpi / 72 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    canvas.remove();
+    return new Uint8Array(await blob.arrayBuffer());
+  }
+
   async function handleResize() {
     setResizing(true);
     setResizeError(null);
     setResult(null);
 
     try {
-      const { pdfDoc: srcDoc, isEncrypted } = await loadPdfLibDocument(fileBytes.slice(), { PDFDocument });
-      if (isEncrypted) {
-        setResizeError('This PDF is encrypted. Remove the password first.');
-        return;
-      }
-
-      // Flatten AcroForm fields before embedding so their values are captured
-      // in appearance streams (and signatures are rendered as static content).
-      if (hasFormFields && flattenBeforeResize) {
-        try {
-          srcDoc.getForm().flatten();
-        } catch (e) {
-          console.warn('Form flattening failed, proceeding without flatten:', e);
-        }
-      }
-
       // Resolve target dimensions in points
       let targetW, targetH;
       if (targetFormat === 'custom') {
@@ -342,27 +340,50 @@ export default function PdfPageInspector({ navigateTo }) {
         pagesToProcess = pages;
       }
 
-      // Build output document using page embedding for resized pages and
-      // copyPages for pages kept at original size. Embedding each source page
-      // as an XObject creates clean, fresh content streams — unlike mutating
-      // existing streams (scaleContent/translateContent), which produces output
-      // that Acrobat rejects with error 18 for complex PDFs.
+      // Decide pipeline: if form fields need flattening, use pdfjs canvas
+      // rendering (equivalent to "Print to PDF") which rasterizes everything
+      // including form fields and signatures into static images. pdf-lib's
+      // getForm().flatten() produces structurally broken output for some PDFs.
+      // For non-form PDFs, use pdf-lib's embedPage for vector-quality output.
+      const needsRasterFlatten = hasFormFields && flattenBeforeResize;
+
+      // Load pdfjs doc for raster path (reuse the one we already have)
+      const pdfJsDoc = pdfJsDocRef.current;
+
+      // Load pdf-lib doc for vector path or as the output container
+      const { pdfDoc: srcDoc, isEncrypted } = await loadPdfLibDocument(fileBytes.slice(), { PDFDocument });
+      if (isEncrypted) {
+        setResizeError('This PDF is encrypted. Remove the password first.');
+        return;
+      }
+
       const outDoc = await PDFDocument.create();
       const srcPages = srcDoc.getPages();
-      const embeddedPages = await outDoc.embedPages(srcPages);
 
-      const keepIndices = srcPages.map((_, i) => i).filter(i => !pagesToProcess.has(i + 1));
-      const copiedPages = keepIndices.length > 0
-        ? await outDoc.copyPages(srcDoc, keepIndices)
-        : [];
-      const keepMap = Object.fromEntries(keepIndices.map((srcIdx, j) => [srcIdx, copiedPages[j]]));
+      // For the vector path, embed source pages as XObjects
+      let embeddedPages = null;
+      if (!needsRasterFlatten) {
+        embeddedPages = [];
+        for (const sp of srcPages) {
+          embeddedPages.push(await outDoc.embedPage(sp));
+        }
+      }
 
       for (let i = 0; i < srcPages.length; i++) {
         const pageNum = i + 1;
         const { width: currentW, height: currentH } = srcPages[i].getSize();
 
         if (!pagesToProcess.has(pageNum)) {
-          outDoc.addPage(keepMap[i]);
+          // Non-resized page: embed at original size
+          if (needsRasterFlatten) {
+            const imgBytes = await renderPageToImage(pdfJsDoc, pageNum);
+            const img = await outDoc.embedPng(imgBytes);
+            const p = outDoc.addPage([currentW, currentH]);
+            p.drawImage(img, { x: 0, y: 0, width: currentW, height: currentH });
+          } else {
+            const p = outDoc.addPage([currentW, currentH]);
+            p.drawPage(embeddedPages[i]);
+          }
           continue;
         }
 
@@ -376,16 +397,32 @@ export default function PdfPageInspector({ navigateTo }) {
         const method = resolveMethod(resizeMethod, currentW, currentH, tw, th);
         const newPage = outDoc.addPage([tw, th]);
 
-        if (method === 'scale') {
-          newPage.drawPage(embeddedPages[i], { x: 0, y: 0, width: tw, height: th });
-        } else if (method === 'crop') {
-          // Draw at original size; content outside the smaller MediaBox is clipped
-          newPage.drawPage(embeddedPages[i], { x: 0, y: 0, width: currentW, height: currentH });
+        if (needsRasterFlatten) {
+          // Raster path: render page with pdfjs (captures form fields + signatures),
+          // then place the image at the target dimensions.
+          const imgBytes = await renderPageToImage(pdfJsDoc, pageNum);
+          const img = await outDoc.embedPng(imgBytes);
+
+          if (method === 'scale') {
+            newPage.drawImage(img, { x: 0, y: 0, width: tw, height: th });
+          } else if (method === 'crop') {
+            newPage.drawImage(img, { x: 0, y: 0, width: currentW, height: currentH });
+          } else {
+            const dx = (tw - currentW) / 2;
+            const dy = (th - currentH) / 2;
+            newPage.drawImage(img, { x: dx, y: dy, width: currentW, height: currentH });
+          }
         } else {
-          // Pad: center original content in the larger page
-          const dx = (tw - currentW) / 2;
-          const dy = (th - currentH) / 2;
-          newPage.drawPage(embeddedPages[i], { x: dx, y: dy, width: currentW, height: currentH });
+          // Vector path: use embedded page XObject (preserves text selectability)
+          if (method === 'scale') {
+            newPage.drawPage(embeddedPages[i], { x: 0, y: 0, width: tw, height: th });
+          } else if (method === 'crop') {
+            newPage.drawPage(embeddedPages[i], { x: 0, y: 0, width: currentW, height: currentH });
+          } else {
+            const dx = (tw - currentW) / 2;
+            const dy = (th - currentH) / 2;
+            newPage.drawPage(embeddedPages[i], { x: dx, y: dy, width: currentW, height: currentH });
+          }
         }
       }
 
