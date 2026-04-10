@@ -152,6 +152,10 @@ export default function PdfPageInspector({ navigateTo }) {
   const [pageRangeInput, setPageRangeInput] = useState('');
   const [pageRangeError, setPageRangeError] = useState(null);
 
+  // AcroForm detection
+  const [hasFormFields, setHasFormFields] = useState(false);
+  const [flattenBeforeResize, setFlattenBeforeResize] = useState(true);
+
   const canResize = (() => {
     if (!file || !summary) return false;
     if (targetFormat === 'custom') {
@@ -182,12 +186,18 @@ export default function PdfPageInspector({ navigateTo }) {
       const rawBytes = await selected.arrayBuffer();
       const bytes = new Uint8Array(rawBytes);
 
-      // Check encryption via pdf-lib
-      const { isEncrypted } = await loadPdfLibDocument(bytes.slice(), { PDFDocument });
+      // Check encryption via pdf-lib; also detect AcroForm fields
+      const { pdfDoc: libDoc, isEncrypted } = await loadPdfLibDocument(bytes.slice(), { PDFDocument });
       if (isEncrypted) {
         setError('__encrypted__');
         setLoading(false);
         return;
+      }
+
+      try {
+        setHasFormFields(libDoc ? libDoc.getForm().getFields().length > 0 : false);
+      } catch {
+        setHasFormFields(false);
       }
 
       setFile(selected);
@@ -248,6 +258,8 @@ export default function PdfPageInspector({ navigateTo }) {
     setResizeError(null);
     setResizing(false);
     setResizeOpen(false);
+    setHasFormFields(false);
+    setFlattenBeforeResize(true);
   }
 
   function handleUnitsToggle(u) {
@@ -297,6 +309,15 @@ export default function PdfPageInspector({ navigateTo }) {
       if (isEncrypted) {
         setResizeError('This PDF is encrypted. Remove the password first.');
         return;
+      }
+
+      // Flatten AcroForm fields before resizing if user opted in
+      if (hasFormFields && flattenBeforeResize) {
+        try {
+          pdfDoc.getForm().flatten();
+        } catch (e) {
+          console.warn('Form flattening failed, proceeding without flatten:', e);
+        }
       }
 
       // Resolve target dimensions in points
@@ -450,6 +471,28 @@ export default function PdfPageInspector({ navigateTo }) {
 
             {resizeOpen && (
               <div className="pi-resize-body">
+                {hasFormFields && (
+                  <div className="pi-form-warning">
+                    <div className="pi-form-warning-header">
+                      ⚠ This PDF contains interactive form fields or signature areas
+                    </div>
+                    <p className="pi-form-warning-body">
+                      Resizing moves the page content but not the form field positions, which may cause fields to appear misaligned in the output. Flattening converts all fields to static content before resizing — recommended for most cases.
+                    </p>
+                    <label className="pi-form-flatten-option">
+                      <input
+                        type="checkbox"
+                        checked={flattenBeforeResize}
+                        onChange={e => setFlattenBeforeResize(e.target.checked)}
+                      />
+                      <span>
+                        Flatten form fields before resizing{' '}
+                        <span className="pi-form-flatten-note">(removes interactivity · invalidates any existing signatures)</span>
+                      </span>
+                    </label>
+                  </div>
+                )}
+
                 <div className="pi-resize-row">
                   <label className="pi-resize-label">Target format</label>
                   <div className="pi-resize-controls">
