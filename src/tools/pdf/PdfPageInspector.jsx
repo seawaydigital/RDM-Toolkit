@@ -68,17 +68,6 @@ function resolveMethod(method, currentW, currentH, targetW, targetH) {
   return method;
 }
 
-// Center existing page content within a new larger MediaBox.
-// Uses pdf-lib's built-in translateContent (present in @cantoo/pdf-lib ^1.17.1).
-// Falls back to a manual content stream prepend if not available.
-function padPageContent(page, dx, dy) {
-  if (typeof page.translateContent === 'function') {
-    page.translateContent(dx, dy);
-    return;
-  }
-  // Fallback: log a warning and skip centering rather than crash
-  console.warn('padPageContent: translateContent not available, content will not be centred');
-}
 
 function PageCard({ page, units, thumbnail, pdfJsDocRef, onThumbnailReady }) {
   const ref = useRef(null);
@@ -314,16 +303,17 @@ export default function PdfPageInspector({ navigateTo }) {
     setResult(null);
 
     try {
-      const { pdfDoc, isEncrypted } = await loadPdfLibDocument(fileBytes.slice(), { PDFDocument });
+      const { pdfDoc: srcDoc, isEncrypted } = await loadPdfLibDocument(fileBytes.slice(), { PDFDocument });
       if (isEncrypted) {
         setResizeError('This PDF is encrypted. Remove the password first.');
         return;
       }
 
-      // Flatten AcroForm fields before resizing if user opted in
+      // Flatten AcroForm fields before embedding so their values are captured
+      // in appearance streams (and signatures are rendered as static content).
       if (hasFormFields && flattenBeforeResize) {
         try {
-          pdfDoc.getForm().flatten();
+          srcDoc.getForm().flatten();
         } catch (e) {
           console.warn('Form flattening failed, proceeding without flatten:', e);
         }
@@ -342,7 +332,7 @@ export default function PdfPageInspector({ navigateTo }) {
         targetH = size.h;
       }
 
-      // Resolve which pages to process
+      // Resolve which pages to resize
       let pagesToProcess;
       if (pageRange === 'all') {
         pagesToProcess = new Set(pageInfo.map(p => p.pageNum));
@@ -352,13 +342,29 @@ export default function PdfPageInspector({ navigateTo }) {
         pagesToProcess = pages;
       }
 
-      const pdfPages = pdfDoc.getPages();
-      for (let i = 0; i < pdfPages.length; i++) {
-        const pageNum = i + 1;
-        if (!pagesToProcess.has(pageNum)) continue;
+      // Build output document using page embedding for resized pages and
+      // copyPages for pages kept at original size. Embedding each source page
+      // as an XObject creates clean, fresh content streams — unlike mutating
+      // existing streams (scaleContent/translateContent), which produces output
+      // that Acrobat rejects with error 18 for complex PDFs.
+      const outDoc = await PDFDocument.create();
+      const srcPages = srcDoc.getPages();
+      const embeddedPages = await outDoc.embedPages(srcPages);
 
-        const page = pdfPages[i];
-        const { width: currentW, height: currentH } = page.getSize();
+      const keepIndices = srcPages.map((_, i) => i).filter(i => !pagesToProcess.has(i + 1));
+      const copiedPages = keepIndices.length > 0
+        ? await outDoc.copyPages(srcDoc, keepIndices)
+        : [];
+      const keepMap = Object.fromEntries(keepIndices.map((srcIdx, j) => [srcIdx, copiedPages[j]]));
+
+      for (let i = 0; i < srcPages.length; i++) {
+        const pageNum = i + 1;
+        const { width: currentW, height: currentH } = srcPages[i].getSize();
+
+        if (!pagesToProcess.has(pageNum)) {
+          outDoc.addPage(keepMap[i]);
+          continue;
+        }
 
         // Orient target to match source page orientation
         const srcIsPortrait = currentH >= currentW;
@@ -368,24 +374,22 @@ export default function PdfPageInspector({ navigateTo }) {
         const th = srcIsPortrait ? tgtPortraitH : tgtPortraitW;
 
         const method = resolveMethod(resizeMethod, currentW, currentH, tw, th);
+        const newPage = outDoc.addPage([tw, th]);
 
         if (method === 'scale') {
-          const sx = tw / currentW;
-          const sy = th / currentH;
-          page.scaleContent(sx, sy);
-          page.setSize(tw, th);
+          newPage.drawPage(embeddedPages[i], { x: 0, y: 0, width: tw, height: th });
         } else if (method === 'crop') {
-          page.setSize(tw, th);
+          // Draw at original size; content outside the smaller MediaBox is clipped
+          newPage.drawPage(embeddedPages[i], { x: 0, y: 0, width: currentW, height: currentH });
         } else {
-          // pad — center content in the larger MediaBox
+          // Pad: center original content in the larger page
           const dx = (tw - currentW) / 2;
           const dy = (th - currentH) / 2;
-          padPageContent(page, dx, dy);
-          page.setSize(tw, th);
+          newPage.drawPage(embeddedPages[i], { x: dx, y: dy, width: currentW, height: currentH });
         }
       }
 
-      const outputBytes = await pdfDoc.save({ useObjectStreams: false });
+      const outputBytes = await outDoc.save({ useObjectStreams: false });
       const blob = new Blob([outputBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
 
