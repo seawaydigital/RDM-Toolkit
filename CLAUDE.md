@@ -22,10 +22,10 @@
 This is a **100% client-side static SPA**. There is no server, no database, no API, no authentication, and no backend.
 
 - **Routing:** Hash-based (`window.location.hash`). No router library. Two route types: tools (e.g. `#merge-pdfs`) and pages (e.g. `#how-this-works`).
-- **Tools:** 59 components, all loaded with `React.lazy()` for code splitting. Each tool is a standalone JSX file.
+- **Tools:** 60 components, all loaded with `React.lazy()` for code splitting. Each tool is a standalone JSX file.
 - **Pages:** 6 informational pages (not tools) rendered separately from the tool area.
 - **Data flow:** File → browser memory → process in JS → download result. Nothing is ever sent over the network.
-- **Offline:** Workbox service worker (via `vite-plugin-pwa`) pre-caches all static assets on first load. All 59 tools work without internet after first visit.
+- **Offline:** Workbox service worker (via `vite-plugin-pwa`) pre-caches all static assets on first load. All 60 tools work without internet after first visit.
 - **PWA:** Installable as a standalone app. Manifest at `/RDM-Toolkit/manifest.webmanifest`.
 
 ---
@@ -67,7 +67,7 @@ src/
 │   └── useRecentTools.js          # localStorage-backed recent tools (last 5)
 ├── styles/
 │   └── global.css                 # All styles — CSS variables, layout, component styles
-├── tools/                         # 59 tool components grouped by category
+├── tools/                         # 60 tool components grouped by category
 │   ├── archives/                  # 3 tools
 │   ├── calculators/               # 4 tools
 │   ├── developer/                 # 2 tools
@@ -93,13 +93,13 @@ src/
 
 Every tool is defined here. Adding or removing a tool means updating this file **and** adding/removing the corresponding JSX file in `src/tools/` **and** updating the lazy import map in `App.jsx`.
 
-### Tool count: 59 tools across 9 categories
+### Tool count: 60 tools across 9 categories
 
 #### Primary Categories (always visible in sidebar)
 
 | Category | ID | Tools | Count |
 |---|---|---|---|
-| PDF Tools | `pdf` | merge-pdfs, split-pdf, compress-pdf, rotate-pages, reorder-pages, add-page-numbers, sign-pdf, password-protect-pdf, remove-pdf-password, extract-images-from-pdf, pdf-watermark, pdf-redaction, pdf-page-delete, pdf-to-images, add-cover-page | 15 |
+| PDF Tools | `pdf` | merge-pdfs, split-pdf, compress-pdf, rotate-pages, reorder-pages, add-page-numbers, sign-pdf, password-protect-pdf, remove-pdf-password, extract-images-from-pdf, pdf-watermark, pdf-redaction, pdf-page-delete, pdf-to-images, add-cover-page, pdf-page-inspector | 16 |
 | Image Tools | `images` | compress-image, convert-image-format, resize-image, image-cropper, strip-image-metadata, image-to-pdf | 6 |
 | Text & Data Tools | `text` | word-counter, find-replace, text-diff, json-formatter, csv-json-converter, data-anonymizer, bibtex-formatter | 7 |
 | Privacy & Security | `privacy` | strip-file-metadata, sha256-hasher, encrypt-decrypt-text, password-generator, qr-code-generator | 5 |
@@ -335,6 +335,7 @@ All external sources are hyperlinked (`target="_blank" rel="noopener noreferrer"
 
 | Date | Change |
 |---|---|
+| 2026-04-10 | Added PDF Page Inspector tool (`#pdf-page-inspector`) — inspect exact page dimensions for every page (standard format detection with ±5pt/±20pt tolerances, in/mm toggle, lazy thumbnails), plus optional resize to Letter, A4, Legal, A3, A5, Tabloid, Executive, B5, or custom dimensions with Scale, Crop, or Pad methods; built with pdfjs-dist + pdf-lib, fully offline |
 | 2026-04-08 | Upgraded pdfjs-dist v3 → v5.6.205 — patches CVE GHSA-wgrm-67xf-hhpq; updated worker import path to `.mjs`; replaced callback-based `page.objs.get()` with synchronous API in ExtractImagesFromPDF |
 | 2026-04-08 | Added CodeQL security scanning — runs on every push/PR + weekly; results in GitHub Security tab |
 | 2026-04-08 | Added Cover Page PDF tool (`#add-cover-page`) — prepend a custom cover page (title, subtitle, author, department, institution, date) with two layouts (centred/left-ruled), colour picker, live preview; built with pdf-lib, fully offline |
