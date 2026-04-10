@@ -10396,6 +10396,7 @@ input:focus, textarea:focus, select:focus {
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 0.85rem;
+  font-family: var(--font-sans);
   padding: 4px 8px;
 }
 
@@ -10456,6 +10457,7 @@ input:focus, textarea:focus, select:focus {
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 0.85rem;
+  font-family: var(--font-sans);
   padding: 5px 10px;
 }
 

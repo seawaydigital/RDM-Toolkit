@@ -412,7 +412,10 @@ export default function PdfPageInspector({ navigateTo }) {
                         name="pageRange"
                         value="custom"
                         checked={pageRange === 'custom'}
-                        onChange={() => setPageRange('custom')}
+                        onChange={() => {
+                          setPageRange('custom');
+                          setPageRangeError('Enter at least one page number');
+                        }}
                       />
                       Custom range
                     </label>
