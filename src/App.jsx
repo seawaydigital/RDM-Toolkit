@@ -36,6 +36,7 @@ const PDF_TOOLS = new Set([
   'merge-pdfs', 'split-pdf', 'compress-pdf', 'rotate-pages', 'reorder-pages',
   'add-page-numbers', 'sign-pdf', 'password-protect-pdf', 'remove-pdf-password',
   'extract-images-from-pdf', 'pdf-watermark', 'pdf-redaction', 'pdf-page-delete', 'pdf-to-images', 'add-cover-page',
+  'pdf-page-inspector',
 ]);
 
 // Lazy-loaded tool components — Phase 2+ will populate these
@@ -56,6 +57,7 @@ const toolComponents = {
   'pdf-page-delete': lazy(() => import('./tools/pdf/PDFPageDelete.jsx')),
   'pdf-to-images': lazy(() => import('./tools/pdf/PDFToImages.jsx')),
   'add-cover-page': lazy(() => import('./tools/pdf/AddCoverPage.jsx')),
+  'pdf-page-inspector': lazy(() => import('./tools/pdf/PdfPageInspector.jsx')),
   // Image Tools
   'compress-image': lazy(() => import('./tools/images/CompressImage.jsx')),
   'convert-image-format': lazy(() => import('./tools/images/ConvertImageFormat.jsx')),

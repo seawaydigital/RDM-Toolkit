@@ -21,6 +21,7 @@ export const CATEGORIES = [
       { id: 'pdf-page-delete', name: 'Delete PDF Pages', slug: 'pages-deleted', description: 'Remove specific pages from a PDF document.', tags: ['pdf'], related: ['split-pdf', 'reorder-pages', 'rotate-pages'] },
       { id: 'pdf-to-images', name: 'PDF to Images', slug: 'as-images', description: 'Export each page of a PDF as a high-quality PNG or JPG image.', tags: ['pdf', 'image', 'conversion'], related: ['extract-images-from-pdf', 'compress-image', 'image-to-pdf'] },
       { id: 'add-cover-page', name: 'Add Cover Page', slug: 'with-cover', description: 'Prepend a custom-designed cover page to any PDF — set a title, author, department, date, and colour scheme. Runs entirely in your browser.', tags: ['pdf', 'cover', 'documentation', 'report'], related: ['merge-pdfs', 'add-page-numbers', 'pdf-watermark'] },
+      { id: 'pdf-page-inspector', name: 'PDF Page Inspector', slug: 'resized', description: 'Inspect exact page dimensions and resize pages to Letter, A4, Legal, and other standard formats.', tags: ['pdf', 'resize', 'page size', 'format'], related: ['rotate-pages', 'reorder-pages', 'compress-pdf'] },
     ],
   },
   {
