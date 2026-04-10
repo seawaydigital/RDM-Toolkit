@@ -10494,23 +10494,3 @@ input:focus, textarea:focus, select:focus {
   margin: 0;
   line-height: 1.5;
 }
-
-.pi-form-flatten-option {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-sm);
-  font-size: 0.85rem;
-  color: var(--text-primary);
-  cursor: pointer;
-}
-
-.pi-form-flatten-option input[type="checkbox"] {
-  margin-top: 2px;
-  flex-shrink: 0;
-  cursor: pointer;
-}
-
-.pi-form-flatten-note {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}

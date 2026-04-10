@@ -143,7 +143,6 @@ export default function PdfPageInspector({ navigateTo }) {
 
   // AcroForm detection
   const [hasFormFields, setHasFormFields] = useState(false);
-  const [flattenBeforeResize, setFlattenBeforeResize] = useState(true);
 
   const canResize = (() => {
     if (!file || !summary) return false;
@@ -257,7 +256,6 @@ export default function PdfPageInspector({ navigateTo }) {
     setResizing(false);
     setResizeOpen(false);
     setHasFormFields(false);
-    setFlattenBeforeResize(true);
   }
 
   function handleUnitsToggle(u) {
@@ -297,26 +295,18 @@ export default function PdfPageInspector({ navigateTo }) {
     };
   }, [result]);
 
-  // Render a pdfjs page to a PNG Uint8Array at the given DPI.
-  async function renderPageToImage(pdfJsDoc, pageNum, dpi = 300) {
-    const page = await pdfJsDoc.getPage(pageNum);
-    const viewport = page.getViewport({ scale: dpi / 72 });
-    const canvas = document.createElement('canvas');
-    canvas.width = viewport.width;
-    canvas.height = viewport.height;
-    const ctx = canvas.getContext('2d');
-    await page.render({ canvasContext: ctx, viewport }).promise;
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-    canvas.remove();
-    return new Uint8Array(await blob.arrayBuffer());
-  }
-
   async function handleResize() {
     setResizing(true);
     setResizeError(null);
     setResult(null);
 
     try {
+      const { pdfDoc: srcDoc, isEncrypted } = await loadPdfLibDocument(fileBytes.slice(), { PDFDocument });
+      if (isEncrypted) {
+        setResizeError('This PDF is encrypted. Remove the password first.');
+        return;
+      }
+
       // Resolve target dimensions in points
       let targetW, targetH;
       if (targetFormat === 'custom') {
@@ -340,33 +330,14 @@ export default function PdfPageInspector({ navigateTo }) {
         pagesToProcess = pages;
       }
 
-      // Decide pipeline: if form fields need flattening, use pdfjs canvas
-      // rendering (equivalent to "Print to PDF") which rasterizes everything
-      // including form fields and signatures into static images. pdf-lib's
-      // getForm().flatten() produces structurally broken output for some PDFs.
-      // For non-form PDFs, use pdf-lib's embedPage for vector-quality output.
-      const needsRasterFlatten = hasFormFields && flattenBeforeResize;
-
-      // Load pdfjs doc for raster path (reuse the one we already have)
-      const pdfJsDoc = pdfJsDocRef.current;
-
-      // Load pdf-lib doc for vector path or as the output container
-      const { pdfDoc: srcDoc, isEncrypted } = await loadPdfLibDocument(fileBytes.slice(), { PDFDocument });
-      if (isEncrypted) {
-        setResizeError('This PDF is encrypted. Remove the password first.');
-        return;
-      }
-
+      // Build output by embedding each source page as an XObject and drawing
+      // it onto a fresh page. This creates clean content streams that are
+      // compatible with all PDF viewers including Adobe Acrobat.
       const outDoc = await PDFDocument.create();
       const srcPages = srcDoc.getPages();
-
-      // For the vector path, embed source pages as XObjects
-      let embeddedPages = null;
-      if (!needsRasterFlatten) {
-        embeddedPages = [];
-        for (const sp of srcPages) {
-          embeddedPages.push(await outDoc.embedPage(sp));
-        }
+      const embeddedPages = [];
+      for (const sp of srcPages) {
+        embeddedPages.push(await outDoc.embedPage(sp));
       }
 
       for (let i = 0; i < srcPages.length; i++) {
@@ -374,16 +345,8 @@ export default function PdfPageInspector({ navigateTo }) {
         const { width: currentW, height: currentH } = srcPages[i].getSize();
 
         if (!pagesToProcess.has(pageNum)) {
-          // Non-resized page: embed at original size
-          if (needsRasterFlatten) {
-            const imgBytes = await renderPageToImage(pdfJsDoc, pageNum);
-            const img = await outDoc.embedPng(imgBytes);
-            const p = outDoc.addPage([currentW, currentH]);
-            p.drawImage(img, { x: 0, y: 0, width: currentW, height: currentH });
-          } else {
-            const p = outDoc.addPage([currentW, currentH]);
-            p.drawPage(embeddedPages[i]);
-          }
+          const p = outDoc.addPage([currentW, currentH]);
+          p.drawPage(embeddedPages[i]);
           continue;
         }
 
@@ -397,32 +360,14 @@ export default function PdfPageInspector({ navigateTo }) {
         const method = resolveMethod(resizeMethod, currentW, currentH, tw, th);
         const newPage = outDoc.addPage([tw, th]);
 
-        if (needsRasterFlatten) {
-          // Raster path: render page with pdfjs (captures form fields + signatures),
-          // then place the image at the target dimensions.
-          const imgBytes = await renderPageToImage(pdfJsDoc, pageNum);
-          const img = await outDoc.embedPng(imgBytes);
-
-          if (method === 'scale') {
-            newPage.drawImage(img, { x: 0, y: 0, width: tw, height: th });
-          } else if (method === 'crop') {
-            newPage.drawImage(img, { x: 0, y: 0, width: currentW, height: currentH });
-          } else {
-            const dx = (tw - currentW) / 2;
-            const dy = (th - currentH) / 2;
-            newPage.drawImage(img, { x: dx, y: dy, width: currentW, height: currentH });
-          }
+        if (method === 'scale') {
+          newPage.drawPage(embeddedPages[i], { x: 0, y: 0, width: tw, height: th });
+        } else if (method === 'crop') {
+          newPage.drawPage(embeddedPages[i], { x: 0, y: 0, width: currentW, height: currentH });
         } else {
-          // Vector path: use embedded page XObject (preserves text selectability)
-          if (method === 'scale') {
-            newPage.drawPage(embeddedPages[i], { x: 0, y: 0, width: tw, height: th });
-          } else if (method === 'crop') {
-            newPage.drawPage(embeddedPages[i], { x: 0, y: 0, width: currentW, height: currentH });
-          } else {
-            const dx = (tw - currentW) / 2;
-            const dy = (th - currentH) / 2;
-            newPage.drawPage(embeddedPages[i], { x: dx, y: dy, width: currentW, height: currentH });
-          }
+          const dx = (tw - currentW) / 2;
+          const dy = (th - currentH) / 2;
+          newPage.drawPage(embeddedPages[i], { x: dx, y: dy, width: currentW, height: currentH });
         }
       }
 
@@ -512,19 +457,8 @@ export default function PdfPageInspector({ navigateTo }) {
                 ⚠ This PDF contains interactive form fields or signature areas
               </div>
               <p className="pi-form-warning-body">
-                Resizing moves the page content but not the form field positions, which may cause fields to appear misaligned in the output. Flattening converts all fields to static content before resizing — recommended for most cases.
+                Resizing may cause form fields and signature boxes to appear misaligned in the output. For best results, flatten the form first by using <strong>File &rarr; Print &rarr; Microsoft Print to PDF</strong> (or Save as PDF on Mac), then load the flattened PDF here to resize.
               </p>
-              <label className="pi-form-flatten-option">
-                <input
-                  type="checkbox"
-                  checked={flattenBeforeResize}
-                  onChange={e => setFlattenBeforeResize(e.target.checked)}
-                />
-                <span>
-                  Flatten form fields before resizing{' '}
-                  <span className="pi-form-flatten-note">(removes interactivity · invalidates any existing signatures)</span>
-                </span>
-              </label>
             </div>
           )}
 
