@@ -376,7 +376,7 @@ export default function PdfPageInspector({ navigateTo }) {
         }
       }
 
-      const outputBytes = await pdfDoc.save();
+      const outputBytes = await pdfDoc.save({ useObjectStreams: false });
       const blob = new Blob([outputBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
 
