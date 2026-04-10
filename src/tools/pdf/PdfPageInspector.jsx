@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { PDFDocument } from '@cantoo/pdf-lib';
+import { PDFDocument, PDFName } from '@cantoo/pdf-lib';
 import DropZone from '../../components/ui/DropZone.jsx';
 import InfoCard from '../../components/ui/InfoCard.jsx';
 import ErrorCard from '../../components/ui/ErrorCard.jsx';
@@ -195,7 +195,11 @@ export default function PdfPageInspector({ navigateTo }) {
       }
 
       try {
-        setHasFormFields(libDoc ? libDoc.getForm().getFields().length > 0 : false);
+        // Check the PDF catalog for an AcroForm entry — more reliable than
+        // getForm().getFields(), which throws for XFA forms, complex signature
+        // fields, and other non-standard AcroForm structures.
+        const acroForm = libDoc?.catalog.lookupMaybe(PDFName.of('AcroForm'));
+        setHasFormFields(acroForm != null);
       } catch {
         setHasFormFields(false);
       }
