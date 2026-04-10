@@ -10216,3 +10216,116 @@ input:focus, textarea:focus, select:focus {
     margin: 0 auto;
   }
 }
+
+/* ── PDF Page Inspector (.pi-*) ────────────────────────── */
+.pi-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.pi-summary-text {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.pi-units-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.pi-units-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.8rem;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s, color 0.15s;
+}
+
+.pi-units-btn--active {
+  background: var(--accent-primary);
+  color: #000;
+  font-weight: 600;
+}
+
+.pi-page-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.pi-page-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.pi-page-thumbnail {
+  width: 100%;
+  aspect-ratio: 0.707;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+}
+
+.pi-page-thumbnail--placeholder {
+  background: var(--bg-tertiary);
+}
+
+.pi-page-number {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.pi-page-dims {
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.pi-page-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 99px;
+}
+
+.pi-page-badge--exact {
+  background: var(--accent-primary);
+  color: #000;
+}
+
+.pi-page-badge--close {
+  background: var(--accent-amber);
+  color: #000;
+}
+
+.pi-page-badge--custom {
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
+.pi-page-rotation {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
