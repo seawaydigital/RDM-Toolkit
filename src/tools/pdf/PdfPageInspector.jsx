@@ -35,6 +35,27 @@ function matchSize(wPt, hPt) {
   return { label: 'Custom', variant: 'custom' };
 }
 
+function parsePageRange(input, pageCount) {
+  const pages = new Set();
+  const parts = input.split(',').map(s => s.trim()).filter(Boolean);
+  for (const part of parts) {
+    if (/^\d+$/.test(part)) {
+      const n = parseInt(part, 10);
+      if (n < 1 || n > pageCount) return { pages: null, error: `Page ${n} out of range (1–${pageCount})` };
+      pages.add(n);
+    } else if (/^\d+-\d+$/.test(part)) {
+      const [a, b] = part.split('-').map(Number);
+      if (a > b) return { pages: null, error: `Invalid range "${part}" — start must be ≤ end` };
+      if (a < 1 || b > pageCount) return { pages: null, error: `Range "${part}" out of bounds (1–${pageCount})` };
+      for (let i = a; i <= b; i++) pages.add(i);
+    } else {
+      return { pages: null, error: `Invalid input "${part}" — use numbers and ranges like "1–3, 5"` };
+    }
+  }
+  if (pages.size === 0) return { pages: null, error: 'Enter at least one page number' };
+  return { pages, error: null };
+}
+
 function PageCard({ page, units, thumbnail, pdfJsDocRef, onThumbnailReady }) {
   const ref = useRef(null);
 
@@ -91,6 +112,30 @@ export default function PdfPageInspector({ navigateTo }) {
   const [error, setError] = useState(null);
   const [thumbnailMap, setThumbnailMap] = useState({});
   const pdfJsDocRef = useRef(null);
+
+  // Resize panel state
+  const [resizeOpen, setResizeOpen] = useState(false);
+  const [targetFormat, setTargetFormat] = useState('a4');
+  const [customW, setCustomW] = useState('');
+  const [customH, setCustomH] = useState('');
+  const [resizeMethod, setResizeMethod] = useState('scale');
+  const [pageRange, setPageRange] = useState('all');
+  const [pageRangeInput, setPageRangeInput] = useState('');
+  const [pageRangeError, setPageRangeError] = useState(null);
+
+  const canResize = (() => {
+    if (!file || !summary) return false;
+    if (targetFormat === 'custom') {
+      const w = parseFloat(customW);
+      const h = parseFloat(customH);
+      if (isNaN(w) || isNaN(h) || w <= 0 || h <= 0) return false;
+    }
+    if (pageRange === 'custom') {
+      const { error } = parsePageRange(pageRangeInput, summary.pageCount);
+      if (error) return false;
+    }
+    return true;
+  })();
 
   const handleFileSelected = useCallback(async ([selected]) => {
     setError(null);
@@ -173,7 +218,30 @@ export default function PdfPageInspector({ navigateTo }) {
   }
 
   function handleUnitsToggle(u) {
+    if (u === units) return;
+    if (customW !== '') {
+      const wNum = parseFloat(customW);
+      if (!isNaN(wNum)) {
+        setCustomW(u === 'mm' ? (wNum * 25.4).toFixed(1) : (wNum / 25.4).toFixed(2));
+      }
+    }
+    if (customH !== '') {
+      const hNum = parseFloat(customH);
+      if (!isNaN(hNum)) {
+        setCustomH(u === 'mm' ? (hNum * 25.4).toFixed(1) : (hNum / 25.4).toFixed(2));
+      }
+    }
     setUnits(u);
+  }
+
+  function handlePageRangeInput(val) {
+    setPageRangeInput(val);
+    if (!val.trim()) {
+      setPageRangeError('Enter at least one page number');
+      return;
+    }
+    const { error } = parsePageRange(val, summary?.pageCount ?? 0);
+    setPageRangeError(error);
   }
 
   const handleThumbnailReady = useCallback((pageNum, dataUrl) => {
@@ -244,6 +312,138 @@ export default function PdfPageInspector({ navigateTo }) {
                 onThumbnailReady={handleThumbnailReady}
               />
             ))}
+          </div>
+
+          <div className="pi-resize-panel">
+            <button
+              className="pi-resize-toggle"
+              onClick={() => setResizeOpen(o => !o)}
+              aria-expanded={resizeOpen}
+            >
+              {resizeOpen ? '▲' : '▼'} Resize Pages
+            </button>
+
+            {resizeOpen && (
+              <div className="pi-resize-body">
+                <div className="pi-resize-row">
+                  <label className="pi-resize-label">Target format</label>
+                  <div className="pi-resize-controls">
+                    <select
+                      className="tool-option-select"
+                      value={targetFormat}
+                      onChange={e => setTargetFormat(e.target.value)}
+                    >
+                      <option value="letter">Letter (8.5 × 11")</option>
+                      <option value="a4">A4 (210 × 297 mm)</option>
+                      <option value="legal">Legal (8.5 × 14")</option>
+                      <option value="a3">A3 (297 × 420 mm)</option>
+                      <option value="a5">A5 (148 × 210 mm)</option>
+                      <option value="tabloid">Tabloid (11 × 17")</option>
+                      <option value="executive">Executive (7.25 × 10.5")</option>
+                      <option value="b5">B5 (176 × 250 mm)</option>
+                      <option value="custom">Custom…</option>
+                    </select>
+                    {targetFormat === 'custom' && (
+                      <div className="pi-custom-dims">
+                        <input
+                          type="number"
+                          className="pi-dim-input"
+                          placeholder={`W (${units})`}
+                          value={customW}
+                          min="1"
+                          step={units === 'mm' ? '1' : '0.01'}
+                          onChange={e => setCustomW(e.target.value)}
+                        />
+                        <span className="pi-dim-sep">×</span>
+                        <input
+                          type="number"
+                          className="pi-dim-input"
+                          placeholder={`H (${units})`}
+                          value={customH}
+                          min="1"
+                          step={units === 'mm' ? '1' : '0.01'}
+                          onChange={e => setCustomH(e.target.value)}
+                        />
+                        <span className="pi-dim-unit">{units}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pi-resize-row">
+                  <label className="pi-resize-label">Method</label>
+                  <div className="pi-resize-method">
+                    {[
+                      { value: 'scale', label: 'Scale', desc: 'Stretch content to fill new size' },
+                      { value: 'crop', label: 'Crop', desc: 'Trim edges to fit new size' },
+                      { value: 'pad', label: 'Pad', desc: 'Add whitespace to reach new size' },
+                    ].map(m => (
+                      <label key={m.value} className="pi-method-option">
+                        <input
+                          type="radio"
+                          name="resizeMethod"
+                          value={m.value}
+                          checked={resizeMethod === m.value}
+                          onChange={() => setResizeMethod(m.value)}
+                        />
+                        <span className="pi-method-label">{m.label}</span>
+                        <span className="pi-method-desc">{m.desc}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pi-resize-row">
+                  <label className="pi-resize-label">Pages</label>
+                  <div className="pi-resize-range">
+                    <label className="pi-range-option">
+                      <input
+                        type="radio"
+                        name="pageRange"
+                        value="all"
+                        checked={pageRange === 'all'}
+                        onChange={() => setPageRange('all')}
+                      />
+                      All pages
+                    </label>
+                    <label className="pi-range-option">
+                      <input
+                        type="radio"
+                        name="pageRange"
+                        value="custom"
+                        checked={pageRange === 'custom'}
+                        onChange={() => setPageRange('custom')}
+                      />
+                      Custom range
+                    </label>
+                    {pageRange === 'custom' && (
+                      <div className="pi-range-input-group">
+                        <input
+                          type="text"
+                          className="pi-range-input"
+                          placeholder={`e.g. 1-3, 5 (of ${summary?.pageCount})`}
+                          value={pageRangeInput}
+                          onChange={e => handlePageRangeInput(e.target.value)}
+                        />
+                        {pageRangeError && (
+                          <div className="pi-range-error">{pageRangeError}</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pi-resize-actions">
+                  <button
+                    className="action-button"
+                    disabled={!canResize}
+                    onClick={() => { /* wired in Task 5 */ }}
+                  >
+                    Resize PDF
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}

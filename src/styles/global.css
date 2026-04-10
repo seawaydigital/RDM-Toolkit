@@ -10329,3 +10329,143 @@ input:focus, textarea:focus, select:focus {
   font-size: 0.7rem;
   color: var(--text-muted);
 }
+
+.pi-resize-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-xl);
+  overflow: hidden;
+}
+
+.pi-resize-toggle {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  font-weight: 600;
+  transition: background 0.15s;
+}
+
+.pi-resize-toggle:hover {
+  background: var(--bg-tertiary);
+}
+
+.pi-resize-body {
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  border-top: 1px solid var(--border);
+}
+
+.pi-resize-row {
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-start;
+}
+
+.pi-resize-label {
+  min-width: 100px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding-top: 6px;
+}
+
+.pi-resize-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  flex: 1;
+}
+
+.pi-custom-dims {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: 4px;
+}
+
+.pi-dim-input {
+  width: 80px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  padding: 4px 8px;
+}
+
+.pi-dim-sep,
+.pi-dim-unit {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.pi-resize-method {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pi-method-option {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.pi-method-label {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  min-width: 48px;
+}
+
+.pi-method-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.pi-resize-range {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pi-range-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.pi-range-input-group {
+  margin-top: 4px;
+}
+
+.pi-range-input {
+  width: 100%;
+  max-width: 280px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  padding: 5px 10px;
+}
+
+.pi-range-error {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: var(--accent-red);
+}
+
+.pi-resize-actions {
+  display: flex;
+  justify-content: flex-end;
+}
