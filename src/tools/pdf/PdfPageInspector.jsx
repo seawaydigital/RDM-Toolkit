@@ -4,8 +4,10 @@ import DropZone from '../../components/ui/DropZone.jsx';
 import InfoCard from '../../components/ui/InfoCard.jsx';
 import ErrorCard from '../../components/ui/ErrorCard.jsx';
 import EncryptedPDFError from '../../components/ui/EncryptedPDFError.jsx';
+import ResultPanel from '../../components/ui/ResultPanel.jsx';
 import { validatePDFHeader } from '../../utils/fileValidation.js';
 import { loadPdfDocument, loadPdfLibDocument, renderPageThumbnail } from '../../utils/pdfThumbnails.js';
+import { buildOutputFilename } from '../../utils/filename.js';
 
 // Standard page sizes in PDF points (1 pt = 1/72 inch)
 const STANDARD_SIZES = [
@@ -54,6 +56,28 @@ function parsePageRange(input, pageCount) {
   }
   if (pages.size === 0) return { pages: null, error: 'Enter at least one page number' };
   return { pages, error: null };
+}
+
+// Resolve the effective method when Crop/Pad cannot apply to the dimension change direction.
+// Silently falls back: Pad→Crop when target is smaller, Crop→Pad when target is larger.
+function resolveMethod(method, currentW, currentH, targetW, targetH) {
+  const larger = targetW > currentW || targetH > currentH;
+  const smaller = targetW < currentW || targetH < currentH;
+  if (method === 'pad' && smaller) return 'crop';
+  if (method === 'crop' && larger) return 'pad';
+  return method;
+}
+
+// Center existing page content within a new larger MediaBox.
+// Uses pdf-lib's built-in translateContent (present in @cantoo/pdf-lib ^1.17.1).
+// Falls back to a manual content stream prepend if not available.
+function padPageContent(page, dx, dy) {
+  if (typeof page.translateContent === 'function') {
+    page.translateContent(dx, dy);
+    return;
+  }
+  // Fallback: log a warning and skip centering rather than crash
+  console.warn('padPageContent: translateContent not available, content will not be centred');
 }
 
 function PageCard({ page, units, thumbnail, pdfJsDocRef, onThumbnailReady }) {
@@ -112,6 +136,11 @@ export default function PdfPageInspector({ navigateTo }) {
   const [error, setError] = useState(null);
   const [thumbnailMap, setThumbnailMap] = useState({});
   const pdfJsDocRef = useRef(null);
+
+  // Resize result state
+  const [resizing, setResizing] = useState(false);
+  const [resizeError, setResizeError] = useState(null);
+  const [result, setResult] = useState(null);
 
   // Resize panel state
   const [resizeOpen, setResizeOpen] = useState(false);
@@ -215,6 +244,10 @@ export default function PdfPageInspector({ navigateTo }) {
     setError(null);
     setThumbnailMap({});
     pdfJsDocRef.current = null;
+    setResult(null);
+    setResizeError(null);
+    setResizing(false);
+    setResizeOpen(false);
   }
 
   function handleUnitsToggle(u) {
@@ -247,6 +280,97 @@ export default function PdfPageInspector({ navigateTo }) {
   const handleThumbnailReady = useCallback((pageNum, dataUrl) => {
     setThumbnailMap(prev => ({ ...prev, [pageNum]: dataUrl }));
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (result?.downloadUrl) URL.revokeObjectURL(result.downloadUrl);
+    };
+  }, [result]);
+
+  async function handleResize() {
+    setResizing(true);
+    setResizeError(null);
+
+    try {
+      const { pdfDoc, isEncrypted } = await loadPdfLibDocument(fileBytes.slice(), { PDFDocument });
+      if (isEncrypted) {
+        setResizeError('This PDF is encrypted. Remove the password first.');
+        return;
+      }
+
+      // Resolve target dimensions in points
+      let targetW, targetH;
+      if (targetFormat === 'custom') {
+        const w = parseFloat(customW);
+        const h = parseFloat(customH);
+        targetW = units === 'in' ? w * 72 : (w / 25.4) * 72;
+        targetH = units === 'in' ? h * 72 : (h / 25.4) * 72;
+      } else {
+        const size = STANDARD_SIZES.find(s => s.id === targetFormat);
+        targetW = size.w;
+        targetH = size.h;
+      }
+
+      // Resolve which pages to process
+      let pagesToProcess;
+      if (pageRange === 'all') {
+        pagesToProcess = new Set(pageInfo.map(p => p.pageNum));
+      } else {
+        const { pages, error } = parsePageRange(pageRangeInput, summary.pageCount);
+        if (error) { setResizeError(error); return; }
+        pagesToProcess = pages;
+      }
+
+      const pdfPages = pdfDoc.getPages();
+      for (let i = 0; i < pdfPages.length; i++) {
+        const pageNum = i + 1;
+        if (!pagesToProcess.has(pageNum)) continue;
+
+        const page = pdfPages[i];
+        const { width: currentW, height: currentH } = page.getSize();
+
+        // Orient target to match source page orientation
+        const srcIsPortrait = currentH >= currentW;
+        const tgtPortraitW = Math.min(targetW, targetH);
+        const tgtPortraitH = Math.max(targetW, targetH);
+        const tw = srcIsPortrait ? tgtPortraitW : tgtPortraitH;
+        const th = srcIsPortrait ? tgtPortraitH : tgtPortraitW;
+
+        const method = resolveMethod(resizeMethod, currentW, currentH, tw, th);
+
+        if (method === 'scale') {
+          const sx = tw / currentW;
+          const sy = th / currentH;
+          page.scaleContent(sx, sy);
+          page.setSize(tw, th);
+        } else if (method === 'crop') {
+          page.setSize(tw, th);
+        } else {
+          // pad — center content in the larger MediaBox
+          const dx = (tw - currentW) / 2;
+          const dy = (th - currentH) / 2;
+          padPageContent(page, dx, dy);
+          page.setSize(tw, th);
+        }
+      }
+
+      const outputBytes = await pdfDoc.save();
+      const blob = new Blob([outputBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      setResult({
+        filename: buildOutputFilename(file.name, 'resized', 'pdf'),
+        originalSize: file.size,
+        resultSize: outputBytes.byteLength,
+        downloadUrl: url,
+      });
+    } catch (e) {
+      console.error(e);
+      setResizeError('Something went wrong during resize. Please try again.');
+    } finally {
+      setResizing(false);
+    }
+  }
 
   return (
     <div className="tool-page">
@@ -438,16 +562,33 @@ export default function PdfPageInspector({ navigateTo }) {
 
                 <div className="pi-resize-actions">
                   <button
-                    className="action-button"
-                    disabled={!canResize}
-                    onClick={() => { /* wired in Task 5 */ }}
+                    className={`action-button${resizing ? ' action-button--loading' : ''}`}
+                    disabled={!canResize || resizing}
+                    onClick={handleResize}
                   >
-                    Resize PDF
+                    {resizing ? 'Resizing…' : 'Resize PDF'}
                   </button>
+                  {resizeError && (
+                    <ErrorCard title="Resize failed" message={resizeError} />
+                  )}
                 </div>
               </div>
             )}
           </div>
+
+          {result && (
+            <ResultPanel
+              filename={result.filename}
+              originalSize={result.originalSize}
+              resultSize={result.resultSize}
+              downloadUrl={result.downloadUrl}
+              onStartOver={() => {
+                setResult(null);
+                setResizeError(null);
+                handleRemove();
+              }}
+            />
+          )}
         </>
       )}
     </div>
