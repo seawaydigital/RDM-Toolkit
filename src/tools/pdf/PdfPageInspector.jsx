@@ -464,6 +464,28 @@ export default function PdfPageInspector({ navigateTo }) {
             ))}
           </div>
 
+          {hasFormFields && (
+            <div className="pi-form-warning">
+              <div className="pi-form-warning-header">
+                ⚠ This PDF contains interactive form fields or signature areas
+              </div>
+              <p className="pi-form-warning-body">
+                Resizing moves the page content but not the form field positions, which may cause fields to appear misaligned in the output. Flattening converts all fields to static content before resizing — recommended for most cases.
+              </p>
+              <label className="pi-form-flatten-option">
+                <input
+                  type="checkbox"
+                  checked={flattenBeforeResize}
+                  onChange={e => setFlattenBeforeResize(e.target.checked)}
+                />
+                <span>
+                  Flatten form fields before resizing{' '}
+                  <span className="pi-form-flatten-note">(removes interactivity · invalidates any existing signatures)</span>
+                </span>
+              </label>
+            </div>
+          )}
+
           <div className="pi-resize-panel">
             <button
               className="pi-resize-toggle"
@@ -475,28 +497,6 @@ export default function PdfPageInspector({ navigateTo }) {
 
             {resizeOpen && (
               <div className="pi-resize-body">
-                {hasFormFields && (
-                  <div className="pi-form-warning">
-                    <div className="pi-form-warning-header">
-                      ⚠ This PDF contains interactive form fields or signature areas
-                    </div>
-                    <p className="pi-form-warning-body">
-                      Resizing moves the page content but not the form field positions, which may cause fields to appear misaligned in the output. Flattening converts all fields to static content before resizing — recommended for most cases.
-                    </p>
-                    <label className="pi-form-flatten-option">
-                      <input
-                        type="checkbox"
-                        checked={flattenBeforeResize}
-                        onChange={e => setFlattenBeforeResize(e.target.checked)}
-                      />
-                      <span>
-                        Flatten form fields before resizing{' '}
-                        <span className="pi-form-flatten-note">(removes interactivity · invalidates any existing signatures)</span>
-                      </span>
-                    </label>
-                  </div>
-                )}
-
                 <div className="pi-resize-row">
                   <label className="pi-resize-label">Target format</label>
                   <div className="pi-resize-controls">
