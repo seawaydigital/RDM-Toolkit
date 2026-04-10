@@ -59,7 +59,7 @@ function PageCard({ page, units, thumbnail, pdfJsDocRef, onThumbnailReady }) {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [thumbnail, page.pageNum, pdfJsDocRef, onThumbnailReady]);
+  }, [thumbnail, page.pageNum, onThumbnailReady]);
 
   const dimStr = units === 'in'
     ? `${page.widthIn.toFixed(2)}" × ${page.heightIn.toFixed(2)}"`
@@ -112,6 +112,7 @@ export default function PdfPageInspector({ navigateTo }) {
       const { isEncrypted } = await loadPdfLibDocument(bytes.slice(), { PDFDocument });
       if (isEncrypted) {
         setError('__encrypted__');
+        setLoading(false);
         return;
       }
 
