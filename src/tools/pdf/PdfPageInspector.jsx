@@ -290,6 +290,7 @@ export default function PdfPageInspector({ navigateTo }) {
   async function handleResize() {
     setResizing(true);
     setResizeError(null);
+    setResult(null);
 
     try {
       const { pdfDoc, isEncrypted } = await loadPdfLibDocument(fileBytes.slice(), { PDFDocument });
