@@ -1,11 +1,11 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { PDFDocument } from '@cantoo/pdf-lib';
 import DropZone from '../../components/ui/DropZone.jsx';
 import InfoCard from '../../components/ui/InfoCard.jsx';
 import ErrorCard from '../../components/ui/ErrorCard.jsx';
 import EncryptedPDFError from '../../components/ui/EncryptedPDFError.jsx';
 import { validatePDFHeader } from '../../utils/fileValidation.js';
-import { loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails.js';
+import { loadPdfDocument, loadPdfLibDocument, renderPageThumbnail } from '../../utils/pdfThumbnails.js';
 
 // Standard page sizes in PDF points (1 pt = 1/72 inch)
 const STANDARD_SIZES = [
@@ -35,6 +35,51 @@ function matchSize(wPt, hPt) {
   return { label: 'Custom', variant: 'custom' };
 }
 
+function PageCard({ page, units, thumbnail, pdfJsDocRef, onThumbnailReady }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    if (thumbnail) return; // already loaded
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        if (!pdfJsDocRef.current) return;
+        try {
+          const dataUrl = await renderPageThumbnail(pdfJsDocRef.current, page.pageNum);
+          onThumbnailReady(page.pageNum, dataUrl);
+        } catch {
+          // silently skip — placeholder stays
+        }
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [thumbnail, page.pageNum, pdfJsDocRef, onThumbnailReady]);
+
+  const dimStr = units === 'in'
+    ? `${page.widthIn.toFixed(2)}" × ${page.heightIn.toFixed(2)}"`
+    : `${page.widthMm.toFixed(1)} × ${page.heightMm.toFixed(1)} mm`;
+
+  return (
+    <div ref={ref} className="pi-page-card">
+      {thumbnail
+        ? <img className="pi-page-thumbnail" src={thumbnail} alt={`Page ${page.pageNum}`} />
+        : <div className="pi-page-thumbnail pi-page-thumbnail--placeholder" />}
+      <div className="pi-page-number">Page {page.pageNum}</div>
+      <div className="pi-page-dims">{dimStr}</div>
+      <span className={`pi-page-badge pi-page-badge--${page.variant}`}>{page.label}</span>
+      {page.rotationDeg !== 0 && (
+        <div className="pi-page-rotation">Rotated {page.rotationDeg}°</div>
+      )}
+    </div>
+  );
+}
+
 export default function PdfPageInspector({ navigateTo }) {
   const [file, setFile] = useState(null);
   // Retained for the resize pipeline — pdf-lib reloads raw bytes in Task 5
@@ -44,6 +89,8 @@ export default function PdfPageInspector({ navigateTo }) {
   const [units, setUnits] = useState('in');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [thumbnailMap, setThumbnailMap] = useState({});
+  const pdfJsDocRef = useRef(null);
 
   const handleFileSelected = useCallback(async ([selected]) => {
     setError(null);
@@ -73,6 +120,7 @@ export default function PdfPageInspector({ navigateTo }) {
 
       // Load with pdfjs-dist for dimension inspection
       const pdfJsDoc = await loadPdfDocument(bytes.slice());
+      pdfJsDocRef.current = pdfJsDoc;
       const numPages = pdfJsDoc.numPages;
       const pages = [];
 
@@ -119,15 +167,17 @@ export default function PdfPageInspector({ navigateTo }) {
     setPageInfo([]);
     setSummary(null);
     setError(null);
+    setThumbnailMap({});
+    pdfJsDocRef.current = null;
   }
 
   function handleUnitsToggle(u) {
     setUnits(u);
   }
 
-  const dimStr = (p) => units === 'in'
-    ? `${p.widthIn.toFixed(2)}" × ${p.heightIn.toFixed(2)}"`
-    : `${p.widthMm.toFixed(1)} × ${p.heightMm.toFixed(1)} mm`;
+  const handleThumbnailReady = useCallback((pageNum, dataUrl) => {
+    setThumbnailMap(prev => ({ ...prev, [pageNum]: dataUrl }));
+  }, []);
 
   return (
     <div className="tool-page">
@@ -184,15 +234,14 @@ export default function PdfPageInspector({ navigateTo }) {
 
           <div className="pi-page-grid">
             {pageInfo.map(p => (
-              <div key={p.pageNum} className="pi-page-card">
-                <div className="pi-page-thumbnail pi-page-thumbnail--placeholder" />
-                <div className="pi-page-number">Page {p.pageNum}</div>
-                <div className="pi-page-dims">{dimStr(p)}</div>
-                <span className={`pi-page-badge pi-page-badge--${p.variant}`}>{p.label}</span>
-                {p.rotationDeg !== 0 && (
-                  <div className="pi-page-rotation">Rotated {p.rotationDeg}°</div>
-                )}
-              </div>
+              <PageCard
+                key={p.pageNum}
+                page={p}
+                units={units}
+                thumbnail={thumbnailMap[p.pageNum]}
+                pdfJsDocRef={pdfJsDocRef}
+                onThumbnailReady={handleThumbnailReady}
+              />
             ))}
           </div>
         </>
