@@ -34,6 +34,16 @@ export default function ExtractZIP({ tool, navigateTo }) {
       const encrypted = [];
       let totalSize = 0;
 
+      // ZIP bomb guard — tally declared uncompressed sizes before decompressing anything
+      const MAX_DECOMPRESSED_BYTES = 5 * 1024 * 1024 * 1024; // 5 GB
+      let declaredTotal = 0;
+      zip.forEach((_, zipEntry) => {
+        if (!zipEntry.dir) declaredTotal += zipEntry._data?.uncompressedSize ?? 0;
+      });
+      if (declaredTotal > MAX_DECOMPRESSED_BYTES) {
+        throw new Error(`ZIP_BOMB: declared decompressed size (${(declaredTotal / 1024 / 1024 / 1024).toFixed(1)} GB) exceeds the 5 GB safety limit.`);
+      }
+
       zip.forEach((relativePath, zipEntry) => {
         if (zipEntry.dir) return;
 
@@ -61,7 +71,9 @@ export default function ExtractZIP({ tool, navigateTo }) {
       setEncryptedFiles(encrypted);
     } catch (e) {
       const msg = e?.message || '';
-      if (msg.toLowerCase().includes('encrypted') || msg.toLowerCase().includes('password')) {
+      if (msg.startsWith('ZIP_BOMB:')) {
+        setError(`This archive was blocked for safety: its declared decompressed size exceeds 5 GB. If this is a legitimate large archive, please extract it with a desktop tool instead.`);
+      } else if (msg.toLowerCase().includes('encrypted') || msg.toLowerCase().includes('password')) {
         setError('This ZIP archive is password-protected. JSZip cannot extract encrypted archives in the browser. Please use a desktop tool to decrypt it first.');
       } else {
         setError('Something went wrong while reading the ZIP file. Please make sure it is a valid ZIP archive.');
