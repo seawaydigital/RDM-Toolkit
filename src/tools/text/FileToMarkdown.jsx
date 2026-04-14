@@ -167,10 +167,11 @@ function csvToMarkdown(text) {
     cells.push(cell.trim());
     return cells;
   };
+  const escapeCell = cell => cell.replace(/\|/g, '\\|');
   const rows = lines.map(parseRow);
-  const header = '| ' + rows[0].join(' | ') + ' |';
+  const header = '| ' + rows[0].map(escapeCell).join(' | ') + ' |';
   const divider = '| ' + rows[0].map(() => '---').join(' | ') + ' |';
-  const body = rows.slice(1).map(r => '| ' + r.join(' | ') + ' |').join('\n');
+  const body = rows.slice(1).map(r => '| ' + r.map(escapeCell).join(' | ') + ' |').join('\n');
   return [header, divider, body].filter(Boolean).join('\n');
 }
 
@@ -213,7 +214,10 @@ async function convertFile(file, mode) {
 
   let md = '';
 
-  if (ext === 'txt' || ext === 'md') {
+  if (ext === 'md') {
+    md = await readFileAs(file, 'text');
+
+  } else if (ext === 'txt') {
     const text = await readFileAs(file, 'text');
     const html = text.split(/\n\n+/).map(p => `<p>${p.replace(/\n/g, ' ')}</p>`).join('');
     md = td.turndown(html);
@@ -263,9 +267,9 @@ async function convertFile(file, mode) {
         const text = line.text.trim();
         if (!text) return;
         if (line.fontSize > bodyFontSize * 1.2) {
-          html += `<h2>${text}</h2>`;
+          html += `<h2>${escapeHtml(text)}</h2>`;
         } else {
-          html += `<p>${text}</p>`;
+          html += `<p>${escapeHtml(text)}</p>`;
         }
       });
 
@@ -282,6 +286,9 @@ async function convertFile(file, mode) {
     if (!firstSheet) throw new Error('No sheets found in this workbook.');
     const htmlTable = XLSX.utils.sheet_to_html(firstSheet);
     md = td.turndown(htmlTable);
+    if (wb.SheetNames.length > 1) {
+      md = `> **Note:** This workbook has ${wb.SheetNames.length} sheets. Only the first sheet ("${wb.SheetNames[0]}") was converted.\n\n` + md;
+    }
 
   } else if (ext === 'csv') {
     const text = await readFileAs(file, 'text');
@@ -468,7 +475,7 @@ export default function FileToMarkdown() {
 
           {activeTab === 'preview' && (
             <div
-              className="ftm-preview mp-output"
+              className="ftm-preview"
               dangerouslySetInnerHTML={{ __html: sanitizedPreview }}
             />
           )}

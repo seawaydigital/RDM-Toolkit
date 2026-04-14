@@ -86,7 +86,7 @@ const toolComponents = {
   'line-number-adder': lazy(() => import('./tools/text/LineNumberAdder.jsx')),
   'whitespace-cleaner': lazy(() => import('./tools/text/WhitespaceCleaner.jsx')),
   'bibtex-formatter': lazy(() => import('./tools/text/BibTeXFormatter.jsx')),
-  'to-markdown': lazy(() => import('./tools/text/FileToMarkdown')),
+  'to-markdown': lazy(() => import('./tools/text/FileToMarkdown.jsx')),
   'data-anonymizer': lazy(() => import('./tools/research/DataAnonymizer.jsx')),
   // Privacy & Security Tools
   'strip-file-metadata': lazy(() => import('./tools/privacy/StripFileMetadata.jsx')),
