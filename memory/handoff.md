@@ -16,8 +16,8 @@
 | Route | `#to-markdown` |
 | File | `src/tools/text/FileToMarkdown.jsx` |
 | Category | Text & Data Tools (primary sidebar, visible by default) |
-| PR | [#2 — open, not yet merged](https://github.com/seawaydigital/RDM-Toolkit/pull/2) |
-| Branch | `feature/to-markdown` (pushed to origin) |
+| PR | [#2 — merged ✅](https://github.com/seawaydigital/RDM-Toolkit/pull/2) |
+| Branch | `feature/to-markdown` (merged into master) |
 
 **Accepted formats:** DOCX, PDF, HTML, XLSX, CSV, TXT, MD, RTF, JSON
 
@@ -36,11 +36,10 @@
 
 ## Current state
 
-### Open PR
-- **PR #2:** "Add File to Markdown converter tool"
+### Merged PR
+- **PR #2:** "Add File to Markdown converter tool" — **merged to master 2026-04-14**
 - URL: https://github.com/seawaydigital/RDM-Toolkit/pull/2
-- Status: Open, awaiting review/merge
-- CI will run: build + npm audit + CodeQL on merge
+- GitHub Pages deploy triggered automatically on merge (deploy.yml runs on push to master)
 
 ### Known issues in the PR
 - `xlsx@0.18.5` has 2 high-severity CVEs (not critical, CI passes, no OSS fix available — documented in CLAUDE.md Known gaps #5)
@@ -55,7 +54,7 @@
 
 ## What's next (suggested)
 
-1. **Merge PR #2** — review the test plan in the PR description, verify each file type works, then merge to master
+1. **Verify live deploy** — check https://seawaydigital.github.io/RDM-Toolkit/#to-markdown once CI finishes
 2. **DOCX → PDF converter** — `mammoth` and `pdf-lib` are both installed; a natural companion tool
 3. **Batch export mode** — future enhancement for File to Markdown (zip of .md files from multiple inputs)
 4. **Branch protection** — GitHub → Settings → Branches: require PR + CI pass before merging to master (listed in Known gaps #3 for a while)
