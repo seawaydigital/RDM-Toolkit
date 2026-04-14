@@ -10526,7 +10526,7 @@ input:focus, textarea:focus, select:focus {
 
 .ftm-mode-btn--active {
   background: var(--accent-primary);
-  color: #000;
+  color: #0A1628;
   font-weight: 600;
 }
 
