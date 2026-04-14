@@ -53,6 +53,7 @@ export const CATEGORIES = [
       { id: 'csv-json-converter', name: 'CSV \u2194 JSON Converter', slug: 'converted', description: 'Convert between CSV and JSON formats.', tags: ['text', 'conversion', 'file-format'], related: ['json-formatter', 'csv-diff', 'csv-encoding-fixer'] },
       { id: 'data-anonymizer', name: 'Data Anonymizer', slug: 'anonymized', description: 'Find and replace names, emails, and IDs in CSV or text with pseudonyms.', tags: ['privacy', 'research', 'text'], related: ['pdf-redaction', 'strip-file-metadata', 'strip-image-metadata'] },
       { id: 'bibtex-formatter', name: 'BibTeX Formatter', slug: null, description: 'Clean up, validate, and format BibTeX citation entries.', tags: ['text', 'documentation', 'research'], related: ['markdown-preview', 'word-counter'] },
+      { id: 'to-markdown', name: 'File to Markdown', slug: 'to-markdown', description: 'Convert DOCX, PDF, HTML, XLSX, CSV, TXT and more to clean Markdown — ideal for pasting into AI tools.', tags: ['convert', 'markdown', 'docx', 'pdf', 'word', 'excel', 'ai', 'llm'], related: ['markdown-preview', 'csv-json-converter', 'bibtex-formatter'] },
     ],
   },
   {

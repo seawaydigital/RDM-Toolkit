@@ -24,6 +24,7 @@ const EXT_TO_TOOL = {
   webp: 'compress-image',
   zip: 'extract-zip',
   csv: 'csv-encoding-fixer',
+  docx: 'to-markdown',
   json: 'json-formatter',
   xml: 'xml-yaml-formatter',
   yaml: 'xml-yaml-formatter',
@@ -85,6 +86,7 @@ const toolComponents = {
   'line-number-adder': lazy(() => import('./tools/text/LineNumberAdder.jsx')),
   'whitespace-cleaner': lazy(() => import('./tools/text/WhitespaceCleaner.jsx')),
   'bibtex-formatter': lazy(() => import('./tools/text/BibTeXFormatter.jsx')),
+  // 'to-markdown': lazy(() => import('./tools/text/FileToMarkdown.jsx')), // TODO: created in Task 3
   'data-anonymizer': lazy(() => import('./tools/research/DataAnonymizer.jsx')),
   // Privacy & Security Tools
   'strip-file-metadata': lazy(() => import('./tools/privacy/StripFileMetadata.jsx')),
