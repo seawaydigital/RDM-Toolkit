@@ -48,6 +48,7 @@ export default defineConfig({
           'jszip': ['jszip'],
           'zxcvbn': ['zxcvbn'],
           'dompurify': ['dompurify'],
+          'xlsx': ['xlsx'],
         },
       },
     },
