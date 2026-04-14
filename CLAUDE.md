@@ -22,10 +22,10 @@
 This is a **100% client-side static SPA**. There is no server, no database, no API, no authentication, and no backend.
 
 - **Routing:** Hash-based (`window.location.hash`). No router library. Two route types: tools (e.g. `#merge-pdfs`) and pages (e.g. `#how-this-works`).
-- **Tools:** 60 components, all loaded with `React.lazy()` for code splitting. Each tool is a standalone JSX file.
+- **Tools:** 61 components, all loaded with `React.lazy()` for code splitting. Each tool is a standalone JSX file.
 - **Pages:** 6 informational pages (not tools) rendered separately from the tool area.
 - **Data flow:** File → browser memory → process in JS → download result. Nothing is ever sent over the network.
-- **Offline:** Workbox service worker (via `vite-plugin-pwa`) pre-caches all static assets on first load. All 60 tools work without internet after first visit.
+- **Offline:** Workbox service worker (via `vite-plugin-pwa`) pre-caches all static assets on first load. All 61 tools work without internet after first visit.
 - **PWA:** Installable as a standalone app. Manifest at `/RDM-Toolkit/manifest.webmanifest`.
 
 ---
@@ -93,7 +93,7 @@ src/
 
 Every tool is defined here. Adding or removing a tool means updating this file **and** adding/removing the corresponding JSX file in `src/tools/` **and** updating the lazy import map in `App.jsx`.
 
-### Tool count: 60 tools across 9 categories
+### Tool count: 61 tools across 9 categories
 
 #### Primary Categories (always visible in sidebar)
 
@@ -101,7 +101,7 @@ Every tool is defined here. Adding or removing a tool means updating this file *
 |---|---|---|---|
 | PDF Tools | `pdf` | merge-pdfs, split-pdf, compress-pdf, rotate-pages, reorder-pages, add-page-numbers, sign-pdf, password-protect-pdf, remove-pdf-password, extract-images-from-pdf, pdf-watermark, pdf-redaction, pdf-page-delete, pdf-to-images, add-cover-page, pdf-page-inspector | 16 |
 | Image Tools | `images` | compress-image, convert-image-format, resize-image, image-cropper, strip-image-metadata, image-to-pdf | 6 |
-| Text & Data Tools | `text` | word-counter, find-replace, text-diff, json-formatter, csv-json-converter, data-anonymizer, bibtex-formatter | 7 |
+| Text & Data Tools | `text` | word-counter, find-replace, text-diff, json-formatter, csv-json-converter, data-anonymizer, bibtex-formatter, to-markdown | 8 |
 | Privacy & Security | `privacy` | strip-file-metadata, sha256-hasher, encrypt-decrypt-text, password-generator, qr-code-generator | 5 |
 
 #### More Tools (collapsed by default, shown under "More Tools" toggle)
@@ -257,7 +257,7 @@ npx vite preview   # Serve production build locally (port 4173)
 - Build target: ES2020
 - Worker format: ES modules (`worker: { format: 'es' }`)
 - Deployed via GitHub Pages from `master` branch
-- Service worker pre-caches 136 assets on first load (includes all JS chunks, fonts, icons)
+- Service worker pre-caches 140 assets on first load (includes all JS chunks, fonts, icons)
 - PWA app name: "RDM Toolkit", theme: `#0D1B35`, display: `standalone`
 
 ---
@@ -286,6 +286,7 @@ npx vite preview   # Serve production build locally (port 4173)
 2. **URL-exposed config** — Storage Calculator saves state to URL hash. Hash doesn't go to server logs, but appears in browser history and shared links.
 3. **Branch protection** — enable in GitHub → Settings → Branches (require PR + review + CI pass before merging to master).
 4. **pdf-lib + AcroForm PDFs** — pdf-lib's serializer produces structurally broken output for PDFs with form fields, digital signatures, or XFA forms (Adobe Acrobat shows "error processing a page"). Tested approaches: `scaleContent()`, `embedPage()`/`drawPage()`, and canvas rasterization — all fail. PDF Page Inspector detects form fields via pdfjs Widget annotations and advises users to flatten via File → Print → Save as PDF before resizing.
+5. **xlsx CVEs** — `xlsx@0.18.5` (SheetJS) has 2 high-severity CVEs: GHSA-4r6h-8v6p-xvw6 (prototype pollution) and GHSA-5pgg-2g8v-p4x9 (ReDoS). Not critical-level (CVSS <9.0), so CI audit passes. No OSS patch available — SheetJS moved patched versions to a commercial license. Risk is low: users only process their own uploaded files.
 
 ---
 
@@ -336,6 +337,7 @@ All external sources are hyperlinked (`target="_blank" rel="noopener noreferrer"
 
 | Date | Change |
 |---|---|
+| 2026-04-14 | Added File to Markdown tool (`#to-markdown`) — converts DOCX, PDF, HTML, XLSX, CSV, TXT, MD, RTF, JSON to Markdown for AI consumption; two modes: AI-friendly (tables flattened, images → `[image]`, whitespace normalised) and Preserve formatting (full Markdown structure); uses Turndown.js as HTML→MD backbone, mammoth for DOCX, pdfjs for PDF text extraction, SheetJS for XLSX; drag-and-drop routing: `.docx` files auto-route here; new deps: `turndown`, `turndown-plugin-gfm`, `xlsx`; PR #2 open, not yet merged |
 | 2026-04-10 | Added PDF Page Inspector tool (`#pdf-page-inspector`) — inspect exact page dimensions for every page (standard format detection with ±5pt/±20pt tolerances, in/mm toggle, lazy thumbnails), plus optional resize to Letter, A4, Legal, A3, A5, Tabloid, Executive, B5, or custom dimensions with Scale, Crop, or Pad methods; resize uses `embedPage()`/`drawPage()` (XObject embedding) with `useObjectStreams: false` for broad viewer compatibility; detects AcroForm fields via pdfjs Widget annotations and shows warning with Print-to-PDF flatten guidance; built with pdfjs-dist + pdf-lib, fully offline |
 | 2026-04-08 | Upgraded pdfjs-dist v3 → v5.6.205 — patches CVE GHSA-wgrm-67xf-hhpq; updated worker import path to `.mjs`; replaced callback-based `page.objs.get()` with synchronous API in ExtractImagesFromPDF |
 | 2026-04-08 | Added CodeQL security scanning — runs on every push/PR + weekly; results in GitHub Security tab |
