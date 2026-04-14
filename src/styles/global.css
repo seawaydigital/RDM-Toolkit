@@ -10494,3 +10494,84 @@ input:focus, textarea:focus, select:focus {
   margin: 0;
   line-height: 1.5;
 }
+
+/* ===== File to Markdown (ftm) ===== */
+.ftm-controls {
+  margin-bottom: var(--space-md);
+}
+
+.ftm-mode-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: var(--space-sm);
+}
+
+.ftm-mode-btn {
+  background: transparent;
+  border: none;
+  padding: var(--space-sm) var(--space-md);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-family: var(--font-sans);
+  transition: background 0.15s, color 0.15s;
+}
+
+.ftm-mode-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.ftm-mode-btn--active {
+  background: var(--accent-primary);
+  color: #0A1628;
+  font-weight: 600;
+}
+
+.ftm-mode-desc {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.ftm-output {
+  margin-top: var(--space-md);
+}
+
+.ftm-preview {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  min-height: 200px;
+  max-height: 500px;
+  overflow-y: auto;
+  color: var(--text-primary);
+  line-height: 1.7;
+  font-size: 0.9375rem;
+}
+
+.ftm-raw {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  min-height: 200px;
+  max-height: 500px;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+}
+
+.ftm-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-top: var(--space-md);
+}

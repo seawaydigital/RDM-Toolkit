@@ -67,7 +67,7 @@ src/
 │   └── useRecentTools.js          # localStorage-backed recent tools (last 5)
 ├── styles/
 │   └── global.css                 # All styles — CSS variables, layout, component styles
-├── tools/                         # 60 tool components grouped by category
+├── tools/                         # 61 tool components grouped by category
 │   ├── archives/                  # 3 tools
 │   ├── calculators/               # 4 tools
 │   ├── developer/                 # 2 tools
@@ -337,7 +337,7 @@ All external sources are hyperlinked (`target="_blank" rel="noopener noreferrer"
 
 | Date | Change |
 |---|---|
-| 2026-04-14 | Added File to Markdown tool (`#to-markdown`) — converts DOCX, PDF, HTML, XLSX, CSV, TXT, MD, RTF, JSON to Markdown for AI consumption; two modes: AI-friendly (tables flattened, images → `[image]`, whitespace normalised) and Preserve formatting (full Markdown structure); uses Turndown.js as HTML→MD backbone, mammoth for DOCX, pdfjs for PDF text extraction, SheetJS for XLSX; drag-and-drop routing: `.docx` files auto-route here; new deps: `turndown`, `turndown-plugin-gfm`, `xlsx`; PR #2 open, not yet merged |
+| 2026-04-14 | Added File to Markdown tool (`#to-markdown`) — converts DOCX, PDF, HTML, XLSX, CSV, TXT, MD, RTF, JSON to Markdown for AI consumption; two modes: AI-friendly (tables flattened, images → `[image]`, whitespace normalised) and Preserve formatting (full Markdown structure); uses Turndown.js as HTML→MD backbone, mammoth for DOCX, pdfjs for PDF text extraction, SheetJS for XLSX; drag-and-drop routing: `.docx` files auto-route here; new deps: `turndown`, `turndown-plugin-gfm`, `xlsx` |
 | 2026-04-10 | Added PDF Page Inspector tool (`#pdf-page-inspector`) — inspect exact page dimensions for every page (standard format detection with ±5pt/±20pt tolerances, in/mm toggle, lazy thumbnails), plus optional resize to Letter, A4, Legal, A3, A5, Tabloid, Executive, B5, or custom dimensions with Scale, Crop, or Pad methods; resize uses `embedPage()`/`drawPage()` (XObject embedding) with `useObjectStreams: false` for broad viewer compatibility; detects AcroForm fields via pdfjs Widget annotations and shows warning with Print-to-PDF flatten guidance; built with pdfjs-dist + pdf-lib, fully offline |
 | 2026-04-08 | Upgraded pdfjs-dist v3 → v5.6.205 — patches CVE GHSA-wgrm-67xf-hhpq; updated worker import path to `.mjs`; replaced callback-based `page.objs.get()` with synchronous API in ExtractImagesFromPDF |
 | 2026-04-08 | Added CodeQL security scanning — runs on every push/PR + weekly; results in GitHub Security tab |
