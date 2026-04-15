@@ -14,6 +14,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,woff,woff2,ttf,ico,png,svg,webp}'],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB (covers pdfjs worker)
         runtimeCaching: [],
+        skipWaiting: true,   // activate new SW immediately on deploy
+        clientsClaim: true,  // take control of all open tabs right away
       },
       manifest: {
         name: 'RDM Toolkit',
