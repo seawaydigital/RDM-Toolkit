@@ -112,17 +112,6 @@ const TASK_GROUPS = [
     ],
   },
   {
-    group: 'Privacy & Research Tools',
-    tasks: [
-      { task: 'Strip metadata from any file',        badge: 'rdm',     label: 'RDM Toolkit', toolId: 'strip-file-metadata' },
-      { task: 'Data anonymization (PII detection)',  badge: 'rdm',     label: 'RDM Toolkit', toolId: 'data-anonymizer' },
-      { task: 'SHA-256 file integrity hashing',      badge: 'rdm',     label: 'RDM Toolkit', toolId: 'sha256-hasher' },
-      { task: 'BibTeX bibliography formatting',      badge: 'rdm',     label: 'RDM Toolkit', toolId: 'bibtex-formatter' },
-      { task: 'CSV \u2194 JSON conversion & diff',        badge: 'rdm',     label: 'RDM Toolkit', toolId: 'csv-json-converter' },
-      { task: 'AES-256 text encryption',             badge: 'rdm',     label: 'RDM Toolkit', toolId: 'encrypt-decrypt-text' },
-    ],
-  },
-  {
     group: 'Compliance & Redaction',
     tasks: [
       { task: 'Visual redaction (non-sensitive docs)', badge: 'rdm',   label: 'RDM Toolkit', toolId: 'pdf-redaction' },
@@ -326,6 +315,45 @@ export default function AcrobatAlternative() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* ── Beyond Acrobat ─────────────────────────────────────────────── */}
+      <section className="aa-section">
+        <div className="aa-beyond-card">
+          <div className="aa-beyond-top">
+            <Sparkles size={18} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
+            <div className="aa-beyond-title">RDM Toolkit does far more than Acrobat Pro — and it's 100% free</div>
+          </div>
+          <p className="aa-beyond-body">
+            The comparison above only covers tasks Adobe Acrobat Pro is known for. RDM Toolkit
+            also includes an entire suite of research-specific tools that Acrobat doesn't touch
+            at all — all running privately in your browser, with no account, no subscription,
+            and no files ever leaving your device.
+          </p>
+          <div className="aa-beyond-chips">
+            {[
+              { label: 'Data Anonymizer',        toolId: 'data-anonymizer' },
+              { label: 'SHA-256 File Hasher',    toolId: 'sha256-hasher' },
+              { label: 'BibTeX Formatter',       toolId: 'bibtex-formatter' },
+              { label: 'Strip File Metadata',    toolId: 'strip-file-metadata' },
+              { label: 'CSV \u2194 JSON Converter',   toolId: 'csv-json-converter' },
+              { label: 'AES-256 Text Encryption',toolId: 'encrypt-decrypt-text' },
+              { label: 'File to Markdown',       toolId: 'to-markdown' },
+              { label: 'Password Generator',     toolId: 'password-generator' },
+              { label: 'QR Code Generator',      toolId: 'qr-code-generator' },
+              { label: 'Checksum Verifier',      toolId: 'checksum-verifier' },
+              { label: 'CSV Diff',               toolId: 'csv-diff' },
+              { label: 'Encoding Detector',      toolId: 'encoding-detector' },
+            ].map(({ label, toolId }) => (
+              <a key={toolId} href={`#${toolId}`} className="aa-beyond-chip">
+                {label}
+              </a>
+            ))}
+          </div>
+          <a href="" className="aa-beyond-all" onClick={(e) => { e.preventDefault(); window.location.hash = ''; }}>
+            Explore all 61 tools →
+          </a>
         </div>
       </section>
 

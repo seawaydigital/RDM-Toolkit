@@ -10943,6 +10943,72 @@ input:focus, textarea:focus, select:focus {
   line-height: 1.6;
 }
 
+/* ── Beyond Acrobat callout ───────────────────────────────────────────────── */
+
+.aa-beyond-card {
+  background: rgba(255, 194, 14, 0.05);
+  border: 1px solid rgba(255, 194, 14, 0.25);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+}
+
+.aa-beyond-top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.aa-beyond-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.aa-beyond-body {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: var(--space-lg);
+}
+
+.aa-beyond-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.aa-beyond-chip {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  background: rgba(255, 194, 14, 0.10);
+  border: 1px solid rgba(255, 194, 14, 0.20);
+  border-radius: 20px;
+  padding: 4px 12px;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.aa-beyond-chip:hover {
+  background: rgba(255, 194, 14, 0.18);
+  border-color: rgba(255, 194, 14, 0.40);
+}
+
+.aa-beyond-all {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+.aa-beyond-all:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* ── Privacy Note ─────────────────────────────────────────────────────────── */
 
 .aa-privacy-note {
