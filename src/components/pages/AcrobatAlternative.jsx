@@ -74,23 +74,23 @@ const TASK_GROUPS = [
   {
     group: 'PDF Page Operations',
     tasks: [
-      { task: 'Merge multiple PDFs into one',         badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'Split PDF into separate files',        badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'Delete specific pages',               badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'Rotate pages',                        badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'Reorder pages (drag & drop)',          badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'Add page numbers',                    badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'Add custom cover page',               badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'Inspect & resize page dimensions',    badge: 'rdm',     label: 'RDM Toolkit' },
+      { task: 'Merge multiple PDFs into one',         badge: 'rdm',     label: 'RDM Toolkit', toolId: 'merge-pdfs' },
+      { task: 'Split PDF into separate files',        badge: 'rdm',     label: 'RDM Toolkit', toolId: 'split-pdf' },
+      { task: 'Delete specific pages',               badge: 'rdm',     label: 'RDM Toolkit', toolId: 'pdf-page-delete' },
+      { task: 'Rotate pages',                        badge: 'rdm',     label: 'RDM Toolkit', toolId: 'rotate-pages' },
+      { task: 'Reorder pages (drag & drop)',          badge: 'rdm',     label: 'RDM Toolkit', toolId: 'reorder-pages' },
+      { task: 'Add page numbers',                    badge: 'rdm',     label: 'RDM Toolkit', toolId: 'add-page-numbers' },
+      { task: 'Add custom cover page',               badge: 'rdm',     label: 'RDM Toolkit', toolId: 'add-cover-page' },
+      { task: 'Inspect & resize page dimensions',    badge: 'rdm',     label: 'RDM Toolkit', toolId: 'pdf-page-inspector' },
     ],
   },
   {
     group: 'PDF Security',
     tasks: [
-      { task: 'Password protect PDF (AES-256)',       badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'Remove PDF password',                 badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'Add text watermark (DRAFT, CONFIDENTIAL, etc.)', badge: 'rdm', label: 'RDM Toolkit' },
-      { task: 'Extract images from PDF',             badge: 'rdm',     label: 'RDM Toolkit' },
+      { task: 'Password protect PDF (AES-256)',       badge: 'rdm',     label: 'RDM Toolkit', toolId: 'password-protect-pdf' },
+      { task: 'Remove PDF password',                 badge: 'rdm',     label: 'RDM Toolkit', toolId: 'remove-pdf-password' },
+      { task: 'Add text watermark (DRAFT, CONFIDENTIAL, etc.)', badge: 'rdm', label: 'RDM Toolkit', toolId: 'pdf-watermark' },
+      { task: 'Extract images from PDF',             badge: 'rdm',     label: 'RDM Toolkit', toolId: 'extract-images-from-pdf' },
     ],
   },
   {
@@ -105,27 +105,27 @@ const TASK_GROUPS = [
   {
     group: 'Document Conversion',
     tasks: [
-      { task: 'PDF → Word or Excel (non-sensitive)',  badge: 'google',  label: 'Google Docs (Lakehead)' },
-      { task: 'PDF → Word (sensitive/OCAP® data)',   badge: 'libre',   label: 'LibreOffice (offline)' },
-      { task: 'PDF → images (PNG / JPG)',            badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'Images → PDF',                       badge: 'rdm',     label: 'RDM Toolkit' },
+      { task: 'PDF \u2192 Word or Excel (non-sensitive)',  badge: 'google',  label: 'Google Docs (Lakehead)' },
+      { task: 'PDF \u2192 Word (sensitive/OCAP\u00ae data)',   badge: 'libre',   label: 'LibreOffice (offline)' },
+      { task: 'PDF \u2192 images (PNG / JPG)',            badge: 'rdm',     label: 'RDM Toolkit', toolId: 'pdf-to-images' },
+      { task: 'Images \u2192 PDF',                       badge: 'rdm',     label: 'RDM Toolkit', toolId: 'image-to-pdf' },
     ],
   },
   {
     group: 'Privacy & Research Tools',
     tasks: [
-      { task: 'Strip metadata from any file',        badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'Data anonymization (PII detection)',  badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'SHA-256 file integrity hashing',      badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'BibTeX bibliography formatting',      badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'CSV ↔ JSON conversion & diff',        badge: 'rdm',     label: 'RDM Toolkit' },
-      { task: 'AES-256 text encryption',             badge: 'rdm',     label: 'RDM Toolkit' },
+      { task: 'Strip metadata from any file',        badge: 'rdm',     label: 'RDM Toolkit', toolId: 'strip-file-metadata' },
+      { task: 'Data anonymization (PII detection)',  badge: 'rdm',     label: 'RDM Toolkit', toolId: 'data-anonymizer' },
+      { task: 'SHA-256 file integrity hashing',      badge: 'rdm',     label: 'RDM Toolkit', toolId: 'sha256-hasher' },
+      { task: 'BibTeX bibliography formatting',      badge: 'rdm',     label: 'RDM Toolkit', toolId: 'bibtex-formatter' },
+      { task: 'CSV \u2194 JSON conversion & diff',        badge: 'rdm',     label: 'RDM Toolkit', toolId: 'csv-json-converter' },
+      { task: 'AES-256 text encryption',             badge: 'rdm',     label: 'RDM Toolkit', toolId: 'encrypt-decrypt-text' },
     ],
   },
   {
     group: 'Compliance & Redaction',
     tasks: [
-      { task: 'Visual redaction (non-sensitive docs)', badge: 'rdm',   label: 'RDM Toolkit' },
+      { task: 'Visual redaction (non-sensitive docs)', badge: 'rdm',   label: 'RDM Toolkit', toolId: 'pdf-redaction' },
       { task: 'PHIPA/PIPEDA-compliant redaction',    badge: 'coming',  label: 'Planned improvement' },
       { task: 'OCR (scanned document recognition)',  badge: 'skip',    label: "Acrobat\u2019s OCR is mediocre \u2014 use Google Docs (free) or ABBYY FineReader Online" },
     ],
@@ -244,23 +244,42 @@ export default function AcrobatAlternative() {
                   </tr>
                   {group.tasks.map((row) => {
                     const meta = BADGE_META[row.badge] ?? BADGE_META.skip;
+                    const href = row.toolId ? `#${row.toolId}` : null;
                     return (
-                      <tr key={row.task} className="aa-table-row">
+                      <tr
+                        key={row.task}
+                        className={`aa-table-row${href ? ' aa-table-row--linked' : ''}`}
+                      >
                         <td className="aa-table-task">
                           <ChevronRight size={13} className="aa-table-arrow" />
-                          {row.task}
+                          {href ? (
+                            <a href={href} className="aa-table-task-link">{row.task}</a>
+                          ) : (
+                            row.task
+                          )}
                         </td>
                         <td className="aa-table-coverage">
-                          <span
-                            className="aa-badge"
-                            style={{ color: meta.color, background: meta.bg }}
-                          >
-                            {row.badge !== 'skip' && row.badge !== 'coming' && (
+                          {href ? (
+                            <a
+                              href={href}
+                              className="aa-badge aa-badge--link"
+                              style={{ color: meta.color, background: meta.bg }}
+                            >
                               <CheckCircle2 size={12} />
-                            )}
-                            {row.badge === 'coming' && <Clock size={12} />}
-                            {row.label}
-                          </span>
+                              {row.label}
+                            </a>
+                          ) : (
+                            <span
+                              className="aa-badge"
+                              style={{ color: meta.color, background: meta.bg }}
+                            >
+                              {row.badge !== 'skip' && row.badge !== 'coming' && (
+                                <CheckCircle2 size={12} />
+                              )}
+                              {row.badge === 'coming' && <Clock size={12} />}
+                              {row.label}
+                            </span>
+                          )}
                         </td>
                       </tr>
                     );

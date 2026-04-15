@@ -10839,6 +10839,21 @@ input:focus, textarea:focus, select:focus {
   flex-shrink: 0;
 }
 
+.aa-table-task-link {
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.aa-table-task-link:hover {
+  color: var(--accent-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.aa-table-row--linked:hover .aa-table-arrow {
+  color: var(--accent-primary);
+}
+
 .aa-table-coverage {
   padding: 9px var(--space-md);
   white-space: nowrap;
@@ -10854,6 +10869,18 @@ input:focus, textarea:focus, select:focus {
   padding: 3px 8px;
   white-space: normal;
   line-height: 1.4;
+}
+
+.aa-badge--link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.aa-badge--link:hover {
+  filter: brightness(1.2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* ── Honest Section ───────────────────────────────────────────────────────── */
