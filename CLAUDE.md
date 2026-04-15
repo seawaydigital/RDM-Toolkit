@@ -136,6 +136,7 @@ Every tool is defined here. Adding or removing a tool means updating this file *
 | `#storage-calculator` | `StorageCalculator.jsx` | 14 file categories, backup strategy multipliers, canvas doughnut chart, DMP text export, OCAP® flag, LUFA 7-year minimum, URL-based config save/load |
 | `#tri-agency-policy` | `TriAgencyPolicy.jsx` | Tri-Agency RDM Policy explainer, data deposit flowchart (SVG), repository cards (Borealis/ICPSR/Zenodo/FRDR), FAQ, Indigenous data sovereignty section |
 | `#drac-services` | `DRACServices.jsx` | DRAC services tabs: ARC (clusters), Cloud, RDM (Borealis/FRDR/Globus/Nextcloud), Sensitive Data Toolkit, Explora |
+| `#acrobat-alternative` | `AcrobatAlternative.jsx` | Adobe Acrobat Pro comparison guide for Lakehead researchers — The Free Stack (RDM Toolkit + Free Acrobat Reader + Google Docs via Lakehead Workspace + LibreOffice), task-by-task coverage table with links to RDM tools, honest "when Acrobat is still worth it" section, privacy note for OCAP®/PHIPA data, bonus callout for research tools beyond Acrobat's scope |
 
 ---
 
@@ -337,6 +338,9 @@ All external sources are hyperlinked (`target="_blank" rel="noopener noreferrer"
 
 | Date | Change |
 |---|---|
+| 2026-04-14 | Added Adobe Acrobat Alternative page (`#acrobat-alternative`) — persuasive cost-saving guide for Lakehead researchers showing how RDM Toolkit + Free Acrobat Reader + Google Docs (Lakehead institutional) + LibreOffice replaces ~$240/yr Acrobat Pro subscription; task coverage table links directly to relevant RDM tools; sidebar link (CircleDollarSign icon, first in special pages); CSS prefix `.aa-*` |
+| 2026-04-14 | Fixed PWA service worker cache-staleness bug — added `skipWaiting: true` + `clientsClaim: true` to `vite.config.js` Workbox config; new SW now activates immediately on deploy instead of waiting for all tabs to close, preventing "Failed to fetch dynamically imported module" errors after deployments |
+| 2026-04-14 | Installed missing runtime deps (`turndown`, `turndown-plugin-gfm`, `xlsx`) — were declared in package.json but absent from node_modules, causing build failures |
 | 2026-04-14 | Added File to Markdown tool (`#to-markdown`) — converts DOCX, PDF, HTML, XLSX, CSV, TXT, MD, RTF, JSON to Markdown for AI consumption; two modes: AI-friendly (tables flattened, images → `[image]`, whitespace normalised) and Preserve formatting (full Markdown structure); uses Turndown.js as HTML→MD backbone, mammoth for DOCX, pdfjs for PDF text extraction, SheetJS for XLSX; drag-and-drop routing: `.docx` files auto-route here; new deps: `turndown`, `turndown-plugin-gfm`, `xlsx` |
 | 2026-04-10 | Added PDF Page Inspector tool (`#pdf-page-inspector`) — inspect exact page dimensions for every page (standard format detection with ±5pt/±20pt tolerances, in/mm toggle, lazy thumbnails), plus optional resize to Letter, A4, Legal, A3, A5, Tabloid, Executive, B5, or custom dimensions with Scale, Crop, or Pad methods; resize uses `embedPage()`/`drawPage()` (XObject embedding) with `useObjectStreams: false` for broad viewer compatibility; detects AcroForm fields via pdfjs Widget annotations and shows warning with Print-to-PDF flatten guidance; built with pdfjs-dist + pdf-lib, fully offline |
 | 2026-04-08 | Upgraded pdfjs-dist v3 → v5.6.205 — patches CVE GHSA-wgrm-67xf-hhpq; updated worker import path to `.mjs`; replaced callback-based `page.objs.get()` with synchronous API in ExtractImagesFromPDF |
