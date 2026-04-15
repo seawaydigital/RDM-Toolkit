@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, X, CircleDollarSign } from 'lucide-react';
 import { PRIMARY_CATEGORIES, MORE_CATEGORIES, CATEGORIES } from '../../data/toolRegistry';
 
 export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen, onClose }) {
@@ -117,6 +117,14 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
 
           {/* Special pages */}
           <div className="sidebar-divider" />
+          <a
+            href="#acrobat-alternative"
+            className={`sidebar-htw-link ${currentPage === 'acrobat-alternative' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <CircleDollarSign size={16} />
+            Adobe Acrobat Alternative
+          </a>
           <a
             href="#storage-calculator"
             className={`sidebar-htw-link ${currentPage === 'storage-calculator' ? 'sidebar-htw-link--active' : ''}`}
