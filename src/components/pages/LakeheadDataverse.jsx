@@ -261,7 +261,7 @@ export default function LakeheadDataverse() {
                   <ChevronRight size={16} className={`lud-faq-chevron${isOpen ? ' lud-faq-chevron--open' : ''}`} />
                 </button>
                 {isOpen && (
-                  i === 6
+                  item.a === null
                     ? <p className="lud-faq-answer">
                         Contact Dr. Philips Ayeni, Lakehead's Scholarly Communications &amp; Data
                         Services Librarian, at{' '}
