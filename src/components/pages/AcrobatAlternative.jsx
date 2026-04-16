@@ -105,8 +105,8 @@ const TASK_GROUPS = [
   {
     group: 'Document Conversion',
     tasks: [
-      { task: 'PDF \u2192 Word or Excel (non-sensitive)',  badge: 'google',  label: 'Google Docs (Lakehead)' },
-      { task: 'PDF \u2192 Word (sensitive/OCAP\u00ae data)',   badge: 'libre',   label: 'LibreOffice (offline)' },
+      { task: 'PDF \u2192 Word or Excel',                  badge: 'word',    label: 'Microsoft Word (File \u2192 Open)' },
+      { task: 'PDF \u2192 Word (complex formatting)',      badge: 'libre',   label: 'LibreOffice (free) or Tungsten Power PDF (paid)' },
       { task: 'PDF \u2192 images (PNG / JPG)',            badge: 'rdm',     label: 'RDM Toolkit', toolId: 'pdf-to-images' },
       { task: 'Images \u2192 PDF',                       badge: 'rdm',     label: 'RDM Toolkit', toolId: 'image-to-pdf' },
     ],
@@ -126,6 +126,7 @@ const BADGE_META = {
   acrobat: { color: '#FF6B6B', bg: 'rgba(255,107,107,0.12)' },
   google:  { color: '#4285F4', bg: 'rgba(66,133,244,0.12)' },
   libre:   { color: '#18A303', bg: 'rgba(24,163,3,0.12)' },
+  word:    { color: '#2B579A', bg: 'rgba(43,87,154,0.12)' },
   coming:  { color: '#A78BFA', bg: 'rgba(167,139,250,0.12)' },
   skip:    { color: '#7C9BBF', bg: 'rgba(124,155,191,0.10)' },
 };
