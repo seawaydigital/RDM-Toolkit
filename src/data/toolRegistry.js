@@ -8,7 +8,7 @@ export const CATEGORIES = [
     tools: [
       { id: 'merge-pdfs', name: 'Merge PDFs', slug: 'merged', description: 'Combine multiple PDF files into a single document in the order you choose.', tags: ['pdf', 'documentation'], related: ['split-pdf', 'compress-pdf', 'add-page-numbers'] },
       { id: 'split-pdf', name: 'Split PDF', slug: 'split', description: 'Extract specific pages or page ranges from a PDF into separate files.', tags: ['pdf', 'documentation'], related: ['merge-pdfs', 'pdf-page-delete', 'reorder-pages'] },
-      { id: 'compress-pdf', name: 'Compress PDF', slug: 'compressed', description: 'Reduce PDF file size by optimising embedded content.', tags: ['pdf', 'compression'], related: ['merge-pdfs', 'compress-image', 'pdf-to-images'] },
+      { id: 'compress-pdf', name: 'Compress PDF', slug: 'compressed', description: 'Reduce PDF file size with Low, Medium, or High image compression — see all three sizes before you choose. Runs entirely in your browser.', tags: ['pdf', 'compression'], related: ['merge-pdfs', 'compress-image', 'pdf-to-images'] },
       { id: 'rotate-pages', name: 'Rotate PDF Pages', slug: 'rotated', description: 'Rotate individual pages or all pages at once to fix orientation.', tags: ['pdf'], related: ['reorder-pages', 'pdf-page-delete'] },
       { id: 'reorder-pages', name: 'Reorder PDF Pages', slug: 'reordered', description: 'Rearrange the pages of a PDF into any order you choose.', tags: ['pdf'], related: ['rotate-pages', 'split-pdf', 'pdf-page-delete'] },
       { id: 'add-page-numbers', name: 'Add Page Numbers', slug: 'numbered', description: 'Embed page numbers directly into a PDF at a position and style you choose.', tags: ['pdf', 'documentation'], related: ['merge-pdfs', 'pdf-watermark', 'sign-pdf'] },
@@ -22,6 +22,7 @@ export const CATEGORIES = [
       { id: 'pdf-to-images', name: 'PDF to Images', slug: 'as-images', description: 'Export each page of a PDF as a high-quality PNG or JPG image.', tags: ['pdf', 'image', 'conversion'], related: ['extract-images-from-pdf', 'compress-image', 'image-to-pdf'] },
       { id: 'add-cover-page', name: 'Add Cover Page', slug: 'with-cover', description: 'Prepend a custom-designed cover page to any PDF — set a title, author, department, date, and colour scheme. Runs entirely in your browser.', tags: ['pdf', 'cover', 'documentation', 'report'], related: ['merge-pdfs', 'add-page-numbers', 'pdf-watermark'] },
       { id: 'pdf-page-inspector', name: 'PDF Page Inspector', slug: 'resized', description: 'Inspect exact page dimensions and resize pages to Letter, A4, Legal, and other standard formats.', tags: ['pdf', 'resize', 'page size', 'format'], related: ['rotate-pages', 'reorder-pages', 'compress-pdf'] },
+      { id: 'fillable-pdf-form', name: 'Fillable PDF Form', slug: 'fillable', description: 'Turn a flat PDF into a fillable form — add text fields, checkboxes, radio buttons, and dropdowns. Runs entirely in your browser.', tags: ['pdf', 'form', 'documentation'], related: ['sign-pdf', 'add-page-numbers', 'pdf-watermark'] },
     ],
   },
   {

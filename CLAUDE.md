@@ -93,13 +93,13 @@ src/
 
 Every tool is defined here. Adding or removing a tool means updating this file **and** adding/removing the corresponding JSX file in `src/tools/` **and** updating the lazy import map in `App.jsx`.
 
-### Tool count: 61 tools across 9 categories
+### Tool count: 62 tools across 9 categories
 
 #### Primary Categories (always visible in sidebar)
 
 | Category | ID | Tools | Count |
 |---|---|---|---|
-| PDF Tools | `pdf` | merge-pdfs, split-pdf, compress-pdf, rotate-pages, reorder-pages, add-page-numbers, sign-pdf, password-protect-pdf, remove-pdf-password, extract-images-from-pdf, pdf-watermark, pdf-redaction, pdf-page-delete, pdf-to-images, add-cover-page, pdf-page-inspector | 16 |
+| PDF Tools | `pdf` | merge-pdfs, split-pdf, compress-pdf, rotate-pages, reorder-pages, add-page-numbers, sign-pdf, password-protect-pdf, remove-pdf-password, extract-images-from-pdf, pdf-watermark, pdf-redaction, pdf-page-delete, pdf-to-images, add-cover-page, pdf-page-inspector, fillable-pdf-form | 17 |
 | Image Tools | `images` | compress-image, convert-image-format, resize-image, image-cropper, strip-image-metadata, image-to-pdf | 6 |
 | Text & Data Tools | `text` | word-counter, find-replace, text-diff, json-formatter, csv-json-converter, data-anonymizer, bibtex-formatter, to-markdown | 8 |
 | Privacy & Security | `privacy` | strip-file-metadata, sha256-hasher, encrypt-decrypt-text, password-generator, qr-code-generator | 5 |
@@ -339,6 +339,8 @@ All external sources are hyperlinked (`target="_blank" rel="noopener noreferrer"
 
 | Date | Change |
 |---|---|
+| 2026-04-16 | Added Fillable PDF Form tool (`#fillable-pdf-form`) — turns a flat PDF into a fillable form with text fields, checkboxes, radio groups, dropdowns, and signature boxes placed by clicking on a page preview; field properties panel for renaming/defaults/options/multi-line; signature boxes are real `/Sig` AcroForm widgets registered via low-level pdf-lib dict API + `SigFlags = 3` so Adobe Reader's Fill & Sign and digital-signature flows recognize them; pre-flight detects existing AcroForm fields and refuses (avoids the documented `@cantoo/pdf-lib` serializer issue); generates with `useObjectStreams: false` for broad viewer compatibility; CSS prefix `.ff-*`; PDF Tools count → 17 |
+| 2026-04-16 | Rewrote Compress PDF (`#compress-pdf`) with smart detection + 3-preset workflow — analyzes embedded image content via pdfjs `OPS.paintImageXObject` and routes image-heavy PDFs (≥30% of pages with ≥200×200px images) to a per-page rasterization pipeline that produces Low (150 DPI / 0.90 JPEG), Medium (110 DPI / 0.75) and High (80 DPI / 0.55) versions in parallel and shows their sizes side-by-side for the user to pick; text-heavy PDFs fall back to the existing single-pass structural `pdfDoc.save()`; both modes accessible from either branch via secondary CTA; uses Canvas API + `pdfDoc.embedJpg()` — fully offline, no new deps; added CSS for `.compress-analysis-*`, `.compress-preset-*` |
 | 2026-04-16 | Updated AcrobatAlternative PDF→Word table rows: primary recommendation changed from Google Docs to Microsoft Word (File → Open); removed OCAP®/sensitive row (Word is secure for all cases); added "PDF → Word (complex formatting)" row recommending LibreOffice (free) or Tungsten Power PDF (paid); added `word` badge style (Microsoft blue #2B579A) |
 | 2026-04-16 | Moved cybersecurity guide out of HowThisWorks — full content (7 essential actions, device encryption, passwords/2FA, file encryption, AI warning, controlled data) relocated to RS Toolkit at `https://seawaydigital.github.io/RSToolkit/#cybersecurity-guide`; replaced with a bridge callout card + 4 linked security tool cards (Password Protect PDF, Strip Metadata, SHA-256, Encrypt Text); removed 9 unused lucide icon imports |
 | 2026-04-16 | Reordered sidebar special pages to follow researcher workflow: How This Works → Tri-Agency RDM Policy → Classify Your Data → Research Storage Calculator → Lakehead Dataverse → DRAC Services → Adobe Acrobat Alternative → Request a Tool |
