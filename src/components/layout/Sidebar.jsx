@@ -118,44 +118,12 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
           {/* Special pages */}
           <div className="sidebar-divider" />
           <a
-            href="#acrobat-alternative"
-            className={`sidebar-htw-link ${currentPage === 'acrobat-alternative' ? 'sidebar-htw-link--active' : ''}`}
+            href="#how-this-works"
+            className={`sidebar-htw-link ${currentPage === 'how-this-works' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
           >
-            <CircleDollarSign size={16} />
-            Adobe Acrobat Alternative
-          </a>
-          <a
-            href="#lakehead-dataverse"
-            className={`sidebar-htw-link ${currentPage === 'lakehead-dataverse' ? 'sidebar-htw-link--active' : ''}`}
-            onClick={onClose}
-          >
-            <Database size={16} />
-            Lakehead Dataverse
-          </a>
-          <a
-            href="#storage-calculator"
-            className={`sidebar-htw-link ${currentPage === 'storage-calculator' ? 'sidebar-htw-link--active' : ''}`}
-            onClick={onClose}
-          >
-            <HardDrive size={16} />
-            Research Storage Calculator
-          </a>
-          <a
-            href="#data-classification"
-            className={`sidebar-htw-link ${currentPage === 'data-classification' ? 'sidebar-htw-link--active' : ''}`}
-            onClick={onClose}
-          >
-            <ShieldCheck size={16} />
-            Classify Your Data
-          </a>
-          <a
-            href="#drac-services"
-            className={`sidebar-htw-link ${currentPage === 'drac-services' ? 'sidebar-htw-link--active' : ''}`}
-            onClick={onClose}
-          >
-            <Globe size={16} />
-            DRAC Services
+            <HelpCircle size={16} />
+            How This Works
           </a>
           <a
             href="#tri-agency-policy"
@@ -166,12 +134,44 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             Tri-Agency RDM Policy
           </a>
           <a
-            href="#how-this-works"
-            className={`sidebar-htw-link ${currentPage === 'how-this-works' ? 'sidebar-htw-link--active' : ''}`}
+            href="#data-classification"
+            className={`sidebar-htw-link ${currentPage === 'data-classification' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
           >
-            <HelpCircle size={16} />
-            How This Works
+            <ShieldCheck size={16} />
+            Classify Your Data
+          </a>
+          <a
+            href="#storage-calculator"
+            className={`sidebar-htw-link ${currentPage === 'storage-calculator' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <HardDrive size={16} />
+            Research Storage Calculator
+          </a>
+          <a
+            href="#lakehead-dataverse"
+            className={`sidebar-htw-link ${currentPage === 'lakehead-dataverse' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <Database size={16} />
+            Lakehead Dataverse
+          </a>
+          <a
+            href="#drac-services"
+            className={`sidebar-htw-link ${currentPage === 'drac-services' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <Globe size={16} />
+            DRAC Services
+          </a>
+          <a
+            href="#acrobat-alternative"
+            className={`sidebar-htw-link ${currentPage === 'acrobat-alternative' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <CircleDollarSign size={16} />
+            Adobe Acrobat Alternative
           </a>
           <a
             href="#request-a-tool"
