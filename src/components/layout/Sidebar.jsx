@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, X, CircleDollarSign } from 'lucide-react';
+import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, X, CircleDollarSign, Database } from 'lucide-react';
 import { PRIMARY_CATEGORIES, MORE_CATEGORIES, CATEGORIES } from '../../data/toolRegistry';
 
 export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen, onClose }) {
@@ -124,6 +124,14 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
           >
             <CircleDollarSign size={16} />
             Adobe Acrobat Alternative
+          </a>
+          <a
+            href="#lakehead-dataverse"
+            className={`sidebar-htw-link ${currentPage === 'lakehead-dataverse' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <Database size={16} />
+            Lakehead Dataverse
           </a>
           <a
             href="#storage-calculator"

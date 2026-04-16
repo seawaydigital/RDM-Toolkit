@@ -10,6 +10,7 @@ import StorageCalculator from './components/pages/StorageCalculator';
 import TriAgencyPolicy from './components/pages/TriAgencyPolicy';
 import DRACServices from './components/pages/DRACServices';
 import AcrobatAlternative from './components/pages/AcrobatAlternative';
+import LakeheadDataverse from './components/pages/LakeheadDataverse';
 import RelatedTools from './components/ui/RelatedTools';
 import ToolSkeleton from './components/ui/ToolSkeleton';
 import { ALL_TOOLS } from './data/toolRegistry';
@@ -108,7 +109,7 @@ const toolComponents = {
   'uuid-generator': lazy(() => import('./tools/developer/UUIDGenerator.jsx')),
 };
 
-const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy', 'drac-services', 'acrobat-alternative']);
+const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy', 'drac-services', 'acrobat-alternative', 'lakehead-dataverse']);
 
 function getRouteFromHash() {
   const hash = window.location.hash.slice(1);
@@ -327,6 +328,7 @@ export default function App() {
           {currentPage === 'tri-agency-policy' && <TriAgencyPolicy />}
           {currentPage === 'drac-services' && <DRACServices />}
           {currentPage === 'acrobat-alternative' && <AcrobatAlternative />}
+          {currentPage === 'lakehead-dataverse' && <LakeheadDataverse />}
           {currentToolId && ToolComponent && (
             <ErrorBoundary
               resetKey={errorResetKey}
