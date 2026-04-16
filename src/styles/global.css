@@ -11086,7 +11086,7 @@ input:focus, textarea:focus, select:focus {
    ═══════════════════════════════════════════════════════════════ */
 
 /* Wrapper */
-.lud { max-width: 860px; }
+.lud { max-width: 860px; margin: 0 auto; padding: var(--space-xl) var(--space-lg) var(--space-2xl); }
 
 /* ── Hero ── */
 .lud-hero {
