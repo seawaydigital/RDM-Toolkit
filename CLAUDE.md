@@ -130,13 +130,13 @@ Every tool is defined here. Adding or removing a tool means updating this file *
 
 | Hash | Component | Purpose |
 |---|---|---|
-| `#how-this-works` | `HowThisWorks.jsx` | Privacy model, compliance (PIPEDA/PHIPA/GDPR/Tri-Agency), encryption guide, password guidance — all external sources hyperlinked |
+| `#how-this-works` | `HowThisWorks.jsx` | Privacy model, compliance (PIPEDA/PHIPA/GDPR/Tri-Agency), verification steps, FAQ — plus a bridge callout to RS Toolkit for cybersecurity practices, and 4 linked cards for RDM security tools (Password Protect PDF, Strip Metadata, SHA-256 Hasher, Encrypt Text) |
 | `#request-a-tool` | `RequestATool.jsx` | Tool request info |
 | `#data-classification` | `DataClassification.jsx` | Guided wizard for classifying research data (Public → Internal → Confidential → Highly Confidential). Shows control requirements, LUFA retention rules |
 | `#storage-calculator` | `StorageCalculator.jsx` | 14 file categories, backup strategy multipliers, canvas doughnut chart, DMP text export, OCAP® flag, LUFA 7-year minimum, URL-based config save/load |
 | `#tri-agency-policy` | `TriAgencyPolicy.jsx` | Tri-Agency RDM Policy explainer, data deposit flowchart (SVG), repository cards (Borealis/ICPSR/Zenodo/FRDR), FAQ, Indigenous data sovereignty section |
 | `#drac-services` | `DRACServices.jsx` | DRAC services tabs: ARC (clusters), Cloud, RDM (Borealis/FRDR/Globus/Nextcloud), Sensitive Data Toolkit, Explora |
-| `#acrobat-alternative` | `AcrobatAlternative.jsx` | Adobe Acrobat Pro comparison guide for Lakehead researchers — The Free Stack (RDM Toolkit + Free Acrobat Reader + Google Docs via Lakehead Workspace + LibreOffice), task-by-task coverage table with links to RDM tools, honest "when Acrobat is still worth it" section, privacy note for OCAP®/PHIPA data, bonus callout for research tools beyond Acrobat's scope |
+| `#acrobat-alternative` | `AcrobatAlternative.jsx` | Adobe Acrobat Pro comparison guide for Lakehead researchers — The Free Stack (RDM Toolkit + Free Acrobat Reader + Google Docs via Lakehead Workspace + LibreOffice), task-by-task coverage table with links to RDM tools, honest "when Acrobat is still worth it" section, privacy note for OCAP®/PHIPA data, bonus callout for research tools beyond Acrobat's scope. PDF→Word primary: Microsoft Word (File → Open); complex formatting: LibreOffice (free) or Tungsten Power PDF (paid) |
 | `#lakehead-dataverse` | `LakeheadDataverse.jsx` | Dedicated guide for depositing data to the Lakehead University Dataverse on Borealis — persuasive intro, 6-card benefits grid, repo picker (LU Dataverse vs FRDR vs Zenodo), 8-step deposit guide, FAQ, contact CTA for Dr. Ayeni |
 
 ---
@@ -339,6 +339,10 @@ All external sources are hyperlinked (`target="_blank" rel="noopener noreferrer"
 
 | Date | Change |
 |---|---|
+| 2026-04-16 | Updated AcrobatAlternative PDF→Word table rows: primary recommendation changed from Google Docs to Microsoft Word (File → Open); removed OCAP®/sensitive row (Word is secure for all cases); added "PDF → Word (complex formatting)" row recommending LibreOffice (free) or Tungsten Power PDF (paid); added `word` badge style (Microsoft blue #2B579A) |
+| 2026-04-16 | Moved cybersecurity guide out of HowThisWorks — full content (7 essential actions, device encryption, passwords/2FA, file encryption, AI warning, controlled data) relocated to RS Toolkit at `https://seawaydigital.github.io/RSToolkit/#cybersecurity-guide`; replaced with a bridge callout card + 4 linked security tool cards (Password Protect PDF, Strip Metadata, SHA-256, Encrypt Text); removed 9 unused lucide icon imports |
+| 2026-04-16 | Reordered sidebar special pages to follow researcher workflow: How This Works → Tri-Agency RDM Policy → Classify Your Data → Research Storage Calculator → Lakehead Dataverse → DRAC Services → Adobe Acrobat Alternative → Request a Tool |
+| 2026-04-16 | Fixed `.lud` page wrapper centering — added `margin: 0 auto` and `padding` to match `.aa` pattern; content was left-aligned |
 | 2026-04-16 | Added Lakehead Dataverse page (`#lakehead-dataverse`) — persuasive + practical guide for LU researchers to deposit data to the institutional Borealis collection; 6 benefit cards, repository picker table (LU Dataverse vs FRDR vs Zenodo), 8-step deposit walkthrough, FAQ accordion, contact CTA for Dr. Philips Ayeni; sidebar link (Database icon, second in special pages group); CSS prefix `.lud-*` |
 | 2026-04-16 | Option A integrations: updated Borealis links in TriAgencyPolicy (repo card URL → LU-specific, added "Recommended for Lakehead" gold badge) and DRACServices (url, tagline, description updated to highlight LU institutional collection) |
 | 2026-04-14 | Added Adobe Acrobat Alternative page (`#acrobat-alternative`) — persuasive cost-saving guide for Lakehead researchers showing how RDM Toolkit + Free Acrobat Reader + Google Docs (Lakehead institutional) + LibreOffice replaces ~$240/yr Acrobat Pro subscription; task coverage table links directly to relevant RDM tools; sidebar link (CircleDollarSign icon, first in special pages); CSS prefix `.aa-*` |
