@@ -5248,6 +5248,19 @@ input:focus, textarea:focus, select:focus {
   line-height: 1.6;
 }
 
+.htw-compliance-card--link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.htw-compliance-card--link:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-tertiary);
+}
+.htw-compliance-card--link:hover h3 {
+  color: var(--accent-primary);
+}
+
 /* ── Security Section ── */
 
 .htw-link {

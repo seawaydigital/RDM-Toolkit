@@ -272,34 +272,34 @@ export default function HowThisWorks() {
           Several tools in this app directly reduce your security footprint when handling research files:
         </p>
         <div className="htw-compliance-grid">
-          <div className="htw-compliance-card">
+          <a href="#password-protect-pdf" className="htw-compliance-card htw-compliance-card--link">
             <Lock size={20} />
             <div>
               <h3>Password Protect PDF</h3>
               <p>Add AES-256 encryption to a PDF before sharing — the recipient needs the password to open it.</p>
             </div>
-          </div>
-          <div className="htw-compliance-card">
+          </a>
+          <a href="#strip-file-metadata" className="htw-compliance-card htw-compliance-card--link">
             <Eye size={20} />
             <div>
               <h3>Strip Metadata</h3>
               <p>Remove hidden author, location, and device information from files before sharing externally.</p>
             </div>
-          </div>
-          <div className="htw-compliance-card">
+          </a>
+          <a href="#sha256-hasher" className="htw-compliance-card htw-compliance-card--link">
             <FileCheck size={20} />
             <div>
               <h3>SHA-256 Hasher</h3>
               <p>Generate a hash fingerprint to verify a file hasn't been altered after transfer or storage.</p>
             </div>
-          </div>
-          <div className="htw-compliance-card">
+          </a>
+          <a href="#encrypt-decrypt-text" className="htw-compliance-card htw-compliance-card--link">
             <Shield size={20} />
             <div>
               <h3>Encrypt / Decrypt Text</h3>
               <p>Encrypt sensitive notes or data snippets with AES-256 before pasting them anywhere.</p>
             </div>
-          </div>
+          </a>
         </div>
       </section>
 
