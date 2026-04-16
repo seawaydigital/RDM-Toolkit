@@ -48,9 +48,9 @@ const RDM_TOOLS = [
     name: 'Borealis',
     icon: Database,
     color: '#10B981',
-    tagline: 'Institutional data repository (Dataverse)',
-    url: 'https://borealisdata.ca',
-    description: 'Canada\'s national Dataverse-based repository, supported by academic libraries across Canada. Lakehead University has an institutional collection on Borealis for self-deposit.',
+    tagline: 'Lakehead\'s institutional data repository',
+    url: 'https://borealisdata.ca/dataverse/lakehead',
+    description: 'Canada\'s national Dataverse-based repository. Lakehead University has its own institutional collection on Borealis — the recommended starting point for most LU researchers. Self-service deposit, DOI assignment, restricted access, and version control. Free for all LU researchers.',
     stats: '25,000+ datasets',
     tags: ['Self-service', 'Institutional', 'Restricted access supported'],
     useCases: [
