@@ -1,4 +1,4 @@
-import { Shield, WifiOff, Wifi, HardDrive, Eye, Server, FileCheck, Lock, Globe, MonitorSmartphone, ArrowRight, ArrowDown, CheckCircle, XCircle, Laptop, KeyRound, Database, CloudOff, AlertTriangle, Copy, Terminal, Smartphone, RefreshCw, ExternalLink } from 'lucide-react';
+import { Shield, WifiOff, Wifi, Eye, FileCheck, Lock, Globe, MonitorSmartphone, ArrowRight, ArrowDown, CheckCircle, XCircle, Laptop, ExternalLink } from 'lucide-react';
 
 export default function HowThisWorks() {
   return (
@@ -243,206 +243,62 @@ export default function HowThisWorks() {
         </div>
       </section>
 
-      {/* ── Security Best Practices for Researchers ── */}
+      {/* ── Bridge to RS Toolkit ── */}
       <section className="htw-section">
-        <h2 className="htw-section-title">Protecting Your Research Data: A Practical Guide</h2>
-        <p className="htw-section-intro">
-          RDM Toolkit keeps your files off servers — but once a file leaves the tool,
-          protecting it is up to you. These practices are drawn from{' '}
-          <a
-            href="https://www.lakeheadu.ca/research-and-innovation/research-services/resources/safeguarding-research-resources/cybersecurity"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="htw-link"
-          >
-            Lakehead University's Cybersecurity guidance for researchers
-            <ExternalLink size={12} style={{ marginLeft: 4, verticalAlign: 'middle' }} />
-          </a>
-          .
-        </p>
-
-        {/* 7 Essential Actions */}
-        <div className="htw-security-callout">
-          <div className="htw-security-callout-header">
-            <Shield size={20} />
-            <strong>7 Essential Actions for Every Researcher</strong>
-          </div>
-          <ol className="htw-security-essentials">
-            <li><KeyRound size={14} /><span>Enable <strong>2FA on both Duo and Google</strong> separately — they protect different Lakehead systems</span></li>
-            <li><Lock size={14} /><span>Use a <strong>password manager</strong> (Bitwarden is free; 1Password is included with many accounts)</span></li>
-            <li><Laptop size={14} /><span><strong>Encrypt your laptop</strong> — BitLocker on Windows, FileVault on Mac</span></li>
-            <li><Wifi size={14} /><span>Use <strong>VPN on public networks</strong>, especially while travelling internationally</span></li>
-            <li><CloudOff size={14} /><span><strong>Never enter sensitive research data into AI tools</strong> like ChatGPT, Copilot, or Gemini</span></li>
-            <li><Copy size={14} /><span>Follow the <strong>3-2-1 backup rule</strong>: 3 copies, 2 different media, 1 offsite</span></li>
-            <li><AlertTriangle size={14} /><span>Know how to <strong>report a security incident</strong> — contact TSC immediately if something feels wrong</span></li>
-          </ol>
-        </div>
-
-        {/* Encrypting files */}
-        <h3 className="htw-subsection-title">Encrypting Files Before Uploading to Cloud Storage</h3>
-        <p className="htw-section-intro">
-          Even when using Lakehead-approved services like Google Drive, you should encrypt files that contain
-          personal information, unpublished findings, industry partner materials, grant proposals, or anything
-          covered by an NDA. Encrypt the file first, then upload the encrypted version.
-        </p>
-
-        <div className="htw-encrypt-grid">
-          <div className="htw-encrypt-card">
-            <div className="htw-encrypt-card-header">
-              <Terminal size={18} />
-              <h4>Windows — 7-Zip (Free)</h4>
-            </div>
-            <ol className="htw-encrypt-steps">
-              <li>Download <a href="https://www.7-zip.org" target="_blank" rel="noopener noreferrer"><strong>7-Zip</strong></a> from <a href="https://www.7-zip.org" target="_blank" rel="noopener noreferrer">7-zip.org</a> (free, open-source)</li>
-              <li>Right-click your file or folder → <strong>7-Zip → Add to archive</strong></li>
-              <li>Set format to <strong>7z</strong></li>
-              <li>Set encryption method to <strong>AES-256</strong></li>
-              <li>Enter a strong passphrase (12+ characters)</li>
-              <li>Upload the resulting <code>.7z</code> file to Google Drive</li>
-            </ol>
-            <div className="htw-encrypt-tip">
-              <CheckCircle size={14} />
-              Share the password separately from the file — never in the same email.
-            </div>
-          </div>
-
-          <div className="htw-encrypt-card">
-            <div className="htw-encrypt-card-header">
-              <Terminal size={18} />
-              <h4>Mac — Terminal (Built-in)</h4>
-            </div>
-            <ol className="htw-encrypt-steps">
-              <li>Open <strong>Terminal</strong> (Applications → Utilities)</li>
-              <li>Run: <code>zip -er ~/Desktop/encrypted.zip /path/to/file</code></li>
-              <li>Enter a strong passphrase when prompted</li>
-              <li>Upload <code>encrypted.zip</code> to Google Drive</li>
-            </ol>
-            <div className="htw-encrypt-tip">
-              <CheckCircle size={14} />
-              For cross-platform sharing (Mac → Windows), consider <a href="https://www.veracrypt.fr" target="_blank" rel="noopener noreferrer"><strong>VeraCrypt</strong></a> for consistent results.
-            </div>
-          </div>
-
-          <div className="htw-encrypt-card">
-            <div className="htw-encrypt-card-header">
-              <Lock size={18} />
-              <h4>Using RDM Toolkit</h4>
-            </div>
-            <ol className="htw-encrypt-steps">
-              <li>Use <strong>Encrypt Text</strong> to encrypt notes or data snippets with AES-256 before pasting anywhere</li>
-              <li>Use <strong>Password Protect PDF</strong> to add a password before sharing PDF reports</li>
-              <li>Use <strong>Strip Metadata</strong> to remove hidden author/location info from files before sharing</li>
-              <li>Use <strong>Hash File (SHA-256)</strong> to verify a file hasn't been tampered with after transfer</li>
-            </ol>
-            <div className="htw-encrypt-tip">
-              <CheckCircle size={14} />
-              All of these run entirely in your browser — nothing is uploaded.
-            </div>
+        <div className="htw-promise">
+          <Shield size={32} />
+          <div>
+            <h2>Protecting Your Research Data</h2>
+            <p>
+              RDM Toolkit keeps your files off servers — but protecting your devices,
+              accounts, and stored data is a separate challenge. For a full guide covering
+              device encryption, passwords &amp; 2FA, backups, AI tool risks, and
+              requirements for controlled research data, visit the{' '}
+              <a
+                href="https://seawaydigital.github.io/RSToolkit/#cybersecurity-guide"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="htw-link"
+              >
+                Research Security Toolkit — Cybersecurity Best Practices
+                <ExternalLink size={12} style={{ marginLeft: 4, verticalAlign: 'middle' }} />
+              </a>.
+            </p>
           </div>
         </div>
 
-        {/* Device encryption */}
-        <h3 className="htw-subsection-title">Encrypting Your Device</h3>
+        <h3 className="htw-subsection-title">RDM Toolkit tools that help</h3>
         <p className="htw-section-intro">
-          If your laptop is stolen without device encryption, anyone can read every file on it — regardless of your login password.
-          Device encryption is your last line of defence.
+          Several tools in this app directly reduce your security footprint when handling research files:
         </p>
-        <div className="htw-device-grid">
-          <div className="htw-device-card">
-            <Laptop size={20} />
-            <div>
-              <h4>Windows — BitLocker</h4>
-              <p>Settings → Privacy &amp; Security → Device Encryption → turn it on. Save your recovery key to your Lakehead Microsoft account, not just locally.</p>
-            </div>
-          </div>
-          <div className="htw-device-card">
-            <Laptop size={20} />
-            <div>
-              <h4>Mac — FileVault</h4>
-              <p>System Settings → Privacy &amp; Security → FileVault → turn it on. Choose to store the recovery key in your iCloud account or write it down and keep it somewhere safe.</p>
-            </div>
-          </div>
-          <div className="htw-device-card">
-            <HardDrive size={20} />
-            <div>
-              <h4>USB Drives &amp; External Storage</h4>
-              <p>Never store research data on an unencrypted USB drive. Use BitLocker To Go (Windows) or the built-in Encrypt option on Mac. For cross-platform drives, use <a href="https://www.veracrypt.fr" target="_blank" rel="noopener noreferrer">VeraCrypt</a> (free).</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Passwords & 2FA */}
-        <h3 className="htw-subsection-title">Passwords &amp; Two-Factor Authentication</h3>
         <div className="htw-compliance-grid">
-          <div className="htw-compliance-card">
-            <KeyRound size={20} />
-            <div>
-              <h3>Strong Passphrases</h3>
-              <p>
-                Use four or more random words — "Closet lamp Bathroom Mug" is stronger than "P@ssw0rd!". The <a href="https://www.cyber.gc.ca" target="_blank" rel="noopener noreferrer">Canadian Centre for Cyber Security</a> recommends at least 12 characters.
-                Check if your email has been in a breach at <a href="https://haveibeenpwned.com" target="_blank" rel="noopener noreferrer">haveibeenpwned.com</a>.
-              </p>
-            </div>
-          </div>
           <div className="htw-compliance-card">
             <Lock size={20} />
             <div>
-              <h3>Password Managers</h3>
-              <p>
-                Use <a href="https://bitwarden.com" target="_blank" rel="noopener noreferrer"><strong>Bitwarden</strong></a> (free, open-source) or <a href="https://1password.com" target="_blank" rel="noopener noreferrer"><strong>1Password</strong></a> to generate and store unique passwords for every account. Never reuse passwords, especially for research systems.
-              </p>
+              <h3>Password Protect PDF</h3>
+              <p>Add AES-256 encryption to a PDF before sharing — the recipient needs the password to open it.</p>
             </div>
           </div>
           <div className="htw-compliance-card">
-            <Smartphone size={20} />
+            <Eye size={20} />
             <div>
-              <h3>Two-Factor Authentication</h3>
-              <p>
-                Lakehead requires 2FA in <strong>two separate places</strong>: Duo Security (for myInfo, D2L) and Google 2-Step Verification (for your Lakehead Google account). Set up both, plus enable 2FA on all other research-related accounts.
-              </p>
+              <h3>Strip Metadata</h3>
+              <p>Remove hidden author, location, and device information from files before sharing externally.</p>
             </div>
           </div>
           <div className="htw-compliance-card">
-            <RefreshCw size={20} />
+            <FileCheck size={20} />
             <div>
-              <h3>The 3-2-1 Backup Rule</h3>
-              <p>
-                Keep <strong>3 copies</strong> of important research data, on <strong>2 different types of media</strong> (e.g., laptop + external drive), with <strong>1 copy offsite</strong> (e.g., Lakehead Google Drive or OneDrive). The LUFA Collective Agreement requires research data to be retained for at least 7 years.
-              </p>
+              <h3>SHA-256 Hasher</h3>
+              <p>Generate a hash fingerprint to verify a file hasn't been altered after transfer or storage.</p>
             </div>
           </div>
-        </div>
-
-        {/* AI tools warning */}
-        <div className="htw-ai-warning">
-          <AlertTriangle size={20} />
-          <div>
-            <strong>Do not input sensitive research data into AI tools.</strong>
-            <p>
-              ChatGPT, Microsoft Copilot, Google Gemini, and similar services may store and use your inputs
-              for training. Never paste participant data, unpublished findings, confidential partner information,
-              grant text, or anything covered by an ethics protocol into these tools. If you need AI assistance
-              with sensitive research, contact the Research Security and Data Management Specialist to discuss
-              approved alternatives.
-            </p>
-          </div>
-        </div>
-
-        {/* Certain research data */}
-        <div className="htw-promise" style={{ marginTop: 'var(--space-lg)' }}>
-          <Database size={32} />
-          <div>
-            <h2>Special Requirements for Certain Research Data</h2>
-            <p>
-              Some categories of research data <strong>must</strong> be stored on Canadian-hosted servers only.
-              This includes defence contracts, Controlled Goods research, provincial health datasets, and projects
-              with specific ethics approval requirements. Before storing sensitive data on any cloud service,
-              consult the <strong>Research Security and Data Management Specialist</strong> in the Office of
-              Research Services.
-            </p>
-            <p style={{ marginTop: '12px' }}>
-              Contact: <strong>rdm.research@lakeheadu.ca</strong>
-            </p>
+          <div className="htw-compliance-card">
+            <Shield size={20} />
+            <div>
+              <h3>Encrypt / Decrypt Text</h3>
+              <p>Encrypt sensitive notes or data snippets with AES-256 before pasting them anywhere.</p>
+            </div>
           </div>
         </div>
       </section>
