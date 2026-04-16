@@ -528,9 +528,12 @@ export default function TriAgencyPolicy() {
           <h3 className="tap-repos-title">Repository Options for Lakehead Researchers</h3>
           <div className="tap-repo-grid">
             <div className="tap-repo-card">
-              <a href="https://borealisdata.ca" target="_blank" rel="noopener noreferrer"><strong>Borealis (Dataverse Canada)</strong></a>
-              <span className="tap-repo-type">General / Institutional</span>
-              <p>Canada's national research data repository. Lakehead has an institutional collection. Supports restricted access.</p>
+              <a href="https://borealisdata.ca/dataverse/lakehead" target="_blank" rel="noopener noreferrer"><strong>Borealis — Lakehead Dataverse</strong></a>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <span className="tap-repo-type">General / Institutional</span>
+                <span className="tap-repo-badge--featured">Recommended for Lakehead</span>
+              </div>
+              <p>Canada's national Dataverse-based repository. Lakehead has its own institutional collection — deposit here for free, get a DOI, and satisfy Tri-Agency requirements. Supports restricted access.</p>
             </div>
             <div className="tap-repo-card">
               <a href="https://www.icpsr.umich.edu" target="_blank" rel="noopener noreferrer"><strong>ICPSR</strong></a>
