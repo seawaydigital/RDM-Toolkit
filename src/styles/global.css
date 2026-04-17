@@ -11622,6 +11622,66 @@ input:focus, textarea:focus, select:focus {
 .compress-secondary-link:hover:not(:disabled) { color: var(--text-primary); }
 .compress-secondary-link:disabled { opacity: 0.5; cursor: not-allowed; }
 
+.compress-cleanup-note {
+  margin-top: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(16, 185, 129, 0.08);
+  border-left: 3px solid var(--accent-green);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.compress-results-note {
+  margin: calc(var(--space-sm) * -1) 0 var(--space-md) 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.compress-no-gains {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-amber);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  color: var(--text-primary);
+}
+.compress-no-gains svg {
+  color: var(--accent-amber);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.compress-no-gains strong {
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+.compress-no-gains p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.compress-secondary-link--prominent {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--accent-primary);
+  text-decoration: none;
+  padding: var(--space-sm) var(--space-lg);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+}
+.compress-secondary-link--prominent:hover:not(:disabled) {
+  background: rgba(255, 194, 14, 0.1);
+  color: var(--accent-primary);
+}
+
 .compress-startover {
   display: inline-flex;
   align-items: center;
@@ -11636,6 +11696,108 @@ input:focus, textarea:focus, select:focus {
   font-family: inherit;
 }
 .compress-startover:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+
+/* Section title sub-tag (e.g. "Keeps text selectable") */
+.compress-results-title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.compress-results-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.compress-results-title--sub {
+  font-size: 14px;
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-sm);
+  color: var(--text-secondary);
+}
+
+/* Aggressive (raster) presets section, revealed on demand under smart presets */
+.compress-aggressive-section {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px dashed var(--border);
+}
+.compress-preset-card--aggressive {
+  border-left: 3px solid var(--accent-amber);
+}
+.compress-preset-cta--aggressive {
+  background: var(--accent-amber);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25);
+}
+
+/* Inline link inside a paragraph (rendered as a button element) */
+.compress-inline-link {
+  background: none;
+  border: none;
+  color: var(--accent-primary);
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.compress-inline-link:hover:not(:disabled) { filter: brightness(1.1); }
+.compress-inline-link:disabled { opacity: 0.5; cursor: not-allowed; text-decoration: none; }
+
+/* Honest callout: desktop tools can do better for heavily scanned PDFs */
+.compress-advisory {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--lh-cobalt);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-lg);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.compress-advisory > svg {
+  color: var(--lh-cobalt);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.compress-advisory strong {
+  display: block;
+  margin-bottom: var(--space-xs);
+  color: var(--text-primary);
+}
+.compress-advisory p {
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--text-secondary);
+}
+.compress-advisory-list {
+  margin: 0 0 var(--space-sm) 0;
+  padding-left: var(--space-md);
+  color: var(--text-secondary);
+}
+.compress-advisory-list li {
+  margin-bottom: 4px;
+}
+.compress-advisory-list a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+.compress-advisory-list a:hover { text-decoration: underline; }
+.compress-advisory-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0 !important;
+}
 
 /* ========================================
    FILLABLE PDF FORM
