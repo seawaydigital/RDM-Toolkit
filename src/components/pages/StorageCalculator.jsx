@@ -1222,11 +1222,11 @@ export default function StorageCalculator() {
         <div className="sc-left">
           {/* Compact Header */}
           <div style={{ marginBottom: 'var(--space-lg)' }}>
-            <h1 style={{ fontFamily: 'var(--font-mono)', fontSize: 22, fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 10 }}>
-              <HardDrive size={22} />
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 30, fontWeight: 500, fontVariationSettings: '"opsz" 48, "SOFT" 40', letterSpacing: '-0.015em', color: 'var(--text-parchment)', display: 'flex', alignItems: 'center', gap: 10, lineHeight: 1.1 }}>
+              <HardDrive size={24} style={{ color: 'var(--accent-primary)' }} />
               Research Storage Calculator
             </h1>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--text-secondary)', marginTop: 8, lineHeight: 1.55 }}>
               Estimate how much storage your research project needs.
             </p>
           </div>

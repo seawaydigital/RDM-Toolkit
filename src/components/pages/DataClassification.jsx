@@ -623,8 +623,9 @@ export default function DataClassification() {
     return (
       <div className="htw dc-page">
         <div className="htw-hero">
-          <h1 className="htw-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-            <ShieldCheck size={36} />
+          <div className="htw-kicker">Guided assessment</div>
+          <h1 className="htw-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
+            <ShieldCheck size={32} style={{ color: 'var(--accent-primary)' }} />
             Data Classification Tool
           </h1>
           <p className="htw-subtitle">

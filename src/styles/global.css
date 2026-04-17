@@ -5359,20 +5359,51 @@ input:focus, textarea:focus, select:focus {
 
 .htw-hero {
   text-align: center;
-  padding: var(--space-xl) 0 var(--space-lg);
+  padding: var(--space-xl) 0 var(--space-xl);
+  margin-bottom: var(--space-xl);
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+.htw-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+  margin-bottom: 18px;
+}
+
+.htw-kicker::before,
+.htw-kicker::after {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
 }
 
 .htw-title {
-  font-family: var(--font-mono);
-  font-size: 36px;
-  font-weight: 600;
-  color: var(--accent-cyan);
-  margin-bottom: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 72, "SOFT" 40;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--text-parchment);
+  margin-bottom: 14px;
 }
 
 .htw-subtitle {
+  font-family: var(--font-sans);
   font-size: 16px;
+  line-height: 1.55;
   color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .htw-section {
@@ -5380,10 +5411,27 @@ input:focus, textarea:focus, select:focus {
 }
 
 .htw-section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-display);
   font-size: 22px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--space-sm);
+  font-weight: 500;
+  font-variation-settings: "opsz" 36, "SOFT" 40;
+  letter-spacing: -0.01em;
+  color: var(--text-parchment);
+  margin-bottom: 14px;
+}
+
+.htw-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-hairline) 0%, transparent 100%);
+}
+
+@media (max-width: 767px) {
+  .htw-title { font-size: 32px; }
 }
 
 .htw-section-intro {
@@ -5994,20 +6042,27 @@ input:focus, textarea:focus, select:focus {
 .tap-agency-sep { color: var(--text-muted); font-size: 18px; }
 
 .tap-title {
-  font-family: var(--font-mono);
-  font-size: 30px;
-  font-weight: 700;
-  color: var(--accent-cyan);
-  margin-bottom: var(--space-sm);
-  line-height: 1.3;
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 72, "SOFT" 40;
+  letter-spacing: -0.02em;
+  color: var(--text-parchment);
+  margin-bottom: 14px;
+  line-height: 1.1;
 }
 
 .tap-subtitle {
+  font-family: var(--font-sans);
   font-size: 16px;
   color: var(--text-secondary);
-  max-width: 560px;
+  max-width: 620px;
   margin: 0 auto var(--space-md);
   line-height: 1.6;
+}
+
+@media (max-width: 767px) {
+  .tap-title { font-size: 30px; }
 }
 
 .tap-source-link {
@@ -6028,10 +6083,23 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: var(--space-2xl);
 }
 .tap-section-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--space-sm);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 36, "SOFT" 40;
+  letter-spacing: -0.01em;
+  color: var(--text-parchment);
+  margin-bottom: 14px;
+}
+
+.tap-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-hairline) 0%, transparent 100%);
 }
 .tap-section-intro {
   font-size: 14px;
@@ -6497,36 +6565,50 @@ input:focus, textarea:focus, select:focus {
 /* Hero */
 .drac-hero {
   text-align: center;
-  padding: var(--space-xl) 0 var(--space-lg);
-  border-bottom: 1px solid var(--border);
+  padding: var(--space-xl) 0 var(--space-xl);
+  border-bottom: 1px solid var(--border-hairline);
   margin-bottom: var(--space-xl);
 }
 .drac-hero-logo {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-sm);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-bottom: var(--space-md);
-}
-.drac-hero-logo svg { color: var(--accent-cyan); }
-.drac-title {
-  font-family: var(--font-mono);
-  font-size: 28px;
+  gap: 10px;
+  font-family: var(--font-sans);
+  font-size: 10px;
   font-weight: 700;
-  color: var(--accent-cyan);
-  margin-bottom: var(--space-sm);
-  line-height: 1.3;
+  color: var(--accent-primary);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.drac-hero-logo::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.7;
+}
+.drac-hero-logo svg { color: var(--accent-primary); }
+.drac-title {
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 72, "SOFT" 40;
+  letter-spacing: -0.02em;
+  color: var(--text-parchment);
+  margin-bottom: 14px;
+  line-height: 1.1;
 }
 .drac-subtitle {
-  font-size: 15px;
+  font-family: var(--font-sans);
+  font-size: 16px;
   color: var(--text-secondary);
-  max-width: 560px;
+  max-width: 620px;
   margin: 0 auto var(--space-lg);
-  line-height: 1.7;
+  line-height: 1.6;
+}
+@media (max-width: 767px) {
+  .drac-title { font-size: 30px; }
 }
 .drac-stats {
   display: flex;
@@ -6593,10 +6675,22 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: var(--space-lg);
 }
 .drac-subsection-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: var(--space-xl) 0 var(--space-md);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 36, "SOFT" 40;
+  letter-spacing: -0.01em;
+  color: var(--text-parchment);
+  margin: var(--space-xl) 0 14px;
+}
+.drac-subsection-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-hairline) 0%, transparent 100%);
 }
 /* ── Cluster concepts grid ── */
 .drac-concepts-grid {
@@ -8231,10 +8325,22 @@ input:focus, textarea:focus, select:focus {
 }
 
 .dc-section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--space-sm);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 36, "SOFT" 40;
+  letter-spacing: -0.01em;
+  color: var(--text-parchment);
+  margin-bottom: 14px;
+}
+.dc-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-hairline) 0%, transparent 100%);
 }
 
 .dc-section-desc {
@@ -8677,9 +8783,12 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sc-section-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 36, "SOFT" 40;
+  letter-spacing: -0.005em;
+  color: var(--text-parchment);
   margin-bottom: var(--space-md);
   display: flex;
   align-items: center;
@@ -11636,18 +11745,25 @@ input:focus, textarea:focus, select:focus {
   color: var(--accent-primary);
 }
 .lud-hero h1 {
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: var(--space-md);
-  line-height: 1.25;
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 72, "SOFT" 40;
+  letter-spacing: -0.02em;
+  color: var(--text-parchment);
+  margin-bottom: 14px;
+  line-height: 1.1;
 }
 .lud-hero-sub {
-  font-size: 15px;
+  font-family: var(--font-sans);
+  font-size: 16px;
   color: var(--text-secondary);
-  line-height: 1.7;
-  max-width: 600px;
+  line-height: 1.6;
+  max-width: 620px;
   margin: 0 auto var(--space-lg);
+}
+@media (max-width: 767px) {
+  .lud-hero h1 { font-size: 30px; }
 }
 .lud-hero-actions {
   display: flex;
@@ -11706,10 +11822,22 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: var(--space-2xl);
 }
 .lud-section-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--space-sm);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 36, "SOFT" 40;
+  letter-spacing: -0.01em;
+  color: var(--text-parchment);
+  margin-bottom: 14px;
+}
+.lud-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-hairline) 0%, transparent 100%);
 }
 .lud-section-intro {
   font-size: 14px;

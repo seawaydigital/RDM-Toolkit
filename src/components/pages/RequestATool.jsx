@@ -67,6 +67,7 @@ export default function RequestATool() {
   return (
     <div className="htw">
       <div className="htw-hero">
+        <div className="htw-kicker">Submissions welcome</div>
         <h1 className="htw-title">Request a Tool</h1>
         <p className="htw-subtitle">
           Have an idea for a tool that should be added? Let us know.

@@ -4,6 +4,7 @@ export default function HowThisWorks() {
   return (
     <div className="htw">
       <div className="htw-hero">
+        <div className="htw-kicker">The privacy model</div>
         <h1 className="htw-title">How RDM Toolkit Works</h1>
         <p className="htw-subtitle">
           A plain-language explanation of why your files are safe here.
