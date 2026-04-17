@@ -97,15 +97,6 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
           </button>
         )}
 
-        {/* Brand header */}
-        <div className="sidebar-brand">
-          <div className="sidebar-brand-mark" aria-hidden="true">L</div>
-          <div className="sidebar-brand-text">
-            <span className="sidebar-brand-kicker">Lakehead Research</span>
-            <span className="sidebar-brand-name">Data Toolkit</span>
-          </div>
-        </div>
-
         <div className="sidebar-scroll">
           {/* Primary categories */}
           {PRIMARY_CATEGORIES.map(renderCategory)}

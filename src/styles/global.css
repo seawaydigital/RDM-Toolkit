@@ -248,8 +248,10 @@ input:focus, textarea:focus, select:focus {
   line-height: 1;
 }
 
-.topbar-logo::first-letter {
+.topbar-logo-mark {
   color: var(--accent-primary);
+  font-weight: 700;
+  letter-spacing: 0.005em;
 }
 
 .topbar-subtitle {
