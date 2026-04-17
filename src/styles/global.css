@@ -12748,6 +12748,95 @@ input:focus, textarea:focus, select:focus {
   margin: 0 !important;
 }
 
+/* Split PDF recommendation — shown when file is very large or compression won't help much */
+.compress-split-rec {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  margin-top: var(--space-lg);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.compress-split-rec > svg {
+  color: var(--accent-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.compress-split-rec strong {
+  display: block;
+  margin-bottom: var(--space-xs);
+  color: var(--text-primary);
+}
+.compress-split-rec p {
+  margin: 0 0 var(--space-sm) 0;
+  color: var(--text-secondary);
+}
+.compress-split-rec-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  box-shadow: 0 2px 6px rgba(255, 194, 14, 0.25);
+}
+.compress-split-rec-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(255, 194, 14, 0.35);
+  filter: brightness(1.05);
+}
+.compress-split-rec-cta:active { transform: translateY(0); }
+.compress-split-rec-cta--compact {
+  padding: 6px 12px;
+  font-size: 12px;
+  margin-top: var(--space-sm);
+}
+
+/* Large-file warning (>100 MB) with split CTA */
+.compress-large-file {
+  margin: var(--space-md) 0;
+}
+.compress-large-file-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-amber);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.compress-large-file-warning > svg {
+  color: var(--accent-amber);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.compress-large-file-warning strong {
+  display: block;
+  margin-bottom: var(--space-xs);
+  color: var(--text-primary);
+}
+.compress-large-file-warning p {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
 /* ========================================
    FILLABLE PDF FORM
    ======================================== */
