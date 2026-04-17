@@ -11155,7 +11155,7 @@ input:focus, textarea:focus, select:focus {
   font-size: 1.0625rem;
   color: var(--text-secondary);
   line-height: 1.65;
-  max-width: 560px;
+  max-width: 640px;
   margin: 0 auto var(--space-xl);
 }
 

@@ -141,27 +141,31 @@ export default function AcrobatAlternative() {
       <div className="aa-hero">
         <div className="aa-hero-eyebrow">
           <CircleDollarSign size={15} />
-          Cost guide for Lakehead researchers
+          Subscription review for Lakehead researchers
         </div>
-        <h1 className="aa-hero-title">Ditch Adobe Acrobat Pro</h1>
+        <h1 className="aa-hero-title">Do you still need Adobe Acrobat Pro?</h1>
         <p className="aa-hero-subtitle">
-          Most researchers at Lakehead can cover their entire Adobe Acrobat workflow
-          for free — using tools already available to them.
+          Before your next renewal, it's worth taking stock of what you actually use
+          Acrobat Pro for. For most research workflows at Lakehead, the features you
+          rely on are already available through free, institution-supported tools —
+          a quiet way to reclaim a few hundred dollars a year from a subscription
+          that may be quietly auto-renewing.
         </p>
         <div className="aa-cost-badge">
           <span className="aa-cost-free">$0&thinsp;/&thinsp;year</span>
           <span className="aa-cost-divider">vs</span>
           <span className="aa-cost-paid">~$240&thinsp;/&thinsp;year</span>
-          <span className="aa-cost-label">for Adobe Acrobat Pro</span>
+          <span className="aa-cost-label">Acrobat Pro subscription</span>
         </div>
       </div>
 
       {/* ── The Free Stack ─────────────────────────────────────────────── */}
       <section className="aa-section">
-        <h2 className="aa-section-title">The Free Stack</h2>
+        <h2 className="aa-section-title">The equivalent toolkit</h2>
         <p className="aa-section-intro">
-          Four free tools — used together — replace Adobe Acrobat Pro for the vast
-          majority of research workflows.
+          Four complementary tools — most already available to you — together cover the
+          same ground as Acrobat Pro for the vast majority of research workflows, with
+          no subscription required.
         </p>
         <div className="aa-stack-grid">
           {STACK.map((tool) => {
@@ -214,9 +218,10 @@ export default function AcrobatAlternative() {
 
       {/* ── Task Coverage Table ─────────────────────────────────────────── */}
       <section className="aa-section">
-        <h2 className="aa-section-title">Task Coverage</h2>
+        <h2 className="aa-section-title">Task coverage</h2>
         <p className="aa-section-intro">
-          Every common Adobe Acrobat Pro task — and which free tool covers it.
+          A task-by-task comparison of common Acrobat Pro workflows and the free
+          tools that handle them.
         </p>
         <div className="aa-table-wrap">
           <table className="aa-table">
@@ -285,11 +290,12 @@ export default function AcrobatAlternative() {
       <section className="aa-section aa-honest-section">
         <div className="aa-honest-header">
           <AlertCircle size={18} style={{ color: 'var(--accent-amber)', flexShrink: 0 }} />
-          <h2 className="aa-section-title" style={{ margin: 0 }}>When Acrobat Pro Is Still Worth It</h2>
+          <h2 className="aa-section-title" style={{ margin: 0 }}>When Acrobat Pro still earns its keep</h2>
         </div>
         <p className="aa-section-intro">
-          Two genuine scenarios where a paid Acrobat subscription is justified. If neither
-          applies to your workflow, you likely don't need it.
+          Two genuine scenarios where an Acrobat Pro subscription earns its keep. If
+          neither matches your workflow, the free toolkit above will likely serve you
+          just as well.
         </p>
         <div className="aa-honest-cards">
           <div className="aa-honest-card">
@@ -324,13 +330,13 @@ export default function AcrobatAlternative() {
         <div className="aa-beyond-card">
           <div className="aa-beyond-top">
             <Sparkles size={18} style={{ color: 'var(--accent-primary)', flexShrink: 0 }} />
-            <div className="aa-beyond-title">RDM Toolkit does far more than Acrobat Pro — and it's 100% free</div>
+            <div className="aa-beyond-title">Research-specific tools Acrobat doesn't cover</div>
           </div>
           <p className="aa-beyond-body">
-            The comparison above only covers tasks Adobe Acrobat Pro is known for. RDM Toolkit
-            also includes an entire suite of research-specific tools that Acrobat doesn't touch
-            at all — all running privately in your browser, with no account, no subscription,
-            and no files ever leaving your device.
+            The comparison above is limited to PDF workflows, which is where Acrobat Pro
+            is strongest. RDM Toolkit also includes a suite of research-specific tools
+            outside Acrobat's scope — all running privately in your browser, with no
+            account, no subscription, and no files ever leaving your device.
           </p>
           <div className="aa-beyond-chips">
             {[
