@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { ShieldCheck, ShieldAlert, ShieldX, Info, ChevronLeft, ChevronRight, Printer, Copy, RotateCcw, Check, ChevronDown } from 'lucide-react';
+import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
 
 /* ============================================================
    CONSTANTS
@@ -713,8 +714,8 @@ export default function DataClassification() {
         <div className="dc-disclaimer">
           <p>
             This classification is based on the <em>Lakehead University Research Data Guidelines and Classification Standard</em> (March 2024).
-            For complex cases or questions, contact the Office of Research Services at{' '}
-            <a href="mailto:rdm.research@lakeheadu.ca">rdm.research@lakeheadu.ca</a>.
+            For complex cases or questions, contact the {INSTITUTION.researchOffice} at{' '}
+            <a href={MAILTO.rdm}>{INSTITUTION.rdmEmail}</a>.
           </p>
         </div>
       </div>

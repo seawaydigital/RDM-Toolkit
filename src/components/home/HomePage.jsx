@@ -71,14 +71,14 @@ export default function HomePage({ onNavigate }) {
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
       <div className="homepage-hero">
         <div className="homepage-hero-kicker">
-          A Scholarly Perspective
-          <span className="homepage-hero-serial">№ 01 · EST. 2026</span>
+          Lakehead Research Data Toolkit
+          <span className="homepage-hero-serial">EST. 2026</span>
         </div>
         <h1 className="homepage-title">
           Research data, <em>handled</em> with rigor.
         </h1>
         <p className="homepage-tagline">
-          A curated suite of browser-native instruments designed to secure, analyze, and preserve your academic data — without a single byte ever leaving your device.
+          A browser-native toolkit for Lakehead researchers — secure, analyze, and preserve your data without a single byte leaving your device.
         </p>
         <div className="homepage-trust">
           <span className="homepage-trust-badge">🔒 No uploads</span>

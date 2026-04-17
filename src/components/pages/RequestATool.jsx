@@ -1,4 +1,5 @@
 import { Mail, Server, AlertTriangle, FileText, Video, Globe, Cpu, Image, Code } from 'lucide-react';
+import { INSTITUTION } from '../../data/institutionConfig';
 
 const CONSIDERED_TOOLS = [
   {
@@ -86,10 +87,10 @@ export default function RequestATool() {
             </p>
             <p style={{ marginTop: '12px' }}>
               <a
-                href="mailto:rdm.research@lakeheadu.ca?subject=RDM%20Toolkit%20-%20Tool%20Request"
+                href={`mailto:${INSTITUTION.rdmEmail}?subject=RDM%20Toolkit%20-%20Tool%20Request`}
                 style={{ fontSize: 16, fontWeight: 600 }}
               >
-                rdm.research@lakeheadu.ca
+                {INSTITUTION.rdmEmail}
               </a>
             </p>
             <p style={{ marginTop: '12px', fontSize: 13, color: 'var(--text-muted)' }}>

@@ -7053,6 +7053,80 @@ input:focus, textarea:focus, select:focus {
   color: #0A1628;
 }
 
+/* Per-agency matrix */
+.tap-matrix {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.tap-matrix-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-top: 3px solid var(--matrix-accent, var(--accent-primary));
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-card);
+}
+.tap-matrix-card--cihr  { --matrix-accent: #F87171; }
+.tap-matrix-card--nserc { --matrix-accent: #60A5FA; }
+.tap-matrix-card--sshrc { --matrix-accent: #34D399; }
+.tap-matrix-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-hairline);
+  margin-bottom: var(--space-sm);
+}
+.tap-matrix-disciplines {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.tap-matrix-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.tap-matrix-list li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+.tap-matrix-icon { flex-shrink: 0; margin-top: 3px; }
+.tap-matrix-icon--done { color: var(--accent-green); }
+.tap-matrix-icon--active { color: var(--accent-amber); }
+.tap-matrix-icon--pending { color: var(--text-muted); }
+.tap-matrix-list strong {
+  display: block;
+  font-size: 12px;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.tap-matrix-list p {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+.tap-matrix-footnote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  padding: var(--space-sm) var(--space-md);
+  background: rgba(255,255,255,0.02);
+  border-left: 2px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  margin: 0;
+}
+.tap-matrix-footnote svg { flex-shrink: 0; margin-top: 2px; color: var(--text-muted); }
+
 /* Indigenous section */
 .tap-indigenous {
   background: rgba(168,85,247,0.06);
@@ -7080,6 +7154,17 @@ input:focus, textarea:focus, select:focus {
   gap: var(--space-sm);
   margin-bottom: var(--space-md);
 }
+.tap-indigenous-subtitle {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: #C084FC;
+  margin: var(--space-lg) 0 var(--space-sm);
+  letter-spacing: -0.01em;
+}
+.tap-indigenous-subtitle:first-of-type {
+  margin-top: 0;
+}
 .tap-indigenous-card {
   background: rgba(168,85,247,0.06);
   border: 1px solid rgba(168,85,247,0.18);
@@ -7096,6 +7181,228 @@ input:focus, textarea:focus, select:focus {
   padding: var(--space-sm) var(--space-md);
   margin: 0;
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Grants & Identifiers page (.gai-*) — reuses .htw hero/section structure
+   ────────────────────────────────────────────────────────────────────────── */
+
+.gai-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-md);
+}
+.gai-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-top: 3px solid var(--gai-accent, var(--accent-primary));
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-md) var(--space-lg);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.gai-card-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-hairline);
+  color: var(--gai-accent, var(--accent-primary));
+}
+.gai-card-head strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.gai-card-head span {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.gai-card-desc {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin: 0;
+}
+.gai-card-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gai-card-bullets li {
+  display: flex;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+.gai-card-bullets svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--gai-accent, var(--accent-primary));
+}
+.gai-card-bullets a { color: var(--text-primary); text-decoration: underline; text-decoration-color: rgba(255,255,255,0.25); }
+.gai-card-bullets a:hover { text-decoration-color: var(--accent-primary); }
+.gai-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  margin-top: auto;
+  padding-top: var(--space-sm);
+}
+.gai-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--gai-accent, var(--accent-primary));
+  color: #0A1628;
+  font-weight: 600;
+  font-size: 12.5px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.gai-card-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px -8px rgba(0,0,0,0.6);
+}
+.gai-card-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+.gai-card-secondary:hover { color: var(--text-primary); text-decoration: underline; }
+
+/* Recommended order */
+.gai-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  counter-reset: gai-step;
+}
+.gai-steps > li {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+}
+.gai-step-num {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,194,14,0.15);
+  color: var(--accent-primary);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gai-steps strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.gai-steps p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Ethics / supporting resources */
+.gai-ethics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-md);
+}
+.gai-ethics-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.gai-ethics-card strong {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+.gai-ethics-card p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+  flex: 1;
+}
+.gai-ethics-card a {
+  font-size: 12.5px;
+  color: var(--accent-primary);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.gai-ethics-card a:hover { text-decoration: underline; }
+
+/* EDI section */
+.tap-edi {
+  background: rgba(20,184,166,0.06);
+  border: 1px solid rgba(20,184,166,0.25);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+.tap-edi-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+  color: #5EEAD4;
+}
+.tap-edi-header h2 { font-size: 18px; font-weight: 600; color: var(--text-primary); margin: 0; }
+.tap-edi > p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: var(--space-lg);
+}
+.tap-edi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-sm);
+}
+.tap-edi-card {
+  background: rgba(20,184,166,0.06);
+  border: 1px solid rgba(20,184,166,0.18);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+}
+.tap-edi-card strong { display: block; font-size: 13px; color: var(--text-primary); margin-bottom: 6px; }
+.tap-edi-card p { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.6; }
 
 /* Timeline */
 .tap-timeline { display: flex; flex-direction: column; gap: 0; position: relative; }
