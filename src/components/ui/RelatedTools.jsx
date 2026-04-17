@@ -14,7 +14,10 @@ export default function RelatedTools({ toolId, onNavigate }) {
 
   return (
     <div className="related-tools">
-      <p className="related-tools-title">You might also need&hellip;</p>
+      <h2 className="related-tools-title">
+        You might also need
+        <span className="related-tools-count">{relatedTools.length} · suggested</span>
+      </h2>
       <div className="related-tools-row">
         {relatedTools.map(tool => {
           const desc = tool.description.length > 60

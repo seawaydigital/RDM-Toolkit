@@ -336,21 +336,42 @@ export default function App() {
               fallback={(err) => <ToolErrorFallback onReset={() => setErrorResetKey(k => k + 1)} error={err} />}
             >
               <Suspense fallback={<ToolSkeleton />}>
-                <div className="tool-header">
-                  <h1 className="tool-title">{currentTool?.name}</h1>
+                <div className="tool-page">
+                  <header className="tool-header">
+                    {currentTool?.categoryLabel && (
+                      <div className="tool-header-kicker">
+                        <span className="tool-header-emoji" aria-hidden="true">{currentTool.categoryEmoji}</span>
+                        {currentTool.categoryLabel}
+                      </div>
+                    )}
+                    <h1 className="tool-title">{currentTool?.name}</h1>
+                    {currentTool?.description && (
+                      <p className="tool-header-lede">{currentTool.description}</p>
+                    )}
+                  </header>
+                  <ToolComponent
+                    tool={currentTool}
+                    navigateTo={navigateTo}
+                  />
+                  <RelatedTools toolId={currentToolId} onNavigate={navigateTo} />
                 </div>
-                <ToolComponent
-                  tool={currentTool}
-                  navigateTo={navigateTo}
-                />
-                <RelatedTools toolId={currentToolId} onNavigate={navigateTo} />
               </Suspense>
             </ErrorBoundary>
           )}
           {currentToolId && !ToolComponent && (
-            <div className="tool-placeholder">
-              <h1 className="tool-title">{currentTool?.name || 'Unknown Tool'}</h1>
-              <p className="tool-placeholder-text">This tool is coming soon.</p>
+            <div className="tool-page">
+              <header className="tool-header">
+                {currentTool?.categoryLabel && (
+                  <div className="tool-header-kicker">
+                    <span className="tool-header-emoji" aria-hidden="true">{currentTool.categoryEmoji}</span>
+                    {currentTool.categoryLabel}
+                  </div>
+                )}
+                <h1 className="tool-title">{currentTool?.name || 'Unknown Tool'}</h1>
+              </header>
+              <div className="tool-placeholder">
+                <p className="tool-placeholder-text">This tool is coming soon.</p>
+              </div>
             </div>
           )}
         </MainContent>

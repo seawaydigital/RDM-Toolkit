@@ -5,7 +5,6 @@ export default function InfoCard({ description, limitations }) {
 
   return (
     <div className="info-card">
-      <p className="info-card-description">{description}</p>
       <div className="info-card-badges">
         <span className="info-card-badge">{'\u25CF'} Works in your browser</span>
         <span className="info-card-badge">{'\u25CF'} Your files never leave your device</span>
