@@ -6,7 +6,7 @@ import DropZone from '../../components/ui/DropZone';
 import ResultPanel from '../../components/ui/ResultPanel';
 import ErrorCard from '../../components/ui/ErrorCard';
 import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
-import { Download, RotateCcw, X, Loader2, Sparkles, ExternalLink, Info } from 'lucide-react';
+import { Download, RotateCcw, X, Loader2, Sparkles, ExternalLink, Info, Scissors } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
@@ -19,6 +19,7 @@ const LIMITATIONS = [
   'Aggressive compression flattens text to images — text won\u2019t be selectable in the output',
   'Text-only mode strips XMP metadata, embedded file attachments, JavaScript, and page thumbnails (title, author, and outlines are preserved)',
   'Sizes shown before download are estimates and are typically within \u00b115% of the actual result',
+  'For very large PDFs (>50 MB) or files that won\u2019t compress much, consider splitting instead — the Split PDF tool is suggested automatically when that\u2019s likely to help',
   'For heavily scanned documents, dedicated desktop tools (PDFGear, Ghostscript) still produce smaller files — see the note below',
 ];
 
@@ -41,6 +42,11 @@ const IMAGE_HEAVY_RATIO = 0.3;
 const LARGE_FILE_BYTES = 100 * 1024 * 1024;
 // A preset is "useful" if estimated savings exceed this fraction of the original.
 const MIN_USEFUL_REDUCTION = 0.05;
+// Below this we recommend the Split PDF tool as an alternative.
+const SPLIT_RECOMMEND_BYTES = 50 * 1024 * 1024;
+// If even the best preset won't reduce the file by more than this fraction,
+// splitting is often a better strategy than compression.
+const POOR_COMPRESSION_THRESHOLD = 0.20;
 
 async function analyzePdfContent(pdfJsDoc) {
   let pagesWithLargeImages = 0;
@@ -452,6 +458,35 @@ async function compressStructural(fileBytes) {
   return { bytes: out, cleanupStats };
 }
 
+function SplitPdfRecommendation({ onNavigate, reason, fileSize }) {
+  const headline =
+    reason === 'poor-compression'
+      ? 'Compression won\u2019t shrink this PDF much'
+      : 'Also consider splitting this PDF';
+  const body =
+    reason === 'poor-compression'
+      ? 'Based on the estimates above, compression won\u2019t reduce this file by much. Splitting it into logical sections (chapters, appendices, date ranges) is often a better way to make each piece easier to share, email, or archive.'
+      : `This PDF is ${formatFileSize(fileSize)}. At this size, splitting into chapters or sections is often more practical than compression — each part is easier to share, email (most providers cap attachments at 25 MB), or archive separately.`;
+
+  return (
+    <div className="compress-split-rec">
+      <Scissors size={18} />
+      <div>
+        <strong>{headline}</strong>
+        <p>{body}</p>
+        <button
+          className="compress-split-rec-cta"
+          type="button"
+          onClick={() => onNavigate?.('split-pdf')}
+        >
+          <Scissors size={14} />
+          Open Split PDF
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AdvisoryCallout() {
   return (
     <div className="compress-advisory">
@@ -778,6 +813,24 @@ export default function CompressPDF({ tool, navigateTo }) {
   const showSmart = mode === 'smart' && smartEstimates && file && !structuralResult;
   const showRaster = mode === 'raster' && rasterEstimates && file && !structuralResult;
 
+  // Should we recommend splitting as an alternative?
+  // Reason 1: the file is simply large (>50 MB) — splitting helps with sharing/email limits.
+  // Reason 2: the best available estimate reduces by <20% — compression isn't going to help much.
+  let splitReason = null;
+  if (file) {
+    if (file.size > SPLIT_RECOMMEND_BYTES) splitReason = 'large';
+    const bestSmart = smartEstimates ? Math.min(...Object.values(smartEstimates.estimates)) : Infinity;
+    const bestRaster = rasterEstimates ? Math.min(...Object.values(rasterEstimates)) : Infinity;
+    const bestBytes = Math.min(bestSmart, bestRaster);
+    if (
+      Number.isFinite(bestBytes) &&
+      bestBytes > file.size * (1 - POOR_COMPRESSION_THRESHOLD)
+    ) {
+      // Prefer "poor-compression" reason (more actionable) when both triggers fire.
+      splitReason = 'poor-compression';
+    }
+  }
+
   return (
     <div className="tool-container">
       <InfoCard description={DESCRIPTION} limitations={LIMITATIONS} />
@@ -839,10 +892,23 @@ export default function CompressPDF({ tool, navigateTo }) {
       )}
 
       {file && file.size > LARGE_FILE_BYTES && !structuralResult && (
-        <ErrorCard
-          title="Large file"
-          message={`This PDF is ${formatFileSize(file.size)}. Compression may take 30 seconds or more once you pick a version.`}
-        />
+        <div className="compress-large-file">
+          <div className="compress-large-file-warning">
+            <Info size={16} />
+            <div>
+              <strong>Large file ({formatFileSize(file.size)})</strong>
+              <p>Compression may take 30 seconds or more once you pick a version. If you only need to share part of this PDF, splitting it first is usually faster than compressing.</p>
+              <button
+                className="compress-split-rec-cta compress-split-rec-cta--compact"
+                type="button"
+                onClick={() => navigateTo?.('split-pdf')}
+              >
+                <Scissors size={14} />
+                Split this PDF instead
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Smart compression (image XObject replacement) — primary when available */}
@@ -1043,6 +1109,14 @@ export default function CompressPDF({ tool, navigateTo }) {
               </div>
             )}
 
+            {splitReason && (
+              <SplitPdfRecommendation
+                onNavigate={navigateTo}
+                reason={splitReason}
+                fileSize={file.size}
+              />
+            )}
+
             <AdvisoryCallout />
 
             <button className="compress-startover" onClick={handleStartOver} type="button">
@@ -1084,6 +1158,13 @@ export default function CompressPDF({ tool, navigateTo }) {
                   {structuralLoading ? 'Running text-only compression\u2026' : 'Try text-only compression instead (keeps selectable text)'}
                 </button>
               </div>
+              {splitReason && (
+                <SplitPdfRecommendation
+                  onNavigate={navigateTo}
+                  reason={splitReason}
+                  fileSize={file.size}
+                />
+              )}
               <AdvisoryCallout />
               <button className="compress-startover" onClick={handleStartOver} type="button">
                 <RotateCcw size={14} />
@@ -1170,6 +1251,14 @@ export default function CompressPDF({ tool, navigateTo }) {
                   {structuralLoading ? 'Running text-only cleanup\u2026' : 'Or just clean up metadata (fastest, preserves text and images) \u2192'}
                 </button>
               </div>
+            )}
+
+            {splitReason && (
+              <SplitPdfRecommendation
+                onNavigate={navigateTo}
+                reason={splitReason}
+                fileSize={file.size}
+              />
             )}
 
             <AdvisoryCallout />
