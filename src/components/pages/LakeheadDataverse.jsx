@@ -3,6 +3,7 @@ import {
   Link, Shield, Lock, CheckCircle, GitBranch, Users,
   ChevronRight, Star, Database, ExternalLink
 } from 'lucide-react';
+import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
 
 /* ── Benefits data ───────────────────────────────────────────── */
 const BENEFITS = [
@@ -152,7 +153,7 @@ export default function LakeheadDataverse() {
           >
             Browse the Lakehead Dataverse <ExternalLink size={14} />
           </a>
-          <a href="mailto:payeni1@lakeheadu.ca" className="lud-hero-link">
+          <a href={MAILTO.dataLibrarian} className="lud-hero-link">
             Get help from the library
           </a>
         </div>
@@ -209,7 +210,7 @@ export default function LakeheadDataverse() {
         <p className="lud-picker-callout">
           Not sure? Start with the LU Dataverse. The library can help you migrate to FRDR if
           your dataset grows.{' '}
-          <a href="mailto:payeni1@lakeheadu.ca">Contact Dr. Ayeni →</a>
+          <a href={MAILTO.dataLibrarian}>Contact Dr. Ayeni →</a>
         </p>
       </section>
 
@@ -265,7 +266,7 @@ export default function LakeheadDataverse() {
                     ? <p className="lud-faq-answer">
                         Contact Dr. Philips Ayeni, Lakehead's Scholarly Communications &amp; Data
                         Services Librarian, at{' '}
-                        <a href="mailto:payeni1@lakeheadu.ca">payeni1@lakeheadu.ca</a>. He can review
+                        <a href={MAILTO.dataLibrarian}>{INSTITUTION.dataLibrarian.email}</a>. He can review
                         your dataset before you publish, advise on metadata, and help with restricted
                         access setup.
                       </p>
@@ -288,10 +289,10 @@ export default function LakeheadDataverse() {
               review your DMP, advise on metadata, set up restricted access, and guide you
               through your first deposit.
             </p>
-            <a href="mailto:payeni1@lakeheadu.ca">payeni1@lakeheadu.ca</a>
+            <a href={MAILTO.dataLibrarian}>{INSTITUTION.dataLibrarian.email}</a>
             {' · '}
             <a
-              href="https://libguides.lakeheadu.ca/c.php?g=613282&p=4276405"
+              href={INSTITUTION.libraryDataGuideUrl}
               target="_blank"
               rel="noopener noreferrer"
             >

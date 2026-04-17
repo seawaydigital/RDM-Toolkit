@@ -5,6 +5,7 @@ import {
   Globe, Zap, ArrowRight, Star, CheckCircle, Info, Terminal,
   FolderOpen, Layers, LayoutDashboard, Bot
 } from 'lucide-react';
+import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
 
 // ── Data ──────────────────────────────────────────────────────────────────
 
@@ -679,8 +680,8 @@ export default function DRACServices() {
               <a href="https://docs.alliancecan.ca" target="_blank" rel="noopener noreferrer" className="drac-inline-link">docs.alliancecan.ca <ExternalLink size={11} /></a>
             </div>
             <div className="drac-contact-item">
-              <strong>Lakehead RDM support</strong>
-              <a href="mailto:rdm.research@lakeheadu.ca" className="drac-inline-link">rdm.research@lakeheadu.ca</a>
+              <strong>{INSTITUTION.shortName} RDM support</strong>
+              <a href={MAILTO.rdm} className="drac-inline-link">{INSTITUTION.rdmEmail}</a>
             </div>
           </div>
         </div>

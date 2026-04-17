@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { HardDrive, ChevronDown, ChevronUp, Search, Copy, Check, Printer, Link, RotateCcw, AlertTriangle, Shield, Info, Play } from 'lucide-react';
+import { INSTITUTION } from '../../data/institutionConfig';
 
 /* ============================================================
    CONSTANTS — FILE CATEGORIES
@@ -1009,7 +1010,7 @@ export default function StorageCalculator() {
       `Archival Duration: ${archivalDuration} years\n\n` +
       `Please let me know available times for a meeting.\n\nThank you.`
     );
-    window.open(`mailto:rdm@lakeheadu.ca?subject=${subject}&body=${body}`);
+    window.open(`mailto:${INSTITUTION.storageEmail}?subject=${subject}&body=${body}`);
   }, [totalActiveGB, totalArchivalGB, classificationLevel, activeDuration, archivalDuration]);
 
   // --- Export: Save Configuration ---

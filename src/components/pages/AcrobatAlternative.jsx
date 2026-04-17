@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import {
   Layers, FileSignature, FileText, Monitor,
   CheckCircle2, ExternalLink, CircleDollarSign,
@@ -233,8 +234,8 @@ export default function AcrobatAlternative() {
             </thead>
             <tbody>
               {TASK_GROUPS.map((group) => (
-                <>
-                  <tr key={group.group} className="aa-table-group">
+                <Fragment key={group.group}>
+                  <tr className="aa-table-group">
                     <td colSpan={2}>{group.group}</td>
                   </tr>
                   {group.tasks.map((row) => {
@@ -279,7 +280,7 @@ export default function AcrobatAlternative() {
                       </tr>
                     );
                   })}
-                </>
+                </Fragment>
               ))}
             </tbody>
           </table>

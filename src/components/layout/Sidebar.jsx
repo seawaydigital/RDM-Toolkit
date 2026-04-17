@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, X, CircleDollarSign, Database, ArrowUpRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, X, CircleDollarSign, Database, ArrowUpRight, BadgeCheck } from 'lucide-react';
 import { PRIMARY_CATEGORIES, MORE_CATEGORIES, CATEGORIES } from '../../data/toolRegistry';
 
 export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen, onClose }) {
@@ -134,6 +134,14 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
           >
             <BookOpen size={16} />
             Tri-Agency RDM Policy
+          </a>
+          <a
+            href="#grants-identifiers"
+            className={`sidebar-htw-link ${currentPage === 'grants-identifiers' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <BadgeCheck size={16} />
+            Grants &amp; Identifiers
           </a>
           <a
             href="#data-classification"

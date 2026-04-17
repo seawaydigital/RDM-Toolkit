@@ -3,8 +3,9 @@ import {
   Search, Database, Share2, RefreshCw, ChevronDown, ChevronRight,
   CheckCircle, AlertCircle, Clock, Building2, Users, FlaskConical,
   FileText, Upload, BookOpen, ArrowRight, ArrowDown, Info, ExternalLink,
-  Feather, Globe, Shield, Star
+  Feather, Globe, Shield, Star, Scale, Heart
 } from 'lucide-react';
+import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
 
 // ── FAIR card data ─────────────────────────────────────────────────────────
 const FAIR = [
@@ -247,28 +248,138 @@ export default function TriAgencyPolicy() {
             <div className="tap-pillar">
               <Building2 size={22} />
               <div>
-                <strong>Institutions</strong>
-                <span>RDM Strategy</span>
+                <strong>Pillar 1 · Institutions</strong>
+                <span>Publish an RDM Strategy</span>
               </div>
             </div>
             <ArrowDown size={16} className="tap-pillar-arrow" />
             <div className="tap-pillar">
               <FileText size={22} />
               <div>
-                <strong>Researchers</strong>
-                <span>Data Management Plans</span>
+                <strong>Pillar 2 · Researchers</strong>
+                <span>Submit a DMP at application</span>
               </div>
             </div>
             <ArrowDown size={16} className="tap-pillar-arrow" />
             <div className="tap-pillar">
               <Upload size={22} />
               <div>
-                <strong>Publication</strong>
-                <span>Data Deposit</span>
+                <strong>Pillar 3 · Publication</strong>
+                <span>Deposit data at publication</span>
               </div>
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Per-agency matrix */}
+      <section className="tap-section">
+        <h2 className="tap-section-title">How the Three Pillars Apply to Each Agency</h2>
+        <p className="tap-section-intro">
+          All three agencies share the same policy, but each agency rolls out the requirements
+          on its own schedule and through its own competitions. Find your agency to see what
+          currently applies to you.
+        </p>
+        <div className="tap-matrix">
+          <div className="tap-matrix-card tap-matrix-card--cihr">
+            <div className="tap-matrix-head">
+              <span className="tap-agency-badge tap-agency-badge--cihr">CIHR</span>
+              <span className="tap-matrix-disciplines">Health Research</span>
+            </div>
+            <ul className="tap-matrix-list">
+              <li>
+                <CheckCircle size={14} className="tap-matrix-icon tap-matrix-icon--done" />
+                <div>
+                  <strong>Pillar 1 — Institutional Strategy</strong>
+                  <p>In effect since March 2023. {INSTITUTION.name} has its strategy posted publicly.</p>
+                </div>
+              </li>
+              <li>
+                <AlertCircle size={14} className="tap-matrix-icon tap-matrix-icon--active" />
+                <div>
+                  <strong>Pillar 2 — DMPs</strong>
+                  <p>Required for specific competitions since early 2023. Check your call for proposals — the DMP requirement will be spelled out there.</p>
+                </div>
+              </li>
+              <li>
+                <CheckCircle size={14} className="tap-matrix-icon tap-matrix-icon--done" />
+                <div>
+                  <strong>Pillar 3 — Deposit</strong>
+                  <p>Bioinformatics, atomic, and molecular coordinate data: required since 2008. General deposit requirement phasing in.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div className="tap-matrix-card tap-matrix-card--nserc">
+            <div className="tap-matrix-head">
+              <span className="tap-agency-badge tap-agency-badge--nserc">NSERC</span>
+              <span className="tap-matrix-disciplines">Natural Sciences &amp; Engineering</span>
+            </div>
+            <ul className="tap-matrix-list">
+              <li>
+                <CheckCircle size={14} className="tap-matrix-icon tap-matrix-icon--done" />
+                <div>
+                  <strong>Pillar 1 — Institutional Strategy</strong>
+                  <p>In effect since March 2023. {INSTITUTION.name} has its strategy posted publicly.</p>
+                </div>
+              </li>
+              <li>
+                <AlertCircle size={14} className="tap-matrix-icon tap-matrix-icon--active" />
+                <div>
+                  <strong>Pillar 2 — DMPs</strong>
+                  <p>Required in select competitions including Alliance and certain Discovery streams. The call for proposals identifies whether a DMP is required.</p>
+                </div>
+              </li>
+              <li>
+                <Clock size={14} className="tap-matrix-icon tap-matrix-icon--pending" />
+                <div>
+                  <strong>Pillar 3 — Deposit</strong>
+                  <p>Phasing in. Data supporting published findings should be deposited; the full mandate will be announced once institutional readiness is assessed.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div className="tap-matrix-card tap-matrix-card--sshrc">
+            <div className="tap-matrix-head">
+              <span className="tap-agency-badge tap-agency-badge--sshrc">SSHRC</span>
+              <span className="tap-matrix-disciplines">Social Sciences &amp; Humanities</span>
+            </div>
+            <ul className="tap-matrix-list">
+              <li>
+                <CheckCircle size={14} className="tap-matrix-icon tap-matrix-icon--done" />
+                <div>
+                  <strong>Pillar 1 — Institutional Strategy</strong>
+                  <p>In effect since March 2023. {INSTITUTION.name} has its strategy posted publicly.</p>
+                </div>
+              </li>
+              <li>
+                <AlertCircle size={14} className="tap-matrix-icon tap-matrix-icon--active" />
+                <div>
+                  <strong>Pillar 2 — DMPs</strong>
+                  <p>Required in select competitions including Insight and Insight Development. Qualitative data management (e.g., interview confidentiality) should be addressed explicitly.</p>
+                </div>
+              </li>
+              <li>
+                <Clock size={14} className="tap-matrix-icon tap-matrix-icon--pending" />
+                <div>
+                  <strong>Pillar 3 — Deposit</strong>
+                  <p>Phasing in, subject to disciplinary norms. Qualitative data with confidentiality constraints is rarely deposited openly — restricted deposit is usually appropriate.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <p className="tap-matrix-footnote">
+          <Info size={13} />
+          The authoritative source is always the specific funding opportunity you are applying
+          to. When the policy applies, the call for proposals will say so. Visit the official{' '}
+          <a href="https://science.gc.ca/site/science/en/interagency-research-funding/policies-and-guidelines/research-data-management/tri-agency-research-data-management-policy" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+            Tri-Agency RDM Policy page <ExternalLink size={11} />
+          </a>
+          {' '}for current requirements.
+        </p>
       </section>
 
       {/* FAIR Principles */}
@@ -564,8 +675,81 @@ export default function TriAgencyPolicy() {
           <p>
             Research conducted <em>by and with</em> First Nations, Métis, and Inuit communities
             is subject to additional and distinct requirements. These communities have the right
-            to guide and determine how their data is collected, used, and preserved.
+            to guide and determine how their data is collected, used, and preserved. A{' '}
+            <strong>distinctions-based approach</strong> is required — no single framework
+            applies across all Indigenous Peoples in Canada.
           </p>
+
+          {/* Distinctions-based frameworks */}
+          <h3 className="tap-indigenous-subtitle">Governance Frameworks</h3>
+          <div className="tap-indigenous-grid">
+            <div className="tap-indigenous-card">
+              <strong>OCAP® — First Nations</strong>
+              <p>
+                <strong>O</strong>wnership, <strong>C</strong>ontrol, <strong>A</strong>ccess, and <strong>P</strong>ossession.
+                The established standard for data collected from First Nations communities in Canada.
+                OCAP® certification is offered by the{' '}
+                <a href="https://fnigc.ca/ocap-training/" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+                  First Nations Information Governance Centre (FNIGC) <ExternalLink size={11} />
+                </a>.
+              </p>
+            </div>
+            <div className="tap-indigenous-card">
+              <strong>CARE Principles — Global</strong>
+              <p>
+                <strong>C</strong>ollective benefit, <strong>A</strong>uthority to control,{' '}
+                <strong>R</strong>esponsibility, <strong>E</strong>thics. Published by the{' '}
+                <a href="https://www.gida-global.org/care" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+                  Global Indigenous Data Alliance (GIDA) <ExternalLink size={11} />
+                </a>
+                {' '}in 2020. CARE complements the FAIR principles by adding people- and purpose-oriented considerations.
+              </p>
+            </div>
+            <div className="tap-indigenous-card">
+              <strong>National Inuit Strategy on Research — Inuit</strong>
+              <p>
+                Released by{' '}
+                <a href="https://www.itk.ca/national-strategy-on-research/" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+                  Inuit Tapiriit Kanatami (ITK) <ExternalLink size={11} />
+                </a>
+                {' '}in 2018. Centres Inuit self-determination in research, outlines partnership expectations, and asserts the right to govern research in Inuit Nunangat.
+              </p>
+            </div>
+            <div className="tap-indigenous-card">
+              <strong>USAI Research Framework — Urban Indigenous</strong>
+              <p>
+                <strong>U</strong>tility, <strong>S</strong>elf-voicing, <strong>A</strong>ccess,{' '}
+                <strong>I</strong>nter-relationality. Developed by the{' '}
+                <a href="https://ofifc.org/research/usai-research-framework/" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+                  Ontario Federation of Indigenous Friendship Centres (OFIFC) <ExternalLink size={11} />
+                </a>
+                {' '}— the framework for urban Indigenous research, highly relevant in Thunder Bay.
+              </p>
+            </div>
+            <div className="tap-indigenous-card">
+              <strong>Métis Research Protocols</strong>
+              <p>
+                The{' '}
+                <a href="https://www.metisnation.org/" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+                  Métis Nation of Ontario <ExternalLink size={11} />
+                </a>
+                {' '}and other Métis governments maintain their own research policies. Engage the relevant Métis government directly — protocols vary by jurisdiction and community.
+              </p>
+            </div>
+            <div className="tap-indigenous-card">
+              <strong>TCPS 2 Chapter 9</strong>
+              <p>
+                Canada's{' '}
+                <a href="https://ethics.gc.ca/eng/tcps2-eptc2_2022_chapter9-chapitre9.html" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+                  Tri-Council Policy Statement Chapter 9 <ExternalLink size={11} />
+                </a>
+                {' '}sets the minimum ethics standard for research involving First Nations, Inuit, and Métis Peoples. Required reading before any REB submission.
+              </p>
+            </div>
+          </div>
+
+          {/* General guidance */}
+          <h3 className="tap-indigenous-subtitle">General guidance for all Indigenous research</h3>
           <div className="tap-indigenous-grid">
             <div className="tap-indigenous-card">
               <strong>DMPs must be co-developed</strong>
@@ -576,17 +760,72 @@ export default function TriAgencyPolicy() {
               <p>If a community determines that data should not be deposited publicly (or at all), that decision takes precedence over the general deposit requirement.</p>
             </div>
             <div className="tap-indigenous-card">
-              <strong>OCAP® is one model, not the only model</strong>
-              <p>The OCAP® principles (Ownership, Control, Access, Possession) apply specifically to First Nations. Métis and Inuit communities may have different frameworks — a distinctions-based approach is required.</p>
-            </div>
-            <div className="tap-indigenous-card">
               <strong>Right of repatriation</strong>
               <p>Communities have the right to have their data returned to them. Plan for this in your DMP. Include provisions for renegotiation of the DMP as the project evolves.</p>
             </div>
           </div>
+
           <p className="tap-indigenous-note">
-            Engage community partners and Lakehead's Indigenous Research Support Office early in your project planning — these conversations cannot happen at the last minute.
+            Engage community partners and {INSTITUTION.indigenousResearchOffice} early in your project planning — these conversations cannot happen at the last minute.
           </p>
+        </div>
+      </section>
+
+      {/* Equity, Diversity & Inclusion */}
+      <section className="tap-section">
+        <div className="tap-edi">
+          <div className="tap-edi-header">
+            <Scale size={24} />
+            <h2>Equity, Diversity &amp; Inclusion</h2>
+          </div>
+          <p>
+            Tri-Agency grant applications increasingly require applicants to address EDI —
+            in team composition, recruitment, training, and research design itself. RDM
+            touches EDI in two ways: data <em>about</em> people from equity-deserving groups
+            needs particular care, and the DMP itself should reflect inclusive practice.
+          </p>
+          <div className="tap-edi-grid">
+            <div className="tap-edi-card">
+              <strong>In your grant application</strong>
+              <p>
+                All three agencies evaluate EDI in team composition and training plans. Most
+                competitions require an explicit statement. See the{' '}
+                <a href="https://www.nserc-crsng.gc.ca/NSERC-CRSNG/EDI-EDI/index_eng.asp" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+                  Tri-Agency EDI resources <ExternalLink size={11} />
+                </a>
+                {' '}for best practices and self-identification questionnaires.
+              </p>
+            </div>
+            <div className="tap-edi-card">
+              <strong>In your DMP</strong>
+              <p>
+                Disaggregated data (by race, gender identity, disability, sexual orientation, etc.)
+                enables equity analysis but raises re-identification risk in small samples. Your
+                DMP should explain how consent, minimum cell sizes, and access controls will
+                protect participants.
+              </p>
+            </div>
+            <div className="tap-edi-card">
+              <strong>Collecting EDI data responsibly</strong>
+              <p>
+                Use the built-in{' '}
+                <a href="#data-classification" className="tap-inline-link">Data Classification wizard</a>
+                {' '}to decide the handling tier before you collect, and the{' '}
+                <a href="#data-anonymizer" className="tap-inline-link">Data Anonymizer</a>
+                {' '}to strip direct identifiers before sharing analysis files with collaborators.
+              </p>
+            </div>
+            <div className="tap-edi-card">
+              <strong>The Dimensions Program</strong>
+              <p>
+                Canada's{' '}
+                <a href="https://www.science.gc.ca/eic/site/063.nsf/eng/h_F3B6A1D5.html" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+                  Dimensions charter <ExternalLink size={11} />
+                </a>
+                {' '}— modelled on the UK's Athena SWAN — helps institutions build inclusive research environments. {INSTITUTION.name} is a signatory.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -644,10 +883,10 @@ export default function TriAgencyPolicy() {
           <div>
             <strong>Need help with your DMP or data deposit?</strong>
             <p>
-              Lakehead's Research Data Management team can review your DMP, recommend repositories,
+              {INSTITUTION.shortName}'s Research Data Management team can review your DMP, recommend repositories,
               and guide you through compliance. Contact{' '}
-              <a href="mailto:rdm.research@lakeheadu.ca" className="tap-inline-link">
-                rdm.research@lakeheadu.ca
+              <a href={MAILTO.rdm} className="tap-inline-link">
+                {INSTITUTION.rdmEmail}
               </a>
               .
             </p>
