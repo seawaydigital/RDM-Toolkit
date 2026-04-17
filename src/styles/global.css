@@ -5892,6 +5892,7 @@ input:focus, textarea:focus, select:focus {
 
 .tap {
   max-width: 860px;
+  margin: 0 auto;
 }
 
 /* Hero */
@@ -6421,7 +6422,7 @@ input:focus, textarea:focus, select:focus {
    ======================================== */
 
 /* Layout */
-.drac { max-width: 900px; }
+.drac { max-width: 900px; margin: 0 auto; }
 
 /* Hero */
 .drac-hero {
