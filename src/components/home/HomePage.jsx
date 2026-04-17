@@ -70,15 +70,20 @@ export default function HomePage({ onNavigate }) {
 
       {/* ── Hero ───────────────────────────────────────────────────────────── */}
       <div className="homepage-hero">
-        <h1 className="homepage-title">RDM Toolkit</h1>
-        <p className="homepage-tagline">Research Data Management Toolkit</p>
+        <div className="homepage-hero-kicker">
+          A Scholarly Perspective
+          <span className="homepage-hero-serial">№ 01 · EST. 2026</span>
+        </div>
+        <h1 className="homepage-title">
+          Research data, <em>handled</em> with rigor.
+        </h1>
+        <p className="homepage-tagline">
+          A curated suite of browser-native instruments designed to secure, analyze, and preserve your academic data — without a single byte ever leaving your device.
+        </p>
         <div className="homepage-trust">
           <span className="homepage-trust-badge">🔒 No uploads</span>
-          <span className="homepage-trust-sep" aria-hidden="true">·</span>
           <span className="homepage-trust-badge">💻 Runs in your browser</span>
-          <span className="homepage-trust-sep" aria-hidden="true">·</span>
           <span className="homepage-trust-badge">🚫 No account</span>
-          <span className="homepage-trust-sep" aria-hidden="true">·</span>
           <span className="homepage-trust-badge"><WifiOff size={12} aria-hidden="true" /> Works offline</span>
         </div>
         <p className="homepage-compliance">
@@ -112,7 +117,10 @@ export default function HomePage({ onNavigate }) {
 
       {/* ── Popular Tools ──────────────────────────────────────────────────── */}
       <section className="homepage-section">
-        <h2 className="homepage-section-title">Popular Tools</h2>
+        <h2 className="homepage-section-title">
+          Popular Tools
+          <span className="homepage-section-title-count">{popularTools.length} · curated</span>
+        </h2>
         <div className="homepage-popular-grid">
           {popularTools.map(tool => (
             <button
@@ -130,7 +138,10 @@ export default function HomePage({ onNavigate }) {
 
       {/* ── Research Resources ─────────────────────────────────────────────── */}
       <section className="homepage-section">
-        <h2 className="homepage-section-title">Research Resources</h2>
+        <h2 className="homepage-section-title">
+          Research Resources
+          <span className="homepage-section-title-count">{RESEARCH_PAGES.length} · guides</span>
+        </h2>
         <div className="homepage-resources-grid">
           {RESEARCH_PAGES.map(page => {
             const Icon = page.icon;
@@ -156,7 +167,10 @@ export default function HomePage({ onNavigate }) {
 
       {/* ── Browse by Category ─────────────────────────────────────────────── */}
       <section className="homepage-section" style={{ paddingBottom: 'var(--space-2xl)' }}>
-        <h2 className="homepage-section-title">All Tools</h2>
+        <h2 className="homepage-section-title">
+          All Tools
+          <span className="homepage-section-title-count">{allCategories.reduce((n, c) => n + c.tools.length, 0)} · total</span>
+        </h2>
         <div className="homepage-cat-list">
           {allCategories.map(cat => {
             const isOpen = expandedCat === cat.id;

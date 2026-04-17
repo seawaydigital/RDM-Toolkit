@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, X, CircleDollarSign, Database } from 'lucide-react';
+import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, X, CircleDollarSign, Database, ArrowUpRight } from 'lucide-react';
 import { PRIMARY_CATEGORIES, MORE_CATEGORIES, CATEGORIES } from '../../data/toolRegistry';
 
 export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen, onClose }) {
@@ -96,6 +96,16 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             <X size={18} />
           </button>
         )}
+
+        {/* Brand header */}
+        <div className="sidebar-brand">
+          <div className="sidebar-brand-mark" aria-hidden="true">L</div>
+          <div className="sidebar-brand-text">
+            <span className="sidebar-brand-kicker">Lakehead Research</span>
+            <span className="sidebar-brand-name">Data Toolkit</span>
+          </div>
+        </div>
+
         <div className="sidebar-scroll">
           {/* Primary categories */}
           {PRIMARY_CATEGORIES.map(renderCategory)}
@@ -117,6 +127,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
 
           {/* Special pages */}
           <div className="sidebar-divider" />
+          <div className="sidebar-section-label">Research Resources</div>
           <a
             href="#how-this-works"
             className={`sidebar-htw-link ${currentPage === 'how-this-works' ? 'sidebar-htw-link--active' : ''}`}
@@ -173,13 +184,20 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             <CircleDollarSign size={16} />
             Adobe Acrobat Alternative
           </a>
+        </div>
+
+        {/* Pinned CTA — Request a Tool */}
+        <div className="sidebar-cta">
           <a
             href="#request-a-tool"
-            className={`sidebar-htw-link ${currentPage === 'request-a-tool' ? 'sidebar-htw-link--active' : ''}`}
+            className="sidebar-cta-card"
             onClick={onClose}
           >
-            <MessageSquarePlus size={16} />
-            Request a Tool
+            <span className="sidebar-cta-kicker">Missing something?</span>
+            <span className="sidebar-cta-title">
+              Request a Tool
+              <ArrowUpRight size={16} strokeWidth={2.5} />
+            </span>
           </a>
         </div>
       </nav>
