@@ -161,14 +161,19 @@ Every tool is defined here. Adding or removing a tool means updating this file *
 ```css
 /* Backgrounds */
 --bg-primary:     #0A1628   /* dark navy — main background */
---bg-secondary:   #0D2847   /* card/panel backgrounds */
+--bg-secondary:   #0E2743   /* card/panel backgrounds (subtly warmed 2026-04-17) */
 --bg-tertiary:    #163A5E   /* hover/raised surfaces */
+--bg-card:        #102F52   /* card surface — slightly lifted from secondary */
+--bg-inset:       #081121   /* deepest well — sidebar base */
 --border:         #1E5A8A   /* borders and dividers */
+--border-soft:    rgba(255,255,255,0.06)
+--border-hairline:rgba(255,255,255,0.08)  /* preferred for editorial rules/separators */
 
 /* Text */
 --text-primary:   #F1F5F9   /* near-white — body text */
 --text-secondary: #94A3B8   /* subdued text, meta info, source links */
 --text-muted:     #7C9BBF   /* placeholder, timestamps */
+--text-parchment: #EEE6D3   /* warm off-white for display/hero headings */
 
 /* Accent colours */
 --accent-primary: #FFC20E   /* Lakehead gold — primary CTA, highlights */
@@ -182,8 +187,13 @@ Every tool is defined here. Adding or removing a tool means updating this file *
 --lh-blaze:       #FFC20E
 
 /* Typography */
---font-sans:  'IBM Plex Sans', system-ui, sans-serif
---font-mono:  'IBM Plex Mono', Consolas, monospace
+--font-display: 'Fraunces', 'Iowan Old Style', Palatino, Georgia, serif  /* editorial serif — wordmark, hero titles, section titles, resource/category labels */
+--font-sans:  'IBM Plex Sans', system-ui, sans-serif                     /* body text */
+--font-mono:  'IBM Plex Mono', Consolas, monospace                       /* serials, metadata counts, code */
+
+/* Shadows (editorial — soft) */
+--shadow-card: 0 1px 0 rgba(255,255,255,0.04) inset, 0 10px 30px -18px rgba(0,0,0,0.6)
+--shadow-lift: 0 1px 0 rgba(255,255,255,0.06) inset, 0 20px 40px -20px rgba(0,0,0,0.7)
 
 /* Spacing (8px base grid) */
 --space-xs: 4px  --space-sm: 8px  --space-md: 16px
@@ -226,7 +236,8 @@ Every tool is defined here. Adding or removing a tool means updating this file *
 | `qrcode` | ^1.5.3 | QR code generation |
 | `@dnd-kit/core` / `sortable` / `utilities` | ^6/8/3 | Drag-and-drop page reordering (PDF tools) |
 | `lucide-react` | ^0.344.0 | Icons throughout the UI |
-| `@fontsource/ibm-plex-sans` / `mono` | ^5.0.0 | Self-hosted fonts |
+| `@fontsource/ibm-plex-sans` / `mono` | ^5.0.0 | Self-hosted body + mono fonts |
+| `@fontsource/fraunces` | ^5.x | Self-hosted display serif for headings, wordmark, hero titles |
 
 ### Dev
 
@@ -339,6 +350,7 @@ All external sources are hyperlinked (`target="_blank" rel="noopener noreferrer"
 
 | Date | Change |
 |---|---|
+| 2026-04-17 | **Editorial shell redesign** (commits `bfaf05b` → `c4d71f7`) — added Fraunces display serif (`@fontsource/fraunces`, weights 400/500/600/700) as `--font-display`; new tokens `--bg-card` (`#102F52`), `--bg-inset` (`#081121`), `--text-parchment` (`#EEE6D3`), `--border-hairline` (`rgba(255,255,255,0.08)`), `--accent-primary-soft`, `--shadow-card`, `--shadow-lift`; Topbar wordmark split so full "RDM" renders in gold via `.topbar-logo-mark` span (initially tried `::first-letter` — user wanted all three letters), Fraunces type, gold tick under the bar via `.topbar::after` linear-gradient; Sidebar base darkened to `--bg-inset`, hairline borders, gold-tick active indicator via `::before`, new "Research Resources" section label, **pinned gold `.sidebar-cta` CTA card at bottom** ("Request a Tool" moved here from the inline list), flex-column layout so CTA sticks to bottom; HomePage hero became an editorial gradient card (`.homepage-hero`) with grid-mask overlay + kicker/serial + serif title with italic gold `<em>` + trust pills + compliance rule-separator; Popular Tools and Research Resources cards got `--bg-card` surface, hover lift + top-edge shimmer, gold left-rail on resource card hover; all section titles use Fraunces with flex rule and a mono metadata count (`.homepage-section-title-count`); topbar search became a pill-style button; added `margin: 0 auto` to `.tap` and `.drac` — they were left-aligning while the other Research Resources pages centered; sidebar brand header (L-in-a-box + "Lakehead Research / Data Toolkit") was tried and then removed at user's request — redundant with topbar |
 | 2026-04-17 | Compress PDF: added smart image-XObject replacement tier — `compressViaImageReplacement()` walks `pdfDoc.context.enumerateIndirectObjects()`, filters `PDFRawStream` image XObjects to plain `/DCTDecode` JPEGs with RGB color spaces (`/DeviceRGB` or `/ICCBased` N=3) and no masks/decode arrays, re-encodes each via `createImageBitmap()` → `OffscreenCanvas` → `toBlob('image/jpeg')` at the preset's quality + maxDimension, then swaps via `PDFRawStream.of(newDict, bytes)` + `context.assign(ref, newStream)` only when the new image is ≥10% smaller; text objects, vector graphics, and outlines are preserved — selectable text stays selectable; smart mode is the primary path for image-heavy PDFs; whole-page raster is now demoted to a "Need more reduction? → aggressive compression" reveal under the smart presets (orange-bordered cards, warns flattens text to images); if no JPEG candidates exist (JBIG2/CCITTFax/Flate images) smart mode is skipped and raster becomes primary with a note; added `.compress-advisory` InfoCard under every image-heavy result set pointing to PDFGear (https://www.pdfgear.com) and Ghostscript (https://ghostscript.com) for cases where browser compression can't match desktop tools; sample-based estimation uses the 3 largest images to project total savings; commit `eee9868` |
 | 2026-04-16 | Compress PDF Quick Wins pass for text-heavy mode — `stripDeadweight()` now removes XMP metadata, `/Names /EmbeddedFiles` attachments, `/Names /JavaScript`, `/OpenAction`, document + page `/AA` triggers, `/PieceInfo`, and per-page `/Thumb` entries before `pdfDoc.save({ useObjectStreams: true })`; preserves title/author/subject/keywords, outlines, page labels, and named destinations (so outline links still work); defensive per-entry try/catch so any failure skips that entry rather than blocking the save; ResultPanel shows a green-bar note listing exactly what was stripped |
 | 2026-04-16 | Redesigned Compress PDF UX — auto-analyzes + estimates 3 presets immediately on upload via per-page JPEG sampling (1–3 representative pages extrapolated by page count, ±15% accuracy), hides presets projected to reduce <5% (`compress-preset-card--unhelpful`), compresses only the preset the user clicks to download, replaced the screen-wide "Generate 3 versions" button with prominent per-card `.compress-preset-cta` pills (16px bold, 14×22 padding, gold shadow, hover lift, `min-width: 180px`), demoted text-only fallback to a small text link |
