@@ -201,7 +201,6 @@ export default function CSVEncodingFixer({ tool }) {
           accept=".csv,.tsv,.txt"
           onFilesSelected={handleFileSelected}
           label="Drop a CSV or TSV file here or click to browse"
-          sublabel="Accepts .csv, .tsv, and .txt files"
         />
       )}
 

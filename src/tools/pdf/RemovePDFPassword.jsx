@@ -196,7 +196,6 @@ export default function RemovePDFPassword({ tool, navigateTo }) {
           validationConfig={ANY_FILE_VALIDATION}
           onFilesSelected={handleFileSelected}
           label="Drop a password-protected PDF or .pdf.enc file here"
-          sublabel="Accepts .pdf and .pdf.enc files"
         />
       )}
 

@@ -195,7 +195,6 @@ export default function RemoveBackground({ tool }) {
           validationConfig={BG_REMOVAL_VALIDATION}
           onFilesSelected={handleFileSelected}
           label="Drop an image here or click to browse"
-          sublabel="Accepts JPG, PNG, WebP"
         />
       )}
 
