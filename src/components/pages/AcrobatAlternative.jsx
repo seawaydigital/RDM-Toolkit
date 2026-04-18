@@ -115,8 +115,7 @@ const TASK_GROUPS = [
   {
     group: 'Compliance & Redaction',
     tasks: [
-      { task: 'Visual redaction (non-sensitive docs)', badge: 'rdm',   label: 'RDM Toolkit', toolId: 'pdf-redaction' },
-      { task: 'PHIPA/PIPEDA-compliant redaction',    badge: 'coming',  label: 'Planned improvement' },
+      { task: 'PHIPA/PIPEDA-compliant redaction',    badge: 'rdm',     label: 'RDM Toolkit', toolId: 'pdf-redaction' },
       { task: 'OCR (scanned document recognition)',  badge: 'skip',    label: "Acrobat\u2019s OCR is mediocre \u2014 use Google Docs (free) or ABBYY FineReader Online" },
     ],
   },

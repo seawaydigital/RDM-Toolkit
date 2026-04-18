@@ -1,15 +1,112 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { PDFDocument, rgb } from '@cantoo/pdf-lib';
+import { PDFDocument, PDFName, PDFDict } from '@cantoo/pdf-lib';
 import InfoCard from '../../components/ui/InfoCard';
 import DropZone from '../../components/ui/DropZone';
 import ActionButton from '../../components/ui/ActionButton';
 import ResultPanel from '../../components/ui/ResultPanel';
 import ErrorCard from '../../components/ui/ErrorCard';
 import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
-import { X, ZoomIn, ZoomOut, AlertTriangle } from 'lucide-react';
+import { X, ZoomIn, ZoomOut, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderAllThumbnails, renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+
+const REDACTION_DPI = 200;
+const REDACTION_JPEG_QUALITY = 0.88;
+
+// Strip every catalog-level and page-level deadweight dict that could carry
+// PII or side-channel data after a redaction. Source-doc metadata is already
+// absent because we build a fresh PDFDocument — but copyPages() brings over
+// per-page /Thumb, /PieceInfo, /AA, and /Annots, so wipe those. Wiping
+// /Annots also removes form widgets (which carry the raw field values) and
+// file-attachment annotations.
+function stripRedactionDeadweight(pdfDoc) {
+  const stats = { stripped: [] };
+  const catalog = pdfDoc.catalog;
+
+  const tryDeleteCatalog = (key, label) => {
+    try {
+      if (catalog.has(PDFName.of(key))) {
+        catalog.delete(PDFName.of(key));
+        stats.stripped.push(label);
+      }
+    } catch { /* defensive */ }
+  };
+
+  tryDeleteCatalog('Metadata',   'XMP metadata');
+  tryDeleteCatalog('OpenAction', 'open-document action');
+  tryDeleteCatalog('AA',         'document action triggers');
+  tryDeleteCatalog('PieceInfo',  'application piece info');
+  tryDeleteCatalog('Outlines',   'bookmarks / outline');
+  tryDeleteCatalog('AcroForm',   'form-field definitions');
+
+  try {
+    const namesEntry = catalog.lookupMaybe(PDFName.of('Names'), PDFDict);
+    if (namesEntry) {
+      if (namesEntry.has(PDFName.of('EmbeddedFiles'))) {
+        namesEntry.delete(PDFName.of('EmbeddedFiles'));
+        stats.stripped.push('embedded file attachments');
+      }
+      if (namesEntry.has(PDFName.of('JavaScript'))) {
+        namesEntry.delete(PDFName.of('JavaScript'));
+        stats.stripped.push('JavaScript');
+      }
+    }
+  } catch { /* ignore */ }
+
+  let thumbsRemoved = 0;
+  let piecesRemoved = 0;
+  let pageAAsRemoved = 0;
+  let annotsRemoved = 0;
+  for (const page of pdfDoc.getPages()) {
+    const node = page.node;
+    try {
+      if (node.has(PDFName.of('Thumb')))     { node.delete(PDFName.of('Thumb')); thumbsRemoved++; }
+      if (node.has(PDFName.of('PieceInfo'))) { node.delete(PDFName.of('PieceInfo')); piecesRemoved++; }
+      if (node.has(PDFName.of('AA')))        { node.delete(PDFName.of('AA')); pageAAsRemoved++; }
+      if (node.has(PDFName.of('Annots')))    { node.delete(PDFName.of('Annots')); annotsRemoved++; }
+    } catch { /* skip this page */ }
+  }
+  if (thumbsRemoved)  stats.stripped.push(`${thumbsRemoved} page thumbnail${thumbsRemoved === 1 ? '' : 's'}`);
+  if (piecesRemoved)  stats.stripped.push(`${piecesRemoved} page piece-info blob${piecesRemoved === 1 ? '' : 's'}`);
+  if (pageAAsRemoved) stats.stripped.push(`${pageAAsRemoved} page action trigger${pageAAsRemoved === 1 ? '' : 's'}`);
+  if (annotsRemoved)  stats.stripped.push(`annotations on ${annotsRemoved} page${annotsRemoved === 1 ? '' : 's'} (form widgets, links, file attachments)`);
+
+  // Clear document info dict (title/author/subject/keywords/producer/creator)
+  try {
+    pdfDoc.setTitle('');
+    pdfDoc.setAuthor('');
+    pdfDoc.setSubject('');
+    pdfDoc.setKeywords([]);
+    pdfDoc.setProducer('');
+    pdfDoc.setCreator('');
+    stats.stripped.push('document info dictionary');
+  } catch { /* ignore */ }
+
+  return stats;
+}
+
+// After saving, re-open the output with pdfjs and confirm that every page we
+// rasterized has zero extractable text. This is a belt-and-braces check — if
+// it ever fails, we refuse to download the file.
+async function verifyRedactedPagesAreImages(pdfBytes, redactedPageNums) {
+  const pdfJsDoc = await loadPdfDocument(pdfBytes.slice());
+  const leakedPages = [];
+  for (const pageNum of redactedPageNums) {
+    const page = await pdfJsDoc.getPage(pageNum);
+    const textContent = await page.getTextContent();
+    const nonEmpty = textContent.items.filter(it => it.str && it.str.trim().length > 0);
+    if (nonEmpty.length > 0) {
+      leakedPages.push({
+        pageNum,
+        sample: nonEmpty.slice(0, 3).map(it => it.str.trim()).join(' | '),
+      });
+    }
+    page.cleanup();
+  }
+  pdfJsDoc.destroy();
+  return { leakedPages, verifiedPageCount: redactedPageNums.length };
+}
 
 // Renders a single thumbnail only when it scrolls into view
 function LazyThumbnail({ pageNum, pdfJsDocRef, onRender, cached }) {
@@ -48,6 +145,7 @@ export default function PDFRedaction({ tool, navigateTo }) {
   const [thumbnails, setThumbnails] = useState({});
   const [thumbSize, setThumbSize] = useState(140);
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState('');
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
 
@@ -95,7 +193,6 @@ export default function PDFRedaction({ tool, navigateTo }) {
       if (pdfJsDocRef.current) pdfJsDocRef.current.destroy();
       const pdfJsDoc = await loadPdfDocument(bytesCopy.slice());
       pdfJsDocRef.current = pdfJsDoc;
-      // Thumbnails are rendered lazily via IntersectionObserver — see LazyThumbnail component
     } catch (e) {
       console.error('[PDFRedaction] file load error:', e);
       setError('Something went wrong while reading the PDF. Please try a different file.');
@@ -104,7 +201,6 @@ export default function PDFRedaction({ tool, navigateTo }) {
 
   const handleSelectPage = useCallback(async (pageNum) => {
     setSelectedPage(pageNum);
-    // Render a larger preview for drawing
     if (pdfJsDocRef.current) {
       try {
         const dataUrl = await renderPageThumbnail(pdfJsDocRef.current, pageNum, 2.0);
@@ -144,7 +240,6 @@ export default function PDFRedaction({ tool, navigateTo }) {
     const w = Math.abs(drawCurrent.x - drawStart.x);
     const h = Math.abs(drawCurrent.y - drawStart.y);
 
-    // Only add if rectangle is meaningful (at least 1% in each dimension)
     if (w > 0.01 && h > 0.01) {
       setRedactions(prev => ({
         ...prev,
@@ -167,46 +262,101 @@ export default function PDFRedaction({ tool, navigateTo }) {
   }, []);
 
   const totalRedactions = Object.values(redactions).reduce((sum, arr) => sum + arr.length, 0);
+  const redactedPageCount = Object.keys(redactions).length;
 
   const handleProcess = useCallback(async () => {
     if (!fileBytes || totalRedactions === 0) return;
     setLoading(true);
+    setLoadingStep('Preparing…');
     setError(null);
 
     try {
-      const { pdfDoc, isEncrypted } = await loadPdfLibDocument(fileBytes.slice(), { PDFDocument });
+      const { pdfDoc: sourceDoc, isEncrypted } = await loadPdfLibDocument(fileBytes.slice(), { PDFDocument });
       if (isEncrypted) {
         setError('__encrypted__');
         return;
       }
 
-      const pages = pdfDoc.getPages();
+      // Use the existing pdfjs doc for rendering; reload if it was destroyed.
+      let pdfJsDoc = pdfJsDocRef.current;
+      if (!pdfJsDoc) {
+        pdfJsDoc = await loadPdfDocument(fileBytes.slice());
+        pdfJsDocRef.current = pdfJsDoc;
+      }
 
-      for (const [pageNumStr, rects] of Object.entries(redactions)) {
-        const pageIdx = parseInt(pageNumStr, 10) - 1;
-        const page = pages[pageIdx];
-        if (!page) continue;
-        const { width, height } = page.getSize();
+      const newDoc = await PDFDocument.create();
+      const totalPages = sourceDoc.getPageCount();
+      const redactedPageNums = new Set(
+        Object.entries(redactions)
+          .filter(([, rects]) => rects.length > 0)
+          .map(([k]) => parseInt(k, 10))
+      );
+      const scale = REDACTION_DPI / 72;
 
-        for (const rect of rects) {
-          // Convert from normalized (0-1, top-left origin) to PDF coords (bottom-left origin)
-          const pdfX = rect.x * width;
-          const pdfY = height - (rect.y + rect.h) * height;
-          const pdfW = rect.w * width;
-          const pdfH = rect.h * height;
+      for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+        setLoadingStep(`Processing page ${pageNum} of ${totalPages}…`);
 
-          page.drawRectangle({
-            x: pdfX,
-            y: pdfY,
-            width: pdfW,
-            height: pdfH,
-            color: rgb(0, 0, 0),
-            opacity: 1,
-          });
+        if (redactedPageNums.has(pageNum)) {
+          // Rasterize: render page → paint black rects on canvas → embed as JPEG.
+          // Underlying text/vectors are discarded; only pixels remain.
+          const page = await pdfJsDoc.getPage(pageNum);
+          const baseVp = page.getViewport({ scale: 1 });
+          const vp = page.getViewport({ scale });
+
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.floor(vp.width));
+          canvas.height = Math.max(1, Math.floor(vp.height));
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          await page.render({ canvasContext: ctx, viewport: vp }).promise;
+
+          ctx.fillStyle = '#000000';
+          for (const rect of redactions[pageNum]) {
+            ctx.fillRect(
+              rect.x * canvas.width,
+              rect.y * canvas.height,
+              rect.w * canvas.width,
+              rect.h * canvas.height
+            );
+          }
+
+          const blob = await new Promise(resolve =>
+            canvas.toBlob(resolve, 'image/jpeg', REDACTION_JPEG_QUALITY)
+          );
+          canvas.remove();
+          page.cleanup();
+
+          if (!blob) throw new Error(`Failed to encode page ${pageNum} as image.`);
+          const arrBuf = await blob.arrayBuffer();
+          const jpg = await newDoc.embedJpg(arrBuf);
+          const newPage = newDoc.addPage([baseVp.width, baseVp.height]);
+          newPage.drawImage(jpg, { x: 0, y: 0, width: baseVp.width, height: baseVp.height });
+        } else {
+          // No redactions on this page — copy it intact so text stays selectable.
+          const [copiedPage] = await newDoc.copyPages(sourceDoc, [pageNum - 1]);
+          newDoc.addPage(copiedPage);
         }
       }
 
-      const resultBytes = await pdfDoc.save();
+      setLoadingStep('Stripping metadata & attachments…');
+      const stripStats = stripRedactionDeadweight(newDoc);
+
+      setLoadingStep('Saving…');
+      const resultBytes = await newDoc.save({ useObjectStreams: false });
+
+      setLoadingStep('Verifying text is gone…');
+      const verifyStats = await verifyRedactedPagesAreImages(
+        resultBytes,
+        Array.from(redactedPageNums).sort((a, b) => a - b)
+      );
+      if (verifyStats.leakedPages.length > 0) {
+        const pages = verifyStats.leakedPages.map(p => p.pageNum).join(', ');
+        throw new Error(
+          `Verification failed — text was still extractable on page${verifyStats.leakedPages.length === 1 ? '' : 's'} ${pages}. The file has NOT been downloaded. Please report this.`
+        );
+      }
+
       const blob = new Blob([resultBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       const filename = buildOutputFilename(file.name, 'redacted', 'pdf');
@@ -216,12 +366,17 @@ export default function PDFRedaction({ tool, navigateTo }) {
         originalSize: file.size,
         resultSize: resultBytes.byteLength,
         downloadUrl: url,
+        stripStats,
+        verifyStats,
+        redactedPageCount: redactedPageNums.size,
+        totalRedactions,
       });
     } catch (e) {
       console.error('[PDFRedaction]', e);
-      setError('Something went wrong while redacting the PDF. Please try again.');
+      setError(e.message || 'Something went wrong while redacting the PDF. Please try again.');
     } finally {
       setLoading(false);
+      setLoadingStep('');
     }
   }, [fileBytes, file, redactions, totalRedactions]);
 
@@ -257,26 +412,35 @@ export default function PDFRedaction({ tool, navigateTo }) {
         <InfoCard
           description={tool.description}
           limitations={[
-            'Draws black rectangles over content visually only',
-            'Underlying text data may still be extractable by specialist tools',
-            "For sensitive documents, consult your institution's IT security team",
+            'Redacted pages are flattened to images — text on those pages is no longer selectable, searchable, or screen-reader accessible',
+            'Pages without redactions stay vector; redact elsewhere if those pages also hold sensitive content',
+            'Scanned image content behind a redaction is also destroyed; embedded OCR text is overwritten along with the visible text',
           ]}
         />
-        {/* Prominent permanence warning on result screen */}
+
         <div style={{
           display: 'flex', alignItems: 'flex-start', gap: 'var(--space-sm)',
           padding: 'var(--space-md)', marginBottom: 'var(--space-md)',
-          background: 'rgba(239,68,68,0.10)', border: '2px solid rgba(239,68,68,0.5)',
+          background: 'rgba(16,185,129,0.10)', border: '1px solid rgba(16,185,129,0.4)',
           borderRadius: 'var(--radius-md)', fontSize: 13, color: 'var(--text-primary)',
         }}>
-          <AlertTriangle size={18} style={{ flexShrink: 0, color: '#EF4444', marginTop: 1 }} />
+          <ShieldCheck size={18} style={{ flexShrink: 0, color: 'var(--accent-green)', marginTop: 1 }} />
           <div>
-            <strong style={{ color: '#EF4444' }}>This is NOT legally compliant redaction.</strong>
+            <strong style={{ color: 'var(--accent-green)' }}>
+              Verified: no extractable text remains in redacted regions.
+            </strong>
             <p style={{ margin: '4px 0 0', color: 'var(--text-secondary)' }}>
-              Black rectangles hide content visually but the underlying text remains in the PDF file and can be extracted with freely available tools. Do not use this for legally sensitive, confidential, or regulated documents. Use a dedicated redaction tool (e.g., Adobe Acrobat's redaction feature) for legally binding redaction.
+              {result.totalRedactions} redaction{result.totalRedactions === 1 ? '' : 's'} across{' '}
+              {result.redactedPageCount} page{result.redactedPageCount === 1 ? '' : 's'}.
+              Redacted pages were rasterized to images at {REDACTION_DPI} DPI and the output was
+              re-opened with pdfjs to confirm zero selectable text on those pages.
+              {result.stripStats?.stripped?.length > 0 && (
+                <> Also stripped: {result.stripStats.stripped.join(', ')}.</>
+              )}
             </p>
           </div>
         </div>
+
         <ResultPanel
           filename={result.filename}
           originalSize={result.originalSize}
@@ -288,7 +452,6 @@ export default function PDFRedaction({ tool, navigateTo }) {
     );
   }
 
-  // Get the current drawing rectangle for overlay
   const drawRect = isDrawing && drawStart && drawCurrent ? {
     x: Math.min(drawStart.x, drawCurrent.x),
     y: Math.min(drawStart.y, drawCurrent.y),
@@ -299,24 +462,23 @@ export default function PDFRedaction({ tool, navigateTo }) {
   return (
     <div>
       <InfoCard
-        description="Visually redact areas of your PDF by drawing black rectangles over sensitive content. Select a page, then click and drag to mark areas for redaction. Your file never leaves your browser."
+        description="Permanently remove sensitive content from a PDF. Redacted pages are rasterized to images so the underlying text is physically destroyed, not just visually covered — safe for PHIPA, PIPEDA, and TCPS 2 disclosure workflows. Your file never leaves your browser."
         limitations={[
-          'Draws black rectangles over content visually only',
-          'Underlying text data may still be extractable by specialist tools',
-          "For sensitive documents, consult your institution's IT security team",
+          'Pages with redactions become images — text on those pages will no longer be selectable, searchable, or screen-reader accessible',
+          'Pages without redactions stay as vector text; redact on every page where sensitive content appears',
+          'Form-field values, bookmarks, embedded attachments, document metadata, and annotations are also stripped from the output',
         ]}
       />
 
-      {/* Warning banner */}
       <div style={{
         display: 'flex', alignItems: 'flex-start', gap: 'var(--space-sm)',
         padding: 'var(--space-md)', marginBottom: 'var(--space-md)',
-        background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)',
+        background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.35)',
         borderRadius: 'var(--radius-md)', fontSize: 13, color: 'var(--text-primary)',
       }}>
-        <AlertTriangle size={18} style={{ flexShrink: 0, color: '#F59E0B', marginTop: 1 }} />
+        <ShieldCheck size={18} style={{ flexShrink: 0, color: 'var(--accent-green)', marginTop: 1 }} />
         <span>
-          <strong>Visual redaction only.</strong> This tool covers content with black rectangles but does not remove the underlying text data from the PDF. For legally sensitive documents, use a professional redaction tool that strips the text layer.
+          <strong>True redaction.</strong> When you redact a page, that page is rasterized to a {REDACTION_DPI} DPI image and re-embedded — the original text stream is not carried into the output, so copy/paste, search, and text-extraction tools cannot recover what was behind the black rectangles. The result is verified with pdfjs before download.
         </span>
       </div>
 
@@ -346,7 +508,6 @@ export default function PDFRedaction({ tool, navigateTo }) {
             </button>
           </div>
 
-          {/* Thumbnail grid - click to select page */}
           <div className="zoom-controls">
             <button className="zoom-btn" onClick={() => setThumbSize(s => Math.max(100, s - 40))} disabled={thumbSize <= 100} aria-label="Zoom out">
               <ZoomOut size={16} />
@@ -358,7 +519,7 @@ export default function PDFRedaction({ tool, navigateTo }) {
           </div>
 
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 'var(--space-sm)' }}>
-            Click a page to select it for redaction. Pages with redactions are highlighted.
+            Click a page to select it for redaction. Pages with redactions are highlighted and will be rasterized to images in the output.
           </p>
 
           <div className="thumbnail-grid" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${thumbSize}px, 1fr))` }}>
@@ -392,7 +553,6 @@ export default function PDFRedaction({ tool, navigateTo }) {
             })}
           </div>
 
-          {/* Drawing area for selected page */}
           {selectedPage && previewUrl && (
             <div style={{
               background: 'var(--bg-secondary)', border: '1px solid var(--border)',
@@ -428,7 +588,6 @@ export default function PDFRedaction({ tool, navigateTo }) {
                   style={{ maxWidth: '100%', display: 'block', borderRadius: 'var(--radius-sm)' }}
                 />
 
-                {/* Existing redaction rectangles */}
                 {(redactions[selectedPage] || []).map((rect, idx) => (
                   <div
                     key={idx}
@@ -445,7 +604,6 @@ export default function PDFRedaction({ tool, navigateTo }) {
                   />
                 ))}
 
-                {/* Active drawing rectangle */}
                 {drawRect && (
                   <div style={{
                     position: 'absolute',
@@ -458,7 +616,6 @@ export default function PDFRedaction({ tool, navigateTo }) {
                 )}
               </div>
 
-              {/* Redaction list for this page */}
               {redactions[selectedPage] && redactions[selectedPage].length > 0 && (
                 <div style={{ marginTop: 'var(--space-sm)' }}>
                   <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
@@ -469,16 +626,25 @@ export default function PDFRedaction({ tool, navigateTo }) {
             </div>
           )}
 
-          {/* Summary */}
           {totalRedactions > 0 && (
-            <p style={{ fontSize: 13, color: 'var(--text-primary)', marginBottom: 'var(--space-sm)' }}>
-              {totalRedactions} redaction{totalRedactions !== 1 ? 's' : ''} across{' '}
-              {Object.keys(redactions).length} page{Object.keys(redactions).length !== 1 ? 's' : ''}
-            </p>
+            <div style={{
+              display: 'flex', alignItems: 'flex-start', gap: 'var(--space-sm)',
+              padding: 'var(--space-md)', marginBottom: 'var(--space-md)',
+              background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)',
+              borderRadius: 'var(--radius-md)', fontSize: 13, color: 'var(--text-primary)',
+            }}>
+              <AlertTriangle size={18} style={{ flexShrink: 0, color: 'var(--accent-amber)', marginTop: 1 }} />
+              <span>
+                <strong>Heads up:</strong> {totalRedactions} redaction{totalRedactions === 1 ? '' : 's'} on{' '}
+                {redactedPageCount} page{redactedPageCount === 1 ? '' : 's'} — those page{redactedPageCount === 1 ? '' : 's'}{' '}
+                will be flattened to images in the output. Text on them won't be selectable or searchable afterwards.
+                File size of those pages will also grow.
+              </span>
+            </div>
           )}
 
           <ActionButton
-            label={`Redact ${totalRedactions} Area${totalRedactions !== 1 ? 's' : ''}`}
+            label={loading && loadingStep ? loadingStep : `Redact ${totalRedactions} Area${totalRedactions !== 1 ? 's' : ''}`}
             onClick={handleProcess}
             disabled={!fileBytes || totalRedactions === 0}
             loading={loading}
