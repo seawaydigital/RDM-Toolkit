@@ -1,4 +1,4 @@
-import { Shield, WifiOff, Wifi, Eye, FileCheck, Lock, Globe, MonitorSmartphone, ArrowRight, ArrowDown, CheckCircle, XCircle, Laptop, ExternalLink } from 'lucide-react';
+import { Shield, WifiOff, Wifi, Eye, FileCheck, Lock, Globe, MonitorSmartphone, ArrowRight, ArrowDown, CheckCircle, XCircle, Laptop, ExternalLink, Clock, FileText, Image as ImageIcon, Cpu } from 'lucide-react';
 
 export default function HowThisWorks() {
   return (
@@ -143,6 +143,107 @@ export default function HowThisWorks() {
               page (just like any website loads its code). After that, all the actual
               file processing happens using your computer's processor and memory. Your
               internet connection is not involved.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Why this wasn't possible ten years ago */}
+      <section className="htw-section">
+        <h2 className="htw-section-title">Why This Wasn't Possible Ten Years Ago</h2>
+        <div className="htw-promise">
+          <Clock size={32} />
+          <div>
+            <p>
+              If your gut reaction to a website that offers to merge a PDF is
+              {' '}<em>"that has to be uploading my file somewhere,"</em> you're not
+              wrong — you're just remembering how the internet used to work. For most
+              of its history, web browsers could do almost nothing on their own. They
+              were display windows. Anything heavier than showing text and pictures —
+              editing a PDF, encrypting a file, resizing an image — had to happen on
+              a server somewhere else, which meant your file had to travel there first.
+            </p>
+            <p style={{ marginTop: '12px' }}>
+              That changed, quietly, between about 2014 and 2019. Chrome, Firefox,
+              Safari, and Edge all added the ability to run real, heavy-duty software
+              directly inside the browser — the kind of work that used to require
+              installing a desktop app or uploading to a service. The browser stopped
+              being a display window and became a small computer in its own right.
+            </p>
+          </div>
+        </div>
+
+        <h3 className="htw-subsection-title">What the browser can now do on its own</h3>
+        <div className="htw-compliance-grid">
+          <div className="htw-compliance-card">
+            <Lock size={20} />
+            <div>
+              <h3>Built-in encryption (since 2014)</h3>
+              <p>
+                Modern browsers ship with the same AES-256 encryption used by banks and
+                the U.S. government for classified data. That's what powers the
+                Encrypt Text and Password Protect PDF tools — no server required.
+              </p>
+            </div>
+          </div>
+          <div className="htw-compliance-card">
+            <FileText size={20} />
+            <div>
+              <h3>PDF editing (since ~2017)</h3>
+              <p>
+                Using a technology called WebAssembly, browsers can now open, edit,
+                split, merge, and rebuild PDF files at near-desktop speed. This is how
+                the PDF tools on this site work.
+              </p>
+            </div>
+          </div>
+          <div className="htw-compliance-card">
+            <ImageIcon size={20} />
+            <div>
+              <h3>Image processing (mature since ~2015)</h3>
+              <p>
+                Browsers can resize, compress, crop, and strip hidden metadata from
+                images directly. The capability existed earlier but only became fast
+                enough for real files in the last several years.
+              </p>
+            </div>
+          </div>
+          <div className="htw-compliance-card">
+            <Cpu size={20} />
+            <div>
+              <h3>Large-file memory</h3>
+              <p>
+                A laptop from 2020 typically has 8 GB of RAM or more. Modern browsers
+                can use a large chunk of that, letting them handle research-scale
+                files (hundreds of megabytes) without choking.
+              </p>
+            </div>
+          </div>
+          <div className="htw-compliance-card">
+            <WifiOff size={20} />
+            <div>
+              <h3>Works offline (since ~2018)</h3>
+              <p>
+                Browsers can save an entire website to your device so it still works
+                with Wi-Fi off. This is why, once you've visited RDM Toolkit, every
+                tool keeps working even when you're on a plane or off campus.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="htw-promise" style={{ marginTop: 'var(--space-lg)' }}>
+          <Shield size={32} />
+          <div>
+            <p>
+              The upshot: a modern browser can now do — privately, on your own
+              device — the kind of work that five or ten years ago genuinely{' '}
+              <em>did</em> require uploading your file to somebody else's server.
+              If you remember "online PDF tool" meaning "some stranger's server has
+              a copy of my document now," that memory was accurate at the time. The
+              technology has simply moved on. RDM Toolkit exists because that shift
+              made it possible to offer research-grade tools without asking you to
+              trust a middleman in between.
             </p>
           </div>
         </div>
