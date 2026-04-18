@@ -406,28 +406,6 @@ input:focus, textarea:focus, select:focus {
   }
 }
 
-.sidebar-close-btn {
-  display: none;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 6px;
-  border-radius: var(--radius-sm);
-  line-height: 0;
-  z-index: 1;
-}
-.sidebar-close-btn:hover {
-  background: var(--bg-tertiary);
-  color: var(--text-primary);
-}
-@media (max-width: 767px) {
-  .sidebar-close-btn { display: flex; }
-}
-
 .sidebar-scroll {
   padding: 10px 0 12px;
   flex: 1;
@@ -705,11 +683,19 @@ input:focus, textarea:focus, select:focus {
 }
 
 @media (max-width: 767px) {
+  .tool-header {
+    padding-bottom: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+  .tool-header-kicker {
+    margin-bottom: 10px;
+  }
   .tool-title {
-    font-size: 30px;
+    font-size: 26px;
   }
   .tool-header-lede {
     font-size: 14px;
+    margin-top: 8px;
   }
 }
 
@@ -842,6 +828,10 @@ input:focus, textarea:focus, select:focus {
   font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+.dropzone-label--mobile {
+  display: none;
 }
 
 .dropzone-sublabel {
@@ -11006,6 +10996,10 @@ input:focus, textarea:focus, select:focus {
     display: none;
   }
 
+  .topbar-search-btn {
+    display: none;
+  }
+
   /* Homepage grid — 1 column on very small screens */
   .homepage-grid {
     grid-template-columns: 1fr;
@@ -11028,6 +11022,84 @@ input:focus, textarea:focus, select:focus {
   .sign-step-dot {
     font-size: 11px;
     padding: 4px 10px;
+  }
+
+  /* Dropzone — touch-friendly copy */
+  .dropzone-label--desktop {
+    display: none;
+  }
+  .dropzone-label--mobile {
+    display: block;
+  }
+  .dropzone-browse-link {
+    display: none;
+  }
+
+  /* Sidebar — larger touch targets for tool items */
+  .sidebar-tool-item {
+    padding: 11px var(--space-md) 11px 42px;
+    font-size: 14px;
+    min-height: 40px;
+  }
+
+  /* Sidebar — hide pinned CTA on mobile (saves ~80px of vertical space) */
+  .sidebar-cta {
+    display: none;
+  }
+
+  /* Homepage recent pills — bigger thumb targets */
+  .homepage-recent-pill {
+    min-height: 40px;
+    padding: 9px 16px;
+    font-size: 13.5px;
+  }
+
+  /* Hero kicker & serial metadata — bump from 9-10px to 11px for legibility */
+  .homepage-hero-kicker {
+    font-size: 11px;
+  }
+  .homepage-hero-serial {
+    font-size: 11px;
+  }
+  .sidebar-more-toggle {
+    font-size: 11px;
+  }
+  .sidebar-section-label {
+    font-size: 11px;
+  }
+
+  /* Wide tables — visual affordance for horizontal scroll (right-edge fade) */
+  .lud-picker-wrap,
+  .aa-task-table-wrap,
+  .tap-matrix,
+  .dc-controls-table-wrap {
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+  }
+  .lud-picker-wrap::after,
+  .aa-task-table-wrap::after,
+  .dc-controls-table-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 24px;
+    pointer-events: none;
+    background: linear-gradient(to right, transparent, var(--bg-primary));
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  }
+
+  /* Inline prose links — expanded hit area without visible layout change */
+  .htw p a,
+  .tap p a,
+  .aa p a,
+  .lud p a,
+  .dc p a,
+  .drac p a,
+  .gai p a {
+    padding: 2px 2px;
+    margin: -2px -2px;
   }
 }
 

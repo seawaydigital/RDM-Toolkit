@@ -134,7 +134,8 @@ export default function DropZone({
       >
         <Upload size={36} className="dropzone-icon" />
 
-        <p className="dropzone-label">Drop your file here</p>
+        <p className="dropzone-label dropzone-label--desktop">Drop your file here</p>
+        <p className="dropzone-label dropzone-label--mobile">Tap to choose a file</p>
 
         {formattedTypes && (
           <p className="dropzone-sublabel">Supports {formattedTypes} files</p>

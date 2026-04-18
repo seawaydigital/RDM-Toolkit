@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, X, CircleDollarSign, Database, ArrowUpRight, BadgeCheck } from 'lucide-react';
+import { ChevronDown, ChevronRight, HelpCircle, MessageSquarePlus, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, CircleDollarSign, Database, ArrowUpRight, BadgeCheck } from 'lucide-react';
 import { PRIMARY_CATEGORIES, MORE_CATEGORIES, CATEGORIES } from '../../data/toolRegistry';
 
 export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen, onClose }) {
@@ -86,17 +86,6 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
     <>
       {isOpen && <div className="sidebar-backdrop" onClick={onClose} />}
       <nav className={`sidebar ${isOpen ? 'sidebar--open' : ''}`} aria-label="Tool navigation" ref={navRef}>
-        {/* Close button — visible on mobile only */}
-        {onClose && (
-          <button
-            className="sidebar-close-btn"
-            onClick={onClose}
-            aria-label="Close navigation"
-          >
-            <X size={18} />
-          </button>
-        )}
-
         <div className="sidebar-scroll">
           {/* Primary categories */}
           {PRIMARY_CATEGORIES.map(renderCategory)}
