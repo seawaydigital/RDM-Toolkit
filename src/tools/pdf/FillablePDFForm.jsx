@@ -11,6 +11,8 @@ import {
   ChevronRight,
   MousePointer,
   PenLine,
+  Maximize2,
+  Minimize2,
 } from 'lucide-react';
 import InfoCard from '../../components/ui/InfoCard';
 import DropZone from '../../components/ui/DropZone';
@@ -70,9 +72,57 @@ export default function FillablePDFForm({ tool, navigateTo }) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [previewScale, setPreviewScale] = useState(0.9);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [autoFit, setAutoFit] = useState(true);
 
   const pageWrapRef = useRef(null);
   const dragStateRef = useRef(null);
+  const pageColumnRef = useRef(null);
+  const editorRef = useRef(null);
+
+  const firstPage = pages[0];
+  const isLandscape = firstPage ? firstPage.pdfWidth > firstPage.pdfHeight : false;
+
+  // Fit-to-width: measure available width in the page column and set zoom.
+  useEffect(() => {
+    if (!autoFit) return;
+    const col = pageColumnRef.current;
+    const page = pages[currentPageIdx];
+    if (!col || !page) return;
+
+    const measure = () => {
+      const available = col.clientWidth - 48;
+      if (available <= 0) return;
+      const fit = available / page.pdfWidth;
+      const clamped = Math.max(0.4, Math.min(2.5, fit));
+      setPreviewScale(clamped);
+    };
+    measure();
+
+    const ro = new ResizeObserver(measure);
+    ro.observe(col);
+    return () => ro.disconnect();
+  }, [autoFit, pages, currentPageIdx, fullscreen, isLandscape]);
+
+  // Escape exits fullscreen / cancels placement.
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape') {
+        if (activeTool) setActiveTool(null);
+        else if (fullscreen) setFullscreen(false);
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [activeTool, fullscreen]);
+
+  // Lock body scroll while in fullscreen.
+  useEffect(() => {
+    if (!fullscreen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [fullscreen]);
 
   const handleFilesSelected = useCallback(async ([f]) => {
     setError(null);
@@ -433,234 +483,292 @@ export default function FillablePDFForm({ tool, navigateTo }) {
       )}
 
       {file && page && (
-        <>
-          <div className="ff-toolbar">
-            <button
-              className={`ff-tool-btn ${activeTool === null ? 'ff-tool-btn--active' : ''}`}
-              onClick={() => setActiveTool(null)}
-              type="button"
-              aria-label="Select / move tool"
-            >
-              <MousePointer size={16} />
-              Select
-            </button>
-            {FIELD_TYPES.map(t => {
-              const Icon = t.icon;
-              return (
-                <button
-                  key={t.id}
-                  className={`ff-tool-btn ${activeTool === t.id ? 'ff-tool-btn--active' : ''}`}
-                  onClick={() => {
-                    setActiveTool(t.id);
-                    setSelectedFieldId(null);
-                  }}
-                  type="button"
-                >
-                  <Icon size={16} />
-                  {t.label}
-                </button>
-              );
-            })}
-            <div className="ff-toolbar-spacer" />
-            <button className="tool-file-remove" onClick={handleRemoveFile} aria-label="Remove file">
-              <X size={14} />
-              Remove
-            </button>
-          </div>
-
-          <div className="ff-page-meta">
-            <button
-              className="ff-page-nav"
-              onClick={() => setCurrentPageIdx(i => Math.max(0, i - 1))}
-              disabled={currentPageIdx === 0}
-              aria-label="Previous page"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <span className="ff-page-meta-text">
-              Page {currentPageIdx + 1} of {pages.length}
-              {fieldsOnPage.length > 0 && ` — ${fieldsOnPage.length} field${fieldsOnPage.length === 1 ? '' : 's'}`}
-            </span>
-            <button
-              className="ff-page-nav"
-              onClick={() => setCurrentPageIdx(i => Math.min(pages.length - 1, i + 1))}
-              disabled={currentPageIdx >= pages.length - 1}
-              aria-label="Next page"
-            >
-              <ChevronRight size={16} />
-            </button>
-            <div className="ff-toolbar-spacer" />
-            <label className="ff-zoom-label">
-              Zoom
-              <input
-                type="range"
-                min={0.5}
-                max={1.5}
-                step={0.1}
-                value={previewScale}
-                onChange={e => setPreviewScale(Number(e.target.value))}
-              />
-              {Math.round(previewScale * 100)}%
-            </label>
-          </div>
-
-          {activeTool && (
-            <p className="ff-hint">
-              Click on the page to drop a {FIELD_TYPES.find(t => t.id === activeTool).label.toLowerCase()}.
-              Press Esc or click Select to cancel.
-            </p>
-          )}
-
-          <div className="ff-page-shell">
-            <div
-              ref={pageWrapRef}
-              className={`ff-page-wrap ${activeTool ? 'ff-page-wrap--placing' : ''}`}
-              onClick={handlePageClick}
-              style={{
-                width: page.pdfWidth * previewScale,
-                height: page.pdfHeight * previewScale,
-              }}
-            >
-              <img
-                src={page.thumbnail}
-                alt={`Page ${currentPageIdx + 1}`}
-                className="ff-page-img"
-                draggable={false}
-              />
-              {fieldsOnPage.map(fd => {
-                const cssX = (fd.x / page.pdfWidth) * (page.pdfWidth * previewScale);
-                const cssY = ((page.pdfHeight - fd.y - fd.height) / page.pdfHeight) * (page.pdfHeight * previewScale);
-                const cssW = (fd.width / page.pdfWidth) * (page.pdfWidth * previewScale);
-                const cssH = (fd.height / page.pdfHeight) * (page.pdfHeight * previewScale);
-                const isSelected = selectedFieldId === fd.id;
+        <div
+          ref={editorRef}
+          className={`ff-editor ${isLandscape ? 'ff-editor--landscape' : 'ff-editor--portrait'} ${fullscreen ? 'ff-editor--fullscreen' : ''}`}
+        >
+          <div className="ff-page-column" ref={pageColumnRef}>
+            <div className="ff-toolbar">
+              <button
+                className={`ff-tool-btn ${activeTool === null ? 'ff-tool-btn--active' : ''}`}
+                onClick={() => setActiveTool(null)}
+                type="button"
+                aria-label="Select / move tool"
+              >
+                <MousePointer size={16} />
+                Select
+              </button>
+              {FIELD_TYPES.map(t => {
+                const Icon = t.icon;
                 return (
-                  <div
-                    key={fd.id}
-                    className={`ff-field ff-field--${fd.type} ${isSelected ? 'ff-field--selected' : ''}`}
-                    style={{ left: cssX, top: cssY, width: cssW, height: cssH }}
-                    onMouseDown={(e) => startDrag(e, fd, 'move')}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedFieldId(fd.id);
-                      setActiveTool(null);
+                  <button
+                    key={t.id}
+                    className={`ff-tool-btn ${activeTool === t.id ? 'ff-tool-btn--active' : ''}`}
+                    onClick={() => {
+                      setActiveTool(t.id);
+                      setSelectedFieldId(null);
                     }}
+                    type="button"
                   >
-                    <span className="ff-field-label">{fd.name}</span>
-                    {isSelected && (
-                      <>
-                        <button
-                          className="ff-field-delete"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            deleteField(fd.id);
-                          }}
-                          onMouseDown={(e) => e.stopPropagation()}
-                          aria-label="Delete field"
-                          type="button"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                        <div
-                          className="ff-field-resize"
-                          onMouseDown={(e) => startDrag(e, fd, 'resize')}
-                          aria-label="Resize"
-                        />
-                      </>
-                    )}
-                  </div>
+                    <Icon size={16} />
+                    {t.label}
+                  </button>
                 );
               })}
+              <div className="ff-toolbar-spacer" />
+              <button
+                className="ff-tool-btn"
+                onClick={() => setFullscreen(f => !f)}
+                type="button"
+                aria-label={fullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                title={fullscreen ? 'Exit fullscreen (Esc)' : 'Fullscreen'}
+              >
+                {fullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                {fullscreen ? 'Exit' : 'Fullscreen'}
+              </button>
+              {!fullscreen && (
+                <button className="tool-file-remove" onClick={handleRemoveFile} aria-label="Remove file">
+                  <X size={14} />
+                  Remove
+                </button>
+              )}
             </div>
+
+            <div className="ff-page-meta">
+              <button
+                className="ff-page-nav"
+                onClick={() => setCurrentPageIdx(i => Math.max(0, i - 1))}
+                disabled={currentPageIdx === 0}
+                aria-label="Previous page"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="ff-page-meta-text">
+                Page {currentPageIdx + 1} of {pages.length}
+                {fieldsOnPage.length > 0 && ` — ${fieldsOnPage.length} field${fieldsOnPage.length === 1 ? '' : 's'}`}
+              </span>
+              <button
+                className="ff-page-nav"
+                onClick={() => setCurrentPageIdx(i => Math.min(pages.length - 1, i + 1))}
+                disabled={currentPageIdx >= pages.length - 1}
+                aria-label="Next page"
+              >
+                <ChevronRight size={16} />
+              </button>
+              <div className="ff-toolbar-spacer" />
+              <label className="ff-zoom-label">
+                <input
+                  type="checkbox"
+                  checked={autoFit}
+                  onChange={e => setAutoFit(e.target.checked)}
+                />
+                Fit
+              </label>
+              <label className="ff-zoom-label">
+                Zoom
+                <input
+                  type="range"
+                  min={0.4}
+                  max={2.5}
+                  step={0.1}
+                  value={previewScale}
+                  onChange={e => {
+                    setAutoFit(false);
+                    setPreviewScale(Number(e.target.value));
+                  }}
+                />
+                {Math.round(previewScale * 100)}%
+              </label>
+            </div>
+
+            {activeTool && (
+              <p className="ff-hint">
+                Click on the page to drop a {FIELD_TYPES.find(t => t.id === activeTool).label.toLowerCase()}.
+                Press Esc or click Select to cancel.
+              </p>
+            )}
+
+            <div className="ff-page-shell">
+              <div
+                ref={pageWrapRef}
+                className={`ff-page-wrap ${activeTool ? 'ff-page-wrap--placing' : ''}`}
+                onClick={handlePageClick}
+                style={{
+                  width: page.pdfWidth * previewScale,
+                  height: page.pdfHeight * previewScale,
+                }}
+              >
+                <img
+                  src={page.thumbnail}
+                  alt={`Page ${currentPageIdx + 1}`}
+                  className="ff-page-img"
+                  draggable={false}
+                />
+                {fieldsOnPage.map(fd => {
+                  const cssX = (fd.x / page.pdfWidth) * (page.pdfWidth * previewScale);
+                  const cssY = ((page.pdfHeight - fd.y - fd.height) / page.pdfHeight) * (page.pdfHeight * previewScale);
+                  const cssW = (fd.width / page.pdfWidth) * (page.pdfWidth * previewScale);
+                  const cssH = (fd.height / page.pdfHeight) * (page.pdfHeight * previewScale);
+                  const isSelected = selectedFieldId === fd.id;
+                  return (
+                    <div
+                      key={fd.id}
+                      className={`ff-field ff-field--${fd.type} ${isSelected ? 'ff-field--selected' : ''}`}
+                      style={{ left: cssX, top: cssY, width: cssW, height: cssH }}
+                      onMouseDown={(e) => startDrag(e, fd, 'move')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedFieldId(fd.id);
+                        setActiveTool(null);
+                      }}
+                    >
+                      <span className="ff-field-label">{fd.name}</span>
+                      {isSelected && (
+                        <>
+                          <button
+                            className="ff-field-delete"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteField(fd.id);
+                            }}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            aria-label="Delete field"
+                            type="button"
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                          <div
+                            className="ff-field-resize"
+                            onMouseDown={(e) => startDrag(e, fd, 'resize')}
+                            aria-label="Resize"
+                          />
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {!fullscreen && (
+              <ActionButton
+                label={`Generate Fillable PDF (${fields.length} field${fields.length === 1 ? '' : 's'})`}
+                onClick={handleGenerate}
+                disabled={fields.length === 0}
+                loading={loading}
+              />
+            )}
           </div>
 
-          {selectedField && (
-            <div className="ff-props">
-              <div className="ff-props-header">
-                <strong>Field properties</strong>
-                <button
-                  className="ff-props-delete"
-                  onClick={() => deleteField(selectedField.id)}
-                  type="button"
-                >
-                  <Trash2 size={14} />
-                  Delete field
-                </button>
-              </div>
-              <div className="ff-props-grid">
-                <label className="ff-prop">
-                  <span>Field name</span>
-                  <input
-                    type="text"
-                    value={selectedField.name}
-                    onChange={e => updateField(selectedField.id, { name: e.target.value })}
-                  />
-                </label>
-                {(selectedField.type === 'text' || selectedField.type === 'dropdown') && (
-                  <label className="ff-prop">
-                    <span>Default value</span>
-                    <input
-                      type="text"
-                      value={selectedField.defaultValue}
-                      onChange={e => updateField(selectedField.id, { defaultValue: e.target.value })}
-                    />
-                  </label>
-                )}
-                {selectedField.type === 'text' && (
-                  <label className="ff-prop ff-prop--checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectedField.multiline}
-                      onChange={e => updateField(selectedField.id, { multiline: e.target.checked })}
-                    />
-                    <span>Multi-line</span>
-                  </label>
-                )}
-                {selectedField.type === 'radio' && (
-                  <>
+          <aside className="ff-side-rail">
+            <div className="ff-side-rail-inner">
+              {selectedField ? (
+                <div className="ff-props">
+                  <div className="ff-props-header">
+                    <strong>Field properties</strong>
+                    <button
+                      className="ff-props-delete"
+                      onClick={() => deleteField(selectedField.id)}
+                      type="button"
+                    >
+                      <Trash2 size={14} />
+                      Delete
+                    </button>
+                  </div>
+                  <div className="ff-props-grid">
                     <label className="ff-prop">
-                      <span>Group name (radios sharing this name belong to one group)</span>
+                      <span>Field name</span>
                       <input
                         type="text"
-                        value={selectedField.groupName}
-                        onChange={e => updateField(selectedField.id, { groupName: e.target.value })}
+                        value={selectedField.name}
+                        onChange={e => updateField(selectedField.id, { name: e.target.value })}
                       />
                     </label>
-                    <label className="ff-prop">
-                      <span>Option value</span>
-                      <input
-                        type="text"
-                        value={selectedField.defaultValue}
-                        onChange={e => updateField(selectedField.id, { defaultValue: e.target.value })}
-                        placeholder="e.g. Yes"
-                      />
-                    </label>
-                  </>
-                )}
-                {selectedField.type === 'dropdown' && (
-                  <label className="ff-prop ff-prop--full">
-                    <span>Options (one per line)</span>
-                    <textarea
-                      rows={4}
-                      value={(selectedField.options || []).join('\n')}
-                      onChange={e =>
-                        updateField(selectedField.id, {
-                          options: e.target.value.split('\n').map(s => s.trim()).filter(Boolean),
-                        })
-                      }
-                    />
-                  </label>
-                )}
-              </div>
-            </div>
-          )}
+                    {(selectedField.type === 'text' || selectedField.type === 'dropdown') && (
+                      <label className="ff-prop">
+                        <span>Default value</span>
+                        <input
+                          type="text"
+                          value={selectedField.defaultValue}
+                          onChange={e => updateField(selectedField.id, { defaultValue: e.target.value })}
+                        />
+                      </label>
+                    )}
+                    {selectedField.type === 'text' && (
+                      <label className="ff-prop ff-prop--checkbox">
+                        <input
+                          type="checkbox"
+                          checked={selectedField.multiline}
+                          onChange={e => updateField(selectedField.id, { multiline: e.target.checked })}
+                        />
+                        <span>Multi-line</span>
+                      </label>
+                    )}
+                    {selectedField.type === 'radio' && (
+                      <>
+                        <label className="ff-prop">
+                          <span>Group name (radios sharing this name belong to one group)</span>
+                          <input
+                            type="text"
+                            value={selectedField.groupName}
+                            onChange={e => updateField(selectedField.id, { groupName: e.target.value })}
+                          />
+                        </label>
+                        <label className="ff-prop">
+                          <span>Option value</span>
+                          <input
+                            type="text"
+                            value={selectedField.defaultValue}
+                            onChange={e => updateField(selectedField.id, { defaultValue: e.target.value })}
+                            placeholder="e.g. Yes"
+                          />
+                        </label>
+                      </>
+                    )}
+                    {selectedField.type === 'dropdown' && (
+                      <label className="ff-prop ff-prop--full">
+                        <span>Options (one per line)</span>
+                        <textarea
+                          rows={4}
+                          value={(selectedField.options || []).join('\n')}
+                          onChange={e =>
+                            updateField(selectedField.id, {
+                              options: e.target.value.split('\n').map(s => s.trim()).filter(Boolean),
+                            })
+                          }
+                        />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="ff-rail-empty">
+                  <p className="ff-rail-empty-title">No field selected</p>
+                  <p className="ff-rail-empty-body">
+                    Pick a field type from the toolbar and click anywhere on the page to drop it,
+                    or click an existing field to edit its properties here.
+                  </p>
+                  {fields.length > 0 && (
+                    <p className="ff-rail-empty-count">
+                      {fields.length} field{fields.length === 1 ? '' : 's'} placed across the document.
+                    </p>
+                  )}
+                </div>
+              )}
 
-          <ActionButton
-            label={`Generate Fillable PDF (${fields.length} field${fields.length === 1 ? '' : 's'})`}
-            onClick={handleGenerate}
-            disabled={fields.length === 0}
-            loading={loading}
-          />
-        </>
+              {fullscreen && (
+                <div className="ff-rail-actions">
+                  <ActionButton
+                    label={`Generate (${fields.length})`}
+                    onClick={handleGenerate}
+                    disabled={fields.length === 0}
+                    loading={loading}
+                  />
+                </div>
+              )}
+            </div>
+          </aside>
+        </div>
       )}
     </div>
   );

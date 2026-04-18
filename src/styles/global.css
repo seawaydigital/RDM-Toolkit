@@ -13239,6 +13239,113 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: var(--space-sm);
 }
 
+.ff-editor {
+  display: grid;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.ff-editor--portrait {
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+}
+.ff-editor--landscape {
+  grid-template-columns: minmax(0, 1fr);
+}
+.ff-editor--landscape .ff-side-rail {
+  order: -1;
+}
+@media (max-width: 900px) {
+  .ff-editor--portrait {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ff-editor--portrait .ff-side-rail {
+    order: 2;
+  }
+}
+
+.ff-page-column {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.ff-side-rail {
+  position: sticky;
+  top: calc(var(--topbar-height) + var(--space-md));
+  align-self: start;
+}
+.ff-side-rail-inner {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  max-height: calc(100vh - var(--topbar-height) - var(--space-xl));
+  display: flex;
+  flex-direction: column;
+}
+.ff-rail-empty {
+  padding: var(--space-lg);
+  color: var(--text-secondary);
+}
+.ff-rail-empty-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-sm);
+}
+.ff-rail-empty-body {
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0 0 var(--space-md);
+}
+.ff-rail-empty-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-hairline);
+}
+.ff-rail-actions {
+  padding: var(--space-md);
+  border-top: 1px solid var(--border-hairline);
+  background: var(--bg-inset);
+}
+
+.ff-editor--fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: var(--bg-primary);
+  padding: var(--space-md);
+  margin: 0;
+  overflow: hidden;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--space-md);
+}
+.ff-editor--fullscreen.ff-editor--landscape {
+  grid-template-columns: minmax(0, 1fr) 340px;
+}
+.ff-editor--fullscreen .ff-page-column {
+  overflow: hidden;
+  min-height: 0;
+}
+.ff-editor--fullscreen .ff-page-shell {
+  flex: 1;
+  max-height: none;
+  min-height: 0;
+}
+.ff-editor--fullscreen .ff-side-rail {
+  position: relative;
+  top: auto;
+  height: 100%;
+}
+.ff-editor--fullscreen .ff-side-rail-inner {
+  max-height: 100%;
+  height: 100%;
+}
+
 .ff-page-shell {
   display: flex;
   justify-content: center;
@@ -13246,9 +13353,8 @@ input:focus, textarea:focus, select:focus {
   background: var(--bg-primary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  margin-bottom: var(--space-md);
   overflow: auto;
-  max-height: 70vh;
+  max-height: 75vh;
 }
 
 .ff-page-wrap {
@@ -13343,11 +13449,8 @@ input:focus, textarea:focus, select:focus {
 }
 
 .ff-props {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
   padding: var(--space-md) var(--space-lg);
-  margin-bottom: var(--space-md);
+  overflow: auto;
 }
 .ff-props-header {
   display: flex;
@@ -13373,7 +13476,7 @@ input:focus, textarea:focus, select:focus {
 
 .ff-props-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--space-md);
 }
 .ff-prop {
