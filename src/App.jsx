@@ -222,6 +222,15 @@ export default function App() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
+  // Lock body scroll when sidebar is open on mobile
+  useEffect(() => {
+    if (isMobile && sidebarOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [isMobile, sidebarOpen]);
+
   // Task 3 — Ctrl+K / Cmd+K opens search
   useEffect(() => {
     function onKeyDown(e) {
