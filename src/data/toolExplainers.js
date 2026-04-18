@@ -18,7 +18,7 @@
  *                      or won't do (optional).
  *   verify.quick:      string  — a 30-second test the user can run themselves.
  *
- * Coverage (Tier 1 + Tier 2): 25 tools.
+ * Coverage (Tier 1 + Tier 2 + Tier 4): 40 tools.
  */
 
 const DEFAULT_QUICK_VERIFY =
@@ -785,6 +785,441 @@ const EXPLAINERS = {
     ],
     verify: {
       quick: 'Turn off your Wi-Fi and generate 1000 UUIDs. Every one is unique and the page never hits the network — because the randomness comes from your browser itself.',
+    },
+  },
+
+  // ============================================================
+  // TIER 4 — borderline trust (file-processing utilities)
+  // ============================================================
+
+  'split-pdf': {
+    whatItDoes: 'Splits one PDF into separate smaller PDFs by page range — useful for pulling a single chapter out of a large scanned document or breaking a big report into emailable chunks.',
+    howItWorks: [
+      'You upload a PDF and type the page ranges you want to keep (for example: <code>1-3, 7, 10-15</code>). Your browser opens the PDF, makes a brand-new empty PDF for each range, copies just those pages across, and bundles the results into a ZIP so you can download everything at once.',
+      'The original file stays untouched — splitting creates new PDFs rather than editing the source. Pages keep their original text, images, and layout; nothing is re-rendered or re-compressed.',
+    ],
+    technicalDetails: {
+      library: '<code>@cantoo/pdf-lib</code> for PDF manipulation; <code>jszip</code> for bundling the output.',
+      flow: [
+        'Load the source: <code>PDFDocument.load(bytes)</code>.',
+        'For each range, <code>PDFDocument.create()</code> \u2192 <code>newDoc.copyPages(srcDoc, [indices])</code> \u2192 <code>newDoc.addPage()</code>.',
+        'Save each new document: <code>newDoc.save()</code>.',
+        'Add each Uint8Array to a JSZip archive \u2192 <code>zip.generateAsync({ type: \'blob\' })</code>.',
+      ],
+      sourceFile: 'src/tools/pdf/SplitPDF.jsx',
+    },
+    privacy: [
+      'Your PDF is loaded into this tab\u2019s memory and parsed by JavaScript. No bytes are sent to a server.',
+      'Output files are generated in memory and handed to you as a ZIP download \u2014 nothing is written to disk until you save it.',
+      'Closing the tab discards everything: the source PDF, the copied pages, and the ZIP.',
+    ],
+    limitations: [
+      'Page ranges are parsed from text \u2014 there is no drag-to-select preview for choosing which pages go into which split.',
+      'Bookmarks, document outlines, and per-document metadata may not be preserved across splits \u2014 each new PDF gets only the pages you asked for.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'rotate-pages': {
+    whatItDoes: 'Rotates PDF pages 90\u00b0, 180\u00b0, or 270\u00b0 \u2014 for fixing scans that came out sideways, or correcting upside-down pages from a photo-capture.',
+    howItWorks: [
+      'Rotation in a PDF is a number stored on each page that tells viewers how to display it. Your browser reads that number, adds the rotation you chose, and writes the new number back. The page\u2019s actual content \u2014 text, images, vectors \u2014 is untouched; only the display angle changes.',
+      'Because rotation is metadata, there\u2019s no re-rendering: a 500-page PDF rotates as fast as a 1-page PDF.',
+    ],
+    technicalDetails: {
+      library: '<code>@cantoo/pdf-lib</code>.',
+      flow: [
+        'Load: <code>PDFDocument.load(bytes)</code> \u2192 <code>pdfDoc.getPages()</code>.',
+        'For each target page: <code>page.setRotation(degrees(current + delta))</code>.',
+        'Save: <code>pdfDoc.save()</code>.',
+      ],
+      sourceFile: 'src/tools/pdf/RotatePages.jsx',
+    },
+    privacy: [
+      'The PDF is opened and edited entirely in this browser tab. Nothing leaves your device.',
+      'The output is built in memory; you decide when to save it to disk.',
+    ],
+    limitations: [
+      'Rotation changes the <em>display</em> angle only. If a scanned image inside a page was captured upside-down, rotating the page re-orients the whole page \u2014 but the pixels themselves are not rotated in place.',
+      'Because the content isn\u2019t re-rendered, this won\u2019t help with OCR or with recovering text from a rotated image.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'reorder-pages': {
+    whatItDoes: 'Rearranges the pages of a PDF by drag-and-drop or by typing a new page order \u2014 useful for reordering chapters, moving an appendix to the front, or fixing a scanner that fed pages in the wrong sequence.',
+    howItWorks: [
+      'Your browser shows a thumbnail grid of every page. You drag thumbnails into the order you want (or type a sequence like <code>3,1,2,4</code>). When you hit Generate, a brand-new PDF is created and the pages are copied into it in the new order.',
+      'The original file isn\u2019t edited \u2014 a fresh PDF is built from the reordered pages. Page content is copied byte-for-byte: text stays selectable, images keep their resolution, vectors stay sharp.',
+    ],
+    technicalDetails: {
+      library: '<code>@cantoo/pdf-lib</code> for page copy; <code>@dnd-kit/sortable</code> + <code>arrayMove()</code> for drag-and-drop.',
+      flow: [
+        'Render thumbnails with <code>pdfjs-dist</code> on first load.',
+        '<code>PDFDocument.create()</code> \u2192 <code>destDoc.copyPages(srcDoc, [newOrderIndices])</code> \u2192 <code>destDoc.addPage()</code> for each.',
+        'Save: <code>destDoc.save()</code>.',
+      ],
+      sourceFile: 'src/tools/pdf/ReorderPages.jsx',
+    },
+    privacy: [
+      'Thumbnails and page copies happen in this tab\u2019s memory. Nothing is uploaded.',
+      'The reordered output is a blob handed to you for download \u2014 no persistent storage.',
+    ],
+    limitations: [
+      'Your new page order must reference every page once (no partial reorders \u2014 use Split PDF first if you only want a subset).',
+      'Single-page PDFs are rejected (there\u2019s nothing to reorder).',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'add-page-numbers': {
+    whatItDoes: 'Adds page numbers (like "Page 3 of 47") to the bottom or top of every page of a PDF \u2014 useful for thesis drafts, REB submissions, and court-ready documents.',
+    howItWorks: [
+      'Your browser opens the PDF, loops through every page, and draws a short piece of text (the page number) in the corner you chose. The existing page content stays exactly as it was \u2014 the number is layered on top.',
+      'Because the numbers are drawn as real PDF text, they remain searchable and selectable in the final document.',
+    ],
+    technicalDetails: {
+      library: '<code>@cantoo/pdf-lib</code>.',
+      flow: [
+        'Load: <code>PDFDocument.load(bytes)</code> \u2192 <code>pdfDoc.embedFont(StandardFonts.Helvetica)</code>.',
+        'For each page: compute <code>{ x, y }</code> based on the chosen position \u2192 <code>page.drawText(label, { x, y, size, font, color: rgb(\u2026) })</code>.',
+        'Save: <code>pdfDoc.save()</code>.',
+      ],
+      sourceFile: 'src/tools/pdf/AddPageNumbers.jsx',
+    },
+    privacy: [
+      'All rendering happens in this browser tab. The PDF is never transmitted.',
+      'Helvetica is a built-in PDF standard font \u2014 no font file has to be downloaded to add numbers.',
+    ],
+    limitations: [
+      'Font is fixed to Helvetica; you can\u2019t swap in a custom font here.',
+      'Position is chosen from presets (bottom-centre, bottom-right, top-right, etc.) rather than a free-draw overlay.',
+      'If the chosen corner overlaps existing page content, the number will sit on top of it \u2014 there\u2019s no automatic margin expansion.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'pdf-watermark': {
+    whatItDoes: 'Stamps a text watermark (like "DRAFT", "CONFIDENTIAL", or your name) diagonally across every page of a PDF at the opacity you choose.',
+    howItWorks: [
+      'Your browser opens the PDF and draws your watermark text on top of each page at the angle, size, colour, and opacity you set. The existing content remains intact underneath; the watermark is an added layer.',
+      'Because the watermark is real PDF text (not a raster overlay), page text beneath it stays selectable and searchable.',
+    ],
+    technicalDetails: {
+      library: '<code>@cantoo/pdf-lib</code>.',
+      flow: [
+        'Load: <code>PDFDocument.load(bytes)</code> \u2192 <code>pdfDoc.embedFont(StandardFonts.Helvetica)</code>.',
+        'For each page: <code>page.drawText(text, { x, y, size, font, color: rgb(\u2026), opacity, rotate: degrees(\u2026) })</code>.',
+        'Save: <code>pdfDoc.save()</code>.',
+      ],
+      sourceFile: 'src/tools/pdf/PDFWatermark.jsx',
+    },
+    privacy: [
+      'Watermarking is pure local PDF editing \u2014 no network calls, no server rendering.',
+      'Your watermark text never leaves this browser tab; it\u2019s drawn directly into the output PDF.',
+    ],
+    limitations: [
+      'Text watermarks only \u2014 you cannot overlay an image or logo with this tool.',
+      'A watermark can be removed or edited by anyone who opens the resulting PDF in a full editor. For hard "cannot be removed" stamping, rasterise the final PDF (e.g. via Compress PDF\u2019s aggressive mode).',
+      'Opacity is set per-draw call, not as a blend mode \u2014 effects on pages with complex overlapping content may vary across viewers.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'add-cover-page': {
+    whatItDoes: 'Prepends a branded cover page (title, subtitle, author, department, institution, date) to the front of a PDF \u2014 useful for thesis drafts, grant applications, and office reports.',
+    howItWorks: [
+      'You type the cover details and pick a layout. Your browser creates a fresh 1-page PDF with those details drawn as real PDF text. Then it builds a new combined PDF: first the cover, then every page of your original. The original file isn\u2019t altered.',
+      'Because the cover text is real (not an image), it remains selectable, searchable, and machine-readable in the final document.',
+    ],
+    technicalDetails: {
+      library: '<code>@cantoo/pdf-lib</code>.',
+      flow: [
+        'Create the cover: <code>PDFDocument.create()</code> \u2192 <code>embedFont(StandardFonts.Helvetica + HelveticaBold)</code> \u2192 <code>page.drawRectangle()</code>, <code>page.drawText()</code>, <code>page.drawLine()</code>.',
+        'Build the combined document: <code>finalDoc.copyPages(coverDoc, [0])</code> + <code>finalDoc.copyPages(uploadedDoc, all)</code>.',
+        'Save: <code>finalDoc.save()</code>.',
+      ],
+      sourceFile: 'src/tools/pdf/AddCoverPage.jsx',
+    },
+    privacy: [
+      'The original PDF is read and copied inside this browser tab; it is never uploaded.',
+      'Cover details you type are written directly into the output PDF \u2014 not stored or logged anywhere.',
+    ],
+    limitations: [
+      'Two fixed layouts (centred, left-ruled); no fully custom layout.',
+      'Font is limited to Helvetica/Helvetica-Bold (standard PDF fonts that don\u2019t require embedding).',
+      'Logos and images on the cover are not supported here; if you need a logo, add it to your PDF separately before running this tool.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'pdf-page-inspector': {
+    whatItDoes: 'Reports the exact dimensions of every page of a PDF (in inches or millimetres) and detects standard paper sizes like Letter, A4, or Legal \u2014 optionally resizing all pages to a target size using Scale, Crop, or Pad.',
+    howItWorks: [
+      'Your browser renders thumbnails for each page, reads each page\u2019s width and height from the PDF\u2019s internal metadata, and compares against a table of standard paper sizes (with a small tolerance for rounding). You see a per-page report and a summary.',
+      'If you ask it to resize, the tool creates a new PDF where each page is drawn onto a new page of the target size \u2014 either scaled to fit, cropped to the centre, or padded with white space. The original file is not edited.',
+    ],
+    technicalDetails: {
+      library: '<code>pdfjs-dist</code> for inspection; <code>@cantoo/pdf-lib</code> for resize.',
+      flow: [
+        'Inspect: <code>pdfJsDoc.getPage(i)</code> \u2192 <code>page.getViewport()</code> \u2192 extract width/height \u2192 match against A-series/US-series with \u00b15pt/\u00b120pt tolerance.',
+        'Detect form fields via Widget annotations (<code>page.getAnnotations()</code>) to warn users that resize may misalign fillable areas.',
+        'Resize: <code>outDoc.embedPage(srcPage)</code> \u2192 <code>newPage.drawPage(embeddedPage, { x, y, width, height })</code> with <code>save({ useObjectStreams: false })</code> for broad viewer compatibility.',
+      ],
+      sourceFile: 'src/tools/pdf/PdfPageInspector.jsx',
+    },
+    privacy: [
+      'The PDF is loaded into memory by pdfjs running in a sandboxed Web Worker \u2014 never sent to a server.',
+      'All measurements are read from the PDF\u2019s own structure inside this browser tab.',
+    ],
+    limitations: [
+      'If the source PDF has fillable form fields or a digital signature, resizing will likely misalign them. The tool flags this and suggests flattening via File \u2192 Print \u2192 Save as PDF first.',
+      'Resize modes do not re-flow text \u2014 Scale shrinks or stretches the whole page; Crop keeps the centre at original size; Pad adds whitespace.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'convert-image-format': {
+    whatItDoes: 'Converts an image from one format to another (PNG, JPEG, WebP, BMP) \u2014 useful when a portal requires JPEG uploads or you want to shrink a big PNG by re-encoding as JPEG.',
+    howItWorks: [
+      'Your browser decodes the image into pixels, paints them onto an invisible canvas, then asks the canvas to re-encode those pixels in the format you chose. The result is a fresh file in the new format.',
+      'For lossy formats (JPEG, WebP), you can pick a quality level \u2014 higher quality means larger files; lower quality means more visible compression artefacts.',
+    ],
+    technicalDetails: {
+      library: 'Canvas API (<code>HTMLCanvasElement.toBlob</code>) \u2014 native browser, no third-party codec library.',
+      flow: [
+        'Load: <code>const img = new Image()</code> \u2192 <code>img.src = URL.createObjectURL(file)</code>.',
+        'Draw: <code>canvas.getContext(\'2d\').drawImage(img, 0, 0)</code>.',
+        'Encode: <code>canvas.toBlob(cb, \'image/jpeg\', quality)</code> (or <code>image/png</code>, <code>image/webp</code>, <code>image/bmp</code>).',
+      ],
+      sourceFile: 'src/tools/images/ConvertImageFormat.jsx',
+    },
+    privacy: [
+      'The image is decoded, re-drawn, and re-encoded inside your browser. No upload, no cloud conversion.',
+      'EXIF and other metadata are dropped during the canvas round-trip \u2014 a useful privacy side-effect (use Strip Image Metadata if you want to keep the same format but only remove metadata).',
+    ],
+    limitations: [
+      'ICC colour profiles are not preserved \u2014 colours may shift subtly if the source used a wide-gamut profile.',
+      'Transparency is lost for JPEG and BMP (the alpha channel is flattened against white).',
+      'Canvas can\u2019t read some exotic formats (e.g. HEIC on older browsers); if a file won\u2019t load, try converting it with your OS\u2019s photo app first.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'resize-image': {
+    whatItDoes: 'Resizes an image to specific pixel dimensions (or a percentage of the original), with optional aspect-ratio lock \u2014 useful for meeting an upload portal\u2019s size limits or generating a thumbnail.',
+    howItWorks: [
+      'Your browser decodes the image, creates an invisible canvas at the target size, paints the image onto it (the canvas does the scaling), and then asks for a new file back out.',
+      'If you lock the aspect ratio, one dimension is computed from the other so the image doesn\u2019t get stretched.',
+    ],
+    technicalDetails: {
+      library: 'Canvas API.',
+      flow: [
+        'Load: <code>img.src = URL.createObjectURL(file)</code>.',
+        'Resize: <code>canvas.width = targetWidth; canvas.height = targetHeight</code> \u2192 <code>ctx.drawImage(img, 0, 0, targetWidth, targetHeight)</code>.',
+        'Encode: <code>canvas.toBlob(cb, mime, quality)</code>.',
+      ],
+      sourceFile: 'src/tools/images/ResizeImage.jsx',
+    },
+    privacy: [
+      'Resizing happens entirely inside the canvas in this tab. No network activity.',
+      'The output is a fresh blob; nothing is persisted to disk until you download.',
+    ],
+    limitations: [
+      'The canvas uses the browser\u2019s default resampling algorithm \u2014 decent, but not as good as a high-quality downsampler like Lanczos. For professional print work, use dedicated image software.',
+      'Dramatic downsizes (e.g. 4000\u00d74000 \u2192 200\u00d7200) can look softer than you\u2019d expect; consider doing it in two passes if the result isn\u2019t crisp enough.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'image-cropper': {
+    whatItDoes: 'Crops a rectangular region out of an image \u2014 useful for trimming a screenshot, cutting out a face for a headshot, or isolating a chart from a larger figure.',
+    howItWorks: [
+      'Your browser shows the image with a draggable selection rectangle. When you export, a new canvas is created at the size of your selection, and only the pixels inside that rectangle are painted onto it.',
+      'The result is a fresh image file containing just the cropped region \u2014 the original file isn\u2019t modified.',
+    ],
+    technicalDetails: {
+      library: 'Canvas API.',
+      flow: [
+        'Track selection rectangle via pointer events \u2192 convert screen coords to image coords.',
+        'Crop: <code>canvas.width = cropW; canvas.height = cropH</code> \u2192 <code>ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cropW, cropH)</code>.',
+        'Encode: <code>canvas.toBlob(cb, mime, quality)</code>.',
+      ],
+      sourceFile: 'src/tools/images/ImageCropper.jsx',
+    },
+    privacy: [
+      'The image is read into the browser, cropped on a local canvas, and the result is offered back as a download. Nothing is uploaded.',
+      'The cropped output is a fresh file \u2014 it does not include pixels from outside your selection.',
+    ],
+    limitations: [
+      'Crop is a hard rectangular cut \u2014 no feathering, rounded corners, or soft edges.',
+      'Selecting a region smaller than 1\u00d71 pixel isn\u2019t allowed.',
+      'Rotation and perspective correction aren\u2019t part of this tool \u2014 use Resize Image or Convert Image Format before/after as needed.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'create-zip': {
+    whatItDoes: 'Bundles multiple files into a single ZIP archive \u2014 useful for emailing a project folder, preparing a DMP deposit package, or sharing research outputs.',
+    howItWorks: [
+      'You drop files onto the page; your browser reads each one into memory, hands the bytes to a ZIP builder that compresses them using the standard DEFLATE algorithm, and then produces a single ZIP file you can download.',
+      'Folder structure (e.g. a sub-folder of files you dropped) is preserved inside the archive where the browser supports it.',
+    ],
+    technicalDetails: {
+      library: '<code>jszip</code> v3.10.1.',
+      flow: [
+        'For each file: <code>zip.file(name, arrayBuffer)</code>.',
+        'Generate: <code>zip.generateAsync({ type: \'blob\', compression: \'DEFLATE\', compressionOptions: { level: 6 } })</code>.',
+        'Offer the blob as a download via <code>URL.createObjectURL()</code>.',
+      ],
+      sourceFile: 'src/tools/archives/CreateZIP.jsx',
+    },
+    privacy: [
+      'All files are read, compressed, and packaged inside this browser tab. Nothing is uploaded.',
+      'The final ZIP lives in memory until you download it; closing the tab erases everything.',
+    ],
+    limitations: [
+      'All files are buffered in memory \u2014 very large batches (multi-GB total) may stress the browser. For huge archives, consider command-line tools like <code>7-Zip</code> or <code>zip</code>.',
+      'Compression level is fixed at 6 (a balanced default). Already-compressed files like JPEGs and MP4s will not shrink further inside a ZIP.',
+      'No password protection \u2014 use the Encrypt Text tool or a dedicated archiver (7-Zip, Keka) if you need an encrypted archive.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'csv-json-converter': {
+    whatItDoes: 'Converts CSV to JSON or JSON to CSV \u2014 useful for moving data between spreadsheet-friendly and programmer-friendly formats (e.g. exporting a survey CSV for a web app, or flattening API data into a spreadsheet).',
+    howItWorks: [
+      'CSV \u2192 JSON: your browser reads the first row as column headers, then turns each following row into an object with those headers as keys. The full list of objects is pretty-printed as JSON.',
+      'JSON \u2192 CSV: your browser collects all the field names used across the objects, writes them as a header row, then writes each object\u2019s values as a CSV row \u2014 escaping commas, quotes, and newlines as needed.',
+    ],
+    technicalDetails: {
+      library: 'Pure JavaScript \u2014 no third-party CSV library.',
+      flow: [
+        'CSV parse: character-by-character scanner handling quoted fields and <code>""</code> escapes.',
+        'JSON assembly: <code>rows.map(row => Object.fromEntries(headers.map((h, i) =&gt; [h, row[i]])))</code> \u2192 <code>JSON.stringify(\u2026, null, 2)</code>.',
+        'CSV write: <code>JSON.parse()</code> \u2192 collect all keys \u2192 <code>escapeCSVField()</code> (wrap in quotes if comma/quote/newline) \u2192 join with commas + newlines.',
+      ],
+      sourceFile: 'src/tools/text/CSVJSONConverter.jsx',
+    },
+    privacy: [
+      'All parsing and conversion happens in this tab. Your data \u2014 including any PII in the CSV \u2014 never leaves your device.',
+      'There is no "cloud API" step: the converter is entirely JavaScript running in your browser.',
+    ],
+    limitations: [
+      'The CSV parser handles the common case (quoted fields, escaped <code>""</code>, comma delimiter). Exotic dialects (semicolon delimiters, non-UTF-8 encodings) may need pre-cleaning via CSV Encoding Fixer first.',
+      'The first row is assumed to be headers \u2014 if your CSV has no header row, add one first or the field names will be your first data row.',
+      'Nested JSON structures get flattened lossily when converting to CSV; round-tripping a deeply nested JSON through CSV and back will not reconstruct the original shape.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'csv-encoding-fixer': {
+    whatItDoes: 'Fixes CSV files where accented characters show up as garbled text (e.g. <code>caf\u00c3\u00a9</code> instead of <code>caf\u00e9</code>) \u2014 common when Excel saves a CSV on Windows and you open it somewhere else.',
+    howItWorks: [
+      'Your browser reads the raw bytes of the CSV (not the text), inspects the byte patterns, and decides which character encoding the file actually uses \u2014 usually Windows-1252 (Excel\u2019s default on Windows) or UTF-8 (the modern standard).',
+      'Once identified, the bytes are decoded through that encoding to recover the correct characters, then re-encoded as UTF-8 with a BOM so that Excel and every other tool open it correctly from now on.',
+    ],
+    technicalDetails: {
+      library: 'Pure JS detection + native <code>TextDecoder</code>/<code>TextEncoder</code>.',
+      flow: [
+        'Detect: check for BOM (<code>EF BB BF</code> = UTF-8, <code>FF FE</code>/<code>FE FF</code> = UTF-16), validate UTF-8 byte-sequence rules, look for control-char patterns in the 0x80\u20130x9F range that indicate Windows-1252.',
+        'Decode: <code>new TextDecoder(detected)</code> (or manual Windows-1252 table for the 0x80\u20130x9F range).',
+        'Re-encode: <code>new TextEncoder().encode(text)</code> \u2192 prepend UTF-8 BOM \u2192 download.',
+      ],
+      sourceFile: 'src/tools/text/CSVEncodingFixer.jsx',
+    },
+    privacy: [
+      'The file is decoded and re-encoded inside this tab. No bytes leave your browser.',
+      'Detection is a local inspection of the first few KB of bytes \u2014 nothing is looked up online.',
+    ],
+    limitations: [
+      'Detection is heuristic. If your file uses a rarer encoding (Shift-JIS, GB2312, ISO-8859-2), auto-detect may guess wrong; the tool shows its confidence so you can catch bad guesses.',
+      'Fixes only text encoding; it does not repair corrupted rows, malformed quotes, or truncated lines.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'csv-diff': {
+    whatItDoes: 'Compares two CSV files side-by-side and highlights added rows, removed rows, and cells that changed \u2014 useful for tracking revisions of a survey export, research dataset, or budget sheet.',
+    howItWorks: [
+      'Your browser parses both CSVs into row arrays, pads them so every row has the same number of columns, and then walks through pairwise. Rows that only exist in one file are marked added or removed; rows that match by position but differ cell-by-cell are marked changed.',
+      'The result is a visual report showing the differences \u2014 no file is created as output; this is a comparison tool, not a merge tool.',
+    ],
+    technicalDetails: {
+      library: 'Pure JavaScript.',
+      flow: [
+        'Parse both files with the same CSV parser used by CSV-JSON Converter.',
+        '<code>normalizeRows()</code> pads short rows to the widest row\u2019s column count.',
+        'Walk rows pairwise \u2192 mark <code>added</code>, <code>removed</code>, or <code>changed</code> with per-cell diff flags.',
+      ],
+      sourceFile: 'src/tools/text/CSVDiff.jsx',
+    },
+    privacy: [
+      'Both files are loaded into memory and compared locally. Nothing is transmitted.',
+      'The on-screen diff view is the only output \u2014 no data is written to disk unless you copy it yourself.',
+    ],
+    limitations: [
+      'Comparison is position-based: if you add a row at the top of one file, every subsequent row will look "changed" because the rows no longer line up. Sort both files the same way first for best results.',
+      'There\u2019s no semantic understanding of CSV content \u2014 the tool doesn\u2019t know your "id" column is a key.',
+      'Duplicate rows are treated as-is: two identical rows in one file are not deduplicated before comparison.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
+    },
+  },
+
+  'encoding-detector': {
+    whatItDoes: 'Detects the character encoding of a text file (UTF-8, UTF-16, Windows-1252, Latin-1) and shows a hex dump plus a preview decoded in each candidate encoding \u2014 useful when a file shows up with garbled characters and you need to diagnose what encoding it really is.',
+    howItWorks: [
+      'Your browser reads the raw bytes of the file, checks for byte-order marks (BOMs) that identify UTF-8 or UTF-16, runs a UTF-8 validator, and looks at the pattern of high-bit bytes to guess whether the file is Windows-1252, Latin-1, or something else.',
+      'You get a confidence rating for each candidate, a hex dump of the first 32 bytes, and a decoded preview in each encoding so you can eyeball which one looks right.',
+    ],
+    technicalDetails: {
+      library: 'Pure JS detection + native <code>TextDecoder</code>.',
+      flow: [
+        'Read file as <code>ArrayBuffer</code> \u2192 check BOMs (UTF-8 <code>EF BB BF</code>, UTF-16 LE <code>FF FE</code>, UTF-16 BE <code>FE FF</code>).',
+        '<code>isValidUTF8()</code> state machine walks byte sequences to check they follow UTF-8 rules.',
+        'UTF-16 heuristic: count alternating null bytes; Latin-1/Windows-1252 distinguished by high-byte patterns in 0x80\u20130x9F.',
+        '<code>formatHexDump()</code> for first 32 bytes; <code>new TextDecoder(enc).decode(bytes)</code> for each preview.',
+      ],
+      sourceFile: 'src/tools/privacy/EncodingDetector.jsx',
+    },
+    privacy: [
+      'The file is inspected inside the browser; its bytes are never sent to a server or looked up in an online database.',
+      'Previews are generated locally by the browser\u2019s built-in <code>TextDecoder</code>.',
+    ],
+    limitations: [
+      'Detection is heuristic \u2014 not machine learning. East-Asian encodings (Shift-JIS, GB18030, Big5) aren\u2019t included; for those, try <code>chardet</code> or <code>uchardet</code> at the command line.',
+      'Confidence scores are rough rules-of-thumb, not calibrated probabilities \u2014 always compare the previews before trusting the pick.',
+    ],
+    verify: {
+      quick: DEFAULT_QUICK_VERIFY,
     },
   },
 };
