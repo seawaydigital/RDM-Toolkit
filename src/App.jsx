@@ -13,6 +13,7 @@ import AcrobatAlternative from './components/pages/AcrobatAlternative';
 import LakeheadDataverse from './components/pages/LakeheadDataverse';
 import GrantsAndIdentifiers from './components/pages/GrantsAndIdentifiers';
 import RelatedTools from './components/ui/RelatedTools';
+import HowItWorks from './components/ui/HowItWorks';
 import ToolSkeleton from './components/ui/ToolSkeleton';
 import { ALL_TOOLS } from './data/toolRegistry';
 import { useRecentTools } from './hooks/useRecentTools';
@@ -355,6 +356,7 @@ export default function App() {
                     tool={currentTool}
                     navigateTo={navigateTo}
                   />
+                  <HowItWorks toolId={currentToolId} />
                   <RelatedTools toolId={currentToolId} onNavigate={navigateTo} />
                 </div>
               </Suspense>
