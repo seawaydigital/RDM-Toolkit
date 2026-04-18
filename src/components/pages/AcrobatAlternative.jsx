@@ -341,7 +341,7 @@ export default function AcrobatAlternative() {
           </p>
           <div className="aa-beyond-chips">
             {[
-              { label: 'Data Anonymizer',        toolId: 'data-anonymizer' },
+              { label: 'De-identify Research Data', toolId: 'data-anonymizer' },
               { label: 'SHA-256 File Hasher',    toolId: 'sha256-hasher' },
               { label: 'BibTeX Formatter',       toolId: 'bibtex-formatter' },
               { label: 'Strip File Metadata',    toolId: 'strip-file-metadata' },
@@ -349,7 +349,6 @@ export default function AcrobatAlternative() {
               { label: 'AES-256 Text Encryption',toolId: 'encrypt-decrypt-text' },
               { label: 'File to Markdown',       toolId: 'to-markdown' },
               { label: 'Password Generator',     toolId: 'password-generator' },
-              { label: 'QR Code Generator',      toolId: 'qr-code-generator' },
               { label: 'Checksum Verifier',      toolId: 'checksum-verifier' },
               { label: 'CSV Diff',               toolId: 'csv-diff' },
               { label: 'Encoding Detector',      toolId: 'encoding-detector' },
@@ -360,7 +359,7 @@ export default function AcrobatAlternative() {
             ))}
           </div>
           <a href="" className="aa-beyond-all" onClick={(e) => { e.preventDefault(); window.location.hash = ''; }}>
-            Explore all 61 tools →
+            Explore all 46 tools →
           </a>
         </div>
       </section>
