@@ -22,10 +22,10 @@
 This is a **100% client-side static SPA**. There is no server, no database, no API, no authentication, and no backend.
 
 - **Routing:** Hash-based (`window.location.hash`). No router library. Two route types: tools (e.g. `#merge-pdfs`) and pages (e.g. `#how-this-works`).
-- **Tools:** 51 components, all loaded with `React.lazy()` for code splitting. Each tool is a standalone JSX file.
+- **Tools:** 46 components, all loaded with `React.lazy()` for code splitting. Each tool is a standalone JSX file.
 - **Pages:** 6 informational pages (not tools) rendered separately from the tool area.
 - **Data flow:** File → browser memory → process in JS → download result. Nothing is ever sent over the network.
-- **Offline:** Workbox service worker (via `vite-plugin-pwa`) pre-caches all static assets on first load. All 51 tools work without internet after first visit.
+- **Offline:** Workbox service worker (via `vite-plugin-pwa`) pre-caches all static assets on first load. All 46 tools work without internet after first visit.
 - **PWA:** Installable as a standalone app. Manifest at `/RDM-Toolkit/manifest.webmanifest`.
 
 ---
@@ -71,15 +71,13 @@ src/
 │   └── useRecentTools.js          # localStorage-backed recent tools (last 5)
 ├── styles/
 │   └── global.css                 # All styles — CSS variables, layout, component styles
-├── tools/                         # 61 tool components grouped by category
+├── tools/                         # 46 tool components grouped by category
 │   ├── archives/                  # 3 tools
-│   ├── calculators/               # 4 tools
-│   ├── developer/                 # 2 tools
 │   ├── images/                    # 6 tools
-│   ├── pdf/                       # 15 tools
-│   ├── privacy/                   # 8 tools
-│   ├── research/                  # 1 tool
-│   └── text/                      # 20 tools
+│   ├── pdf/                       # 17 tools
+│   ├── privacy/                   # 7 tools (4 privacy + 3 more-security)
+│   ├── research/                  # 1 tool (de-identify)
+│   └── text/                      # 12 tools (7 text + 5 more-text)
 └── utils/
     ├── crypto.js                  # AES-256 encryption/decryption helpers
     ├── droppedFile.js             # Drag-and-drop file reading
@@ -97,7 +95,7 @@ src/
 
 Every tool is defined here. Adding or removing a tool means updating this file **and** adding/removing the corresponding JSX file in `src/tools/` **and** updating the lazy import map in `App.jsx`.
 
-### Tool count: 51 tools across 7 categories
+### Tool count: 46 tools across 7 categories
 
 All tools map directly to the RDM mandate (research data lifecycle + Tri-Agency / TCPS 2 / PHIPA / OCAP® compliance). General-purpose utilities (calculators, QR codes, regex/UUID/Base64/YAML-XML developer tooling) were removed 2026-04-18 to keep the scope focused.
 

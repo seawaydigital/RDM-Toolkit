@@ -359,7 +359,7 @@ export default function AcrobatAlternative() {
             ))}
           </div>
           <a href="" className="aa-beyond-all" onClick={(e) => { e.preventDefault(); window.location.hash = ''; }}>
-            Explore all 51 tools →
+            Explore all 46 tools →
           </a>
         </div>
       </section>
