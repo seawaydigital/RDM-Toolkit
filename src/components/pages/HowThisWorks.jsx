@@ -174,63 +174,113 @@ export default function HowThisWorks() {
         </div>
 
         <h3 className="htw-subsection-title">What the browser can now do on its own</h3>
-        <div className="htw-compliance-grid">
-          <div className="htw-compliance-card">
-            <Lock size={20} />
-            <div>
-              <h3>Built-in encryption (since 2014)</h3>
-              <p>
-                Modern browsers ship with the same AES-256 encryption used by banks and
-                the U.S. government for classified data. That's what powers the
-                Encrypt Text and Password Protect PDF tools — no server required.
+        <ol className="htw-timeline" aria-label="Browser capability timeline">
+          <li className="htw-timeline-item htw-timeline-item--era">
+            <div className="htw-timeline-node" aria-hidden="true">
+              <Clock size={16} />
+            </div>
+            <div className="htw-timeline-content">
+              <span className="htw-timeline-year">Before ~2012</span>
+              <h4 className="htw-timeline-title">The browser was a display window</h4>
+              <p className="htw-timeline-body">
+                Anything heavier than showing text and pictures — editing a PDF,
+                encrypting a file, resizing a research photo — had to run on
+                somebody else's server. Your file had to travel there first.
               </p>
             </div>
-          </div>
-          <div className="htw-compliance-card">
-            <FileText size={20} />
-            <div>
-              <h3>PDF editing (since ~2017)</h3>
-              <p>
-                Using a technology called WebAssembly, browsers can now open, edit,
-                split, merge, and rebuild PDF files at near-desktop speed. This is how
-                the PDF tools on this site work.
+          </li>
+          <li className="htw-timeline-item">
+            <div className="htw-timeline-node" aria-hidden="true">
+              <Lock size={16} />
+            </div>
+            <div className="htw-timeline-content">
+              <span className="htw-timeline-year">2014</span>
+              <h4 className="htw-timeline-title">Built-in encryption arrives</h4>
+              <p className="htw-timeline-body">
+                Browsers gained the same AES-256 encryption used by banks and
+                the U.S. government for classified data. This is what powers
+                the Encrypt Text and Password Protect PDF tools — no server required.
+              </p>
+              <span className="htw-timeline-tech">Web Crypto API</span>
+            </div>
+          </li>
+          <li className="htw-timeline-item">
+            <div className="htw-timeline-node" aria-hidden="true">
+              <ImageIcon size={16} />
+            </div>
+            <div className="htw-timeline-content">
+              <span className="htw-timeline-year">~2015</span>
+              <h4 className="htw-timeline-title">Image processing gets fast enough for real files</h4>
+              <p className="htw-timeline-body">
+                Browsers could now resize, compress, crop, and strip hidden
+                metadata from images directly. The capability had existed earlier
+                but only now became fast enough to handle research-scale photos.
+              </p>
+              <span className="htw-timeline-tech">Canvas API · Typed Arrays</span>
+            </div>
+          </li>
+          <li className="htw-timeline-item">
+            <div className="htw-timeline-node" aria-hidden="true">
+              <FileText size={16} />
+            </div>
+            <div className="htw-timeline-content">
+              <span className="htw-timeline-year">~2017</span>
+              <h4 className="htw-timeline-title">Real PDF editing inside the browser</h4>
+              <p className="htw-timeline-body">
+                A new standard called WebAssembly lets desktop-grade code run
+                inside a browser tab at near-native speed. That's why the PDF
+                tools on this site can open, edit, split, merge, and rebuild
+                files the way Acrobat Pro does — without ever touching a server.
+              </p>
+              <span className="htw-timeline-tech">WebAssembly</span>
+            </div>
+          </li>
+          <li className="htw-timeline-item">
+            <div className="htw-timeline-node" aria-hidden="true">
+              <WifiOff size={16} />
+            </div>
+            <div className="htw-timeline-content">
+              <span className="htw-timeline-year">~2018</span>
+              <h4 className="htw-timeline-title">Websites that work offline</h4>
+              <p className="htw-timeline-body">
+                Browsers could save an entire site to your device so it keeps
+                working with Wi-Fi off. Once you've visited RDM Toolkit, every
+                tool keeps working on a plane, in the field, or off campus.
+              </p>
+              <span className="htw-timeline-tech">Service Workers</span>
+            </div>
+          </li>
+          <li className="htw-timeline-item">
+            <div className="htw-timeline-node" aria-hidden="true">
+              <Cpu size={16} />
+            </div>
+            <div className="htw-timeline-content">
+              <span className="htw-timeline-year">2020+</span>
+              <h4 className="htw-timeline-title">Research-scale memory</h4>
+              <p className="htw-timeline-body">
+                Laptops from 2020 onward typically ship with 8 GB of RAM or more,
+                and modern browsers are 64-bit. That means they can hold and
+                process files in the hundreds of megabytes — interview
+                transcripts, image libraries, scanned field notebooks — without choking.
+              </p>
+              <span className="htw-timeline-tech">64-bit browsers · 8 GB+ RAM</span>
+            </div>
+          </li>
+          <li className="htw-timeline-item htw-timeline-item--now">
+            <div className="htw-timeline-node htw-timeline-node--now" aria-hidden="true">
+              <Shield size={16} />
+            </div>
+            <div className="htw-timeline-content">
+              <span className="htw-timeline-year htw-timeline-year--now">Today</span>
+              <h4 className="htw-timeline-title">RDM Toolkit</h4>
+              <p className="htw-timeline-body">
+                All of the above, stitched together into research-grade tools
+                that run entirely inside your browser tab. No server, no
+                upload, no middleman.
               </p>
             </div>
-          </div>
-          <div className="htw-compliance-card">
-            <ImageIcon size={20} />
-            <div>
-              <h3>Image processing (mature since ~2015)</h3>
-              <p>
-                Browsers can resize, compress, crop, and strip hidden metadata from
-                images directly. The capability existed earlier but only became fast
-                enough for real files in the last several years.
-              </p>
-            </div>
-          </div>
-          <div className="htw-compliance-card">
-            <Cpu size={20} />
-            <div>
-              <h3>Large-file memory</h3>
-              <p>
-                A laptop from 2020 typically has 8 GB of RAM or more. Modern browsers
-                can use a large chunk of that, letting them handle research-scale
-                files (hundreds of megabytes) without choking.
-              </p>
-            </div>
-          </div>
-          <div className="htw-compliance-card">
-            <WifiOff size={20} />
-            <div>
-              <h3>Works offline (since ~2018)</h3>
-              <p>
-                Browsers can save an entire website to your device so it still works
-                with Wi-Fi off. This is why, once you've visited RDM Toolkit, every
-                tool keeps working even when you're on a plane or off campus.
-              </p>
-            </div>
-          </div>
-        </div>
+          </li>
+        </ol>
 
         <div className="htw-promise" style={{ marginTop: 'var(--space-lg)' }}>
           <Shield size={32} />
