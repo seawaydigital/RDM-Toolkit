@@ -185,33 +185,36 @@ const EXPLAINERS = {
   },
 
   'pdf-redaction': {
-    whatItDoes: 'Draws opaque black rectangles over parts of a PDF to hide them from view.',
+    whatItDoes: 'Permanently removes sensitive content from a PDF by rasterizing affected pages — the original text bytes are not carried into the output, so copy/paste, search, and text-extraction tools cannot recover what was behind the black rectangles. Suitable for PHIPA, PIPEDA, and TCPS 2 disclosure workflows.',
     howItWorks: [
-      'You drop in a PDF, click and drag to draw rectangles over the parts you want to hide, and download the redacted version. The rectangles are drawn directly onto the PDF\u2019s page content with a PDF editing library running in your browser.',
-      'Important: this tool covers content visually. For truly sensitive data you need to destroy, read the disclosure below carefully.',
+      'You drop in a PDF, click a page, and drag rectangles over the content you want to redact. When you click "Redact", only the pages you marked are rasterized — they\u2019re rendered to a high-resolution image, the black rectangles are painted onto the image, and the result is embedded as a JPEG into a fresh PDF. Pages without redactions are copied over intact so their text stays selectable.',
+      'Before the download is handed to you, the output is re-opened with a PDF parser and every redacted page is checked for extractable text. If any survives, the download is refused.',
     ],
     technicalDetails: {
-      library: '<code>@cantoo/pdf-lib</code>.',
+      library: '<code>@cantoo/pdf-lib</code> for PDF assembly; <code>pdfjs-dist</code> for rendering + verification; Canvas API for painting redactions.',
       flow: [
-        'PDF loaded via <code>PDFDocument.load()</code>; pdfjs renders each page to a canvas for the drawing UI.',
-        'For each redaction rectangle, <code>page.drawRectangle()</code> paints an opaque fill onto the page\u2019s content stream.',
-        'The rectangle becomes part of the drawn content — it is not a peelable annotation.',
-        'The edited PDF is saved with <code>pdfDoc.save()</code> and downloaded as a local blob.',
+        'Source PDF loaded via <code>PDFDocument.load()</code> (pdf-lib) and <code>pdfjs.getDocument()</code>.',
+        'A fresh <code>PDFDocument.create()</code> holds the output — none of the source document\u2019s catalog (metadata, outlines, AcroForm, attachments, JavaScript, OpenActions) is carried over.',
+        'For each page with redactions: pdfjs renders the page to an HTML <code>&lt;canvas&gt;</code> at 200 DPI → <code>ctx.fillRect()</code> paints the redaction rectangles in pure black → <code>canvas.toBlob(\'image/jpeg\', 0.88)</code> produces a flat image → <code>newDoc.embedJpg()</code> and <code>newPage.drawImage()</code> writes it into the output at the original page dimensions.',
+        'Pages without redactions are copied intact via <code>newDoc.copyPages(sourceDoc, [idx])</code>, preserving vector text and searchability.',
+        'Before save: per-page <code>/Thumb</code>, <code>/PieceInfo</code>, <code>/AA</code>, and <code>/Annots</code> (form widgets, links, file-attachment annotations) are deleted. Document info dict (title/author/subject/keywords/producer/creator) is cleared.',
+        'After save: pdfjs re-opens the result, calls <code>getTextContent()</code> on every redacted page, and asserts zero non-empty text items. If the check fails, an error is thrown and the download is blocked.',
       ],
       sourceFile: 'src/tools/pdf/PDFRedaction.jsx',
     },
     privacy: [
       'Your PDF is read into browser memory and never uploaded.',
-      'All rendering and editing happens inside your browser tab.',
+      'Rasterization, metadata stripping, and verification all happen inside your browser tab.',
       'The output PDF is assembled in memory and handed to your browser\u2019s download dialog.',
     ],
     limitations: [
-      '<strong>This is visual redaction, not secure redaction.</strong> The original text underneath the black rectangle may still exist in the PDF\u2019s object stream. A determined attacker with a PDF parser could recover it.',
-      'For legally or ethically sensitive data (health records, Indigenous community data under OCAP®, participant interviews under REB protocols), redact in the <strong>source document</strong> (Word, LaTeX) <strong>before</strong> exporting to PDF, then run this tool only as a second layer.',
-      'As a stronger alternative: after redacting here, use the PDF to Images tool to convert to images, then Image to PDF to rebuild. This flattens the redacted regions into pixels so nothing can be recovered.',
+      'Redacted pages lose text selectability, searchability, and screen-reader accessibility — they become images. File size for those pages will also grow.',
+      'Only pages you mark are rasterized. If sensitive content also appears on a page you didn\u2019t redact, that text stays selectable in the output. Draw at least one redaction on every page where PHI/PII appears.',
+      'XFA forms (dynamic forms used by some Canadian government PDFs) are unusual; their form values live in an XML stream that pdf-lib handles inconsistently. If your source has an XFA form, flatten it first via File → Print → Save as PDF, then redact.',
+      'Handwritten annotations made with a stylus in third-party apps are usually stored as ink annotations — those are stripped out by this tool along with form widgets. If your source relies on annotations, review the output before sharing.',
     ],
     verify: {
-      quick: 'Turn off your Wi-Fi, drop in a PDF, draw redaction boxes, and download. It still works — your PDF never left the browser.',
+      quick: 'After downloading, open the redacted PDF in Adobe Reader (or any viewer) and try to select text in a redacted region. You won\u2019t be able to — because that region is now an image, not text. For a stricter check, run <code>pdftotext</code> on the output and grep for the redacted terms; they should not appear.',
     },
   },
 
