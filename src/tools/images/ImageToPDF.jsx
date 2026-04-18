@@ -294,7 +294,6 @@ export default function ImageToPDF({ tool }) {
         onFilesSelected={handleFilesSelected}
         multiple
         label={images.length > 0 ? 'Drop more images to add' : 'Drop images here or click to browse'}
-        sublabel="Accepts JPG, PNG, WebP"
       />
 
       {images.length > 0 && (

@@ -175,7 +175,6 @@ export default function ExtractZIP({ tool, navigateTo }) {
           validationConfig={ARCHIVE_VALIDATION}
           onFilesSelected={handleFileSelected}
           label="Drop a ZIP file here or click to browse"
-          sublabel="Accepts .zip files"
         />
       )}
 

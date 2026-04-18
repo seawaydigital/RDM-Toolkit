@@ -128,7 +128,6 @@ export default function ConvertImageFormat({ tool }) {
           validationConfig={IMAGE_VALIDATION}
           onFilesSelected={handleFileSelected}
           label="Drop an image here or click to browse"
-          sublabel="Accepts JPG, PNG, WebP, BMP, GIF, TIFF, ICO"
         />
       )}
 

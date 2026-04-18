@@ -235,7 +235,6 @@ export default function StripFileMetadata({ tool, navigateTo }) {
           validationConfig={VALIDATION_CONFIG}
           onFilesSelected={handleFileSelected}
           label="Drop a PDF or image file here"
-          sublabel="Supports PDF, JPG, PNG"
         />
       )}
 

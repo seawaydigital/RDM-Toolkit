@@ -424,7 +424,6 @@ export default function FileToMarkdown() {
         <DropZone
           onFilesSelected={handleFileDrop}
           accept={ACCEPTED}
-          sublabel="DOCX · PDF · HTML · XLSX · CSV · TXT · MD · RTF · JSON"
         />
       )}
 

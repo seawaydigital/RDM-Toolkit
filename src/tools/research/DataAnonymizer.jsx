@@ -289,7 +289,6 @@ function CSVMode() {
           validationConfig={CSV_VALIDATION}
           onFilesSelected={handleFileSelected}
           label="Drop a CSV file here or click to browse"
-          sublabel="Accepts .csv files"
         />
       )}
 
