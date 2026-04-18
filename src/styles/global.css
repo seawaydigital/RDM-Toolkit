@@ -10971,6 +10971,7 @@ input:focus, textarea:focus, select:focus {
   .topbar {
     padding: 0 var(--space-md);
     gap: var(--space-sm);
+    position: relative;
   }
 
   .topbar-left {
@@ -10978,8 +10979,14 @@ input:focus, textarea:focus, select:focus {
     flex-shrink: 0;
   }
 
+  /* Center the wordmark on mobile (hamburger on left, right side hidden) */
   .topbar-logo {
-    font-size: 17px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 24px;
+    white-space: nowrap;
   }
 
   .topbar-right {
