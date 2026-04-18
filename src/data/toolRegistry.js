@@ -6,23 +6,29 @@ export const CATEGORIES = [
     primary: true,
     description: 'Merge, split, compress, rotate, sign, and encrypt PDF documents.',
     tools: [
+      // Structure — rearrange pages
       { id: 'merge-pdfs', name: 'Merge PDFs', slug: 'merged', description: 'Combine multiple PDF files into a single document in the order you choose.', tags: ['pdf', 'documentation'], related: ['split-pdf', 'compress-pdf', 'add-page-numbers'] },
       { id: 'split-pdf', name: 'Split PDF', slug: 'split', description: 'Extract specific pages or page ranges from a PDF into separate files.', tags: ['pdf', 'documentation'], related: ['merge-pdfs', 'pdf-page-delete', 'reorder-pages'] },
-      { id: 'compress-pdf', name: 'Compress PDF', slug: 'compressed', description: 'Reduce PDF file size with Low, Medium, or High image compression — see all three sizes before you choose. Runs entirely in your browser.', tags: ['pdf', 'compression'], related: ['merge-pdfs', 'compress-image', 'pdf-to-images'] },
-      { id: 'rotate-pages', name: 'Rotate PDF Pages', slug: 'rotated', description: 'Rotate individual pages or all pages at once to fix orientation.', tags: ['pdf'], related: ['reorder-pages', 'pdf-page-delete'] },
       { id: 'reorder-pages', name: 'Reorder PDF Pages', slug: 'reordered', description: 'Rearrange the pages of a PDF into any order you choose.', tags: ['pdf'], related: ['rotate-pages', 'split-pdf', 'pdf-page-delete'] },
+      { id: 'pdf-page-delete', name: 'Delete PDF Pages', slug: 'pages-deleted', description: 'Remove specific pages from a PDF document.', tags: ['pdf'], related: ['split-pdf', 'reorder-pages', 'rotate-pages'] },
+      { id: 'rotate-pages', name: 'Rotate PDF Pages', slug: 'rotated', description: 'Rotate individual pages or all pages at once to fix orientation.', tags: ['pdf'], related: ['reorder-pages', 'pdf-page-delete'] },
+      // Size & inspect
+      { id: 'compress-pdf', name: 'Compress PDF', slug: 'compressed', description: 'Reduce PDF file size with Low, Medium, or High image compression — see all three sizes before you choose. Runs entirely in your browser.', tags: ['pdf', 'compression'], related: ['merge-pdfs', 'compress-image', 'pdf-to-images'] },
+      { id: 'pdf-page-inspector', name: 'PDF Page Inspector', slug: 'resized', description: 'Inspect exact page dimensions and resize pages to Letter, A4, Legal, and other standard formats.', tags: ['pdf', 'resize', 'page size', 'format'], related: ['rotate-pages', 'reorder-pages', 'compress-pdf'] },
+      // Content additions
+      { id: 'add-cover-page', name: 'Add Cover Page', slug: 'with-cover', description: 'Prepend a custom-designed cover page to any PDF — set a title, author, department, date, and colour scheme. Runs entirely in your browser.', tags: ['pdf', 'cover', 'documentation', 'report'], related: ['merge-pdfs', 'add-page-numbers', 'pdf-watermark'] },
       { id: 'add-page-numbers', name: 'Add Page Numbers', slug: 'numbered', description: 'Embed page numbers directly into a PDF at a position and style you choose.', tags: ['pdf', 'documentation'], related: ['merge-pdfs', 'pdf-watermark', 'sign-pdf'] },
+      { id: 'pdf-watermark', name: 'PDF Watermark', slug: 'watermarked', description: 'Add text watermarks like DRAFT or CONFIDENTIAL to every page of a PDF.', tags: ['pdf', 'documentation'], related: ['pdf-redaction', 'sign-pdf', 'add-page-numbers'] },
+      // Forms & signatures
       { id: 'sign-pdf', name: 'Sign PDF', slug: 'signed', description: 'Draw or type a signature and place it anywhere on a PDF page.', tags: ['pdf', 'documentation'], related: ['password-protect-pdf', 'pdf-watermark', 'add-page-numbers'] },
+      { id: 'fillable-pdf-form', name: 'Fillable PDF Form', slug: 'fillable', description: 'Turn a flat PDF into a fillable form — add text fields, checkboxes, radio buttons, and dropdowns. Runs entirely in your browser.', tags: ['pdf', 'form', 'documentation'], related: ['sign-pdf', 'add-page-numbers', 'pdf-watermark'] },
+      // Security
+      { id: 'pdf-redaction', name: 'PDF Redaction', slug: 'redacted', description: 'Black out sensitive text or areas in a PDF before sharing.', tags: ['pdf', 'privacy', 'security'], related: ['pdf-watermark', 'strip-file-metadata', 'data-anonymizer'] },
       { id: 'password-protect-pdf', name: 'Password Protect PDF', slug: 'protected', description: 'Apply AES-256 encryption to a PDF so it requires a password to open.', tags: ['pdf', 'security', 'privacy'], related: ['remove-pdf-password', 'sign-pdf', 'encrypt-decrypt-text'] },
       { id: 'remove-pdf-password', name: 'Remove PDF Password', slug: 'unlocked', description: 'Remove the open password from a password-protected PDF.', tags: ['pdf', 'security'], related: ['password-protect-pdf', 'sign-pdf'] },
+      // Extract / convert
       { id: 'extract-images-from-pdf', name: 'Extract Images from PDF', slug: 'images-extracted', description: 'Pull all embedded images out of a PDF and package them as a ZIP.', tags: ['pdf', 'image'], related: ['pdf-to-images', 'compress-image', 'strip-image-metadata'] },
-      { id: 'pdf-watermark', name: 'PDF Watermark', slug: 'watermarked', description: 'Add text watermarks like DRAFT or CONFIDENTIAL to every page of a PDF.', tags: ['pdf', 'documentation'], related: ['pdf-redaction', 'sign-pdf', 'add-page-numbers'] },
-      { id: 'pdf-redaction', name: 'PDF Redaction', slug: 'redacted', description: 'Black out sensitive text or areas in a PDF before sharing.', tags: ['pdf', 'privacy', 'security'], related: ['pdf-watermark', 'strip-file-metadata', 'data-anonymizer'] },
-      { id: 'pdf-page-delete', name: 'Delete PDF Pages', slug: 'pages-deleted', description: 'Remove specific pages from a PDF document.', tags: ['pdf'], related: ['split-pdf', 'reorder-pages', 'rotate-pages'] },
       { id: 'pdf-to-images', name: 'PDF to Images', slug: 'as-images', description: 'Export each page of a PDF as a high-quality PNG or JPG image.', tags: ['pdf', 'image', 'conversion'], related: ['extract-images-from-pdf', 'compress-image', 'image-to-pdf'] },
-      { id: 'add-cover-page', name: 'Add Cover Page', slug: 'with-cover', description: 'Prepend a custom-designed cover page to any PDF — set a title, author, department, date, and colour scheme. Runs entirely in your browser.', tags: ['pdf', 'cover', 'documentation', 'report'], related: ['merge-pdfs', 'add-page-numbers', 'pdf-watermark'] },
-      { id: 'pdf-page-inspector', name: 'PDF Page Inspector', slug: 'resized', description: 'Inspect exact page dimensions and resize pages to Letter, A4, Legal, and other standard formats.', tags: ['pdf', 'resize', 'page size', 'format'], related: ['rotate-pages', 'reorder-pages', 'compress-pdf'] },
-      { id: 'fillable-pdf-form', name: 'Fillable PDF Form', slug: 'fillable', description: 'Turn a flat PDF into a fillable form — add text fields, checkboxes, radio buttons, and dropdowns. Runs entirely in your browser.', tags: ['pdf', 'form', 'documentation'], related: ['sign-pdf', 'add-page-numbers', 'pdf-watermark'] },
     ],
   },
   {
@@ -32,11 +38,15 @@ export const CATEGORIES = [
     primary: true,
     description: 'Compress, convert, resize, crop, and strip metadata from images.',
     tools: [
+      // Dimensional ops (most common)
       { id: 'compress-image', name: 'Compress Image', slug: 'compressed', description: 'Reduce image file size by adjusting quality and optionally scaling dimensions.', tags: ['image', 'compression'], related: ['resize-image', 'convert-image-format', 'compress-pdf'] },
-      { id: 'convert-image-format', name: 'Convert Image Format', slug: 'converted', description: 'Convert images between formats using the browser\'s Canvas API.', tags: ['image', 'conversion', 'file-format'], related: ['compress-image', 'resize-image', 'image-to-pdf'] },
       { id: 'resize-image', name: 'Resize Image', slug: 'resized', description: 'Change image dimensions by pixel or percentage scale.', tags: ['image'], related: ['compress-image', 'image-cropper', 'convert-image-format'] },
       { id: 'image-cropper', name: 'Image Cropper', slug: 'cropped', description: 'Crop images to a custom selection area before downloading.', tags: ['image'], related: ['resize-image', 'strip-image-metadata', 'compress-image'] },
+      // Format change
+      { id: 'convert-image-format', name: 'Convert Image Format', slug: 'converted', description: 'Convert images between formats using the browser\'s Canvas API.', tags: ['image', 'conversion', 'file-format'], related: ['compress-image', 'resize-image', 'image-to-pdf'] },
+      // Privacy
       { id: 'strip-image-metadata', name: 'Strip Image Metadata', slug: 'metadata-stripped', description: 'Read and display all hidden EXIF metadata, then remove it permanently.', tags: ['image', 'privacy', 'metadata'], related: ['strip-file-metadata', 'data-anonymizer', 'image-cropper'] },
+      // Export
       { id: 'image-to-pdf', name: 'Image to PDF', slug: 'as-pdf', description: 'Embed one or more images into a PDF document, one image per page.', tags: ['image', 'pdf', 'conversion'], related: ['merge-pdfs', 'pdf-to-images', 'compress-image'] },
     ],
   },
@@ -47,14 +57,17 @@ export const CATEGORIES = [
     primary: true,
     description: 'Count words, find and replace, diff text, format JSON and CSV.',
     tools: [
+      // Analyze / edit / compare text
       { id: 'word-counter', name: 'Word & Character Counter', slug: null, description: 'Live word, character, sentence, and paragraph counts.', tags: ['text', 'analysis'], related: ['text-diff', 'find-replace'] },
       { id: 'find-replace', name: 'Find & Replace', slug: null, description: 'Find and replace text with regex support.', tags: ['text'], related: ['word-counter', 'text-diff', 'whitespace-cleaner'] },
       { id: 'text-diff', name: 'Text Diff Checker', slug: null, description: 'Line-by-line comparison of two texts.', tags: ['text', 'data-integrity'], related: ['csv-diff', 'find-replace', 'word-counter'] },
+      // Structured data formats
       { id: 'json-formatter', name: 'JSON Formatter & Validator', slug: null, description: 'Format, minify, and validate JSON.', tags: ['text', 'data-integrity', 'file-format'], related: ['xml-yaml-formatter', 'csv-json-converter'] },
       { id: 'csv-json-converter', name: 'CSV \u2194 JSON Converter', slug: 'converted', description: 'Convert between CSV and JSON formats.', tags: ['text', 'conversion', 'file-format'], related: ['json-formatter', 'csv-diff', 'csv-encoding-fixer'] },
-      { id: 'data-anonymizer', name: 'Data Anonymizer', slug: 'anonymized', description: 'Find and replace names, emails, and IDs in CSV or text with pseudonyms.', tags: ['privacy', 'research', 'text'], related: ['pdf-redaction', 'strip-file-metadata', 'strip-image-metadata'] },
-      { id: 'bibtex-formatter', name: 'BibTeX Formatter', slug: null, description: 'Clean up, validate, and format BibTeX citation entries.', tags: ['text', 'documentation', 'research'], related: ['markdown-preview', 'word-counter'] },
       { id: 'to-markdown', name: 'File to Markdown', slug: 'to-markdown', description: 'Convert DOCX, PDF, HTML, XLSX, CSV, TXT and more to clean Markdown — ideal for pasting into AI tools.', tags: ['convert', 'markdown', 'docx', 'pdf', 'word', 'excel', 'ai', 'llm'], related: ['markdown-preview', 'csv-json-converter', 'bibtex-formatter'] },
+      // Research-specific
+      { id: 'bibtex-formatter', name: 'BibTeX Formatter', slug: null, description: 'Clean up, validate, and format BibTeX citation entries.', tags: ['text', 'documentation', 'research'], related: ['markdown-preview', 'word-counter'] },
+      { id: 'data-anonymizer', name: 'De-identify Research Data', slug: 'deidentified', description: 'De-identify names, emails, and IDs in CSV or text \u2014 pseudonymize with a downloadable key (TCPS 2 coded data) or anonymize irreversibly.', tags: ['privacy', 'research', 'text', 'de-identification', 'tcps2', 'phipa'], related: ['pdf-redaction', 'strip-file-metadata', 'strip-image-metadata'] },
     ],
   },
   {
@@ -64,10 +77,14 @@ export const CATEGORIES = [
     primary: true,
     description: 'Strip metadata, hash files, encrypt text, generate passwords.',
     tools: [
+      // Privacy — clean before share
       { id: 'strip-file-metadata', name: 'Strip File Metadata', slug: 'metadata-stripped', description: 'Remove hidden metadata from PDF and image files.', tags: ['privacy', 'metadata'], related: ['strip-image-metadata', 'data-anonymizer', 'pdf-redaction'] },
-      { id: 'sha256-hasher', name: 'SHA-256 Hash Generator', slug: null, description: 'Generate SHA-256 file hashes for integrity verification.', tags: ['data-integrity', 'security'], related: ['checksum-verifier', 'magic-byte-checker'] },
+      // Encryption + passwords (paired)
       { id: 'encrypt-decrypt-text', name: 'Encrypt / Decrypt Text', slug: null, description: 'Encrypt text using AES-256-GCM with PBKDF2 key derivation.', tags: ['security', 'privacy'], related: ['password-generator', 'password-protect-pdf', 'base64-tool'] },
       { id: 'password-generator', name: 'Strong Password Generator', slug: null, description: 'Generate cryptographically secure passwords.', tags: ['security', 'privacy'], related: ['encrypt-decrypt-text', 'password-protect-pdf'] },
+      // Integrity verification
+      { id: 'sha256-hasher', name: 'SHA-256 Hash Generator', slug: null, description: 'Generate SHA-256 file hashes for integrity verification.', tags: ['data-integrity', 'security'], related: ['checksum-verifier', 'magic-byte-checker'] },
+      // Standalone utility (zero-network)
       { id: 'qr-code-generator', name: 'QR Code Generator', slug: null, description: 'Generate QR codes locally. Zero network request.', tags: ['research'], related: ['password-generator'] },
     ],
   },
@@ -91,15 +108,19 @@ export const CATEGORIES = [
     primary: false,
     description: 'Additional text processing and formatting utilities.',
     tools: [
+      // Text cleanup
+      { id: 'whitespace-cleaner', name: 'Whitespace Cleaner', slug: null, description: 'Strip trailing spaces, normalize line endings, and fix tabs vs spaces.', tags: ['text', 'data-integrity'], related: ['remove-duplicate-lines', 'find-replace', 'text-case-converter'] },
       { id: 'remove-duplicate-lines', name: 'Remove Duplicate Lines', slug: null, description: 'Remove duplicate lines from text input.', tags: ['text', 'data-integrity'], related: ['whitespace-cleaner', 'find-replace'] },
-      { id: 'csv-diff', name: 'CSV Diff Checker', slug: null, description: 'Cell-level comparison of two CSV files.', tags: ['text', 'data-integrity', 'analysis'], related: ['text-diff', 'csv-json-converter', 'csv-encoding-fixer'] },
-      { id: 'base64-tool', name: 'Base64 Encode / Decode', slug: null, description: 'Encode or decode Base64 text and files.', tags: ['text', 'conversion'], related: ['encrypt-decrypt-text', 'sha256-hasher'] },
-      { id: 'csv-encoding-fixer', name: 'CSV Encoding Fixer', slug: 'utf8-fixed', description: 'Detect and fix character encoding issues in CSV files.', tags: ['text', 'data-integrity', 'file-format'], related: ['csv-diff', 'csv-json-converter', 'encoding-detector'] },
-      { id: 'xml-yaml-formatter', name: 'XML / YAML Formatter', slug: null, description: 'Format, validate, and prettify XML and YAML data.', tags: ['text', 'file-format', 'data-integrity'], related: ['json-formatter', 'text-diff'] },
-      { id: 'markdown-preview', name: 'Markdown Preview', slug: null, description: 'Render Markdown to styled HTML with live preview and export.', tags: ['text', 'documentation'], related: ['word-counter', 'bibtex-formatter'] },
       { id: 'text-case-converter', name: 'Text Case Converter', slug: null, description: 'Convert text between UPPER, lower, Title, Sentence, camelCase, and more.', tags: ['text'], related: ['find-replace', 'whitespace-cleaner'] },
       { id: 'line-number-adder', name: 'Line Number Adder', slug: null, description: 'Add line numbers to any text for code review or annotation.', tags: ['text'], related: ['whitespace-cleaner', 'text-diff'] },
-      { id: 'whitespace-cleaner', name: 'Whitespace Cleaner', slug: null, description: 'Strip trailing spaces, normalize line endings, and fix tabs vs spaces.', tags: ['text', 'data-integrity'], related: ['remove-duplicate-lines', 'find-replace', 'text-case-converter'] },
+      // CSV utilities
+      { id: 'csv-diff', name: 'CSV Diff Checker', slug: null, description: 'Cell-level comparison of two CSV files.', tags: ['text', 'data-integrity', 'analysis'], related: ['text-diff', 'csv-json-converter', 'csv-encoding-fixer'] },
+      { id: 'csv-encoding-fixer', name: 'CSV Encoding Fixer', slug: 'utf8-fixed', description: 'Detect and fix character encoding issues in CSV files.', tags: ['text', 'data-integrity', 'file-format'], related: ['csv-diff', 'csv-json-converter', 'encoding-detector'] },
+      // Format / preview
+      { id: 'xml-yaml-formatter', name: 'XML / YAML Formatter', slug: null, description: 'Format, validate, and prettify XML and YAML data.', tags: ['text', 'file-format', 'data-integrity'], related: ['json-formatter', 'text-diff'] },
+      { id: 'markdown-preview', name: 'Markdown Preview', slug: null, description: 'Render Markdown to styled HTML with live preview and export.', tags: ['text', 'documentation'], related: ['word-counter', 'bibtex-formatter'] },
+      // Encoding utility
+      { id: 'base64-tool', name: 'Base64 Encode / Decode', slug: null, description: 'Encode or decode Base64 text and files.', tags: ['text', 'conversion'], related: ['encrypt-decrypt-text', 'sha256-hasher'] },
     ],
   },
   {
