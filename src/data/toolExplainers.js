@@ -612,35 +612,6 @@ const EXPLAINERS = {
     },
   },
 
-  'qr-code-generator': {
-    whatItDoes: 'Turns a URL or short text into a scannable QR code image you can download, print, or embed.',
-    howItWorks: [
-      'You type text or a URL. A QR-code library running inside your browser encodes it using the standard QR algorithm and draws the resulting pattern onto a canvas. Export as a PNG.',
-      'Your text is never sent anywhere. That matters if the URL or text is sensitive — a private event link, a one-time password, a Wi-Fi credential.',
-    ],
-    technicalDetails: {
-      library: '<code>qrcode</code> v1.5.3, dynamically imported only when the tool is opened.',
-      flow: [
-        '<code>QRCode.toCanvas(canvas, text, { errorCorrectionLevel })</code> draws the QR pattern.',
-        '<code>canvas.toDataURL(\'image/png\')</code> produces the downloadable image.',
-        'Error correction level (L/M/Q/H) is configurable; higher levels make the code recoverable from damage but reduce data capacity.',
-      ],
-      sourceFile: 'src/tools/privacy/QRCodeGenerator.jsx',
-    },
-    privacy: [
-      'The text you type lives only in this browser tab.',
-      'QR code rendering happens on a local canvas — no external service is called.',
-      'The downloadable image is created as a local blob URL.',
-    ],
-    limitations: [
-      'QR codes have a maximum data capacity (around 3 KB at the most compact error-correction level). Very long text may be rejected — use a URL shortener for long links, but be aware that moves the data onto a third-party server.',
-      'Scanners vary. If a QR code won\u2019t scan, try a higher error correction level (Q or H) and test under real lighting.',
-    ],
-    verify: {
-      quick: 'Turn off your Wi-Fi and generate a QR code. The image appears instantly — because it was drawn by your browser, not fetched from any service.',
-    },
-  },
-
   'extract-zip': {
     whatItDoes: 'Opens a ZIP archive and extracts its contents, so you can see or save individual files inside.',
     howItWorks: [
@@ -759,34 +730,6 @@ const EXPLAINERS = {
     },
   },
 
-  'uuid-generator': {
-    whatItDoes: 'Generates random UUIDs (v4) — unique identifiers commonly used as database keys, session tokens, or request IDs.',
-    howItWorks: [
-      'Your browser asks its cryptographic random-number generator for 16 random bytes, then sets the version and variant bits to mark the result as a UUID v4. The bytes are formatted as the familiar <code>8-4-4-4-12</code> hex string. Generate one, or batch-generate hundreds at a time.',
-    ],
-    technicalDetails: {
-      library: 'WebCrypto <code>crypto.getRandomValues()</code>.',
-      flow: [
-        '<code>const bytes = crypto.getRandomValues(new Uint8Array(16))</code>.',
-        '<code>bytes[6] = (bytes[6] & 0x0f) | 0x40</code> (set version to 4).',
-        '<code>bytes[8] = (bytes[8] & 0x3f) | 0x80</code> (set RFC 4122 variant).',
-        'Bytes are formatted as hex with hyphens at positions 8, 13, 18, 23.',
-      ],
-      sourceFile: 'src/tools/developer/UUIDGenerator.jsx',
-    },
-    privacy: [
-      'The random source is your browser\u2019s cryptographic randomness — the same source HTTPS uses for session keys.',
-      'UUIDs are generated and displayed only in this browser tab. Nothing is sent, checked, or stored.',
-      'Batch generation of thousands still never touches the network — all randomness is local.',
-    ],
-    limitations: [
-      'UUID v4 is non-sequential — collision probability is astronomically low but not zero. If you need sortable IDs, use UUID v6 or v7 (not supported here) or a timestamp-prefixed scheme.',
-      'Collision risk across small batches (fewer than a trillion IDs) is effectively zero. Don\u2019t over-think it.',
-    ],
-    verify: {
-      quick: 'Turn off your Wi-Fi and generate 1000 UUIDs. Every one is unique and the page never hits the network — because the randomness comes from your browser itself.',
-    },
-  },
 };
 
 export function getExplainer(toolId) {

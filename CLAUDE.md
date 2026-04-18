@@ -22,10 +22,10 @@
 This is a **100% client-side static SPA**. There is no server, no database, no API, no authentication, and no backend.
 
 - **Routing:** Hash-based (`window.location.hash`). No router library. Two route types: tools (e.g. `#merge-pdfs`) and pages (e.g. `#how-this-works`).
-- **Tools:** 61 components, all loaded with `React.lazy()` for code splitting. Each tool is a standalone JSX file.
+- **Tools:** 51 components, all loaded with `React.lazy()` for code splitting. Each tool is a standalone JSX file.
 - **Pages:** 6 informational pages (not tools) rendered separately from the tool area.
 - **Data flow:** File → browser memory → process in JS → download result. Nothing is ever sent over the network.
-- **Offline:** Workbox service worker (via `vite-plugin-pwa`) pre-caches all static assets on first load. All 61 tools work without internet after first visit.
+- **Offline:** Workbox service worker (via `vite-plugin-pwa`) pre-caches all static assets on first load. All 51 tools work without internet after first visit.
 - **PWA:** Installable as a standalone app. Manifest at `/RDM-Toolkit/manifest.webmanifest`.
 
 ---
@@ -97,7 +97,9 @@ src/
 
 Every tool is defined here. Adding or removing a tool means updating this file **and** adding/removing the corresponding JSX file in `src/tools/` **and** updating the lazy import map in `App.jsx`.
 
-### Tool count: 62 tools across 9 categories
+### Tool count: 51 tools across 7 categories
+
+All tools map directly to the RDM mandate (research data lifecycle + Tri-Agency / TCPS 2 / PHIPA / OCAP® compliance). General-purpose utilities (calculators, QR codes, regex/UUID/Base64/YAML-XML developer tooling) were removed 2026-04-18 to keep the scope focused.
 
 #### Primary Categories (always visible in sidebar)
 
@@ -106,17 +108,15 @@ Every tool is defined here. Adding or removing a tool means updating this file *
 | PDF Tools | `pdf` | merge-pdfs, split-pdf, reorder-pages, pdf-page-delete, rotate-pages, compress-pdf, pdf-page-inspector, add-cover-page, add-page-numbers, pdf-watermark, sign-pdf, fillable-pdf-form, pdf-redaction, password-protect-pdf, remove-pdf-password, extract-images-from-pdf, pdf-to-images | 17 |
 | Image Tools | `images` | compress-image, resize-image, image-cropper, convert-image-format, strip-image-metadata, image-to-pdf | 6 |
 | Text & Data Tools | `text` | word-counter, find-replace, text-diff, json-formatter, csv-json-converter, to-markdown, bibtex-formatter, data-anonymizer | 8 |
-| Privacy & Security | `privacy` | strip-file-metadata, encrypt-decrypt-text, password-generator, sha256-hasher, qr-code-generator | 5 |
+| Privacy & Security | `privacy` | strip-file-metadata, encrypt-decrypt-text, password-generator, sha256-hasher | 4 |
 
 #### More Tools (collapsed by default, shown under "More Tools" toggle)
 
 | Category | ID | Tools | Count |
 |---|---|---|---|
 | File & Archive Tools | `archives` | create-zip, extract-zip, file-size-analyser | 3 |
-| More Text Tools | `text-more` | whitespace-cleaner, remove-duplicate-lines, text-case-converter, line-number-adder, csv-diff, csv-encoding-fixer, xml-yaml-formatter, markdown-preview, base64-tool | 9 |
+| More Text Tools | `text-more` | whitespace-cleaner, remove-duplicate-lines, csv-diff, csv-encoding-fixer, markdown-preview | 5 |
 | More Security Tools | `privacy-more` | magic-byte-checker, checksum-verifier, encoding-detector | 3 |
-| Calculators & Converters | `calculators` | unit-converter, date-difference, timestamp-converter, file-size-converter | 4 |
-| Developer Tools | `developer` | regex-tester, uuid-generator | 2 |
 
 #### Registry object shape
 
@@ -240,7 +240,6 @@ Every tool is defined here. Adding or removing a tool means updating this file *
 | `mammoth` | ^1.7.1 | DOCX → HTML conversion |
 | `docx` | ^8.5.0 | DOCX file generation |
 | `@imgly/background-removal` | ^1.4.5 | ML background removal (WASM/ONNX, runs in-browser) |
-| `qrcode` | ^1.5.3 | QR code generation |
 | `@dnd-kit/core` / `sortable` / `utilities` | ^6/8/3 | Drag-and-drop page reordering (PDF tools) |
 | `lucide-react` | ^0.344.0 | Icons throughout the UI |
 | `@fontsource/ibm-plex-sans` / `mono` | ^5.0.0 | Self-hosted body + mono fonts |
@@ -357,6 +356,7 @@ All external sources are hyperlinked (`target="_blank" rel="noopener noreferrer"
 
 | Date | Change |
 |---|---|
+| 2026-04-18 | **Scope-to-RDM-mandate removal — 62 → 51 tools, 9 → 7 categories** — audited every tool against the RDM mandate (research data lifecycle + Tri-Agency/TCPS 2/PHIPA/OCAP® compliance) and removed 11 general-purpose utilities that drifted from scope. **Removed tools (11):** `qr-code-generator` (Privacy), `text-case-converter` / `line-number-adder` / `xml-yaml-formatter` / `base64-tool` (More Text), `unit-converter` / `date-difference` / `timestamp-converter` / `file-size-converter` (entire Calculators & Converters category), `regex-tester` / `uuid-generator` (entire Developer Tools category). Also deleted two orphan files that were never registered: `ColourConverter.jsx`, `JWTDecoder.jsx`. **Edits:** `toolRegistry.js` entries + two whole category objects removed; `App.jsx` lazy imports + EXT_TO_TOOL drag-drop map cleaned of `xml`/`yaml`/`yml` entries; `toolExplainers.js` entries for `qr-code-generator` and `uuid-generator` removed; `AcrobatAlternative.jsx` Beyond-Acrobat chips list dropped the QR chip and updated copy ("Explore all 61 tools" → "51"); `related:` cross-refs in `json-formatter`, `encrypt-decrypt-text`, `file-size-analyser`, `whitespace-cleaner` cleaned of IDs that no longer exist; `package.json` removed unused `qrcode` dep. **Stale bookmark routes** (e.g. `#qr-code-generator`) degrade gracefully — `getRouteFromHash()` doesn't find them in `ALL_TOOLS` so the app falls through to home. Orphan CSS rules in `global.css` (`.qr-*`, `.unit-converter-*`, `.regex-tester-*`, etc.) left in place — harmless unused selectors, cleanup deferred. Verified: build clean in 10.53s, precache 167 → 155 entries, sidebar renders 7 categories, no console errors. |
 | 2026-04-18 | **HowThisWorks: vertical timeline for browser-capability history** — replaced the 5-card `.htw-compliance-grid` in the "What the browser can now do on its own" subsection with a single vertical timeline (`<ol className="htw-timeline">`) running top-to-bottom with a gold gradient rail, circular icon nodes (40px), and card-surface entries with a rotated-square arrow pointing to the rail. 7 stops: **Before ~2012** (display-window era, muted node to anchor the "bad old days"), **2014** (Web Crypto API / AES-256), **~2015** (Canvas API + Typed Arrays / image processing), **~2017** (WebAssembly / PDF editing), **~2018** (Service Workers / offline), **2020+** (64-bit browsers + 8 GB+ RAM / research-scale memory), and **Today** (RDM Toolkit — solid-gold filled node as the payoff). Each stop has a gold mono year badge, Fraunces title, body copy, and a dashed-underline `.htw-timeline-tech` line naming the underlying standard for verifiability. Hover states: node scales 1.08 with stronger gold glow, card translates 2px right, arrow + border shift to gold. `prefers-reduced-motion` kills all transforms. Mobile breakpoint (<640px) narrows the rail, shrinks nodes to 32px, and drops title/body font sizes. No JS logic — pure CSS. |
 | 2026-04-18 | **HowThisWorks: "Why This Wasn't Possible Ten Years Ago" section** — added a historical-context section to `src/components/pages/HowThisWorks.jsx`, placed between "What 'Runs in Your Browser' Actually Means" and "You Don't Have to Take Our Word for It." Addresses a trust problem: a cautious researcher over ~40 has an accurate memory that "online file tool" used to mean "upload to stranger's server," and that instinct pattern-matches onto RDM Toolkit even though the technology underneath is fundamentally different now. Section validates that skepticism ("you're not wrong — you're just remembering how the internet used to work") then grounds the new claim in 5 verifiable browser-capability milestones: built-in AES-256 encryption (Web Crypto API, since 2014), PDF editing via WebAssembly (~2017), Canvas-based image processing (mature ~2015), large-file memory (8+ GB RAM on 2020+ laptops), and offline support (Service Workers, ~2018). Each anchor is something a curious user can Google to verify independently. Structure: two `.htw-promise` intro/outro blocks bookending a 5-card `.htw-compliance-grid` — reuses existing CSS, no new styles needed. Added `Clock`, `FileText`, `Image as ImageIcon`, `Cpu` imports from lucide-react. |
 | 2026-04-18 | **Sidebar tool ordering refresh** — reordered `tools: [...]` arrays in `src/data/toolRegistry.js` across 5 of 9 categories to group related operations and move workflow-logical neighbours adjacent. No tool moved categories, no IDs changed (hash routes preserved), no `related:` arrays touched (they reference IDs, not positions). Per-category changes: **PDF Tools (17)** — regrouped into 6 clusters (Structure: merge/split/reorder/delete/rotate → Size & inspect: compress/page-inspector → Content additions: cover/page-numbers/watermark → Forms & signatures: sign/fillable → Security: redaction/password-protect/remove-password → Extract/convert: extract-images/pdf-to-images). Key moves: `fillable-pdf-form` from end to next-to sign-pdf, `add-cover-page` from slot 15 to 8 near other content additions, `pdf-redaction` promoted to lead the security cluster, `pdf-page-delete` moved into structural cluster. **Image Tools (6)** — dimensional ops grouped (compress/resize/crop) then format (convert) then privacy (strip) then export (to-pdf). **Text & Data Tools (8)** — grouped into analyze/edit/compare (word-counter/find-replace/text-diff) → structured data (json/csv-json/to-markdown) → research (bibtex/data-anonymizer at end). **Privacy & Security (5)** — `encrypt-decrypt-text` and `password-generator` now adjacent (previously split by SHA-256). `qr-code-generator` kept in category (its "zero network request" framing fits privacy posture), moved to end as the utility outlier. **More Text Tools (9)** — 4-cluster regroup (cleanup: whitespace/dedupe/case/line-numbers → CSV: csv-diff/csv-encoding-fixer → format/preview: xml-yaml/markdown → encoding: base64). **Unchanged:** Archives (3), More Security (3), Calculators (4), Developer (2) — small categories, existing order already logical. CLAUDE.md per-category tool lists updated to match. Verified `npx vite build` clean — no logic changes, just array reordering. |

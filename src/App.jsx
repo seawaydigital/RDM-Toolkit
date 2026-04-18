@@ -30,9 +30,6 @@ const EXT_TO_TOOL = {
   csv: 'csv-encoding-fixer',
   docx: 'to-markdown',
   json: 'json-formatter',
-  xml: 'xml-yaml-formatter',
-  yaml: 'xml-yaml-formatter',
-  yml: 'xml-yaml-formatter',
   md: 'markdown-preview',
 };
 
@@ -83,12 +80,8 @@ const toolComponents = {
   'csv-diff': lazy(() => import('./tools/text/CSVDiff.jsx')),
   'json-formatter': lazy(() => import('./tools/text/JSONFormatter.jsx')),
   'csv-json-converter': lazy(() => import('./tools/text/CSVJSONConverter.jsx')),
-  'base64-tool': lazy(() => import('./tools/text/Base64Tool.jsx')),
   'csv-encoding-fixer': lazy(() => import('./tools/text/CSVEncodingFixer.jsx')),
-  'xml-yaml-formatter': lazy(() => import('./tools/text/XMLYAMLFormatter.jsx')),
   'markdown-preview': lazy(() => import('./tools/text/MarkdownPreview.jsx')),
-  'text-case-converter': lazy(() => import('./tools/text/TextCaseConverter.jsx')),
-  'line-number-adder': lazy(() => import('./tools/text/LineNumberAdder.jsx')),
   'whitespace-cleaner': lazy(() => import('./tools/text/WhitespaceCleaner.jsx')),
   'bibtex-formatter': lazy(() => import('./tools/text/BibTeXFormatter.jsx')),
   'to-markdown': lazy(() => import('./tools/text/FileToMarkdown.jsx')),
@@ -98,18 +91,9 @@ const toolComponents = {
   'sha256-hasher': lazy(() => import('./tools/privacy/SHA256Hasher.jsx')),
   'magic-byte-checker': lazy(() => import('./tools/privacy/MagicByteChecker.jsx')),
   'encrypt-decrypt-text': lazy(() => import('./tools/privacy/EncryptDecryptText.jsx')),
-  'qr-code-generator': lazy(() => import('./tools/privacy/QRCodeGenerator.jsx')),
   'password-generator': lazy(() => import('./tools/privacy/PasswordGenerator.jsx')),
   'checksum-verifier': lazy(() => import('./tools/privacy/ChecksumVerifier.jsx')),
   'encoding-detector': lazy(() => import('./tools/privacy/EncodingDetector.jsx')),
-  // Calculators
-  'unit-converter': lazy(() => import('./tools/calculators/UnitConverter.jsx')),
-  'date-difference': lazy(() => import('./tools/calculators/DateDifference.jsx')),
-  'timestamp-converter': lazy(() => import('./tools/calculators/TimestampConverter.jsx')),
-  'file-size-converter': lazy(() => import('./tools/calculators/FileSizeConverter.jsx')),
-  // Developer Tools
-  'regex-tester': lazy(() => import('./tools/developer/RegexTester.jsx')),
-  'uuid-generator': lazy(() => import('./tools/developer/UUIDGenerator.jsx')),
 };
 
 const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy', 'drac-services', 'acrobat-alternative', 'lakehead-dataverse', 'grants-identifiers']);

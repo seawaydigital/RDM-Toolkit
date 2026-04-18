@@ -62,7 +62,7 @@ export const CATEGORIES = [
       { id: 'find-replace', name: 'Find & Replace', slug: null, description: 'Find and replace text with regex support.', tags: ['text'], related: ['word-counter', 'text-diff', 'whitespace-cleaner'] },
       { id: 'text-diff', name: 'Text Diff Checker', slug: null, description: 'Line-by-line comparison of two texts.', tags: ['text', 'data-integrity'], related: ['csv-diff', 'find-replace', 'word-counter'] },
       // Structured data formats
-      { id: 'json-formatter', name: 'JSON Formatter & Validator', slug: null, description: 'Format, minify, and validate JSON.', tags: ['text', 'data-integrity', 'file-format'], related: ['xml-yaml-formatter', 'csv-json-converter'] },
+      { id: 'json-formatter', name: 'JSON Formatter & Validator', slug: null, description: 'Format, minify, and validate JSON.', tags: ['text', 'data-integrity', 'file-format'], related: ['csv-json-converter', 'csv-diff'] },
       { id: 'csv-json-converter', name: 'CSV \u2194 JSON Converter', slug: 'converted', description: 'Convert between CSV and JSON formats.', tags: ['text', 'conversion', 'file-format'], related: ['json-formatter', 'csv-diff', 'csv-encoding-fixer'] },
       { id: 'to-markdown', name: 'File to Markdown', slug: 'to-markdown', description: 'Convert DOCX, PDF, HTML, XLSX, CSV, TXT and more to clean Markdown — ideal for pasting into AI tools.', tags: ['convert', 'markdown', 'docx', 'pdf', 'word', 'excel', 'ai', 'llm'], related: ['markdown-preview', 'csv-json-converter', 'bibtex-formatter'] },
       // Research-specific
@@ -80,12 +80,10 @@ export const CATEGORIES = [
       // Privacy — clean before share
       { id: 'strip-file-metadata', name: 'Strip File Metadata', slug: 'metadata-stripped', description: 'Remove hidden metadata from PDF and image files.', tags: ['privacy', 'metadata'], related: ['strip-image-metadata', 'data-anonymizer', 'pdf-redaction'] },
       // Encryption + passwords (paired)
-      { id: 'encrypt-decrypt-text', name: 'Encrypt / Decrypt Text', slug: null, description: 'Encrypt text using AES-256-GCM with PBKDF2 key derivation.', tags: ['security', 'privacy'], related: ['password-generator', 'password-protect-pdf', 'base64-tool'] },
+      { id: 'encrypt-decrypt-text', name: 'Encrypt / Decrypt Text', slug: null, description: 'Encrypt text using AES-256-GCM with PBKDF2 key derivation.', tags: ['security', 'privacy'], related: ['password-generator', 'password-protect-pdf'] },
       { id: 'password-generator', name: 'Strong Password Generator', slug: null, description: 'Generate cryptographically secure passwords.', tags: ['security', 'privacy'], related: ['encrypt-decrypt-text', 'password-protect-pdf'] },
       // Integrity verification
       { id: 'sha256-hasher', name: 'SHA-256 Hash Generator', slug: null, description: 'Generate SHA-256 file hashes for integrity verification.', tags: ['data-integrity', 'security'], related: ['checksum-verifier', 'magic-byte-checker'] },
-      // Standalone utility (zero-network)
-      { id: 'qr-code-generator', name: 'QR Code Generator', slug: null, description: 'Generate QR codes locally. Zero network request.', tags: ['research'], related: ['password-generator'] },
     ],
   },
   // ── More Tools (collapsed by default) ──
@@ -98,7 +96,7 @@ export const CATEGORIES = [
     tools: [
       { id: 'create-zip', name: 'Create ZIP Archive', slug: 'archived', description: 'Package multiple files into a single ZIP archive.', tags: ['compression', 'file-format'], related: ['extract-zip', 'file-size-analyser'] },
       { id: 'extract-zip', name: 'Extract ZIP', slug: 'extracted', description: 'Open a ZIP archive and download files individually or all at once.', tags: ['file-format'], related: ['create-zip', 'file-size-analyser', 'checksum-verifier'] },
-      { id: 'file-size-analyser', name: 'File Size Analyser', slug: null, description: 'Read file name, size, type, and last modified date from any file.', tags: ['analysis'], related: ['file-size-converter', 'create-zip'] },
+      { id: 'file-size-analyser', name: 'File Size Analyser', slug: null, description: 'Read file name, size, type, and last modified date from any file.', tags: ['analysis'], related: ['create-zip', 'extract-zip'] },
     ],
   },
   {
@@ -109,18 +107,13 @@ export const CATEGORIES = [
     description: 'Additional text processing and formatting utilities.',
     tools: [
       // Text cleanup
-      { id: 'whitespace-cleaner', name: 'Whitespace Cleaner', slug: null, description: 'Strip trailing spaces, normalize line endings, and fix tabs vs spaces.', tags: ['text', 'data-integrity'], related: ['remove-duplicate-lines', 'find-replace', 'text-case-converter'] },
+      { id: 'whitespace-cleaner', name: 'Whitespace Cleaner', slug: null, description: 'Strip trailing spaces, normalize line endings, and fix tabs vs spaces.', tags: ['text', 'data-integrity'], related: ['remove-duplicate-lines', 'find-replace'] },
       { id: 'remove-duplicate-lines', name: 'Remove Duplicate Lines', slug: null, description: 'Remove duplicate lines from text input.', tags: ['text', 'data-integrity'], related: ['whitespace-cleaner', 'find-replace'] },
-      { id: 'text-case-converter', name: 'Text Case Converter', slug: null, description: 'Convert text between UPPER, lower, Title, Sentence, camelCase, and more.', tags: ['text'], related: ['find-replace', 'whitespace-cleaner'] },
-      { id: 'line-number-adder', name: 'Line Number Adder', slug: null, description: 'Add line numbers to any text for code review or annotation.', tags: ['text'], related: ['whitespace-cleaner', 'text-diff'] },
       // CSV utilities
       { id: 'csv-diff', name: 'CSV Diff Checker', slug: null, description: 'Cell-level comparison of two CSV files.', tags: ['text', 'data-integrity', 'analysis'], related: ['text-diff', 'csv-json-converter', 'csv-encoding-fixer'] },
       { id: 'csv-encoding-fixer', name: 'CSV Encoding Fixer', slug: 'utf8-fixed', description: 'Detect and fix character encoding issues in CSV files.', tags: ['text', 'data-integrity', 'file-format'], related: ['csv-diff', 'csv-json-converter', 'encoding-detector'] },
       // Format / preview
-      { id: 'xml-yaml-formatter', name: 'XML / YAML Formatter', slug: null, description: 'Format, validate, and prettify XML and YAML data.', tags: ['text', 'file-format', 'data-integrity'], related: ['json-formatter', 'text-diff'] },
       { id: 'markdown-preview', name: 'Markdown Preview', slug: null, description: 'Render Markdown to styled HTML with live preview and export.', tags: ['text', 'documentation'], related: ['word-counter', 'bibtex-formatter'] },
-      // Encoding utility
-      { id: 'base64-tool', name: 'Base64 Encode / Decode', slug: null, description: 'Encode or decode Base64 text and files.', tags: ['text', 'conversion'], related: ['encrypt-decrypt-text', 'sha256-hasher'] },
     ],
   },
   {
@@ -133,30 +126,6 @@ export const CATEGORIES = [
       { id: 'magic-byte-checker', name: 'Magic Byte Checker', slug: null, description: 'Verify a file\'s true format by reading its binary signature.', tags: ['data-integrity', 'file-format'], related: ['sha256-hasher', 'encoding-detector', 'checksum-verifier'] },
       { id: 'checksum-verifier', name: 'Checksum Batch Verifier', slug: null, description: 'Verify a manifest of checksums against uploaded files for data integrity.', tags: ['data-integrity', 'security', 'research'], related: ['sha256-hasher', 'magic-byte-checker', 'extract-zip'] },
       { id: 'encoding-detector', name: 'Character Encoding Detector', slug: null, description: 'Identify the character encoding of any text file.', tags: ['file-format', 'data-integrity'], related: ['csv-encoding-fixer', 'magic-byte-checker'] },
-    ],
-  },
-  {
-    id: 'calculators',
-    label: 'Calculators & Converters',
-    emoji: '\u{1F5A9}',
-    primary: false,
-    description: 'Convert units, calculate dates, timestamps, and file sizes.',
-    tools: [
-      { id: 'unit-converter', name: 'Unit Converter', slug: null, description: 'Convert between units of length, weight, temperature, and more.', tags: ['research', 'analysis'], related: ['date-difference', 'file-size-converter'] },
-      { id: 'date-difference', name: 'Date Difference Calculator', slug: null, description: 'Calculate the difference between two dates.', tags: ['research', 'analysis'], related: ['timestamp-converter', 'unit-converter'] },
-      { id: 'timestamp-converter', name: 'Unix Timestamp Converter', slug: null, description: 'Convert between Unix timestamps and human-readable dates.', tags: ['research', 'data-integrity'], related: ['date-difference', 'unit-converter'] },
-      { id: 'file-size-converter', name: 'File Size Converter', slug: null, description: 'Convert between bytes, KB, MB, GB, TB, and PB.', tags: ['analysis'], related: ['file-size-analyser', 'unit-converter'] },
-    ],
-  },
-  {
-    id: 'developer',
-    label: 'Developer Tools',
-    emoji: '\u{1F6E0}\uFE0F',
-    primary: false,
-    description: 'Test regex, generate UUIDs.',
-    tools: [
-      { id: 'regex-tester', name: 'Regex Tester', slug: null, description: 'Test regular expressions with real-time match highlighting.', tags: ['text', 'analysis'], related: ['find-replace', 'text-diff'] },
-      { id: 'uuid-generator', name: 'UUID Generator', slug: null, description: 'Generate v4 UUIDs for dataset identifiers or record keys.', tags: ['research', 'data-integrity'], related: ['sha256-hasher', 'password-generator'] },
     ],
   },
 ];
