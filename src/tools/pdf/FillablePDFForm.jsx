@@ -399,6 +399,32 @@ export default function FillablePDFForm({ tool, navigateTo }) {
           const ctx = pdfDoc.context;
           const acroForm = form.acroForm;
 
+          // Without an /AP appearance stream, Chrome/Firefox/macOS Preview render
+          // nothing for the widget (they don't fall back to /BS + /MK like Adobe
+          // does). We build a minimal Form XObject that paints a light panel with
+          // a gray border so the box is visible in every viewer.
+          const w = fd.width;
+          const h = fd.height;
+          const apOps =
+            `q\n` +
+            `0.95 0.95 0.95 rg\n` +
+            `0 0 ${w} ${h} re\n` +
+            `f\n` +
+            `0.4 0.4 0.4 RG\n` +
+            `1 w\n` +
+            `0.5 0.5 ${w - 1} ${h - 1} re\n` +
+            `S\n` +
+            `Q`;
+          const apStream = ctx.stream(apOps, {
+            Type: 'XObject',
+            Subtype: 'Form',
+            BBox: [0, 0, w, h],
+            Matrix: [1, 0, 0, 1, 0, 0],
+            Resources: ctx.obj({ ProcSet: ['PDF'] }),
+            FormType: 1,
+          });
+          const apRef = ctx.register(apStream);
+
           const widgetDict = ctx.obj({
             Type: 'Annot',
             Subtype: 'Widget',
@@ -408,7 +434,8 @@ export default function FillablePDFForm({ tool, navigateTo }) {
             F: 4,
             P: page.ref,
             BS: ctx.obj({ W: 1, S: 'S' }),
-            MK: ctx.obj({ BC: [0.4, 0.4, 0.4] }),
+            MK: ctx.obj({ BC: [0.4, 0.4, 0.4], BG: [0.95, 0.95, 0.95] }),
+            AP: ctx.obj({ N: apRef }),
           });
           const widgetRef = ctx.register(widgetDict);
 
