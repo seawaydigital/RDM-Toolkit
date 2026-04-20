@@ -69,7 +69,7 @@ const RDM_TOOLS = [
     tagline: 'Discover Canadian research data',
     url: 'https://www.lunaris.ca',
     description: 'Canada\'s national data discovery portal. Search across 150+ academic, government, and research repositories by keyword or map location to find datasets relevant to your work.',
-    stats: '105,000+ discoverable datasets',
+    stats: '108,000+ discoverable datasets',
     tags: ['Discovery only', 'Map-based search', 'Cross-repository'],
     useCases: [
       'Finding existing datasets before collecting new data',

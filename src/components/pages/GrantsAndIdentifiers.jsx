@@ -32,7 +32,7 @@ const IDENTIFIERS = [
     bullets: [
       'Populate once, reuse across all three agencies',
       'Links to your ORCID iD to pull publication metadata automatically',
-      'Note: The Tri-Agencies are transitioning to a new Researcher CV platform — keep your ORCID current to ease the migration',
+      'Note: The Tri-Agencies are transitioning to the Tri-Agency Researcher Profile (TARP), a narrative-CV approach — keep your ORCID current to ease the migration',
       'Contributions and memberships carry forward between submissions',
     ],
     cta: { label: 'Access the CCV', href: 'https://ccv-cvc.ca/' },

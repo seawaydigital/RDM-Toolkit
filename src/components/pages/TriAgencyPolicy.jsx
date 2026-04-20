@@ -138,7 +138,7 @@ const TIMELINE = [
     date: 'Spring 2022 → ongoing',
     status: 'active',
     title: 'Data Management Plans',
-    body: 'DMPs required for an initial set of funding opportunities identified in 2022. The agencies are continuing to expand the DMP requirement across funding calls.',
+    body: 'DMPs required for an initial set of funding opportunities identified in 2022, with the requirement steadily expanding through 2024–2025 across Alliance, Insight, Discovery, and CIHR calls. Check the specific funding opportunity for whether a DMP is required.',
   },
   {
     date: 'Phasing in',
@@ -298,7 +298,7 @@ export default function TriAgencyPolicy() {
                 <AlertCircle size={14} className="tap-matrix-icon tap-matrix-icon--active" />
                 <div>
                   <strong>Pillar 2 — DMPs</strong>
-                  <p>Required for specific competitions since early 2023. Check your call for proposals — the DMP requirement will be spelled out there.</p>
+                  <p>Required for a growing set of competitions since 2023. CIHR no longer publishes a consolidated list of DMP-required opportunities — check the specific call on ResearchNet.</p>
                 </div>
               </li>
               <li>
@@ -335,7 +335,7 @@ export default function TriAgencyPolicy() {
                 <Clock size={14} className="tap-matrix-icon tap-matrix-icon--pending" />
                 <div>
                   <strong>Pillar 3 — Deposit</strong>
-                  <p>Phasing in. Data supporting published findings should be deposited; the full mandate will be announced once institutional readiness is assessed.</p>
+                  <p>Phasing in. The Tri-Agency's 2025 engagement report targeted grants awarded after January 1, 2026 for the full deposit requirement; specific implementation dates are still being confirmed on the authoritative policy page. Data supporting published findings should be deposited wherever disciplinary norms allow.</p>
                 </div>
               </li>
             </ul>
@@ -365,7 +365,7 @@ export default function TriAgencyPolicy() {
                 <Clock size={14} className="tap-matrix-icon tap-matrix-icon--pending" />
                 <div>
                   <strong>Pillar 3 — Deposit</strong>
-                  <p>Phasing in, subject to disciplinary norms. Qualitative data with confidentiality constraints is rarely deposited openly — restricted deposit is usually appropriate.</p>
+                  <p>Phasing in. The Tri-Agency's 2025 engagement report targeted grants awarded after January 1, 2026, with specific implementation dates still being confirmed. Subject to disciplinary norms — qualitative data with confidentiality constraints is rarely deposited openly, and restricted deposit is usually appropriate.</p>
                 </div>
               </li>
             </ul>
@@ -811,7 +811,7 @@ export default function TriAgencyPolicy() {
                 Use the built-in{' '}
                 <a href="#data-classification" className="tap-inline-link">Data Classification wizard</a>
                 {' '}to decide the handling tier before you collect, and the{' '}
-                <a href="#data-anonymizer" className="tap-inline-link">Data Anonymizer</a>
+                <a href="#data-anonymizer" className="tap-inline-link">De-identify Research Data tool</a>
                 {' '}to strip direct identifiers before sharing analysis files with collaborators.
               </p>
             </div>
@@ -819,7 +819,7 @@ export default function TriAgencyPolicy() {
               <strong>The Dimensions Program</strong>
               <p>
                 Canada's{' '}
-                <a href="https://www.science.gc.ca/eic/site/063.nsf/eng/h_F3B6A1D5.html" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+                <a href="https://www.nserc-crsng.gc.ca/InterAgency-Interorganismes/EDI-EDI/Dimensions_Dimensions_eng.asp" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
                   Dimensions charter <ExternalLink size={11} />
                 </a>
                 {' '}— modelled on the UK's Athena SWAN — helps institutions build inclusive research environments. {INSTITUTION.name} is a signatory.
