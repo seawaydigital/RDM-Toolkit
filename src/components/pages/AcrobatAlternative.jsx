@@ -154,7 +154,7 @@ export default function AcrobatAlternative() {
         <div className="aa-cost-badge">
           <span className="aa-cost-free">$0&thinsp;/&thinsp;year</span>
           <span className="aa-cost-divider">vs</span>
-          <span className="aa-cost-paid">~$240&thinsp;/&thinsp;year</span>
+          <span className="aa-cost-paid">~$312&thinsp;/&thinsp;year</span>
           <span className="aa-cost-label">Acrobat Pro subscription</span>
         </div>
       </div>
