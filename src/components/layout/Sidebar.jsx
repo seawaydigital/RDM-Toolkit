@@ -174,6 +174,23 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
           </a>
         </div>
 
+        {/* Sister-site link — RS Toolkit (Research Security) */}
+        <div className="sidebar-sister">
+          <a
+            href="https://rs.rdmtoolkit.ca"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="sidebar-sister-link"
+          >
+            <span className="sidebar-sister-wordmark">
+              <span className="sidebar-sister-rs">RS</span>
+              <span className="sidebar-sister-toolkit">Toolkit</span>
+            </span>
+            <span className="sidebar-sister-sub">Research Security companion</span>
+            <ArrowUpRight size={14} strokeWidth={2.5} className="sidebar-sister-icon" />
+          </a>
+        </div>
+
         {/* Pinned CTA — Request a Tool */}
         <div className="sidebar-cta">
           <a
