@@ -2,7 +2,7 @@
 
 > A free, privacy-first toolkit of **62 browser-based utilities** for Lakehead University researchers, grad students, and office staff. Everything runs locally in your browser — your files never leave your device.
 
-🌐 **Live site:** [seawaydigital.github.io/RDM-Toolkit](https://seawaydigital.github.io/RDM-Toolkit/)
+🌐 **Live site:** [rdmtoolkit.ca](https://rdmtoolkit.ca/)
 
 ---
 
