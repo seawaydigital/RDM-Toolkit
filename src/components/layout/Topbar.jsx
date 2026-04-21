@@ -31,7 +31,6 @@ export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, curr
           <span className="topbar-logo" onClick={onLogoClick} style={{ cursor: 'pointer' }}>
             <span className="topbar-logo-mark">RDM</span> Toolkit
           </span>
-          <span className="topbar-subtitle">Research Data Management</span>
         </div>
         <div className="topbar-right">
           <button
