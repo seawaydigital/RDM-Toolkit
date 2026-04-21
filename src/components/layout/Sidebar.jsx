@@ -186,7 +186,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
               <span className="sidebar-sister-rs">RS</span>
               <span className="sidebar-sister-toolkit">Toolkit</span>
             </span>
-            <span className="sidebar-sister-sub">Research Security companion</span>
+            <span className="sidebar-sister-sub">Research Security</span>
             <ArrowUpRight size={14} strokeWidth={2.5} className="sidebar-sister-icon" />
           </a>
         </div>
