@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Lock, Menu, HelpCircle, Search } from 'lucide-react';
+import { Lock, Menu, HelpCircle, Search, MessageSquare } from 'lucide-react';
 import SearchBar from '../ui/SearchBar';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
 
-export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, currentPage, onNavigate }) {
+export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, currentPage, onNavigate, onOpenFeedback }) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   // Global keyboard shortcut: Ctrl+K / Cmd+K
@@ -51,6 +51,18 @@ export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, curr
             <HelpCircle size={15} />
             How This Works
           </a>
+          {onOpenFeedback && (
+            <button
+              type="button"
+              className="topbar-feedback-btn"
+              onClick={onOpenFeedback}
+              aria-label="Send feedback"
+              title="Send feedback"
+            >
+              <MessageSquare size={15} />
+              <span className="topbar-feedback-label">Feedback</span>
+            </button>
+          )}
           <span className="topbar-badge">
             <Lock size={14} />
             100% Browser-Based

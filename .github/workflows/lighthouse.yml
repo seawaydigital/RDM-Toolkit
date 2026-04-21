@@ -1,0 +1,46 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npx vite build
+
+      - name: Start preview server
+        run: |
+          npx vite preview --port 4173 &
+          npx wait-on http://localhost:4173 -t 30000
+
+      - name: Run Lighthouse
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            http://localhost:4173/
+            http://localhost:4173/#how-this-works
+            http://localhost:4173/#compress-pdf
+            http://localhost:4173/#data-classification
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          configPath: .github/lighthouse/lighthouserc.json
+
+      - name: Upload Lighthouse report as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          if-no-files-found: ignore
+          retention-days: 14

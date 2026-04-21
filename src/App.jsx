@@ -15,8 +15,11 @@ import GrantsAndIdentifiers from './components/pages/GrantsAndIdentifiers';
 import RelatedTools from './components/ui/RelatedTools';
 import HowItWorks from './components/ui/HowItWorks';
 import ToolSkeleton from './components/ui/ToolSkeleton';
+import FeedbackModal from './components/ui/FeedbackModal';
+import WelcomeTour, { hasDismissedTour } from './components/ui/WelcomeTour';
 import { ALL_TOOLS } from './data/toolRegistry';
 import { useRecentTools } from './hooks/useRecentTools';
+import { useUsageLog } from './hooks/useUsageLog';
 import { setDroppedFiles } from './utils/droppedFile';
 
 // Map file extensions to tool IDs for global drop routing
@@ -114,6 +117,11 @@ class ErrorBoundary extends Component {
   static getDerivedStateFromError(error) {
     return { hasError: true, error };
   }
+  componentDidCatch(error, info) {
+    if (this.props.onError) {
+      this.props.onError(error, info);
+    }
+  }
   componentDidUpdate(prevProps) {
     if (prevProps.resetKey !== this.props.resetKey) {
       this.setState({ hasError: false, error: null });
@@ -127,46 +135,100 @@ class ErrorBoundary extends Component {
   }
 }
 
-function ToolErrorFallback({ onReset, error }) {
+function classifyError(error) {
+  if (!error) return 'unknown';
+  const msg = (error.message || '').toLowerCase();
+  const name = (error.name || '').toLowerCase();
+  if (!navigator.onLine) return 'offline';
+  if (msg.includes('failed to fetch dynamically imported module') || msg.includes('loading chunk') || msg.includes('importing a module script failed')) {
+    return 'chunk-load';
+  }
+  if (name === 'quotaexceedederror' || msg.includes('quotaexceeded')) return 'storage-full';
+  if (msg.includes('out of memory') || name === 'rangeerror') return 'out-of-memory';
+  return 'unknown';
+}
+
+function errorCopyFor(category) {
+  switch (category) {
+    case 'offline':
+      return {
+        headline: "You're offline and this tool isn't cached yet",
+        explanation: "This tool's code hasn't been downloaded to your device yet. Connect to the internet, reload the page once, and every tool will work offline from then on.",
+      };
+    case 'chunk-load':
+      return {
+        headline: "Couldn't load this tool's code",
+        explanation: "This usually happens after the site is updated — your browser is holding on to an older version. A hard refresh (Ctrl+Shift+R or ⌘+Shift+R) almost always fixes it.",
+      };
+    case 'storage-full':
+      return {
+        headline: 'Your browser is out of storage space',
+        explanation: 'This tool tried to save something locally but your browser storage is full. Clearing other site data or using a fresh browser profile will help.',
+      };
+    case 'out-of-memory':
+      return {
+        headline: 'The file is too large for your browser to handle',
+        explanation: "Try a smaller file, or split it first. Large PDFs (200+ pages) and very high-resolution images can push past your browser's memory limit.",
+      };
+    default:
+      return {
+        headline: 'This tool ran into an error',
+        explanation: "Your files are still safe — nothing left your browser. Try again, and if the error keeps happening, tell us what you were doing so we can fix it.",
+      };
+  }
+}
+
+function ToolErrorFallback({ onReset, onReportProblem, error }) {
   const [showDetail, setShowDetail] = useState(false);
-  const isOffline = !navigator.onLine;
-  const message = isOffline
-    ? 'You appear to be offline. This tool\'s code hasn\'t been cached yet. Connect to the internet and reload the page once to enable full offline use.'
-    : 'Something went wrong loading this tool.';
+  const category = classifyError(error);
+  const { headline, explanation } = errorCopyFor(category);
 
   return (
-    <div className="error-card" role="alert">
+    <div className="error-card error-card--tool" role="alert">
       <div className="error-card-header">
-        <strong>Tool Error</strong>
+        <strong>{headline}</strong>
       </div>
-      <p className="error-card-message">{message}</p>
+      <p className="error-card-message">{explanation}</p>
+
       {error && (
-        <div style={{ marginTop: '8px' }}>
+        <div className="error-card-detail">
           <button
+            type="button"
             onClick={() => setShowDetail(v => !v)}
-            style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+            className="error-card-detail-toggle"
           >
-            {showDetail ? 'Hide details' : 'Show details'}
+            {showDetail ? 'Hide technical details' : 'Show technical details'}
           </button>
           {showDetail && (
-            <pre style={{ marginTop: '8px', padding: '8px', background: 'var(--bg-tertiary)', borderRadius: '4px', fontSize: '0.72rem', color: 'var(--text-muted)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+            <pre className="error-card-detail-pre">
               {error.message}{error.stack ? `\n\n${error.stack}` : ''}
             </pre>
           )}
         </div>
       )}
-      <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
-        <button className="action-button" onClick={onReset} style={{ maxWidth: '160px' }}>
+
+      <div className="error-card-actions">
+        <button className="action-button error-card-action-primary" onClick={onReset}>
           Try Again
         </button>
-        <a
-          href="https://github.com/seawaydigital/RDM-Toolkit/issues"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ fontSize: '0.8rem', color: 'var(--text-muted)', alignSelf: 'center', textDecoration: 'underline' }}
-        >
-          Report this issue
-        </a>
+        {category === 'chunk-load' && (
+          <button
+            type="button"
+            className="action-button action-button--secondary"
+            onClick={() => window.location.reload()}
+          >
+            Hard refresh
+          </button>
+        )}
+        {onReportProblem && (
+          <button
+            type="button"
+            className="error-card-report-btn"
+            onClick={() => onReportProblem(error)}
+          >
+            Report this problem
+          </button>
+        )}
       </div>
     </div>
   );
@@ -178,11 +240,41 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [errorResetKey, setErrorResetKey] = useState(0);
   const [globalDropActive, setGlobalDropActive] = useState(false);
+  const [feedbackContext, setFeedbackContext] = useState(null);
+  const [tourOpen, setTourOpen] = useState(() => !hasDismissedTour());
   const dragCounterRef = useRef(0);
   const { addRecentTool } = useRecentTools();
+  const { logEvent, grantConsent, exportLog } = useUsageLog();
 
   const currentToolId = route.toolId;
   const currentPage = route.page;
+
+  const buildFeedbackContext = useCallback((error) => ({
+    toolId: currentToolId,
+    page: currentPage,
+    url: window.location.href,
+    userAgent: navigator.userAgent,
+    viewport: `${window.innerWidth}x${window.innerHeight}`,
+    online: navigator.onLine,
+    errorMessage: error?.message || null,
+    errorStack: error?.stack || null,
+  }), [currentToolId, currentPage]);
+
+  const openFeedback = useCallback((error) => {
+    setFeedbackContext(buildFeedbackContext(error));
+  }, [buildFeedbackContext]);
+
+  const closeFeedback = useCallback(() => setFeedbackContext(null), []);
+
+  const handleToolError = useCallback((error) => {
+    logEvent('tool_error', {
+      toolId: currentToolId,
+      name: error?.name || 'Error',
+      message: (error?.message || '').slice(0, 200),
+    });
+  }, [currentToolId, logEvent]);
+
+  const handleTourClose = useCallback(() => setTourOpen(false), []);
 
   useEffect(() => {
     function onHashChange() {
@@ -190,11 +282,16 @@ export default function App() {
       setRoute(newRoute);
       setErrorResetKey(k => k + 1);
       // Track recently used tools on every navigation (sidebar clicks, hash changes, etc.)
-      if (newRoute.toolId) addRecentTool(newRoute.toolId);
+      if (newRoute.toolId) {
+        addRecentTool(newRoute.toolId);
+        logEvent('tool_open', { toolId: newRoute.toolId });
+      } else if (newRoute.page) {
+        logEvent('page_open', { page: newRoute.page });
+      }
     }
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
-  }, [addRecentTool]);
+  }, [addRecentTool, logEvent]);
 
   useEffect(() => {
     function onResize() {
@@ -300,12 +397,14 @@ export default function App() {
 
   return (
     <div className="app-layout">
+      <a href="#main-content" className="skip-to-content">Skip to main content</a>
       <Topbar
         onMenuToggle={() => setSidebarOpen(prev => !prev)}
         showMenuButton={isMobile}
         onLogoClick={goHome}
         currentPage={currentPage}
         onNavigate={navigateTo}
+        onOpenFeedback={() => openFeedback(null)}
       />
       <div className="app-body">
         <Sidebar
@@ -329,7 +428,14 @@ export default function App() {
           {currentToolId && ToolComponent && (
             <ErrorBoundary
               resetKey={errorResetKey}
-              fallback={(err) => <ToolErrorFallback onReset={() => setErrorResetKey(k => k + 1)} error={err} />}
+              onError={handleToolError}
+              fallback={(err) => (
+                <ToolErrorFallback
+                  onReset={() => setErrorResetKey(k => k + 1)}
+                  onReportProblem={openFeedback}
+                  error={err}
+                />
+              )}
             >
               <Suspense fallback={<ToolSkeleton />}>
                 <div className="tool-page">
@@ -384,6 +490,20 @@ export default function App() {
             </p>
           </div>
         </div>
+      )}
+
+      <FeedbackModal
+        isOpen={feedbackContext !== null}
+        onClose={closeFeedback}
+        context={feedbackContext || {}}
+        log={exportLog()}
+      />
+
+      {tourOpen && (
+        <WelcomeTour
+          onClose={handleTourClose}
+          onEnableUsageLog={grantConsent}
+        />
       )}
     </div>
   );

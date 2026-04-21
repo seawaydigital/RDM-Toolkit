@@ -1,0 +1,110 @@
+name: Bundle size check
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  bundle-size:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npx vite build
+
+      - name: Compute bundle stats (PR branch)
+        id: pr-stats
+        run: |
+          node scripts/bundle-stats.mjs > /tmp/pr-stats.json
+          cat /tmp/pr-stats.json
+          echo "pr_total_kb=$(jq .totalKB /tmp/pr-stats.json)" >> "$GITHUB_OUTPUT"
+          echo "pr_entry_kb=$(jq .entryKB /tmp/pr-stats.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout base branch
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          git checkout origin/${{ github.base_ref }} -- scripts/bundle-stats.mjs 2>/dev/null || true
+
+      - name: Build base branch
+        run: |
+          git stash push --include-untracked -- dist 2>/dev/null || true
+          git fetch origin ${{ github.base_ref }}:base-ref
+          git checkout base-ref -- . 2>/dev/null || git checkout origin/${{ github.base_ref }} -- .
+          npm ci
+          npx vite build
+          node scripts/bundle-stats.mjs > /tmp/base-stats.json || echo '{"totalKB":0,"entryKB":0}' > /tmp/base-stats.json
+          cat /tmp/base-stats.json
+
+      - name: Compare and comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const pr = JSON.parse(fs.readFileSync('/tmp/pr-stats.json', 'utf8'));
+            const base = JSON.parse(fs.readFileSync('/tmp/base-stats.json', 'utf8'));
+            const deltaTotal = pr.totalKB - base.totalKB;
+            const deltaEntry = pr.entryKB - base.entryKB;
+            const pctTotal = base.totalKB ? ((deltaTotal / base.totalKB) * 100).toFixed(1) : '—';
+            const pctEntry = base.entryKB ? ((deltaEntry / base.entryKB) * 100).toFixed(1) : '—';
+
+            const sign = (n) => (n >= 0 ? '+' : '');
+            const warn = deltaEntry > 25 || deltaTotal > 100 ? ' ⚠️' : '';
+
+            const body = [
+              `## Bundle size report${warn}`,
+              '',
+              '| Metric | Base | This PR | Δ |',
+              '|---|---|---|---|',
+              `| Entry chunk (index) | ${base.entryKB} KB | ${pr.entryKB} KB | ${sign(deltaEntry)}${deltaEntry} KB (${sign(deltaEntry)}${pctEntry}%) |`,
+              `| Total gzipped | ${base.totalKB} KB | ${pr.totalKB} KB | ${sign(deltaTotal)}${deltaTotal} KB (${sign(deltaTotal)}${pctTotal}%) |`,
+              '',
+              warn ? '**⚠️ Bundle grew significantly.** Verify the new dependency is lazy-loaded or justified.' : '_Bundle size within expected range._',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body?.startsWith('## Bundle size report'));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Fail on large regression
+        if: ${{ steps.pr-stats.outputs.pr_entry_kb > 0 }}
+        run: |
+          node -e '
+            const fs = require("fs");
+            const pr = JSON.parse(fs.readFileSync("/tmp/pr-stats.json","utf8"));
+            const base = JSON.parse(fs.readFileSync("/tmp/base-stats.json","utf8"));
+            const dEntry = pr.entryKB - base.entryKB;
+            const dTotal = pr.totalKB - base.totalKB;
+            if (dEntry > 50) { console.error(`Entry chunk grew by ${dEntry} KB (> 50 KB limit)`); process.exit(1); }
+            if (dTotal > 200) { console.error(`Total bundle grew by ${dTotal} KB (> 200 KB limit)`); process.exit(1); }
+          '
