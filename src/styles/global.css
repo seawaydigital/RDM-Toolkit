@@ -7367,8 +7367,9 @@ input:focus, textarea:focus, select:focus {
   border-radius: var(--radius-md);
   padding: var(--space-md);
 }
-.tap-indigenous-card strong { display: block; font-size: 13px; color: var(--text-primary); margin-bottom: 6px; }
+.tap-indigenous-card > strong { display: block; font-size: 13px; color: var(--text-primary); margin-bottom: 6px; }
 .tap-indigenous-card p { font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.6; }
+.tap-indigenous-card p strong { color: var(--text-primary); }
 .tap-indigenous-note {
   font-size: 13px;
   color: #C084FC;
