@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Mail, Github, Copy, Check, ShieldAlert } from 'lucide-react';
+import { X, Mail, Copy, Check, ShieldAlert } from 'lucide-react';
 import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
-
-const GITHUB_ISSUE_URL = 'https://github.com/seawaydigital/RDM-Toolkit/issues/new';
 
 function buildIssueBody({ description, context, includeLog, log }) {
   const lines = [
@@ -34,14 +32,6 @@ function buildMailtoHref({ description, context, includeLog, log }) {
     : `[RDM Toolkit] Feedback: ${context.toolId || context.page || 'general'}`;
   const body = buildIssueBody({ description, context, includeLog, log });
   return `mailto:${INSTITUTION.rdmEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-}
-
-function buildGithubHref({ description, context, includeLog, log }) {
-  const title = context.errorMessage
-    ? `Error in ${context.toolId || 'tool'}: ${context.errorMessage.slice(0, 80)}`
-    : `Feedback: ${context.toolId || context.page || 'general'}`;
-  const body = buildIssueBody({ description, context, includeLog, log });
-  return `${GITHUB_ISSUE_URL}?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
 }
 
 export default function FeedbackModal({ isOpen, onClose, context, log }) {
@@ -183,7 +173,7 @@ export default function FeedbackModal({ isOpen, onClose, context, log }) {
           <div className="feedback-modal-privacy">
             <ShieldAlert size={14} aria-hidden="true" />
             <span>
-              Nothing is uploaded. Clicking a button below opens your email client or GitHub in a new tab,
+              Nothing is uploaded. Clicking the button below opens your email client in a new tab,
               where you can review and send.
             </span>
           </div>
@@ -197,14 +187,6 @@ export default function FeedbackModal({ isOpen, onClose, context, log }) {
             rel="noopener noreferrer"
           >
             <Mail size={15} /> Email us ({INSTITUTION.rdmEmail})
-          </a>
-          <a
-            href={buildGithubHref(payload)}
-            className="feedback-modal-cta feedback-modal-cta--secondary"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Github size={15} /> Open GitHub issue
           </a>
           {log && log.length > 0 && (
             <button
