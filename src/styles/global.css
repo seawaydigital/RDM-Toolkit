@@ -555,18 +555,28 @@ input:focus, textarea:focus, select:focus {
   font-weight: 500;
 }
 
+.sidebar-sister-sub {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
 .sidebar-sister-icon {
   position: absolute;
-  top: 50%;
+  top: 10px;
   right: 10px;
-  transform: translateY(-50%);
   color: var(--text-muted);
   transition: transform 0.15s, color 0.15s;
 }
 
 .sidebar-sister-link:hover .sidebar-sister-icon {
   color: #D53A3A;
-  transform: translate(2px, calc(-50% - 2px));
+  transform: translate(2px, -2px);
 }
 
 .sidebar-cta {
