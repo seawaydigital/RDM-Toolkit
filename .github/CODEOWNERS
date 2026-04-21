@@ -1,0 +1,36 @@
+# CODEOWNERS — review routing for RDM Toolkit
+#
+# GitHub uses the LAST matching pattern, so order matters: put the most
+# general rule first and progressively narrow.
+#
+# Reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default — everything goes to the maintainer
+*                                   @seawaydigital
+
+# CI + release tooling (actions, workflows, dependency config)
+/.github/                           @seawaydigital
+
+# Security-critical code paths — tighten review discipline when these change
+/src/utils/crypto.js                @seawaydigital
+/src/utils/fileValidation.js        @seawaydigital
+/src/tools/privacy/                 @seawaydigital
+/src/tools/research/                @seawaydigital
+/src/tools/pdf/PDFRedaction.jsx     @seawaydigital
+/src/tools/pdf/PasswordProtectPDF.jsx @seawaydigital
+/src/tools/pdf/RemovePDFPassword.jsx  @seawaydigital
+
+# Public-facing trust copy — keep accurate, cite sources
+/src/components/pages/HowThisWorks.jsx          @seawaydigital
+/src/components/pages/DataClassification.jsx    @seawaydigital
+/src/components/pages/TriAgencyPolicy.jsx       @seawaydigital
+/src/data/institutionConfig.js                  @seawaydigital
+/src/data/toolExplainers.js                     @seawaydigital
+
+# Build + PWA surface (service worker, chunking)
+/vite.config.js                     @seawaydigital
+
+# Top-level project docs
+/CLAUDE.md                          @seawaydigital
+/README.md                          @seawaydigital
+/docs/                              @seawaydigital
