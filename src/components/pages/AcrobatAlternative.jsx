@@ -9,9 +9,8 @@ import {
 /* ─── Pricing tiers (used by the savings calculator) ─────────────────────── */
 
 const PRICE_TIERS = [
-  { id: 'low',  amount: 177, label: 'Annual prepay',    hint: 'Cheapest individual plan, paid up-front for the year' },
-  { id: 'mid',  amount: 240, label: 'Monthly billing',  hint: 'Standard individual plan, billed monthly (~$19.99/mo)' },
-  { id: 'high', amount: 300, label: 'Teams / business', hint: 'Business plan or volume licence (typical floor)' },
+  { id: 'low',  amount: 177, label: 'Lakehead internal', hint: 'Lakehead enterprise licensing, paid up-front for the full year' },
+  { id: 'high', amount: 352, label: 'Retail (with HST)', hint: 'Adobe individual annual plan at retail, including 13% Ontario HST' },
 ];
 
 /* ─── Data ──────────────────────────────────────────────────────────────── */
@@ -143,8 +142,8 @@ const BADGE_META = {
 
 export default function AcrobatAlternative() {
   const [users, setUsers] = useState(1);
-  const [tierId, setTierId] = useState('mid');
-  const tier = PRICE_TIERS.find((t) => t.id === tierId) ?? PRICE_TIERS[1];
+  const [tierId, setTierId] = useState('low');
+  const tier = PRICE_TIERS.find((t) => t.id === tierId) ?? PRICE_TIERS[0];
 
   const safeUsers = Math.max(1, Math.min(500, Number.isFinite(users) ? Math.round(users) : 1));
   const yearlySavings = safeUsers * tier.amount;
@@ -171,7 +170,7 @@ export default function AcrobatAlternative() {
         <div className="aa-cost-badge">
           <span className="aa-cost-free">$0&thinsp;/&thinsp;year</span>
           <span className="aa-cost-divider">vs</span>
-          <span className="aa-cost-paid">$177–$300+&thinsp;/&thinsp;year</span>
+          <span className="aa-cost-paid">$177–$352&thinsp;/&thinsp;year</span>
           <span className="aa-cost-label">Acrobat Pro subscription</span>
         </div>
       </div>
