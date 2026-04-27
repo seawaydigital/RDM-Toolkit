@@ -10,7 +10,6 @@ import {
 
 const PRICE_TIERS = [
   { id: 'low',  amount: 177, label: 'Lakehead internal', hint: 'Lakehead enterprise licensing, paid up-front for the full year' },
-  { id: 'mid',  amount: 240, label: 'Monthly billing',   hint: 'Adobe individual plan, billed monthly (~$19.99/mo, before tax)' },
   { id: 'high', amount: 352, label: 'Retail (with HST)', hint: 'Adobe individual annual plan at retail, including 13% Ontario HST' },
 ];
 
@@ -143,8 +142,8 @@ const BADGE_META = {
 
 export default function AcrobatAlternative() {
   const [users, setUsers] = useState(1);
-  const [tierId, setTierId] = useState('mid');
-  const tier = PRICE_TIERS.find((t) => t.id === tierId) ?? PRICE_TIERS[1];
+  const [tierId, setTierId] = useState('low');
+  const tier = PRICE_TIERS.find((t) => t.id === tierId) ?? PRICE_TIERS[0];
 
   const safeUsers = Math.max(1, Math.min(500, Number.isFinite(users) ? Math.round(users) : 1));
   const yearlySavings = safeUsers * tier.amount;
