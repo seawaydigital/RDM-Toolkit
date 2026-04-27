@@ -1,10 +1,18 @@
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import {
   Layers, FileSignature, FileText, Monitor,
   CheckCircle2, ExternalLink, CircleDollarSign,
   AlertCircle, Shield, WifiOff, ChevronRight,
-  Clock, Lock, Sparkles
+  Clock, Lock, Sparkles, Users, Calculator
 } from 'lucide-react';
+
+/* ─── Pricing tiers (used by the savings calculator) ─────────────────────── */
+
+const PRICE_TIERS = [
+  { id: 'low',  amount: 177, label: 'Annual prepay',    hint: 'Cheapest individual plan, paid up-front for the year' },
+  { id: 'mid',  amount: 240, label: 'Monthly billing',  hint: 'Standard individual plan, billed monthly (~$19.99/mo)' },
+  { id: 'high', amount: 300, label: 'Teams / business', hint: 'Business plan or volume licence (typical floor)' },
+];
 
 /* ─── Data ──────────────────────────────────────────────────────────────── */
 
@@ -134,6 +142,15 @@ const BADGE_META = {
 /* ─── Component ─────────────────────────────────────────────────────────── */
 
 export default function AcrobatAlternative() {
+  const [users, setUsers] = useState(1);
+  const [tierId, setTierId] = useState('mid');
+  const tier = PRICE_TIERS.find((t) => t.id === tierId) ?? PRICE_TIERS[1];
+
+  const safeUsers = Math.max(1, Math.min(500, Number.isFinite(users) ? Math.round(users) : 1));
+  const yearlySavings = safeUsers * tier.amount;
+  const fiveYearSavings = yearlySavings * 5;
+  const fmt = (n) => `$${n.toLocaleString('en-CA')}`;
+
   return (
     <div className="aa">
 
@@ -158,6 +175,98 @@ export default function AcrobatAlternative() {
           <span className="aa-cost-label">Acrobat Pro subscription</span>
         </div>
       </div>
+
+      {/* ── Savings Calculator ─────────────────────────────────────────── */}
+      <section className="aa-section aa-calc-section">
+        <h2 className="aa-section-title">
+          <Calculator size={18} aria-hidden="true" />
+          What could your team reclaim?
+        </h2>
+        <p className="aa-section-intro">
+          Estimate how much your lab, department, or research group could redirect
+          from Acrobat Pro renewals into other priorities — equipment, conference
+          travel, or a research assistant. Numbers below are estimates only;
+          your actual Adobe quote may vary.
+        </p>
+
+        <div className="aa-calc">
+          <div className="aa-calc-controls">
+            <div className="aa-calc-field">
+              <label htmlFor="aa-calc-users" className="aa-calc-label">
+                <Users size={14} aria-hidden="true" />
+                Number of users
+              </label>
+              <div className="aa-calc-users-row">
+                <input
+                  id="aa-calc-users"
+                  type="range"
+                  min="1"
+                  max="50"
+                  step="1"
+                  value={Math.min(safeUsers, 50)}
+                  onChange={(e) => setUsers(parseInt(e.target.value, 10))}
+                  className="aa-calc-slider"
+                  aria-label="Number of users (slider, 1 to 50)"
+                />
+                <input
+                  type="number"
+                  min="1"
+                  max="500"
+                  value={safeUsers}
+                  onChange={(e) => setUsers(parseInt(e.target.value, 10) || 1)}
+                  className="aa-calc-number"
+                  aria-label="Number of users (exact)"
+                />
+              </div>
+              <div className="aa-calc-hint">
+                Drag the slider for a department, or type any number up to 500.
+              </div>
+            </div>
+
+            <div className="aa-calc-field">
+              <span className="aa-calc-label">
+                <CircleDollarSign size={14} aria-hidden="true" />
+                Acrobat Pro plan (per user, per year)
+              </span>
+              <div className="aa-calc-tiers" role="radiogroup" aria-label="Acrobat Pro plan tier">
+                {PRICE_TIERS.map((t) => {
+                  const active = t.id === tierId;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => setTierId(t.id)}
+                      className={`aa-calc-tier${active ? ' aa-calc-tier--active' : ''}`}
+                    >
+                      <span className="aa-calc-tier-amount">${t.amount}</span>
+                      <span className="aa-calc-tier-label">{t.label}</span>
+                      <span className="aa-calc-tier-hint">{t.hint}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="aa-calc-result" aria-live="polite">
+            <div className="aa-calc-result-eyebrow">Estimated savings</div>
+            <div className="aa-calc-result-primary">
+              <div className="aa-calc-result-amount">{fmt(yearlySavings)}</div>
+              <div className="aa-calc-result-period">per year</div>
+            </div>
+            <div className="aa-calc-result-secondary">
+              <span className="aa-calc-result-secondary-label">Over 5 years</span>
+              <span className="aa-calc-result-secondary-value">{fmt(fiveYearSavings)}</span>
+            </div>
+            <div className="aa-calc-result-formula">
+              {safeUsers.toLocaleString('en-CA')} {safeUsers === 1 ? 'user' : 'users'}
+              {' '}× ${tier.amount}/yr ({tier.label.toLowerCase()})
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* ── The Free Stack ─────────────────────────────────────────────── */}
       <section className="aa-section">
