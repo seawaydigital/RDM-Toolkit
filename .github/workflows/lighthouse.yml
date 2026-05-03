@@ -9,36 +9,43 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
 
-      - run: npm ci
-      - run: npx vite build
+      - run: npm ci --ignore-scripts
+      - run: npm run build
 
       - name: Start preview server
         run: |
-          npx vite preview --port 4173 &
-          npx wait-on http://localhost:4173 -t 30000
+          npm run preview -- --port 4173 --host 127.0.0.1 &
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Preview server did not become ready in time"
+          exit 1
 
       - name: Run Lighthouse
-        uses: treosh/lighthouse-ci-action@v12
+        uses: treosh/lighthouse-ci-action@3e7e23fb74242897f95c0ba9cabad3d0227b9b18 # v12
         with:
           urls: |
-            http://localhost:4173/
-            http://localhost:4173/#how-this-works
-            http://localhost:4173/#compress-pdf
-            http://localhost:4173/#data-classification
+            http://127.0.0.1:4173/
+            http://127.0.0.1:4173/#how-this-works
+            http://127.0.0.1:4173/#compress-pdf
+            http://127.0.0.1:4173/#data-classification
           uploadArtifacts: true
           temporaryPublicStorage: true
           configPath: .github/lighthouse/lighthouserc.json
 
       - name: Upload Lighthouse report as artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: lighthouse-report
           path: .lighthouseci/

@@ -31,7 +31,6 @@ const EXT_TO_TOOL = {
   webp: 'compress-image',
   zip: 'extract-zip',
   csv: 'csv-encoding-fixer',
-  docx: 'to-markdown',
   json: 'json-formatter',
   md: 'markdown-preview',
 };

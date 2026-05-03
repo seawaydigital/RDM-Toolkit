@@ -226,34 +226,49 @@ All tools map directly to the RDM mandate (research data lifecycle + Tri-Agency 
 
 ## Dependencies
 
+> **All versions are pinned exactly** (no `^`/`~`) since 2026-05-02. The allowlist in [scripts/security-audit.mjs](scripts/security-audit.mjs) enforces both the package set and the exact version. Adding/updating a dep requires editing the allowlist in the same PR — CI fails otherwise.
+
 ### Production
 
 | Package | Version | Purpose |
 |---|---|---|
-| `react` / `react-dom` | ^18.2.0 | UI framework |
-| `@cantoo/pdf-lib` | ^1.17.1 | PDF manipulation (merge, split, protect, sign, watermark) |
-| `pdfjs-dist` | ^5.6.205 | PDF rendering and thumbnail extraction (CVE GHSA-wgrm-67xf-hhpq patched in v4+) |
-| `@pdf-lib/fontkit` | ^1.1.1 | Font embedding in PDFs |
-| `jszip` | ^3.10.1 | ZIP archive creation and extraction |
-| `dompurify` | ^3.3.3 | HTML sanitization (used in Markdown Preview) |
-| `zxcvbn` | ^4.4.2 | Realistic password strength estimation (Encrypt/Decrypt tool) |
-| `exifr` | ^7.1.3 | EXIF/XMP metadata extraction from images |
-| `mammoth` | ^1.7.1 | DOCX → HTML conversion |
-| `docx` | ^8.5.0 | DOCX file generation |
-| `@imgly/background-removal` | ^1.4.5 | ML background removal (WASM/ONNX, runs in-browser) |
-| `@dnd-kit/core` / `sortable` / `utilities` | ^6/8/3 | Drag-and-drop page reordering (PDF tools) |
-| `lucide-react` | ^0.344.0 | Icons throughout the UI |
-| `@fontsource/ibm-plex-sans` / `mono` | ^5.0.0 | Self-hosted body + mono fonts |
-| `@fontsource/fraunces` | ^5.x | Self-hosted display serif for headings, wordmark, hero titles |
+| `react` / `react-dom` | 18.3.1 | UI framework |
+| `@cantoo/pdf-lib` | 1.21.1 | PDF manipulation (merge, split, protect, sign, watermark) |
+| `pdfjs-dist` | 5.6.205 | PDF rendering and thumbnail extraction (CVE GHSA-wgrm-67xf-hhpq patched in v4+) |
+| `@pdf-lib/fontkit` | 1.1.1 | Font embedding in PDFs |
+| `jszip` | 3.10.1 | ZIP archive creation and extraction |
+| `dompurify` | 3.4.0 | HTML sanitization (Markdown Preview, FileToMarkdown) |
+| `zxcvbn` | 4.4.2 | Realistic password strength estimation (Encrypt/Decrypt tool) |
+| `exifr` | 7.1.3 | EXIF/XMP metadata extraction from images |
+| `turndown` | 7.2.4 | HTML → Markdown conversion (FileToMarkdown) |
+| `turndown-plugin-gfm` | 1.0.2 | GFM table/strikethrough support for Turndown |
+| `@dnd-kit/core` / `sortable` / `utilities` | 6.3.1 / 8.0.0 / 3.2.2 | Drag-and-drop page reordering (PDF tools) |
+| `lucide-react` | 0.577.0 | Icons throughout the UI |
+| `@fontsource/ibm-plex-sans` / `mono` | 5.2.8 / 5.2.7 | Self-hosted body + mono fonts |
+| `@fontsource/fraunces` | 5.2.9 | Self-hosted display serif for headings, wordmark, hero titles |
 
 ### Dev
 
-| Package | Purpose |
+| Package | Version | Purpose |
+|---|---|---|
+| `vite` | 5.4.21 | Build tool and dev server |
+| `@vitejs/plugin-react` | 4.7.0 | React HMR and JSX transform |
+| `vite-plugin-pwa` | 1.2.0 | PWA / service worker generation (Workbox) |
+
+### Removed deps (banned via `bannedPackages` in `security-audit.mjs`)
+
+These were removed in the 2026-05-02 hardening pass and are now blocked by the audit script. CI fails if any reappears in `package.json` or `package-lock.json`:
+
+| Package | Reason removed |
 |---|---|
-| `vite` ^5.1.0 | Build tool and dev server |
-| `@vitejs/plugin-react` ^4.2.0 | React HMR and JSX transform |
-| `vite-plugin-pwa` ^1.2.0 | PWA / service worker generation (Workbox) |
-| `vite-plugin-static-copy` ^1.0.0 | Copies `@imgly` WASM assets to dist |
+| `mammoth` | DOCX→HTML — large surface, transitive deps; FileToMarkdown no longer accepts `.docx` |
+| `xlsx` (SheetJS) | Unpatched high-severity CVEs (no OSS fix available); FileToMarkdown no longer accepts `.xlsx` |
+| `docx` | DOCX generation — only used by removed RemoveBackground tool |
+| `@imgly/background-removal` | ML background removal — large WASM/ONNX bundle, removed RemoveBackground tool |
+| `onnxruntime-web` | Transitive dep of @imgly |
+| `protobufjs` | Transitive dep of @imgly |
+| `@xmldom/xmldom` | Transitive parser, no longer needed |
+| `vite-plugin-static-copy` | Was used to copy @imgly WASM to dist — no longer needed |
 
 ### Manual Chunks (vite.config.js)
 
@@ -269,16 +284,19 @@ Large libraries are split into their own chunks to keep tool chunks small:
 ## Build & Deploy
 
 ```bash
-npm run dev        # Vite dev server (HMR)
-npx vite build     # Production build → dist/
-npx vite preview   # Serve production build locally (port 4173)
+npm install              # `.npmrc` forces --ignore-scripts; no postinstall hooks ever run
+npm run dev              # Vite dev server (HMR), port 5173
+npm run build            # Production build → dist/
+npm run preview          # Serve dist/ on port 4173 with full production HTTP headers
+npm run security:audit   # Run all project guardrails (see scripts/security-audit.mjs)
 ```
 
 - Build target: ES2020
 - Worker format: ES modules (`worker: { format: 'es' }`)
-- Deployed via GitHub Pages from `master` branch
-- Service worker pre-caches 140 assets on first load (includes all JS chunks, fonts, icons)
+- Deployed via GitHub Pages from `master` branch (custom domain `rdmtoolkit.ca`)
+- Service worker pre-caches ~162 assets on first load (includes all JS chunks, fonts, icons)
 - PWA app name: "RDM Toolkit", theme: `#0D1B35`, display: `standalone`
+- `vite preview` ships the same security headers production gets via the `previewSecurityHeaders()` plugin in [vite.config.js](vite.config.js) — Lighthouse and local testing see what users actually see
 
 ---
 
@@ -286,27 +304,64 @@ npx vite preview   # Serve production build locally (port 4173)
 
 ### What this app does NOT have
 - No server, no API, no database, no auth, no sessions
-- No `fetch()` to a backend, no `XMLHttpRequest`, no WebSocket
-- No tracking, no analytics, no third-party scripts
+- No `fetch()` to a backend, no `XMLHttpRequest`, no WebSocket, no `sendBeacon`
+- No tracking, no analytics, no third-party scripts, no CDN
 
-### Key security measures in place
-- **DOMPurify** sanitizes all Markdown-rendered HTML before it touches the DOM (Markdown Preview tool); strict allowlist — no `style` attr, no `div`/`span`, blocks `javascript:` and `data:` URIs
-- **zxcvbn** for realistic password strength (not character-class counting)
-- **PDF.js v5** runs PDF parsing in a sandboxed Web Worker (not main thread); upgraded from v3 to patch CVE GHSA-wgrm-67xf-hhpq (arbitrary JS from malicious PDFs)
-- **No CDN scripts** — all JS self-hosted; no third-party script injection surface
-- **Source links** are hyperlinked with `rel="noopener noreferrer"` throughout
+### Runtime defenses (browser-side)
+
+- **CSP `connect-src 'self'`** — blocks any library from making outbound network calls, even if compromised. This is the strongest single defense in the stack.
+- **CSP `script-src 'self' 'wasm-unsafe-eval'`** — no external scripts can load; `'wasm-unsafe-eval'` is the only relaxation, required by pdfjs worker
+- **CSP `object-src 'none'`** — explicit (added 2026-05-02) so Lighthouse `csp-xss` audit passes; closes embed/object/applet vectors
+- **CSP `frame-ancestors 'none'`** — clickjacking protection (works in `_headers`; ignored in meta tag, but X-Frame-Options DENY covers meta-only deployments)
+- **DOMPurify** sanitizes all Markdown-rendered HTML before it touches the DOM (`MarkdownPreview`, `FileToMarkdown`); strict allowlist — no `style` attr, no `script`/`iframe`/`object`/`embed`, blocks `javascript:`/`data:` URIs via custom `ALLOWED_URI_REGEXP`
+- **PDF.js v5** runs PDF parsing in a sandboxed Web Worker (not main thread); upgraded from v3 to patch CVE GHSA-wgrm-67xf-hhpq
+- **PDF Redaction post-save verification** — output re-parsed with pdfjs to confirm zero text on redacted pages; download blocked if any text survives
 - **ZIP bomb guard** — ExtractZIP checks declared decompressed sizes before extraction; blocks > 5 GB total
-- **CSP meta tag** — `default-src 'self'`, blocks `javascript:`/`data:` URIs, `frame-ancestors 'none'`; also sets X-Content-Type-Options, Referrer-Policy, Permissions-Policy via meta tags
-- **Dependabot** — weekly npm scans, PRs auto-opened for dependency updates (`.github/dependabot.yml`)
+- **ZIP slip guard** — `relativePath.split('/').pop()` strips path components from extracted entries
+- **Filename sanitizer** ([utils/filename.js](src/utils/filename.js)) — strips everything except `[a-zA-Z0-9_\-\s]` from output filenames; path separators, dots, control chars cannot survive
+- **AES-256-GCM via Web Crypto** — no DIY crypto; PBKDF2-SHA256 (100k iter) for key derivation; random per-message salt + IV
+- **`crypto.getRandomValues()`** for password generation; never `Math.random()`
+- **Service worker, no runtime caching** — `runtimeCaching: []` so the SW only ever serves precached assets; no opportunity for cache poisoning
+- **HTTP headers** in [public/_headers](public/_headers) (Cloudflare/Netlify) and via `previewSecurityHeaders()` plugin in `vite preview`: HSTS, X-Content-Type-Options, X-Frame-Options DENY, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy denying camera/mic/geo/payment/usb/serial
+
+### Supply-chain defenses (install-time, Tier 1 — added 2026-05-02)
+
+- **Pinned exact versions** — every dep in `package.json` is an exact version (no `^`/`~`). Dependabot still proposes updates as PRs you review.
+- **`.npmrc` with `ignore-scripts=true`** — no postinstall hooks ever execute, neutralizing the most common supply-chain RCE vector
+- **`npm ci --ignore-scripts`** in both `deploy.yml` and `security.yml`
+- **`npm audit signatures`** in CI — verifies every dep was actually published by its registered maintainer (Sigstore/SLSA via npm registry signing); catches account takeovers
+- **Dependency allowlist** in [scripts/security-audit.mjs](scripts/security-audit.mjs) — `allowedDependencies` and `allowedDevDependencies` Maps with exact pinned versions. CI fails on (a) unreviewed deps, (b) version drift, (c) non-exact semver, (d) missing expected deps
+- **Dependency blocklist** — `bannedPackages` array prevents reintroduction of removed deps (mammoth, xlsx, docx, @imgly/background-removal, onnxruntime-web, protobufjs, @xmldom/xmldom, vite-plugin-static-copy)
+- **Lockfile diff guard** ([scripts/lockfile-diff-guard.mjs](scripts/lockfile-diff-guard.mjs)) — fails PR if `package-lock.json` changed without a matching `package.json` change, catching lockfile tampering / undisclosed transitive bumps
+
+### CI / process defenses
+
+- **`npm run security:audit`** — runs every PR and push; blocks on:
+  - Banned package imports anywhere in `src/`
+  - `fetch`/`XMLHttpRequest`/`WebSocket`/`EventSource`/`sendBeacon` calls in source
+  - `eval`/`new Function` calls
+  - `document.cookie`/`indexedDB` access
+  - `.innerHTML`/`.outerHTML`/`insertAdjacentHTML`
+  - `dangerouslySetInnerHTML` outside the 3 allowlisted files (HowItWorks, MarkdownPreview, FileToMarkdown)
+  - `localStorage`/`sessionStorage` outside the 4 allowlisted hooks/components
+  - `style` attribute in any DOMPurify `ALLOWED_ATTR`
+  - `target="_blank"` without nearby `rel="noopener noreferrer"`
+  - `<script>` / `on*=` / `javascript:` / `data:text/html` in `toolExplainers.js`
+  - Tools registered without a lazy import, or files in `src/tools/` without registration
+  - Missing `_headers` file or missing required directives (CSP with `frame-ancestors 'none'` + `object-src 'none'`)
+  - Missing fallback meta CSP in `index.html` or `'unsafe-eval'` present
+- **`npm audit --omit=dev --audit-level=high`** — blocks deploys on any high-severity production CVE
+- **Lighthouse CI** with explicit `csp-xss` audit at `minScore: 1` — blocks merge if CSP regresses
 - **CodeQL** — static analysis on every push to master, every PR, and weekly (`.github/workflows/codeql.yml`); results in GitHub → Security → Code scanning alerts
-- **CI security audit** — `npm audit --omit=dev --audit-level=critical` blocks deploys on CVSS 9.0+ issues
+- **Dependabot** — weekly npm scans, PRs auto-opened for dependency updates (`.github/dependabot.yml`)
 
 ### Known gaps / deployment notes
-1. **HTTP security headers** — GitHub Pages does not support custom headers. `<meta http-equiv>` CSP is a stopgap; notably `frame-ancestors 'none'` is **ignored** in meta tags (only works as HTTP header). When moving off GitHub Pages, configure real headers — Cloudflare Pages `_headers` file or Netlify `netlify.toml`.
-2. **URL-exposed config** — Storage Calculator saves state to URL hash. Hash doesn't go to server logs, but appears in browser history and shared links.
-3. **Branch protection** — enable in GitHub → Settings → Branches (require PR + review + CI pass before merging to master).
-4. **pdf-lib + AcroForm PDFs** — pdf-lib's serializer produces structurally broken output for PDFs with form fields, digital signatures, or XFA forms (Adobe Acrobat shows "error processing a page"). Tested approaches: `scaleContent()`, `embedPage()`/`drawPage()`, and canvas rasterization — all fail. PDF Page Inspector detects form fields via pdfjs Widget annotations and advises users to flatten via File → Print → Save as PDF before resizing.
-5. **xlsx CVEs** — `xlsx@0.18.5` (SheetJS) has 2 high-severity CVEs: GHSA-4r6h-8v6p-xvw6 (prototype pollution) and GHSA-5pgg-2g8v-p4x9 (ReDoS). Not critical-level (CVSS <9.0), so CI audit passes. No OSS patch available — SheetJS moved patched versions to a commercial license. Risk is low: users only process their own uploaded files.
+
+1. **HTTP security headers on GitHub Pages** — GitHub Pages does not apply custom headers. `<meta http-equiv>` CSP is a stopgap; notably `frame-ancestors 'none'` is **ignored** in meta tags. The site should be fronted by Cloudflare Pages or Netlify in production so `public/_headers` takes effect. `vite preview` already sends real headers locally for parity.
+2. **URL-exposed config** — Storage Calculator saves state to URL `?config=` query string. Only contains numeric inputs, predefined labels, and booleans (no free-text). `Referrer-Policy: strict-origin-when-cross-origin` prevents cross-origin leak.
+3. **Branch protection** — enable in GitHub → Settings → Branches (require PR + review + CI pass + signed commits before merging to master). This is the largest gap not in code.
+4. **pdf-lib + AcroForm PDFs** — pdf-lib's serializer produces structurally broken output for PDFs with form fields, digital signatures, or XFA forms. PDF Page Inspector detects form fields via pdfjs Widget annotations and advises users to flatten via File → Print → Save as PDF before resizing.
+5. **PBKDF2 iteration count** — currently 100k (within historical OWASP range). Modern OWASP guidance is 600k for PBKDF2-SHA-256. Bumping requires a backwards-compatibility plan (1-byte version tag prepended to ciphertext) since previously-encrypted blobs would no longer decrypt.
 
 ---
 
@@ -357,6 +412,7 @@ All external sources are hyperlinked (`target="_blank" rel="noopener noreferrer"
 
 | Date | Change |
 |---|---|
+| 2026-05-02 | **Pre-launch security hardening — full sweep + Tier 1 supply-chain defense** — comprehensive security audit (4 parallel sub-agents covering all 46 tools + infrastructure) found no exploitable vulnerabilities meeting confidence ≥8 threshold. Audit then identified hardening opportunities, all landed in this pass. **(1) Dead-file cleanup** — deleted three unregistered tool files (`RemoveBackground.jsx`, `DOCXPDFConverter.jsx`, `RotateReorderPages.jsx`) that were referenced by removed deps but never wired into the registry. **(2) Removed 8 unneeded/vulnerable deps** — `@imgly/background-removal` (huge WASM/ONNX bundle, removed RemoveBackground tool), `onnxruntime-web` + `protobufjs` (transitive @imgly), `mammoth` (DOCX→HTML, big surface), `xlsx` (unpatched high-CVE SheetJS, no OSS fix), `docx` (only used by removed tool), `@xmldom/xmldom` (no longer needed), `vite-plugin-static-copy` (was copying @imgly WASM). **(3) FileToMarkdown** narrowed to `.pdf,.html,.htm,.csv,.txt,.md,.rtf,.json` — no DOCX/XLSX. **(4) SignPDF** removed last `fetch()` calls (replaced data: URL decoding with pure JS `dataUrlToBytes()`). **(5) `scripts/security-audit.mjs`** added — single guardrail script that fails CI on banned package imports, runtime network APIs, eval, dangerouslySetInnerHTML outside 3 allowlisted files, localStorage outside 4 allowlisted hooks, missing `rel="noopener noreferrer"`, missing CSP directives, etc. Verifies all 46 registered tools wire through the lazy-import map. **(6) Allowlist + blocklist for deps** — `allowedDependencies`/`allowedDevDependencies` Maps in security-audit.mjs require exact pinned versions and explicit code review for any new dep. `bannedPackages` array prevents reintroduction. **(7) `package.json` exact-pin** — every version is `1.2.3` not `^1.2.3`; Dependabot still proposes updates as PRs you explicitly merge. **(8) `.npmrc`** — `ignore-scripts=true` neuters all postinstall hooks (the most common supply-chain RCE vector). **(9) CI uses `npm ci --ignore-scripts`** + adds `npm audit signatures` (Sigstore verification — catches maintainer account takeovers). Audit-level raised from `critical` to `high`. **(10) Lockfile diff guard** — `scripts/lockfile-diff-guard.mjs` fails PR if `package-lock.json` changed without `package.json` (catches lockfile tampering / undisclosed transitive bumps). **(11) `.github/workflows/security.yml`** added — standalone PR/push/weekly guardrail run independent of the deploy pipeline. **(12) `public/_headers`** added — full CSP + HSTS + X-Content-Type-Options + Referrer-Policy + Permissions-Policy + X-Frame-Options DENY for Cloudflare/Netlify deployments. **(13) `object-src 'none'`** added to both meta CSP and `_headers` — closes Lighthouse `csp-xss` HIGH severity finding. **(14) Vite preview headers middleware** — new `previewSecurityHeaders()` plugin in `vite.config.js` makes `vite preview` send the same 6 production headers via `configurePreviewServer`, so Lighthouse CI tests reality (not just meta-tag CSP). **(15) Lighthouse `csp-xss` assertion** — explicit `["error", { "minScore": 1 }]` in `lighthouserc.json` makes CI fail (not warn) on any CSP regression. **(16) README + CLAUDE.md** updated to reflect the 46-tool, hardened-dep posture. **Verified:** `npm run security:audit` passes for all 46 registered tools; `curl -sI` confirms all 6 production headers send during `vite preview`; build clean (17.20s, 162 precache entries, no console errors). |
 | 2026-04-21 | **UI polish pass + analytics decision (PRs #26–#30)** — five small launch-ready tweaks and one deliberate non-decision. **(1) Feedback modal: email only (PR #26, `50e5754`)** — dropped the "Open GitHub issue" secondary CTA from [FeedbackModal.jsx](src/components/ui/FeedbackModal.jsx); removed the `Github` lucide import, the `GITHUB_ISSUE_URL` constant, and the `buildGithubHref()` function. Footer now has just the primary `mailto:` button + the optional "Copy log only" ghost button. Privacy copy updated from "opens your email client or GitHub in a new tab" to "opens your email client in a new tab". Rationale: testers reporting via two different channels fragments the bug log; email funnels everything into one inbox at the RDM address. **(2) Topbar subtitle removal (PR #27, `fbd385d`)** — dropped the "— Research Data Management" caption next to the wordmark in [Topbar.jsx:34](src/components/layout/Topbar.jsx:34) and deleted the now-orphaned `.topbar-subtitle` CSS block (base styles, gold hairline `::before` rule, mobile hide). The wordmark alone was enough; the dashed uppercase caption was visual noise at the top of every page. **(3) TriAgencyPolicy governance card acronym fix (PR #28, `3c4f6f6`)** — single-character CSS bug fix. `.tap-indigenous-card strong { display: block }` was a descendant selector, so it hit every nested `<strong>` inside each card — including the inline `<strong>O</strong>`, `<strong>C</strong>`, `<strong>A</strong>`, `<strong>P</strong>` letters used for the OCAP / CARE / USAI acronym expansions. Each letter was wrapping onto its own line (see original issue report). Fix: switched to the child combinator (`.tap-indigenous-card > strong`) so only the direct-child heading `<strong>` becomes a block. Also added `.tap-indigenous-card p strong { color: var(--text-primary) }` so the acronym letters visually stand out against the secondary body copy. Affects all 12 cards in the Governance Frameworks + General Guidance grids. **(4) RS Toolkit sister-site link (PR #29, `d644d3d`)** — added a pinned sister-site link in the sidebar footer, above the gold "Request a Tool" CTA. Opens https://rs.rdmtoolkit.ca (Research Security companion site) in a new tab. Wordmark matches the RS Toolkit logo: "RS" in Fraunces italic red (`#D53A3A`) + "Toolkit" in parchment weight 500, with a small uppercase caption below. Subtle dark card surface (`rgba(255,255,255,0.02)` over sidebar inset) with a hairline border; hover state shifts border + external-link icon to red and lifts the card 1px. Hidden on mobile alongside `.sidebar-cta` via the existing `@media (max-width: 767px)` block. New CSS classes: `.sidebar-sister`, `.sidebar-sister-link`, `.sidebar-sister-wordmark`, `.sidebar-sister-rs`, `.sidebar-sister-toolkit`, `.sidebar-sister-sub`, `.sidebar-sister-icon`. **(5) RS Toolkit caption shortening (PR #30, open)** — follow-up tweak: caption changed from "Research Security companion" → "Research Security". The position + external-link icon make the "companion" framing redundant; shorter reads cleaner in the sidebar width. One-line JSX edit. **(6) Analytics/page counter — deliberately declined** — user asked whether a privacy-respecting page counter was feasible with a public data page. Three options surfaced and weighed: (a) custom Cloudflare Worker counter (cleanest fit, zero 3rd-party script), (b) hosted GoatCounter (free, public dashboards built-in), (c) Plausible/Simple Analytics (paid, polished). All three would have required updating the HowThisWorks + HomePage "no tracking, no analytics, no third-party scripts" claim. User decided against — keeping the privacy claim as-is is simpler to defend, verify, and maintain. If rough usage ever needs surfacing, GitHub → Insights → Traffic (14-day retention, aggregated by GitHub, no script added to the site) and Cloudflare server-side logs (if we ever proxy the domain) stay outside the app itself. **Build status:** all 5 PRs pass CI (bundle-size, CodeQL, Lighthouse). Precache stable at 163 entries. Master HEAD after #29: `d644d3d`. PR #30 still open. |
 | 2026-04-21 | **Pre-launch tester readiness: Phase 1 (in-app feedback + error copy + usage log + welcome tour)** — four coordinated UX additions to make the site ready for formal user testing. **(1) In-app feedback capture** — new `FeedbackModal.jsx` opens from a new `MessageSquare` "Feedback" button in the topbar (mobile: icon-only, 40×40px tap target), or from any error fallback. Auto-populates tool/page, URL, user agent, viewport, online status, and (if triggered from an error) error message + stack. Two CTAs: primary "Email us ({rdmEmail})" → `mailto:` with prefilled subject/body; secondary "Open GitHub issue" → prefilled title + body at `github.com/seawaydigital/RDM-Toolkit/issues/new`. Optional "Include my session log" checkbox + "Copy log only" button for testers who prefer to paste context themselves. Nothing is uploaded; all CTAs open the user's own email client / GitHub in a new tab where they review before sending. **(2) Enhanced error copy** — [App.jsx:130-217](src/App.jsx:130) `ToolErrorFallback` now classifies errors (`offline` / `chunk-load` / `storage-full` / `out-of-memory` / `unknown`) and shows a plain-English headline + explanation per category instead of the generic "Something went wrong." Chunk-load adds a "Hard refresh" button that reloads. Stack trace remains available behind a "Show technical details" toggle. "Report this problem" button on every error opens the Feedback modal pre-filled with error context. **(3) Opt-in usage log** — new [useUsageLog.js](src/hooks/useUsageLog.js) hook stores events to `localStorage` key `rdm_usage_log_v1` (capped at 500 entries). Consent key `rdm_usage_log_consent` ('granted' / 'denied'); events only logged after consent. Event types: `session_start` (ua, viewport, online), `tool_open` (toolId), `page_open` (page), `tool_error` (name, message truncated to 200 chars). Explicitly **never** logs file names, file contents, input text, form values — only tool IDs, page hashes, error classes, timestamps. `exportLog()` is surfaced in the Feedback modal so testers can attach it to their bug report. **(4) First-visit welcome tour** — new `WelcomeTour.jsx` renders on first load (dismissal stored at `rdm_tour_dismissed_v1`). Three steps: "Your files never leave your browser" (privacy framing with OCAP/PHIPA/TCPS 2 hook), "46 tools, one workflow" (Ctrl/⌘+K + drag-drop hint), "Help us make this better" (Feedback button + usage-log opt-in checkbox). Keyboard nav (Arrow keys + Esc), dot indicators, body scroll lock while open. Opt-in checkbox on step 3 calls `grantConsent()` on tour close. ErrorBoundary gained `componentDidCatch` that logs `tool_error` events. Dev-server verified end-to-end: tour step nav works, consent + dismissal persist across reloads, feedback modal auto-populates tool context, mailto href correctly encodes body with `## What I was trying to do` / `## Context` / `## Error` Markdown structure. CSS additions (+445 lines): `.topbar-feedback-btn`, `.error-card--tool`, `.error-card-detail-*`, `.error-card-actions`, `.error-card-report-btn`, `.action-button--secondary`, `.feedback-modal-*` (14 classes), `.welcome-tour-*` (14 classes), mobile overrides. Production build: 14.89s, 161 precache entries, no new warnings beyond pre-existing `zxcvbn` 818 KB (lazy-loaded). |
 | 2026-04-21 | **Custom-domain cutover to `rdmtoolkit.ca` (PR [#21](https://github.com/seawaydigital/RDM-Toolkit/pull/21))** — moved the site off `seawaydigital.github.io/RDM-Toolkit/` onto the apex custom domain. Three coordinated changes: (1) [vite.config.js:7](vite.config.js:7) `base: '/RDM-Toolkit/'` → `'/'` plus PWA `scope`/`start_url` flipped to `/` so emitted asset URLs and the service-worker scope live at root. (2) New [public/CNAME](public/CNAME) with the single line `rdmtoolkit.ca` — Vite copies `public/` into `dist/`, so every Pages deploy ships the CNAME and GitHub doesn't drop the domain binding. (3) DNS at canspace.ca: 4 apex A records to GitHub's Pages IPs (185.199.108–111.153), `www.rdmtoolkit.ca` CNAME → `seawaydigital.github.io` (GitHub auto-301s www → apex), no CAA records (Let's Encrypt unblocked). Cert issuance via GitHub's Let's Encrypt flow took ~1 hour after re-saving the custom domain — standard. Enforce HTTPS is on. Old `seawaydigital.github.io/RDM-Toolkit/` URL 301s to the custom domain. Repo URLs (`github.com/seawaydigital/RDM-Toolkit/...`) in [App.jsx:163](src/App.jsx:163) issue link + [HowItWorks.jsx:5](src/components/ui/HowItWorks.jsx:5) `GITHUB_BASE` are unchanged — those point at the git repo, not the deployed site. README live-site URL + CLAUDE.md project-identity and PWA-manifest lines updated in this pass. |
@@ -425,8 +481,19 @@ All external sources are hyperlinked (`target="_blank" rel="noopener noreferrer"
 
 | File | Trigger | Purpose |
 |---|---|---|
-| `.github/workflows/deploy.yml` | Push to master | Build + deploy to GitHub Pages; runs `npm audit --omit=dev --audit-level=critical` |
+| `.github/workflows/deploy.yml` | Push to master | `npm ci --ignore-scripts` → `npm run security:audit` → `npm audit signatures` → `npm audit --omit=dev --audit-level=high` → `npm run build` → deploy to GitHub Pages |
+| `.github/workflows/security.yml` | PR, push to master, weekly Monday | Standalone guardrail run: `npm ci --ignore-scripts` → lockfile-diff-guard (PR only) → `security:audit` → `npm audit signatures` → `npm audit --audit-level=high` |
+| `.github/workflows/lighthouse.yml` | PR | Build + preview + Lighthouse CI with explicit `csp-xss` audit assertion at `minScore: 1`; uploads report as artifact |
 | `.github/workflows/codeql.yml` | Push, PR, weekly Monday | CodeQL JS static analysis; results in GitHub → Security → Code scanning alerts |
+| `.github/workflows/bundle-size.yml` | PR | Tracks bundle size deltas |
 | `.github/dependabot.yml` | Weekly Monday | Opens PRs for npm dependency updates (major versions excluded) |
 
-**CI audit strategy:** `--omit=dev` excludes esbuild/Vite CVEs (dev server only, not served to users). `--audit-level=critical` blocks only CVSS 9.0+ issues. Tracked non-critical: none currently.
+**CI audit strategy:** `--omit=dev` excludes esbuild/Vite CVEs (dev server only, not served to users). `--audit-level=high` blocks any high or critical production CVE (raised from `critical` on 2026-05-02 — current dep set has zero high+ findings).
+
+### Local scripts
+
+| Script | Purpose |
+|---|---|
+| `scripts/security-audit.mjs` | Single-file project guardrail — see Security Model § for full list of checks |
+| `scripts/lockfile-diff-guard.mjs` | Fails if `package-lock.json` changed without `package.json` (used by security.yml on PR) |
+| `scripts/bundle-stats.mjs` | Bundle size analyzer |

@@ -344,14 +344,14 @@ const EXPLAINERS = {
   'markdown-preview': {
     whatItDoes: 'Previews Markdown-formatted text as rendered HTML, and lets you download the HTML — safely, with all script and unsafe HTML stripped out.',
     howItWorks: [
-      'You paste Markdown into the editor. A small parser running in your browser converts common Markdown syntax (headings, bold, italic, links, code blocks, blockquotes, lists) to HTML. The HTML then passes through a security library (DOMPurify) that strips anything that could run code — things like <code>&lt;script&gt;</code> tags, <code>onclick</code> handlers, and <code>javascript:</code> URLs.',
+      'You paste Markdown into the editor. A small parser running in your browser converts common Markdown syntax (headings, bold, italic, links, code blocks, blockquotes, lists) to HTML. The HTML then passes through a security library (DOMPurify) that strips anything that could run code — things like <code>&lt;script&gt;</code> tags, inline event handlers, and script-style URLs.',
       'Only the sanitized HTML is inserted into the preview. You can read the result side-by-side with your source, or download it as a standalone .html file.',
     ],
     technicalDetails: {
       library: '<code>dompurify</code> v3.3.3 for sanitization; a custom lightweight Markdown parser.',
       flow: [
         '<code>parseMarkdown(text)</code> handles headings, bold/italic, inline/block code, blockquotes, bullet and numbered lists, and links.',
-        '<code>DOMPurify.sanitize(html, { ALLOWED_URI_REGEXP: /^(?:https?|mailto):/i, FORBID_ATTR: [\'style\', \'onerror\', \'onload\'], FORBID_TAGS: [\'div\', \'span\'] })</code> — strict allowlist, blocks <code>javascript:</code> and <code>data:</code> URLs.',
+        '<code>DOMPurify.sanitize(html, { ALLOWED_URI_REGEXP: /^(?:https?|mailto):/i, FORBID_ATTR: [\'style\', \'onerror\', \'onload\'], FORBID_TAGS: [\'div\', \'span\'] })</code> — strict allowlist, blocks script-style and embedded-data URLs.',
         'The sanitized HTML is injected into the preview pane via React\u2019s <code>dangerouslySetInnerHTML</code> — safe because DOMPurify has already removed any executable content.',
       ],
       sourceFile: 'src/tools/text/MarkdownPreview.jsx',
@@ -703,17 +703,16 @@ const EXPLAINERS = {
   },
 
   'to-markdown': {
-    whatItDoes: 'Converts documents (DOCX, PDF, HTML, XLSX, CSV, TXT, RTF, JSON) into clean Markdown text — useful for feeding documents to AI tools or for clean archival.',
+    whatItDoes: 'Converts safer text-shaped documents (PDF, HTML, CSV, TXT, Markdown, RTF, JSON) into clean Markdown text — useful for feeding documents to AI tools or for clean archival.',
     howItWorks: [
-      'Depending on the file type, a specialized library in your browser parses the document: one for Word files, one for PDFs, one for spreadsheets, and a general HTML-to-Markdown engine for everything else. Two output modes: "AI-friendly" (flattened, no complex formatting) or "Preserve formatting" (full Markdown structure with tables and lists).',
+      'Depending on the file type, browser-local parsing extracts text: PDF text comes from pdfjs, HTML is converted through Turndown, and text-shaped formats use native parsers. Two output modes: "AI-friendly" (flattened, no complex formatting) or "Preserve formatting" (full Markdown structure with tables and lists).',
     ],
     technicalDetails: {
-      library: '<code>mammoth</code> for DOCX → HTML; <code>pdfjs-dist</code> for PDF text extraction; <code>turndown</code> + <code>turndown-plugin-gfm</code> for HTML → Markdown; <code>xlsx</code> (SheetJS) for spreadsheets; native parsers for JSON/CSV/TXT.',
+      library: '<code>pdfjs-dist</code> for PDF text extraction; <code>turndown</code> + <code>turndown-plugin-gfm</code> for HTML → Markdown; native parsers for JSON/CSV/TXT/RTF/Markdown.',
       flow: [
-        'File type is detected by extension and magic bytes.',
-        'DOCX → <code>mammoth.convertToHtml()</code> → Turndown.',
+        'File type is detected by extension after browser file selection.',
         'PDF → <code>pdfjs</code> per-page <code>page.getTextContent()</code> → joined text with paragraph breaks.',
-        'XLSX → <code>XLSX.utils.sheet_to_csv()</code> per worksheet, rendered as Markdown tables.',
+        'CSV → local row parser → Markdown table.',
         'HTML → Turndown (with GFM plugin for tables/strikethrough).',
       ],
       sourceFile: 'src/tools/text/FileToMarkdown.jsx',
@@ -724,9 +723,8 @@ const EXPLAINERS = {
       'The Markdown output is built in memory and displayed or downloaded as a local blob.',
     ],
     limitations: [
-      'Complex DOCX layouts (multi-column pages, floating textboxes, embedded OLE objects) may convert imperfectly. Simple documents (articles, letters, notes) convert very cleanly.',
+      'DOCX and XLSX input is intentionally disabled until the project has maintained parser dependencies with a clean production security audit. Export those files to PDF, CSV, TXT, or HTML first.',
       'PDF text extraction is best-effort. Scanned PDFs have no text to extract — use OCR first (e.g. Tesseract) or accept that the output will be empty.',
-      'XLSX formulas are not evaluated; you get the cached cell values as of the last save. Charts and drawings are ignored.',
     ],
     verify: {
       quick: DEFAULT_QUICK_VERIFY,
