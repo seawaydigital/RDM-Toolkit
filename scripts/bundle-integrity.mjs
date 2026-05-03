@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, readdirSync } from 'node:fs';
+import { isAbsolute, resolve, sep } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
 const DEFAULT_ASSET_DIR = 'dist/assets';
+const ROOT = resolve(process.cwd());
 
 function getArg(name, fallback = undefined) {
   const index = process.argv.indexOf(name);
@@ -20,26 +21,45 @@ function stripHash(fileName) {
   return match ? `${match[1]}${match[2]}` : fileName;
 }
 
-function hashFile(filePath, algorithm) {
-  return createHash(algorithm).update(readFileSync(filePath)).digest('base64');
+function resolveWorkspacePath(input, label) {
+  if (!input || isAbsolute(input) || input.includes('\0')) {
+    throw new Error(`${label} must be a relative path inside the workspace`);
+  }
+  const resolved = resolve(ROOT, input);
+  if (resolved !== ROOT && !resolved.startsWith(`${ROOT}${sep}`)) {
+    throw new Error(`${label} must stay inside the workspace`);
+  }
+  return resolved;
+}
+
+function hashBytes(bytes, algorithm) {
+  return createHash(algorithm).update(bytes).digest('base64');
 }
 
 function readBundle(assetDir = DEFAULT_ASSET_DIR) {
-  if (!existsSync(assetDir)) {
+  const resolvedAssetDir = resolveWorkspacePath(assetDir, 'asset directory');
+  let assetNames;
+  try {
+    assetNames = readdirSync(resolvedAssetDir);
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
     throw new Error(`${assetDir} does not exist. Run a production build first.`);
   }
 
-  const files = readdirSync(assetDir)
+  const files = assetNames
     .filter((file) => file.endsWith('.js'))
     .map((file) => {
-      const filePath = join(assetDir, file);
-      const bytes = statSync(filePath).size;
+      if (!/^[A-Za-z0-9._-]+\.js$/.test(file)) {
+        throw new Error(`Unexpected JS asset name: ${file}`);
+      }
+      const filePath = resolve(resolvedAssetDir, file);
+      const fileBytes = readFileSync(filePath);
       return {
         name: file,
         logicalName: stripHash(file),
-        bytes,
-        gzipBytes: gzipSync(readFileSync(filePath), { level: 9 }).length,
-        sha256: hashFile(filePath, 'sha256'),
+        bytes: fileBytes.length,
+        gzipBytes: gzipSync(fileBytes, { level: 9 }).length,
+        sha256: hashBytes(fileBytes, 'sha256'),
       };
     })
     .sort((a, b) => a.logicalName.localeCompare(b.logicalName));
@@ -52,7 +72,7 @@ function readBundle(assetDir = DEFAULT_ASSET_DIR) {
 }
 
 function readJson(filePath) {
-  return JSON.parse(readFileSync(filePath, 'utf8'));
+  return JSON.parse(readFileSync(resolveWorkspacePath(filePath, 'JSON path'), 'utf8'));
 }
 
 function compareBundles(base, current, maxGrowthPct) {

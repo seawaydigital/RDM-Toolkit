@@ -2,8 +2,8 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { createHash } from 'node:crypto';
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { resolve, sep } from 'node:path';
 
 const SECURITY_HEADERS = {
   'Content-Security-Policy':
@@ -27,15 +27,34 @@ const previewSecurityHeaders = () => ({
   },
 });
 
-const integrityFor = (filePath) =>
-  `sha384-${createHash('sha384').update(readFileSync(filePath)).digest('base64')}`;
+function integrityFor(filePath) {
+  try {
+    return `sha384-${createHash('sha384').update(readFileSync(filePath)).digest('base64')}`;
+  } catch (error) {
+    if (error.code === 'ENOENT') return null;
+    throw error;
+  }
+}
+
+const distDir = resolve(process.cwd(), 'dist');
+
+function resolveDistAsset(src) {
+  if (!src.startsWith('/assets/') || !/^\/assets\/[A-Za-z0-9._/-]+\.(?:css|js)$/.test(src)) {
+    return null;
+  }
+  const relativeSrc = src.slice(1);
+  const resolved = resolve(distDir, relativeSrc);
+  if (!resolved.startsWith(`${distDir}${sep}`)) return null;
+  return resolved;
+}
 
 function addIntegrity(tag, src) {
-  const normalizedSrc = src.replace(/^\//, '');
-  const filePath = join(process.cwd(), 'dist', normalizedSrc);
-  if (!existsSync(filePath) || /\sintegrity=/.test(tag)) return tag;
+  const filePath = resolveDistAsset(src);
+  if (!filePath) return tag;
+  if (/\sintegrity=/.test(tag)) return tag;
 
   const integrity = integrityFor(filePath);
+  if (!integrity) return tag;
   const crossOrigin = /\scrossorigin(?:[=>\s]|$)/.test(tag) ? '' : ' crossorigin="anonymous"';
   if (tag.endsWith('</script>')) {
     return tag.replace(/><\/script>$/, ` integrity="${integrity}"${crossOrigin}></script>`);
@@ -46,10 +65,16 @@ function addIntegrity(tag, src) {
 const distSubresourceIntegrity = () => ({
   name: 'dist-subresource-integrity',
   closeBundle() {
-    const indexPath = join(process.cwd(), 'dist', 'index.html');
-    if (!existsSync(indexPath)) return;
+    const indexPath = resolve(distDir, 'index.html');
+    let indexHtml;
+    try {
+      indexHtml = readFileSync(indexPath, 'utf8');
+    } catch (error) {
+      if (error.code === 'ENOENT') return;
+      throw error;
+    }
 
-    const html = readFileSync(indexPath, 'utf8')
+    const html = indexHtml
       .replace(/<script\b[^>]*\bsrc="([^"]+)"[^>]*><\/script>/g, (tag, src) => {
         if (!src.startsWith('/')) return tag;
         return addIntegrity(tag, src);
