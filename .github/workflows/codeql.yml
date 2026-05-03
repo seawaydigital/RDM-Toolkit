@@ -10,7 +10,7 @@ on:
 
 jobs:
   analyze:
-    name: Analyze JavaScript
+    name: CodeQL
     runs-on: ubuntu-latest
     permissions:
       actions: read
