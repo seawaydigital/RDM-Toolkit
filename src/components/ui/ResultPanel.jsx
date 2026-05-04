@@ -26,7 +26,7 @@ export default function ResultPanel({
     <div className="result-panel">
       {preview && <div className="result-panel-preview">{preview}</div>}
 
-      <div className="result-panel-info">
+      <div className="result-panel-info" role="status" aria-live="polite" aria-atomic="true">
         <p className="result-panel-filename">{filename}</p>
         {originalSize != null && resultSize != null && (
           <p className="result-panel-sizes">

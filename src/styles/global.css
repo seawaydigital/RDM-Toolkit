@@ -944,6 +944,8 @@ input:focus, textarea:focus, select:focus {
   justify-content: center;
   gap: var(--space-sm);
   width: 100%;
+  min-width: 24px;
+  min-height: 24px;
   padding: 12px var(--space-lg);
   background: var(--accent-cyan);
   color: #0F172A;
@@ -954,11 +956,12 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: var(--space-lg);
 }
 
-.action-button:hover:not(:disabled) {
+.action-button:hover:not(:disabled):not([aria-disabled="true"]) {
   background: #FFD040;
 }
 
-.action-button:disabled {
+.action-button:disabled,
+.action-button[aria-disabled="true"] {
   opacity: 0.4;
   cursor: not-allowed;
 }
@@ -10667,6 +10670,9 @@ input:focus, textarea:focus, select:focus {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .related-tools-card {
@@ -10864,15 +10870,19 @@ input:focus, textarea:focus, select:focus {
   font-size: 12px;
   color: var(--text-secondary);
   white-space: nowrap;
+  /* Hidden bubbles must not intercept pointer events. */
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.15s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.tooltip-wrapper:hover .tooltip-bubble,
-.tooltip-wrapper:focus-within .tooltip-bubble {
+/* JS-driven visibility (replaces CSS :hover / :focus-within).
+   Also re-enables pointer-events so the cursor can move onto the bubble
+   without it disappearing (WCAG 2.2 SC 1.4.13 Hoverable). */
+.tooltip-bubble--visible {
   opacity: 1;
+  pointer-events: auto;
 }
 
 /* Position variants */
@@ -14203,7 +14213,7 @@ input:focus, textarea:focus, select:focus {
   max-width: 180px;
 }
 
-.action-button--secondary:hover:not(:disabled) {
+.action-button--secondary:hover:not(:disabled):not([aria-disabled="true"]) {
   background: var(--bg-tertiary);
   border-color: var(--accent-primary);
   color: var(--accent-primary);

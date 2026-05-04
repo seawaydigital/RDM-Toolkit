@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, X } from 'lucide-react';
 import { ALL_TOOLS } from '../../data/toolRegistry';
+import { useModalAccessibility } from '../../hooks/useModalAccessibility';
 
 const MAX_RESULTS = 8;
 const MAX_RECENT = 5;
@@ -37,19 +38,24 @@ function getRecentTools() {
 export default function SearchBar({ isOpen, onClose, onNavigate }) {
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
+  const [liveText, setLiveText] = useState('');
   const inputRef = useRef(null);
   const listRef = useRef(null);
+  const modalRef = useRef(null);
 
   const results = query.trim() ? filterTools(query) : getRecentTools();
   const isShowingRecent = !query.trim();
+  const hasResults = results.length > 0;
 
-  // Focus input when opened
+  // Apply modal accessibility: focus trap, focus restoration, scroll lock, Escape
+  useModalAccessibility({ isOpen, onClose, dialogRef: modalRef, initialFocusRef: inputRef });
+
+  // Reset state when opened
   useEffect(() => {
     if (isOpen) {
       setQuery('');
       setActiveIndex(0);
-      // Defer focus to next tick so the element is rendered
-      requestAnimationFrame(() => inputRef.current?.focus());
+      setLiveText('');
     }
   }, [isOpen]);
 
@@ -63,15 +69,21 @@ export default function SearchBar({ isOpen, onClose, onNavigate }) {
     onClose();
   }, [onNavigate, onClose]);
 
-  // Keyboard navigation
+  // Announce result count when results change after a search query
+  useEffect(() => {
+    if (!isOpen || isShowingRecent) return;
+    if (results.length === 0) {
+      setLiveText('No tools found');
+    } else {
+      setLiveText(`${results.length} ${results.length === 1 ? 'tool matches' : 'tools match'}`);
+    }
+  }, [results.length, isOpen, isShowingRecent]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keyboard navigation (Escape handled by useModalAccessibility)
   useEffect(() => {
     if (!isOpen) return;
 
     function onKeyDown(e) {
-      if (e.key === 'Escape') {
-        onClose();
-        return;
-      }
       if (e.key === 'ArrowDown') {
         e.preventDefault();
         setActiveIndex(i => Math.min(i + 1, results.length - 1));
@@ -80,6 +92,16 @@ export default function SearchBar({ isOpen, onClose, onNavigate }) {
       if (e.key === 'ArrowUp') {
         e.preventDefault();
         setActiveIndex(i => Math.max(i - 1, 0));
+        return;
+      }
+      if (e.key === 'Home') {
+        e.preventDefault();
+        setActiveIndex(0);
+        return;
+      }
+      if (e.key === 'End') {
+        e.preventDefault();
+        setActiveIndex(results.length > 0 ? results.length - 1 : 0);
         return;
       }
       if (e.key === 'Enter') {
@@ -92,7 +114,7 @@ export default function SearchBar({ isOpen, onClose, onNavigate }) {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [isOpen, results, activeIndex, onClose, handleSelect]);
+  }, [isOpen, results, activeIndex, handleSelect]);
 
   // Scroll active result into view
   useEffect(() => {
@@ -105,22 +127,34 @@ export default function SearchBar({ isOpen, onClose, onNavigate }) {
 
   return (
     <div className="search-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Search tools">
-      <div className="search-modal" onClick={e => e.stopPropagation()}>
+      <div className="search-modal" ref={modalRef} onClick={e => e.stopPropagation()}>
+        {/* Visually-hidden live region for result count announcements */}
+        <span
+          className="sr-only"
+          aria-live="polite"
+          aria-atomic="true"
+          style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)', whiteSpace: 'nowrap' }}
+        >
+          {liveText}
+        </span>
+
         <div className="search-input-row">
           <Search size={18} className="search-input-icon" aria-hidden="true" />
           <input
             ref={inputRef}
             className="search-input"
             type="text"
+            role="combobox"
             placeholder="Search tools…"
             value={query}
             onChange={e => setQuery(e.target.value)}
             autoComplete="off"
             spellCheck={false}
             aria-label="Search tools"
+            aria-expanded={hasResults}
+            aria-controls="searchbar-listbox"
             aria-autocomplete="list"
-            aria-controls="search-results-list"
-            aria-activedescendant={results[activeIndex] ? `search-result-${results[activeIndex].id}` : undefined}
+            aria-activedescendant={hasResults && activeIndex >= 0 ? `searchbar-option-${activeIndex}` : undefined}
           />
           <button className="search-close-btn" onClick={onClose} aria-label="Close search">
             <X size={16} />
@@ -130,19 +164,20 @@ export default function SearchBar({ isOpen, onClose, onNavigate }) {
         <div className="search-results-container">
           {results.length > 0 && (
             <>
-              <div className="search-results-label">
+              <div className="search-results-label" aria-hidden="true">
                 {isShowingRecent ? 'Recently Used' : `${results.length} result${results.length !== 1 ? 's' : ''}`}
               </div>
               <ul
-                id="search-results-list"
+                id="searchbar-listbox"
                 ref={listRef}
                 className="search-results-list"
                 role="listbox"
+                aria-label="Search results"
               >
                 {results.map((tool, idx) => (
                   <li
                     key={tool.id}
-                    id={`search-result-${tool.id}`}
+                    id={`searchbar-option-${idx}`}
                     role="option"
                     aria-selected={idx === activeIndex}
                     className={`search-result${idx === activeIndex ? ' search-result--active' : ''}`}

@@ -6,7 +6,7 @@ Routes scanned: 10
 
 | Route | Violations | Critical | Serious | Moderate | Minor |
 |---|---|---|---|---|---|
-| `/` | 1 | 0 | 1 | 0 | 0 |
+| `/` | 0 | 0 | 0 | 0 | 0 |
 | `/#how-this-works` | 1 | 0 | 1 | 0 | 0 |
 | `/#data-classification` | 1 | 0 | 1 | 0 | 0 |
 | `/#storage-calculator` | 1 | 0 | 1 | 0 | 0 |
@@ -20,11 +20,11 @@ Routes scanned: 10
 ## Totals
 
 - Critical: 1
-- Serious: 10
+- Serious: 9
 - Moderate: 0
 - Minor: 0
 
 ## Top recurring rules
 
-- `target-size`: 30 instances
+- `target-size`: 27 instances
 - `label`: 2 instances
