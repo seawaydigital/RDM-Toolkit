@@ -158,21 +158,22 @@ Verify `lang="en-CA"` in `index.html`. Affects screen reader pronunciation of "c
 
 ## Phase 2 — Shared UI primitives (Days 7–13)
 
-12 components in `src/components/ui/`. Grouped by issue class — same fix pattern applies across multiple components.
+**13 components** in `src/components/ui/`: `ActionButton`, `DropZone`, `EncryptedPDFError`, `ErrorCard`, `FeedbackModal`, `HowItWorks`, `InfoCard`, `RelatedTools`, `ResultPanel`, `SearchBar`, `ToolSkeleton`, `Tooltip`, `WelcomeTour`. Grouped by issue class — same fix pattern applies across multiple components.
 
 ### 2.A Modals/overlays — `FeedbackModal`, `WelcomeTour`
 
-- `role="dialog" aria-modal="true" aria-labelledby={titleId}`
-- **Focus trap**: Tab/Shift-Tab cycles within modal (FeedbackModal currently restores focus on close but doesn't trap)
-- Initial focus on first focusable element or close button
-- Escape and backdrop click both close (verify both)
-- Body scroll lock when open
-- Reusable hook: `useModalAccessibility({ isOpen, onClose, initialFocusRef })` to encapsulate the pattern; mobile sidebar drawer (Phase 3) reuses it
+`FeedbackModal` is the reference implementation: it already has Tab/Shift-Tab focus trap, Escape close, focus restoration on close ([FeedbackModal.jsx:62-79](src/components/ui/FeedbackModal.jsx)). Plan:
 
-### 2.B Status & alert messaging — `ErrorCard`, `InfoCard`, `ResultPanel`, `EncryptedPDFError`, `DropZone` errors/warnings
+- **Extract the existing FeedbackModal pattern** into a reusable hook `useModalAccessibility({ isOpen, onClose, initialFocusRef, titleId })`
+- Add `role="dialog" aria-modal="true" aria-labelledby={titleId}` if missing
+- Verify body scroll lock (FeedbackModal sets it; WelcomeTour also does per CLAUDE.md)
+- Apply hook to `WelcomeTour` (currently has bespoke focus management — verify)
+- Apply hook to mobile sidebar drawer (Phase 3) for free reuse
 
-- Split `role="alert"` (assertive — fatal errors only) from `role="status"` (polite — warnings, success, neutral updates)
-- **Bug to fix:** DropZone currently uses `role="alert"` for both error AND warning ([DropZone.jsx:162-163](src/components/ui/DropZone.jsx:162))
+### 2.B Status & alert messaging — `ErrorCard`, `InfoCard`, `ResultPanel`, `EncryptedPDFError`
+
+- Verify each component's role choice: `role="alert"` (assertive — fatal errors only) vs `role="status"` (polite — warnings, success, neutral updates)
+- **Already-correct precedent:** `DropZone` already splits these correctly — error uses `role="alert"`, warning uses `role="status"` ([DropZone.jsx:162-163](src/components/ui/DropZone.jsx:162)). Use this as the canonical example in `patterns.md`.
 - Wire success result announcements through ResultPanel: when a result becomes available, announce "PDF compressed, file ready for download" via the existing live region
 
 ### 2.C Form-style inputs — `DropZone`, `SearchBar`, `ActionButton`
@@ -322,69 +323,73 @@ Per-page checklist:
 - Result completion announced via ResultPanel's live region
 - Disabled/busy buttons: `aria-disabled` + `aria-busy` (not native `disabled`)
 
-### PR 5a — PDF easy (13 tools)
+All 46 tools assigned to exactly one batch — no overlap. Counts add up: 13 + 4 + 6 + 8 + 4 + 3 + 8 = 46.
 
-`Compress`, `Merge`, `Split`, `Rotate`, `AddPageNumbers`, `AddCoverPage`, `PdfPageInspector`, `PDFToImages`, `ExtractImagesFromPDF`, `PDFPageDelete`, `PDFWatermark`, `PasswordProtect`, `RemovePDFPassword`.
+### PR 5a — PDF easy (13 tools), ~2–3 days
 
-Mostly DropZone + ResultPanel — once one is done the others are repetitions. ~2–3 days.
+`compress-pdf`, `merge-pdfs`, `split-pdf`, `rotate-pages`, `add-page-numbers`, `add-cover-page`, `pdf-page-inspector`, `pdf-to-images`, `extract-images-from-pdf`, `pdf-page-delete`, `pdf-watermark`, `password-protect-pdf`, `remove-pdf-password`.
+
+Mostly DropZone + ResultPanel — once one is done the others are repetitions.
 
 ### PR 5b — PDF hard, canvas/drag tools (4 tools) — biggest single chunk, ~4–5 days
 
-**`ReorderPages` + `MergePDFs` page-order**:
+`reorder-pages`, `fillable-pdf-form`, `sign-pdf`, `pdf-redaction`.
+
+**`reorder-pages`** (and `merge-pdfs` page-order if reordering applies there too — verify in Phase 5a):
 - Uses `@dnd-kit/core`. Verify keyboard sensor enabled — arrow keys move selected page in the order.
 - WCAG 2.2 SC 2.5.7 Drag Movement: drag-only is forbidden; keyboard alternative required.
 - Visual indicator showing keyboard mode is active.
 
-**`FillablePDFForm`** (per CLAUDE.md has split-pane editor + fullscreen):
+**`fillable-pdf-form`** (per CLAUDE.md has split-pane editor + fullscreen):
 - Click-to-place is fine for sighted/mouse users.
 - Add: keyboard mode where Tab navigates the existing-fields list, arrow keys nudge selected field 1px (Shift+arrow 10px).
 - Field-list panel becomes the text alternative — already exists per CLAUDE.md as the right-rail props panel; add keyboard navigation between list items.
 - Page preview marked decorative for SR users (the field list IS the document representation).
 
-**`SignPDF`** (canvas signature):
+**`sign-pdf`** (canvas signature):
 - Canvas handwriting has no realistic keyboard equivalent.
 - **Best-effort fallback** (additive, not replacement): add a tab-style picker at top of the tool — "Draw" (existing canvas) | "Type" (typed name in cursive font, embedded as text) | "Upload" (signature image upload).
 - Default tab is "Draw" so sighted/mouse users see no UX regression.
 - Document the canvas limitation explicitly in the Accessibility Statement.
 
-**`PDFRedaction`** (canvas drawing):
-- Same constraint as SignPDF.
+**`pdf-redaction`** (canvas drawing):
+- Same constraint as sign-pdf.
 - **Best-effort fallback**: tab-style picker — "Draw rectangles" (existing canvas) | "By coordinates" (form: page #, x, y, width, height; add to redaction list).
 - Both modes commit to the same redaction list which then drives the existing PHIPA-grade rasterization pipeline (per CLAUDE.md commit `3550e23`).
 - Default to canvas; alternative path documented in Statement page.
 
 ### PR 5c — Image (6 tools), ~2 days
 
-`CompressImage`, `ConvertImageFormat`, `ResizeImage`, `StripImageMetadata`, `ImageToPDF`, **`ImageCropper`**.
+`compress-image`, `resize-image`, `image-cropper`, `convert-image-format`, `strip-image-metadata`, `image-to-pdf`.
 
-ImageCropper is the only one needing a fallback: numeric crop inputs (top/left/width/height in px) alongside the existing drag-to-crop canvas. Same additive-tab pattern as SignPDF.
+`image-cropper` is the only one needing a fallback: numeric crop inputs (top/left/width/height in px) alongside the existing drag-to-crop canvas. Same additive-tab pattern as `sign-pdf`.
 
-### PR 5d — Text & Data (8 tools), ~1–2 days
+### PR 5d — Text & Data primary (8 tools), ~1–2 days
 
-`WordCounter`, `FindReplace`, `RemoveDuplicateLines`, `TextDiff`, `CSVDiff`, `JSONFormatter`, `CSVJSONConverter`, `MarkdownPreview`, `WhitespaceCleaner`, `BibTeXFormatter`, `FileToMarkdown`, `DataAnonymizer` (de-identify research data).
+`word-counter`, `find-replace`, `text-diff`, `json-formatter`, `csv-json-converter`, `to-markdown`, `bibtex-formatter`, `data-anonymizer` (de-identify research data).
 
 Mostly `<textarea>`-driven. Verify monospace text contrast in code-output blocks.
 
-For DataAnonymizer specifically (per CLAUDE.md — column groups + row-aware coding): verify the column-cycling chip pattern is keyboard-accessible (Tab to chip, Space/Enter to cycle group). Add live region announcement when a chip's group changes.
+For `data-anonymizer` specifically (per CLAUDE.md — column groups + row-aware coding): verify the column-cycling chip pattern is keyboard-accessible (Tab to chip, Space/Enter to cycle group). Add live region announcement when a chip's group changes.
 
-### PR 5e — Privacy & Security (4 tools), ~1 day
+### PR 5e — Privacy & Security primary (4 tools), ~1 day
 
-`StripFileMetadata`, `SHA256Hasher`, `EncryptDecryptText`, `PasswordGenerator`, `MagicByteChecker`, `ChecksumVerifier`, `EncodingDetector`.
+`strip-file-metadata`, `encrypt-decrypt-text`, `password-generator`, `sha256-hasher`.
 
-- `EncryptDecryptText`: zxcvbn password strength meter — announce score changes via live region ("Password strength: strong"). Currently visual-only.
-- `PasswordGenerator`: copy-to-clipboard button announces "Password copied to clipboard".
+- `encrypt-decrypt-text`: zxcvbn password strength meter — announce score changes via live region ("Password strength: strong"). Currently visual-only.
+- `password-generator`: copy-to-clipboard button announces "Password copied to clipboard".
 
 ### PR 5f — Archives (3 tools), ~0.5 day
 
-`CreateZIP`, `ExtractZIP`, `FileSizeAnalyser`. File lists need `<ul>`/`<li>` semantics. CreateZIP's drag-reorder of files (if present) needs the @dnd-kit keyboard sensor verified.
+`create-zip`, `extract-zip`, `file-size-analyser`. File lists need `<ul>`/`<li>` semantics. `create-zip`'s drag-reorder of files (if present) needs the @dnd-kit keyboard sensor verified.
 
-### PR 5g — More Text (5) + More Security (3) combined, ~1 day
+### PR 5g — "More" overflow (8 tools), ~1 day
 
-`WhitespaceCleaner` (already in 5d), `RemoveDuplicateLines`, `CSVDiff`, `CSVEncodingFixer`, `MarkdownPreview` — most overlap with 5d.
+These are the tools registered under the "More Text" and "More Security" sidebar categories (per CLAUDE.md they're collapsed by default under a "More Tools" toggle):
+- More Text: `whitespace-cleaner`, `remove-duplicate-lines`, `csv-diff`, `csv-encoding-fixer`, `markdown-preview`
+- More Security: `magic-byte-checker`, `checksum-verifier`, `encoding-detector`
 
-`MagicByteChecker`, `ChecksumVerifier`, `EncodingDetector` — already in 5e.
-
-NOTE: 5d/5e/5f/5g overlap in current scope; will reconcile category boundaries in the implementation plan based on actual file structure rather than registry categories.
+`markdown-preview` deserves attention — it uses DOMPurify (per CLAUDE.md) and renders user-supplied markdown to HTML; verify the rendered output has proper heading hierarchy and that any rendered controls remain keyboard-accessible.
 
 ---
 
@@ -553,7 +558,7 @@ Items 1 and 2 confirmed during design (see Phase 0 "Verified findings"). Remaini
 2. Lakehead brand guidelines on gold #FFC20E — is this a fixed hex or is there flexibility for accessibility-driven darkening on light surfaces? (Phase 1 contrast script will identify exact failures; check before adjusting tokens.)
 3. Lakehead Accessibility Office: does RDM Toolkit need to be listed in the institutional annual accessibility report? (Affects audit report distribution; ask before Phase 6 ships.)
 4. Confirm `@dnd-kit/core` keyboard sensor is enabled in `MergePDFs` and `ReorderPages` — if not, that's added in Phase 5b
-5. After the 2026-05-03 security hardening pass added `public/_headers`: confirm whether the site is now (or about to be) served from Cloudflare Pages or similar. If so, real HTTP-header CSP supersedes meta-tag CSP, removing the "frame-ancestors ignored in meta" caveat — accessibility-irrelevant but worth noting.
+5. The 2026-05-03 security hardening pass added `public/_headers`, but `.github/workflows/deploy.yml` still deploys to GitHub Pages via `actions/deploy-pages` — the headers file is **staged for a future host migration but isn't active yet**. The meta-tag CSP in `index.html` is still the operative one, which is fine for accessibility purposes (axe-core is bundled, not CDN-loaded, so `default-src 'self'` permits it).
 
 ---
 
