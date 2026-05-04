@@ -18,25 +18,26 @@ export default function RelatedTools({ toolId, onNavigate }) {
         You might also need
         <span className="related-tools-count">{relatedTools.length} · suggested</span>
       </h2>
-      <div className="related-tools-row">
+      <ul className="related-tools-row">
         {relatedTools.map(tool => {
           const desc = tool.description.length > 60
             ? tool.description.slice(0, 57) + '…'
             : tool.description;
           return (
-            <button
-              key={tool.id}
-              className="related-tools-card"
-              onClick={() => onNavigate(tool.id)}
-              type="button"
-            >
-              <span className="related-tools-emoji">{tool.categoryEmoji}</span>
-              <span className="related-tools-name">{tool.name}</span>
-              <span className="related-tools-desc">{desc}</span>
-            </button>
+            <li key={tool.id}>
+              <button
+                className="related-tools-card"
+                onClick={() => onNavigate(tool.id)}
+                type="button"
+              >
+                <span className="related-tools-emoji">{tool.categoryEmoji}</span>
+                <span className="related-tools-name">{tool.name}</span>
+                <span className="related-tools-desc">{desc}</span>
+              </button>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </div>
   );
 }
