@@ -193,8 +193,14 @@ function errorCopyFor(category) {
 
 function ToolErrorFallback({ onReset, onReportProblem, error }) {
   const [showDetail, setShowDetail] = useState(false);
+  const tryAgainRef = useRef(null);
   const category = classifyError(error);
   const { headline, explanation } = errorCopyFor(category);
+
+  // Move focus to "Try Again" on mount so keyboard users can immediately recover
+  useEffect(() => {
+    tryAgainRef.current?.focus();
+  }, []);
 
   return (
     <div className="error-card error-card--tool" role="alert">
@@ -221,7 +227,7 @@ function ToolErrorFallback({ onReset, onReportProblem, error }) {
       )}
 
       <div className="error-card-actions">
-        <button className="action-button error-card-action-primary" onClick={onReset}>
+        <button ref={tryAgainRef} className="action-button error-card-action-primary" onClick={onReset}>
           Try Again
         </button>
         {category === 'chunk-load' && (
@@ -442,6 +448,7 @@ export default function App() {
       <Topbar
         onMenuToggle={() => setSidebarOpen(prev => !prev)}
         showMenuButton={isMobile}
+        isSidebarOpen={isMobile ? sidebarOpen : undefined}
         onLogoClick={goHome}
         currentPage={currentPage}
         onNavigate={navigateTo}
