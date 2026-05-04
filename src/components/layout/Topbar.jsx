@@ -4,7 +4,7 @@ import SearchBar from '../ui/SearchBar';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
 
-export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, currentPage, onNavigate, onOpenFeedback }) {
+export default function Topbar({ onMenuToggle, showMenuButton, isSidebarOpen, onLogoClick, currentPage, onNavigate, onOpenFeedback }) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   // Global keyboard shortcut: Ctrl+K / Cmd+K
@@ -24,7 +24,13 @@ export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, curr
       <header className="topbar">
         <div className="topbar-left">
           {showMenuButton && (
-            <button className="topbar-menu-btn" onClick={onMenuToggle} aria-label="Toggle sidebar">
+            <button
+              className="topbar-menu-btn"
+              onClick={onMenuToggle}
+              aria-label="Toggle sidebar"
+              aria-expanded={isSidebarOpen}
+              aria-controls="sidebar"
+            >
               <Menu size={20} aria-hidden="true" />
             </button>
           )}
