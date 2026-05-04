@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Mail, Copy, Check, ShieldAlert } from 'lucide-react';
 import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
+import { useModalAccessibility } from '../../hooks/useModalAccessibility';
 
 function buildIssueBody({ description, context, includeLog, log }) {
   const lines = [
@@ -39,56 +40,19 @@ export default function FeedbackModal({ isOpen, onClose, context, log }) {
   const [includeLog, setIncludeLog] = useState(Boolean(log && log.length));
   const [copied, setCopied] = useState(false);
   const textareaRef = useRef(null);
+  const dialogRef = useRef(null);
 
+  useModalAccessibility({ isOpen, onClose, dialogRef, initialFocusRef: textareaRef });
+
+  // Reset form state when modal closes; sync log-include toggle when it opens.
   useEffect(() => {
     if (!isOpen) {
       setDescription('');
       setCopied(false);
     } else {
       setIncludeLog(Boolean(log && log.length));
-      setTimeout(() => textareaRef.current?.focus(), 40);
     }
   }, [isOpen, log]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const previouslyFocused = document.activeElement;
-
-    function onKey(e) {
-      if (e.key === 'Escape') {
-        onClose();
-        return;
-      }
-      if (e.key === 'Tab') {
-        // Simple focus trap: cycle Tab within the modal
-        const modal = document.querySelector('.feedback-modal');
-        if (!modal) return;
-        const focusable = modal.querySelectorAll(
-          'button, [href], input, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        if (focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    }
-
-    window.addEventListener('keydown', onKey);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      window.removeEventListener('keydown', onKey);
-      document.body.style.overflow = '';
-      if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
-        previouslyFocused.focus();
-      }
-    };
-  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -107,6 +71,7 @@ export default function FeedbackModal({ isOpen, onClose, context, log }) {
   return (
     <div className="feedback-modal-backdrop" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="feedback-modal"
         role="dialog"
         aria-modal="true"
