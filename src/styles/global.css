@@ -10867,15 +10867,19 @@ input:focus, textarea:focus, select:focus {
   font-size: 12px;
   color: var(--text-secondary);
   white-space: nowrap;
+  /* Hidden bubbles must not intercept pointer events. */
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.15s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
-.tooltip-wrapper:hover .tooltip-bubble,
-.tooltip-wrapper:focus-within .tooltip-bubble {
+/* JS-driven visibility (replaces CSS :hover / :focus-within).
+   Also re-enables pointer-events so the cursor can move onto the bubble
+   without it disappearing (WCAG 2.2 SC 1.4.13 Hoverable). */
+.tooltip-bubble--visible {
   opacity: 1;
+  pointer-events: auto;
 }
 
 /* Position variants */
