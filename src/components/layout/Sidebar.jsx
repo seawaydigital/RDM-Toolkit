@@ -71,6 +71,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
                 <button
                   className={`sidebar-tool-item ${currentToolId === tool.id ? 'sidebar-tool-item--active' : ''}`}
                   onClick={() => handleToolClick(tool.id)}
+                  aria-current={currentToolId === tool.id ? 'page' : undefined}
                 >
                   {tool.name}
                 </button>
@@ -85,7 +86,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
   return (
     <>
       {isOpen && <div className="sidebar-backdrop" onClick={onClose} />}
-      <nav className={`sidebar ${isOpen ? 'sidebar--open' : ''}`} aria-label="Tool navigation" ref={navRef}>
+      <nav id="sidebar" className={`sidebar ${isOpen ? 'sidebar--open' : ''}`} aria-label="Tool navigation" ref={navRef}>
         <div className="sidebar-scroll">
           {/* Primary categories */}
           {PRIMARY_CATEGORIES.map(renderCategory)}
@@ -94,6 +95,8 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
           <button
             className="sidebar-more-toggle"
             onClick={() => setShowMore(!showMore)}
+            aria-expanded={showMore}
+            aria-controls="sidebar-more-tools"
           >
             <MoreHorizontal size={16} aria-hidden="true" />
             <span>{showMore ? 'Less Tools' : 'More Tools'}</span>
@@ -103,15 +106,18 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             {showMore ? <ChevronDown size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}
           </button>
 
-          {showMore && MORE_CATEGORIES.map(renderCategory)}
+          <div id="sidebar-more-tools">
+            {showMore && MORE_CATEGORIES.map(renderCategory)}
+          </div>
 
           {/* Special pages */}
           <div className="sidebar-divider" />
-          <div className="sidebar-section-label">Research Resources</div>
+          <h2 className="sidebar-section-label">Research Resources</h2>
           <a
             href="#how-this-works"
             className={`sidebar-htw-link ${currentPage === 'how-this-works' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
+            aria-current={currentPage === 'how-this-works' ? 'page' : undefined}
           >
             <HelpCircle size={16} aria-hidden="true" />
             How This Works
@@ -120,6 +126,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             href="#tri-agency-policy"
             className={`sidebar-htw-link ${currentPage === 'tri-agency-policy' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
+            aria-current={currentPage === 'tri-agency-policy' ? 'page' : undefined}
           >
             <BookOpen size={16} aria-hidden="true" />
             Tri-Agency RDM Policy
@@ -128,6 +135,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             href="#grants-identifiers"
             className={`sidebar-htw-link ${currentPage === 'grants-identifiers' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
+            aria-current={currentPage === 'grants-identifiers' ? 'page' : undefined}
           >
             <BadgeCheck size={16} aria-hidden="true" />
             Grants &amp; Identifiers
@@ -136,6 +144,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             href="#data-classification"
             className={`sidebar-htw-link ${currentPage === 'data-classification' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
+            aria-current={currentPage === 'data-classification' ? 'page' : undefined}
           >
             <ShieldCheck size={16} aria-hidden="true" />
             Classify Your Data
@@ -144,6 +153,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             href="#storage-calculator"
             className={`sidebar-htw-link ${currentPage === 'storage-calculator' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
+            aria-current={currentPage === 'storage-calculator' ? 'page' : undefined}
           >
             <HardDrive size={16} aria-hidden="true" />
             Research Storage Calculator
@@ -152,6 +162,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             href="#lakehead-dataverse"
             className={`sidebar-htw-link ${currentPage === 'lakehead-dataverse' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
+            aria-current={currentPage === 'lakehead-dataverse' ? 'page' : undefined}
           >
             <Database size={16} aria-hidden="true" />
             Lakehead Dataverse
@@ -160,6 +171,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             href="#drac-services"
             className={`sidebar-htw-link ${currentPage === 'drac-services' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
+            aria-current={currentPage === 'drac-services' ? 'page' : undefined}
           >
             <Globe size={16} aria-hidden="true" />
             DRAC Services
@@ -168,6 +180,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             href="#acrobat-alternative"
             className={`sidebar-htw-link ${currentPage === 'acrobat-alternative' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
+            aria-current={currentPage === 'acrobat-alternative' ? 'page' : undefined}
           >
             <CircleDollarSign size={16} aria-hidden="true" />
             Adobe Acrobat Alternative
@@ -188,6 +201,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             </span>
             <span className="sidebar-sister-sub">Research Security</span>
             <ArrowUpRight size={14} strokeWidth={2.5} className="sidebar-sister-icon" aria-hidden="true" />
+            <span className="visually-hidden"> (opens in new tab)</span>
           </a>
         </div>
 
