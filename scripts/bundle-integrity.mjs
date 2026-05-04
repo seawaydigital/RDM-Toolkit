@@ -1,10 +1,12 @@
 import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { isAbsolute, resolve, sep } from 'node:path';
 import { gzipSync } from 'node:zlib';
 
 const DEFAULT_ASSET_DIR = 'dist/assets';
 const ROOT = resolve(process.cwd());
+const TMP_ROOT = resolve(tmpdir());
 
 function getArg(name, fallback = undefined) {
   const index = process.argv.indexOf(name);
@@ -22,12 +24,14 @@ function stripHash(fileName) {
 }
 
 function resolveWorkspacePath(input, label) {
-  if (!input || isAbsolute(input) || input.includes('\0')) {
-    throw new Error(`${label} must be a relative path inside the workspace`);
+  if (!input || input.includes('\0')) {
+    throw new Error(`${label} must be a path inside the workspace or system temp directory`);
   }
-  const resolved = resolve(ROOT, input);
-  if (resolved !== ROOT && !resolved.startsWith(`${ROOT}${sep}`)) {
-    throw new Error(`${label} must stay inside the workspace`);
+  const resolved = isAbsolute(input) ? resolve(input) : resolve(ROOT, input);
+  const inWorkspace = resolved === ROOT || resolved.startsWith(`${ROOT}${sep}`);
+  const inTemp = resolved === TMP_ROOT || resolved.startsWith(`${TMP_ROOT}${sep}`);
+  if (!inWorkspace && !inTemp) {
+    throw new Error(`${label} must stay inside the workspace or system temp directory`);
   }
   return resolved;
 }
