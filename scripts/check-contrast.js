@@ -3,6 +3,10 @@
 //   https://www.w3.org/TR/WCAG21/#dfn-contrast-ratio
 //   https://www.w3.org/TR/WCAG21/#dfn-relative-luminance
 
+// Audit driver imports — only used when running this file directly.
+import { readFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
+
 export function hexToRgb(hex) {
   const h = hex.replace('#', '');
   if (h.length === 3) {
@@ -64,4 +68,53 @@ export function parseColorValue(value, bg = { r: 255, g: 255, b: 255 }) {
     return composite(fg, alpha, bg);
   }
   throw new Error(`Unsupported color value: ${value}`);
+}
+
+// Audit driver — run with `node scripts/check-contrast.js`
+// Reads global.css, extracts CSS variable values, and reports
+// which combinations actually used in code fail WCAG AA.
+
+// Windows-safe main-module guard — paths with spaces, drive letters, etc.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const css = await readFile('src/styles/global.css', 'utf8');
+
+  const tokens = {};
+  // Extract --foo: #bar; or --foo: rgba(...);
+  for (const match of css.matchAll(/--([a-z-]+):\s*([^;]+);/g)) {
+    tokens[match[1]] = match[2].trim();
+  }
+
+  // Combinations to audit — text on each background.
+  const FG_TOKENS = ['text-primary', 'text-secondary', 'text-muted', 'text-parchment', 'accent-primary'];
+  const BG_TOKENS = ['bg-primary', 'bg-secondary', 'bg-tertiary', 'bg-card', 'bg-inset'];
+  const AA_NORMAL = 4.5;
+  const AA_LARGE = 3.0;
+
+  console.log('# Contrast audit\n');
+  console.log('| Foreground | Background | Ratio | AA normal (4.5) | AA large (3.0) |');
+  console.log('|---|---|---|---|---|');
+
+  let failures = 0;
+  for (const fg of FG_TOKENS) {
+    for (const bg of BG_TOKENS) {
+      const fgVal = tokens[fg];
+      const bgVal = tokens[bg];
+      if (!fgVal || !bgVal) continue;
+      try {
+        const bgRgb = parseColorValue(bgVal);
+        const fgRgb = parseColorValue(fgVal, bgRgb);
+        const ratio = contrastRatio(fgRgb, bgRgb);
+        const passN = ratio >= AA_NORMAL ? '✅' : '❌';
+        const passL = ratio >= AA_LARGE ? '✅' : '❌';
+        if (ratio < AA_NORMAL) failures++;
+        console.log(
+          `| --${fg} | --${bg} | ${ratio.toFixed(2)} | ${passN} | ${passL} |`,
+        );
+      } catch (e) {
+        console.log(`| --${fg} | --${bg} | ERROR | ${e.message} | |`);
+      }
+    }
+  }
+  console.log(`\nTotal AA-normal failures: ${failures}`);
+  if (failures > 0 && process.argv.includes('--strict')) process.exit(1);
 }
