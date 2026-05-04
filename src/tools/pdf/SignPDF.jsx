@@ -21,6 +21,19 @@ const SIG_MODES = ['Draw', 'Type', 'Upload Image'];
 
 const CHECKERBOARD_CSS = `repeating-conic-gradient(#f0f0f0 0% 25%, #ffffff 0% 50%) 0 0 / 16px 16px`;
 
+function dataUrlToBytes(dataUrl) {
+  const [meta, data] = dataUrl.split(',');
+  if (!meta || !data || !meta.startsWith('data:')) {
+    throw new Error('Invalid signature image data.');
+  }
+  const binary = atob(data);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
 /* ------------------------------------------------------------------ */
 /*  Drawing canvas (transparent background)                            */
 /* ------------------------------------------------------------------ */
@@ -338,8 +351,7 @@ export default function SignPDF({ tool, navigateTo }) {
       const page = pdfDoc.getPages()[selectedPage - 1];
       const { width: pageWidth, height: pageHeight } = page.getSize();
 
-      // Fetch the signature image bytes
-      const sigBytes = await fetch(activeSigUrl).then((r) => r.arrayBuffer());
+      const sigBytes = dataUrlToBytes(activeSigUrl);
 
       // Always embed as PNG to preserve transparency / alpha channel
       let sigImage;
@@ -362,7 +374,7 @@ export default function SignPDF({ tool, navigateTo }) {
         // Do NOT fill background - keep transparent
         ctx.drawImage(img, 0, 0);
         const pngDataUrl = cvs.toDataURL('image/png');
-        const pngBytes = await fetch(pngDataUrl).then((r) => r.arrayBuffer());
+        const pngBytes = dataUrlToBytes(pngDataUrl);
         sigImage = await pdfDoc.embedPng(pngBytes);
         cvs.remove();
       }

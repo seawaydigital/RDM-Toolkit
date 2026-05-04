@@ -1,4 +1,4 @@
-name: Bundle size check
+name: Bundle size and integrity check
 
 on:
   pull_request:
@@ -13,65 +13,86 @@ jobs:
   bundle-size:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
 
-      - run: npm ci
-      - run: npx vite build
+      - run: npm ci --ignore-scripts
+      - run: npm run build
 
-      - name: Compute bundle stats (PR branch)
+      - name: Compute bundle stats and integrity (PR branch)
         id: pr-stats
         run: |
           node scripts/bundle-stats.mjs > /tmp/pr-stats.json
+          node scripts/bundle-integrity.mjs > /tmp/pr-integrity.json
+          cp scripts/bundle-stats.mjs /tmp/bundle-stats.mjs
+          cp scripts/bundle-integrity.mjs /tmp/bundle-integrity.mjs
           cat /tmp/pr-stats.json
+          cat /tmp/pr-integrity.json
           echo "pr_total_kb=$(jq .totalKB /tmp/pr-stats.json)" >> "$GITHUB_OUTPUT"
           echo "pr_entry_kb=$(jq .entryKB /tmp/pr-stats.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Checkout base branch
-        run: |
-          git fetch origin ${{ github.base_ref }}
-          git checkout origin/${{ github.base_ref }} -- scripts/bundle-stats.mjs 2>/dev/null || true
-
       - name: Build base branch
+        if: github.event_name == 'pull_request'
         run: |
-          git stash push --include-untracked -- dist 2>/dev/null || true
           git fetch origin ${{ github.base_ref }}:base-ref
-          git checkout base-ref -- . 2>/dev/null || git checkout origin/${{ github.base_ref }} -- .
-          npm ci
-          npx vite build
-          node scripts/bundle-stats.mjs > /tmp/base-stats.json || echo '{"totalKB":0,"entryKB":0}' > /tmp/base-stats.json
+          git checkout base-ref
+          npm ci --ignore-scripts
+          npm run build
+          node /tmp/bundle-stats.mjs > /tmp/base-stats.json || echo '{"totalKB":0,"entryKB":0,"files":[]}' > /tmp/base-stats.json
+          node /tmp/bundle-integrity.mjs > /tmp/base-integrity.json || echo '{"files":[],"totalBytes":0,"totalGzipBytes":0}' > /tmp/base-integrity.json
           cat /tmp/base-stats.json
+          cat /tmp/base-integrity.json
 
       - name: Compare and comment
-        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
             const fs = require('fs');
             const pr = JSON.parse(fs.readFileSync('/tmp/pr-stats.json', 'utf8'));
             const base = JSON.parse(fs.readFileSync('/tmp/base-stats.json', 'utf8'));
+            const prIntegrity = JSON.parse(fs.readFileSync('/tmp/pr-integrity.json', 'utf8'));
+            const baseIntegrity = JSON.parse(fs.readFileSync('/tmp/base-integrity.json', 'utf8'));
+
+            const baseFiles = new Map(baseIntegrity.files.map(file => [file.logicalName, file]));
+            const newChunks = prIntegrity.files
+              .filter(file => !baseFiles.has(file.logicalName))
+              .map(file => file.logicalName);
+            const largeGrowth = prIntegrity.files
+              .map(file => {
+                const oldFile = baseFiles.get(file.logicalName);
+                if (!oldFile || oldFile.bytes === 0) return null;
+                const pct = ((file.bytes - oldFile.bytes) / oldFile.bytes) * 100;
+                return pct > 10 && file.bytes - oldFile.bytes > 10 * 1024
+                  ? `${file.logicalName} +${pct.toFixed(1)}%`
+                  : null;
+              })
+              .filter(Boolean);
+
             const deltaTotal = pr.totalKB - base.totalKB;
             const deltaEntry = pr.entryKB - base.entryKB;
-            const pctTotal = base.totalKB ? ((deltaTotal / base.totalKB) * 100).toFixed(1) : '—';
-            const pctEntry = base.entryKB ? ((deltaEntry / base.entryKB) * 100).toFixed(1) : '—';
-
+            const pctTotal = base.totalKB ? ((deltaTotal / base.totalKB) * 100).toFixed(1) : '-';
+            const pctEntry = base.entryKB ? ((deltaEntry / base.entryKB) * 100).toFixed(1) : '-';
             const sign = (n) => (n >= 0 ? '+' : '');
-            const warn = deltaEntry > 25 || deltaTotal > 100 ? ' ⚠️' : '';
+            const warn = deltaEntry > 50 || deltaTotal > 200 || newChunks.length > 0 || largeGrowth.length > 0;
 
             const body = [
-              `## Bundle size report${warn}`,
+              `## Bundle size and integrity report${warn ? ' - review needed' : ''}`,
               '',
-              '| Metric | Base | This PR | Δ |',
+              '| Metric | Base | This PR | Change |',
               '|---|---|---|---|',
               `| Entry chunk (index) | ${base.entryKB} KB | ${pr.entryKB} KB | ${sign(deltaEntry)}${deltaEntry} KB (${sign(deltaEntry)}${pctEntry}%) |`,
-              `| Total gzipped | ${base.totalKB} KB | ${pr.totalKB} KB | ${sign(deltaTotal)}${deltaTotal} KB (${sign(deltaTotal)}${pctTotal}%) |`,
+              `| Total gzipped JS | ${base.totalKB} KB | ${pr.totalKB} KB | ${sign(deltaTotal)}${deltaTotal} KB (${sign(deltaTotal)}${pctTotal}%) |`,
+              `| JS chunks | ${baseIntegrity.files.length} | ${prIntegrity.files.length} | ${prIntegrity.files.length - baseIntegrity.files.length} |`,
               '',
-              warn ? '**⚠️ Bundle grew significantly.** Verify the new dependency is lazy-loaded or justified.' : '_Bundle size within expected range._',
+              newChunks.length ? `New chunks: ${newChunks.join(', ')}` : 'New chunks: none',
+              largeGrowth.length ? `Chunks over 10% growth: ${largeGrowth.join(', ')}` : 'Chunks over 10% growth: none',
             ].join('\n');
 
             const { data: comments } = await github.rest.issues.listComments({
@@ -79,7 +100,7 @@ jobs:
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            const existing = comments.find(c => c.body?.startsWith('## Bundle size report'));
+            const existing = comments.find(c => c.body?.startsWith('## Bundle size and integrity report'));
             if (existing) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
@@ -97,7 +118,7 @@ jobs:
             }
 
       - name: Fail on large regression
-        if: ${{ steps.pr-stats.outputs.pr_entry_kb > 0 }}
+        if: github.event_name == 'pull_request'
         run: |
           node -e '
             const fs = require("fs");
@@ -108,3 +129,4 @@ jobs:
             if (dEntry > 50) { console.error(`Entry chunk grew by ${dEntry} KB (> 50 KB limit)`); process.exit(1); }
             if (dTotal > 200) { console.error(`Total bundle grew by ${dTotal} KB (> 200 KB limit)`); process.exit(1); }
           '
+          node /tmp/bundle-integrity.mjs --compare /tmp/base-integrity.json --current /tmp/pr-integrity.json --max-growth-pct 10

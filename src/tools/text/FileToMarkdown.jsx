@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Copy, Check, Download } from 'lucide-react';
 import DOMPurify from 'dompurify';
-import mammoth from 'mammoth';
 import * as pdfjsLib from 'pdfjs-dist';
 import pdfjsWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import TurndownService from 'turndown';
@@ -207,9 +206,9 @@ async function convertFile(file, mode) {
   }
 
   const ext = file.name.split('.').pop().toLowerCase();
-  const supported = ['docx', 'pdf', 'html', 'htm', 'xlsx', 'csv', 'txt', 'md', 'rtf', 'json'];
+  const supported = ['pdf', 'html', 'htm', 'csv', 'txt', 'md', 'rtf', 'json'];
   if (!supported.includes(ext)) {
-    throw new Error('Unsupported file type. Accepted: DOCX, PDF, HTML, XLSX, CSV, TXT, MD, RTF, JSON.');
+    throw new Error('Unsupported file type. Accepted: PDF, HTML, CSV, TXT, MD, RTF, JSON. DOCX and XLSX are intentionally disabled until safer browser parsers are available.');
   }
 
   let md = '';
@@ -225,11 +224,6 @@ async function convertFile(file, mode) {
   } else if (ext === 'html' || ext === 'htm') {
     const text = await readFileAs(file, 'text');
     md = td.turndown(text);
-
-  } else if (ext === 'docx') {
-    const buf = await readFileAs(file, 'arraybuffer');
-    const result = await mammoth.convertToHtml({ arrayBuffer: buf });
-    md = td.turndown(result.value);
 
   } else if (ext === 'pdf') {
     const buf = await readFileAs(file, 'arraybuffer');
@@ -278,18 +272,6 @@ async function convertFile(file, mode) {
 
     md = td.turndown(html);
 
-  } else if (ext === 'xlsx') {
-    const buf = await readFileAs(file, 'arraybuffer');
-    const XLSX = await import('xlsx');
-    const wb = XLSX.read(new Uint8Array(buf));
-    const firstSheet = wb.Sheets[wb.SheetNames[0]];
-    if (!firstSheet) throw new Error('No sheets found in this workbook.');
-    const htmlTable = XLSX.utils.sheet_to_html(firstSheet);
-    md = td.turndown(htmlTable);
-    if (wb.SheetNames.length > 1) {
-      md = `> **Note:** This workbook has ${wb.SheetNames.length} sheets. Only the first sheet ("${wb.SheetNames[0]}") was converted.\n\n` + md;
-    }
-
   } else if (ext === 'csv') {
     const text = await readFileAs(file, 'text');
     md = csvToMarkdown(text);
@@ -312,7 +294,7 @@ async function convertFile(file, mode) {
 
 // ---- Component ----
 
-const ACCEPTED = '.docx,.pdf,.html,.htm,.xlsx,.csv,.txt,.md,.rtf,.json';
+const ACCEPTED = '.pdf,.html,.htm,.csv,.txt,.md,.rtf,.json';
 
 export default function FileToMarkdown() {
   const [file, setFile] = useState(null);
@@ -398,7 +380,7 @@ export default function FileToMarkdown() {
     ? DOMPurify.sanitize(renderMarkdown(markdown), {
         ALLOWED_TAGS: ['h1','h2','h3','h4','h5','h6','p','strong','em','del','code','pre',
           'ul','ol','li','blockquote','hr','a','img','br','div','table','thead','tbody','tr','th','td'],
-        ALLOWED_ATTR: ['href','src','alt','target','rel','style'],
+        ALLOWED_ATTR: ['href','src','alt','target','rel'],
         ALLOW_DATA_ATTR: false,
         FORCE_BODY: true,
         ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
@@ -410,12 +392,12 @@ export default function FileToMarkdown() {
       <div className="tool-page-header">
         <h1>File to Markdown</h1>
         <p className="tool-page-meta">
-          Convert documents to clean Markdown for use with AI tools. All processing happens in your browser — no files are uploaded.
+          Convert text-shaped documents to clean Markdown for use with AI tools. All processing happens in your browser — no files are uploaded.
         </p>
       </div>
 
       <InfoCard
-        description="Accepts DOCX, PDF, HTML, XLSX, CSV, TXT, MD, RTF and JSON files. Output can be AI-friendly (clean plain text) or preserve full Markdown formatting."
+        description="Accepts PDF, HTML, CSV, TXT, MD, RTF and JSON files. DOCX and XLSX are intentionally disabled until safer browser parsers are available. Output can be AI-friendly (clean plain text) or preserve full Markdown formatting."
       />
 
       {error && <ErrorCard message={error} />}

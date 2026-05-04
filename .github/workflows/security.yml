@@ -1,0 +1,41 @@
+name: Security Guardrails
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master]
+  schedule:
+    - cron: '30 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci --ignore-scripts
+
+      - name: Lockfile diff guard
+        if: github.event_name == 'pull_request'
+        run: node scripts/lockfile-diff-guard.mjs origin/${{ github.base_ref }} HEAD
+
+      - name: Project safety checks
+        run: npm run security:audit
+
+      - name: Verify npm registry signatures
+        run: npm audit signatures
+
+      - name: Production dependency audit
+        run: npm audit --omit=dev --audit-level=high
