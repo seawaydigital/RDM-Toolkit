@@ -100,6 +100,20 @@ const toolComponents = {
 
 const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy', 'drac-services', 'acrobat-alternative', 'lakehead-dataverse', 'grants-identifiers']);
 
+// Friendly titles for page routes (tools use tool.name from the registry).
+// Hoisted to module scope so the object isn't rebuilt on every render.
+const PAGE_TITLES = {
+  'how-this-works': 'How this works',
+  'data-classification': 'Classify your data',
+  'storage-calculator': 'Research storage calculator',
+  'tri-agency-policy': 'Tri-Agency RDM Policy',
+  'grants-identifiers': 'Grants and identifiers',
+  'lakehead-dataverse': 'Lakehead Dataverse',
+  'drac-services': 'DRAC services',
+  'acrobat-alternative': 'Adobe Acrobat alternative',
+  'request-a-tool': 'Request a tool',
+};
+
 function getRouteFromHash() {
   const hash = window.location.hash.slice(1);
   if (!hash) return { page: null, toolId: null };
@@ -235,6 +249,7 @@ function ToolErrorFallback({ onReset, onReportProblem, error }) {
 
 export default function App() {
   const [route, setRoute] = useState(getRouteFromHash);
+  const [routeAnnouncement, setRouteAnnouncement] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [errorResetKey, setErrorResetKey] = useState(0);
@@ -275,11 +290,22 @@ export default function App() {
 
   const handleTourClose = useCallback(() => setTourOpen(false), []);
 
+  // Helper: compute a friendly page title and update document.title + the live region.
+  const announceRoute = useCallback((newRoute) => {
+    const tool = newRoute.toolId ? ALL_TOOLS.find(t => t.id === newRoute.toolId) : null;
+    const title = tool
+      ? tool.name
+      : (newRoute.page ? (PAGE_TITLES[newRoute.page] || 'Home') : 'Home');
+    document.title = `${title} — RDM Toolkit`;
+    setRouteAnnouncement(`${title}, page loaded`);
+  }, []);
+
   useEffect(() => {
     function onHashChange() {
       const newRoute = getRouteFromHash();
       setRoute(newRoute);
       setErrorResetKey(k => k + 1);
+      announceRoute(newRoute);
       // Track recently used tools on every navigation (sidebar clicks, hash changes, etc.)
       if (newRoute.toolId) {
         addRecentTool(newRoute.toolId);
@@ -290,7 +316,13 @@ export default function App() {
     }
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
-  }, [addRecentTool, logEvent]);
+  }, [addRecentTool, announceRoute, logEvent]);
+
+  // Announce the initial route on first mount so direct-URL arrivals get a title + live-region read.
+  useEffect(() => {
+    announceRoute(getRouteFromHash());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally empty — fires once on mount only
 
   useEffect(() => {
     function onResize() {
@@ -397,6 +429,16 @@ export default function App() {
   return (
     <div className="app-layout">
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
+      {/* Route-change live region — screen readers announce page transitions (Task 1.6). */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="visually-hidden"
+        id="route-announcer"
+      >
+        {routeAnnouncement}
+      </div>
       <Topbar
         onMenuToggle={() => setSidebarOpen(prev => !prev)}
         showMenuButton={isMobile}
