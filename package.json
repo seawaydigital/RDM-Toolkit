@@ -12,7 +12,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "security:audit": "node scripts/security-audit.mjs",
-    "bundle:integrity": "node scripts/bundle-integrity.mjs"
+    "bundle:integrity": "node scripts/bundle-integrity.mjs",
+    "a11y:baseline": "node scripts/axe-baseline.mjs"
   },
   "dependencies": {
     "@cantoo/pdf-lib": "1.21.1",
@@ -35,7 +36,10 @@
     "zxcvbn": "4.4.2"
   },
   "devDependencies": {
+    "@axe-core/cli": "^4.11.3",
+    "@axe-core/react": "^4.11.3",
     "@vitejs/plugin-react": "4.7.0",
+    "http-server": "^14.1.1",
     "vite": "5.4.21",
     "vite-plugin-pwa": "1.2.0"
   }

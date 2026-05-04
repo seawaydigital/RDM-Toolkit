@@ -24,7 +24,7 @@
   /* Text */
   --text-primary:   #F1F5F9;
   --text-secondary: #94A3B8;
-  --text-muted:     #7C9BBF;
+  --text-muted:     #85A4C9;   /* lifted from #7C9BBF — passes WCAG AA on bg-tertiary (4.53:1) */
   --text-parchment: #EEE6D3;     /* warm off-white for display headings */
 
   /* Accents — Lakehead Blaze gold primary */
@@ -34,6 +34,7 @@
   --accent-green:   #10B981;
   --accent-red:     #EF4444;
   --accent-primary-soft: rgba(255, 194, 14, 0.12);
+  --focus-ring-on-gold:  var(--bg-primary);  /* navy ring for focus-visible on gold backgrounds */
 
   /* Lakehead brand references */
   --lh-cobalt:      #00427A;
@@ -107,10 +108,40 @@ body {
   background: var(--border);
 }
 
-/* Focus styles */
+/* ============================================================
+   Accessibility: focus visibility (WCAG 2.4.7 + 2.4.11)
+   Default: 2px gold outline + 2px offset on dark surfaces.
+   On gold/parchment surfaces, swap to navy via .on-gold-surface.
+   ============================================================ */
+
 :focus-visible {
-  outline: 2px solid var(--accent-cyan);
+  outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
+}
+
+.on-gold-surface :focus-visible,
+.on-gold-surface:focus-visible {
+  outline-color: var(--focus-ring-on-gold);
+}
+
+/* Suppress the default focus ring only when :focus-visible isn't matched
+   (mouse click on a button, etc.) — keyboard focus always visible. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* sr-only / visually-hidden — content present in DOM, not visually rendered.
+   Used for ARIA live regions and screen-reader-only labels. */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 /* Selection */
@@ -14748,21 +14779,9 @@ input:focus, textarea:focus, select:focus {
   outline-offset: 2px;
 }
 
-/* Global focus-visible fallback for any interactive element that doesn't
-   define its own. Component-specific rules override this where present. */
-a:focus-visible,
-button:focus-visible,
-[role="button"]:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible,
-[tabindex]:not([tabindex="-1"]):focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-}
-
 /* Main content should not show the default browser outline when focused via
-   the skip link — the visual target is the content itself. */
+   the skip link — the visual target is the content itself. The universal
+   :focus-visible rule near the top of this file handles all other elements. */
 .main-content:focus-visible {
   outline: none;
 }

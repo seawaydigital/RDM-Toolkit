@@ -132,7 +132,7 @@ export default function DropZone({
         tabIndex={0}
         aria-label={ariaLabel}
       >
-        <Upload size={36} className="dropzone-icon" />
+        <Upload size={36} className="dropzone-icon" aria-hidden="true" />
 
         <p className="dropzone-label dropzone-label--desktop">Drop your file here</p>
         <p className="dropzone-label dropzone-label--mobile">Tap to choose a file</p>
