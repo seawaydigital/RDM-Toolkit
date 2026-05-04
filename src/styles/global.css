@@ -24,7 +24,7 @@
   /* Text */
   --text-primary:   #F1F5F9;
   --text-secondary: #94A3B8;
-  --text-muted:     #7C9BBF;
+  --text-muted:     #85A4C9;   /* lifted from #7C9BBF — passes WCAG AA on bg-tertiary (4.53:1) */
   --text-parchment: #EEE6D3;     /* warm off-white for display headings */
 
   /* Accents — Lakehead Blaze gold primary */
@@ -34,6 +34,7 @@
   --accent-green:   #10B981;
   --accent-red:     #EF4444;
   --accent-primary-soft: rgba(255, 194, 14, 0.12);
+  --focus-ring-on-gold:  var(--bg-primary);  /* navy ring for focus-visible on gold backgrounds */
 
   /* Lakehead brand references */
   --lh-cobalt:      #00427A;
