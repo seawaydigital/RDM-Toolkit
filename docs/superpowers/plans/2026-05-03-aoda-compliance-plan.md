@@ -222,7 +222,7 @@ Create `scripts/axe-baseline.mjs`:
 
 import { spawn } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir, readFile, unlink } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 
 const PORT = 4173;
@@ -284,27 +284,34 @@ async function main() {
   }
 }
 
-function runAxe(url) {
-  return new Promise((resolve) => {
-    const proc = spawn('npx', ['@axe-core/cli', url, '--tags', TAGS, '--stdout'], {
-      shell: true,
-    });
-    let stdout = '';
-    proc.stdout.on('data', (d) => (stdout += d));
-    proc.on('close', () => {
-      try {
-        const parsed = JSON.parse(stdout);
-        // axe-cli wraps results in an array per page
-        const page = Array.isArray(parsed) ? parsed[0] : parsed;
-        resolve({
-          violations: page.violations || [],
-          passes: (page.passes || []).length,
-        });
-      } catch {
-        resolve({ violations: [], passes: 0, parseError: true });
-      }
-    });
+async function runAxe(url) {
+  // axe-cli's default stdout is human-readable text; --save writes a JSON file.
+  // Use a unique tmpfile per route to avoid collisions.
+  const safe = url.replace(/[^a-z0-9]/gi, '_');
+  const outFile = `tmp-axe-${safe}.json`;
+  await new Promise((resolve) => {
+    const proc = spawn(
+      'npx',
+      ['@axe-core/cli', url, '--tags', TAGS, '--save', outFile, '--exit-zero'],
+      { shell: true, stdio: 'ignore' },
+    );
+    proc.on('close', () => resolve());
   });
+  try {
+    const raw = await readFile(outFile, 'utf8');
+    const parsed = JSON.parse(raw);
+    // axe-cli's --save writes either a single object or an array depending on URL count;
+    // for one URL it's a single object.
+    const page = Array.isArray(parsed) ? parsed[0] : parsed;
+    await unlink(outFile).catch(() => {});
+    return {
+      violations: page.violations || [],
+      passes: (page.passes || []).length,
+    };
+  } catch (e) {
+    await unlink(outFile).catch(() => {});
+    return { violations: [], passes: 0, parseError: e.message };
+  }
 }
 
 function buildSummary(results, today) {
@@ -364,6 +371,20 @@ node --check scripts/axe-baseline.mjs
 ```
 
 Expected: no output (syntax OK).
+
+- [ ] **Step 3.5: Smoke-test against one route**
+
+Before relying on the full scan in Task 0.5, sanity-check the axe-cli output shape with a single route. Build first, then:
+
+```bash
+npm run build
+npx http-server dist -p 4173 -s &
+sleep 2
+npx @axe-core/cli http://localhost:4173/ --tags wcag2a,wcag2aa --save tmp-axe-test.json --exit-zero
+node -e "console.log(typeof JSON.parse(require('fs').readFileSync('tmp-axe-test.json','utf8')))"
+```
+
+Expected output: `object`. Stop the http-server (`kill %1` on bash, or `Stop-Process` on PowerShell) and delete `tmp-axe-test.json`. If the JSON shape isn't what `runAxe` expects, adjust the parser before Task 0.5.
 
 - [ ] **Step 4: Commit**
 
@@ -601,8 +622,10 @@ Append to `scripts/check-contrast.js`:
 // which combinations actually used in code fail WCAG AA.
 
 import { readFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
 
-if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}`) {
+// Windows-safe main-module guard — paths with spaces, drive letters, etc.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const css = await readFile('src/styles/global.css', 'utf8');
 
   const tokens = {};
@@ -1292,15 +1315,25 @@ npm run build
 npm run a11y:baseline
 ```
 
-Note: this writes baseline files with today's date. Rename the new ones to indicate Phase 1 completion:
+This writes baseline files with today's date. Rename the new ones to indicate Phase 1 completion (cross-platform via Node):
 
 ```bash
-TODAY=$(date +%Y-%m-%d)
-mv docs/accessibility/baseline-${TODAY}.json docs/accessibility/baseline-after-phase-1-${TODAY}.json
-mv docs/accessibility/baseline-summary-${TODAY}.md docs/accessibility/baseline-after-phase-1-${TODAY}.md
+node -e "
+const fs = require('fs');
+const today = new Date().toISOString().slice(0, 10);
+fs.renameSync(
+  \`docs/accessibility/baseline-\${today}.json\`,
+  \`docs/accessibility/baseline-after-phase-1-\${today}.json\`
+);
+fs.renameSync(
+  \`docs/accessibility/baseline-summary-\${today}.md\`,
+  \`docs/accessibility/baseline-after-phase-1-\${today}.md\`
+);
+console.log('renamed');
+"
 ```
 
-(Adjust the rename for Windows; on Windows use `move` or PowerShell `Rename-Item`.)
+(Works on bash, PowerShell, and cmd identically — Node handles the path mechanics.)
 
 - [ ] **Step 2: Compare to Phase 0 baseline**
 
