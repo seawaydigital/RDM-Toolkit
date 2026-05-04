@@ -108,10 +108,26 @@ body {
   background: var(--border);
 }
 
-/* Focus styles */
+/* ============================================================
+   Accessibility: focus visibility (WCAG 2.4.7 + 2.4.11)
+   Default: 2px gold outline + 2px offset on dark surfaces.
+   On gold/parchment surfaces, swap to navy via .on-gold-surface.
+   ============================================================ */
+
 :focus-visible {
-  outline: 2px solid var(--accent-cyan);
+  outline: 2px solid var(--accent-primary);
   outline-offset: 2px;
+}
+
+.on-gold-surface :focus-visible,
+.on-gold-surface:focus-visible {
+  outline-color: var(--focus-ring-on-gold);
+}
+
+/* Suppress the default focus ring only when :focus-visible isn't matched
+   (mouse click on a button, etc.) — keyboard focus always visible. */
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* Selection */
@@ -14749,21 +14765,9 @@ input:focus, textarea:focus, select:focus {
   outline-offset: 2px;
 }
 
-/* Global focus-visible fallback for any interactive element that doesn't
-   define its own. Component-specific rules override this where present. */
-a:focus-visible,
-button:focus-visible,
-[role="button"]:focus-visible,
-input:focus-visible,
-textarea:focus-visible,
-select:focus-visible,
-[tabindex]:not([tabindex="-1"]):focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-}
-
 /* Main content should not show the default browser outline when focused via
-   the skip link — the visual target is the content itself. */
+   the skip link — the visual target is the content itself. The universal
+   :focus-visible rule near the top of this file handles all other elements. */
 .main-content:focus-visible {
   outline: none;
 }

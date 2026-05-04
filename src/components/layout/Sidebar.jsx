@@ -192,7 +192,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
         </div>
 
         {/* Pinned CTA — Request a Tool */}
-        <div className="sidebar-cta">
+        <div className="sidebar-cta on-gold-surface">
           <a
             href="#request-a-tool"
             className="sidebar-cta-card"
