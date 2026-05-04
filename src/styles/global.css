@@ -944,6 +944,8 @@ input:focus, textarea:focus, select:focus {
   justify-content: center;
   gap: var(--space-sm);
   width: 100%;
+  min-width: 24px;
+  min-height: 24px;
   padding: 12px var(--space-lg);
   background: var(--accent-cyan);
   color: #0F172A;
@@ -954,11 +956,12 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: var(--space-lg);
 }
 
-.action-button:hover:not(:disabled) {
+.action-button:hover:not(:disabled):not([aria-disabled="true"]) {
   background: #FFD040;
 }
 
-.action-button:disabled {
+.action-button:disabled,
+.action-button[aria-disabled="true"] {
   opacity: 0.4;
   cursor: not-allowed;
 }
@@ -14203,7 +14206,7 @@ input:focus, textarea:focus, select:focus {
   max-width: 180px;
 }
 
-.action-button--secondary:hover:not(:disabled) {
+.action-button--secondary:hover:not(:disabled):not([aria-disabled="true"]) {
   background: var(--bg-tertiary);
   border-color: var(--accent-primary);
   color: var(--accent-primary);
