@@ -62,7 +62,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
           <span className="sidebar-category-icon">{cat.emoji}</span>
           <span className="sidebar-category-label">{cat.label}</span>
           <span className="sidebar-category-count">{cat.tools.length}</span>
-          {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+          {isExpanded ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}
         </button>
         {isExpanded && (
           <ul className="sidebar-tool-list">
@@ -95,12 +95,12 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             className="sidebar-more-toggle"
             onClick={() => setShowMore(!showMore)}
           >
-            <MoreHorizontal size={16} />
+            <MoreHorizontal size={16} aria-hidden="true" />
             <span>{showMore ? 'Less Tools' : 'More Tools'}</span>
             <span className="sidebar-category-count">
               {MORE_CATEGORIES.reduce((sum, c) => sum + c.tools.length, 0)}
             </span>
-            {showMore ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            {showMore ? <ChevronDown size={14} aria-hidden="true" /> : <ChevronRight size={14} aria-hidden="true" />}
           </button>
 
           {showMore && MORE_CATEGORIES.map(renderCategory)}
@@ -113,7 +113,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             className={`sidebar-htw-link ${currentPage === 'how-this-works' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
           >
-            <HelpCircle size={16} />
+            <HelpCircle size={16} aria-hidden="true" />
             How This Works
           </a>
           <a
@@ -121,7 +121,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             className={`sidebar-htw-link ${currentPage === 'tri-agency-policy' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
           >
-            <BookOpen size={16} />
+            <BookOpen size={16} aria-hidden="true" />
             Tri-Agency RDM Policy
           </a>
           <a
@@ -129,7 +129,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             className={`sidebar-htw-link ${currentPage === 'grants-identifiers' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
           >
-            <BadgeCheck size={16} />
+            <BadgeCheck size={16} aria-hidden="true" />
             Grants &amp; Identifiers
           </a>
           <a
@@ -137,7 +137,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             className={`sidebar-htw-link ${currentPage === 'data-classification' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
           >
-            <ShieldCheck size={16} />
+            <ShieldCheck size={16} aria-hidden="true" />
             Classify Your Data
           </a>
           <a
@@ -145,7 +145,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             className={`sidebar-htw-link ${currentPage === 'storage-calculator' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
           >
-            <HardDrive size={16} />
+            <HardDrive size={16} aria-hidden="true" />
             Research Storage Calculator
           </a>
           <a
@@ -153,7 +153,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             className={`sidebar-htw-link ${currentPage === 'lakehead-dataverse' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
           >
-            <Database size={16} />
+            <Database size={16} aria-hidden="true" />
             Lakehead Dataverse
           </a>
           <a
@@ -161,7 +161,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             className={`sidebar-htw-link ${currentPage === 'drac-services' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
           >
-            <Globe size={16} />
+            <Globe size={16} aria-hidden="true" />
             DRAC Services
           </a>
           <a
@@ -169,7 +169,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             className={`sidebar-htw-link ${currentPage === 'acrobat-alternative' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
           >
-            <CircleDollarSign size={16} />
+            <CircleDollarSign size={16} aria-hidden="true" />
             Adobe Acrobat Alternative
           </a>
         </div>
@@ -187,7 +187,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
               <span className="sidebar-sister-toolkit">Toolkit</span>
             </span>
             <span className="sidebar-sister-sub">Research Security</span>
-            <ArrowUpRight size={14} strokeWidth={2.5} className="sidebar-sister-icon" />
+            <ArrowUpRight size={14} strokeWidth={2.5} className="sidebar-sister-icon" aria-hidden="true" />
           </a>
         </div>
 
@@ -201,7 +201,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             <span className="sidebar-cta-kicker">Missing something?</span>
             <span className="sidebar-cta-title">
               Request a Tool
-              <ArrowUpRight size={16} strokeWidth={2.5} />
+              <ArrowUpRight size={16} strokeWidth={2.5} aria-hidden="true" />
             </span>
           </a>
         </div>

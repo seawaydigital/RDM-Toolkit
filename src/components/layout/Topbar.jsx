@@ -25,7 +25,7 @@ export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, curr
         <div className="topbar-left">
           {showMenuButton && (
             <button className="topbar-menu-btn" onClick={onMenuToggle} aria-label="Toggle sidebar">
-              <Menu size={20} />
+              <Menu size={20} aria-hidden="true" />
             </button>
           )}
           <span className="topbar-logo" onClick={onLogoClick} style={{ cursor: 'pointer' }}>
@@ -39,7 +39,7 @@ export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, curr
             aria-label={`Search tools (${isMac ? '⌘' : 'Ctrl'}+K)`}
             title={`Search tools (${isMac ? '⌘' : 'Ctrl'}+K)`}
           >
-            <Search size={16} />
+            <Search size={16} aria-hidden="true" />
             <span className="topbar-search-label">Search</span>
             <kbd className="topbar-search-kbd">{isMac ? '⌘K' : 'Ctrl+K'}</kbd>
           </button>
@@ -47,7 +47,7 @@ export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, curr
             href="#how-this-works"
             className={`topbar-htw-link ${currentPage === 'how-this-works' ? 'topbar-htw-link--active' : ''}`}
           >
-            <HelpCircle size={15} />
+            <HelpCircle size={15} aria-hidden="true" />
             How This Works
           </a>
           {onOpenFeedback && (
@@ -58,12 +58,12 @@ export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, curr
               aria-label="Send feedback"
               title="Send feedback"
             >
-              <MessageSquare size={15} />
+              <MessageSquare size={15} aria-hidden="true" />
               <span className="topbar-feedback-label">Feedback</span>
             </button>
           )}
           <span className="topbar-badge">
-            <Lock size={14} />
+            <Lock size={14} aria-hidden="true" />
             100% Browser-Based
           </span>
         </div>
