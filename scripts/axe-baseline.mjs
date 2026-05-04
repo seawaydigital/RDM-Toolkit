@@ -143,6 +143,16 @@ function buildSummary(results, today) {
   lines.push(`- Serious: ${sevCounts.serious}`);
   lines.push(`- Moderate: ${sevCounts.moderate}`);
   lines.push(`- Minor: ${sevCounts.minor}`);
+  // Surface routes that failed to scan — otherwise a Chrome/axe-cli crash on
+  // a single route is hidden behind a phantom "0 violations" row in the table.
+  const errorRoutes = results.filter((r) => r.parseError);
+  if (errorRoutes.length > 0) {
+    lines.push('', '## ⚠️ Routes that failed to scan', '');
+    lines.push('These routes could not be parsed — counts above are missing them.', '');
+    for (const r of errorRoutes) {
+      lines.push(`- \`${r.route}\`: ${r.parseError}`);
+    }
+  }
   lines.push('', '## Top recurring rules', '');
   const ruleCounts = {};
   for (const r of results) {
