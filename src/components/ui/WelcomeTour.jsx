@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { X, ShieldCheck, Wand2, Telescope, ChevronRight, ChevronLeft } from 'lucide-react';
+import { useModalAccessibility } from '../../hooks/useModalAccessibility';
 
 const DISMISS_KEY = 'rdm_tour_dismissed_v1';
 
@@ -49,50 +50,31 @@ const STEPS = [
 export default function WelcomeTour({ onClose, onEnableUsageLog }) {
   const [step, setStep] = useState(0);
   const [logOptIn, setLogOptIn] = useState(false);
+  const dialogRef = useRef(null);
 
+  // Delegate focus trap, focus restoration, Escape-to-close, and body scroll
+  // lock to the shared hook. isOpen is always true while this component is
+  // mounted — the parent unmounts it on close.
+  useModalAccessibility({ isOpen: true, onClose: handleClose, dialogRef });
+
+  // Re-focus the primary button whenever the step changes so keyboard users
+  // land on a sensible target after navigating with Arrow keys or dot buttons.
   useEffect(() => {
-    const previouslyFocused = document.activeElement;
-    // Focus the primary Next/Get-started button when the tour opens or step changes
-    setTimeout(() => {
-      const primary = document.querySelector('.welcome-tour-btn--primary');
+    const t = setTimeout(() => {
+      const primary = dialogRef.current?.querySelector('.welcome-tour-btn--primary');
       if (primary) primary.focus();
     }, 40);
+    return () => clearTimeout(t);
+  }, [step]);
 
-    function onKey(e) {
-      if (e.key === 'Escape') {
-        handleClose();
-        return;
-      }
+  // Arrow key step navigation — app-specific, not handled by the hook.
+  useEffect(() => {
+    function onArrow(e) {
       if (e.key === 'ArrowRight' && step < STEPS.length - 1) setStep(s => s + 1);
       if (e.key === 'ArrowLeft' && step > 0) setStep(s => s - 1);
-      if (e.key === 'Tab') {
-        const tour = document.querySelector('.welcome-tour');
-        if (!tour) return;
-        const focusable = tour.querySelectorAll(
-          'button, [href], input, [tabindex]:not([tabindex="-1"])'
-        );
-        if (focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
     }
-    window.addEventListener('keydown', onKey);
-    document.body.style.overflow = 'hidden';
-    return () => {
-      window.removeEventListener('keydown', onKey);
-      document.body.style.overflow = '';
-      if (previouslyFocused && typeof previouslyFocused.focus === 'function') {
-        previouslyFocused.focus();
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    window.addEventListener('keydown', onArrow);
+    return () => window.removeEventListener('keydown', onArrow);
   }, [step]);
 
   function handleClose() {
@@ -114,8 +96,14 @@ export default function WelcomeTour({ onClose, onEnableUsageLog }) {
   const isLast = step === STEPS.length - 1;
 
   return (
-    <div className="welcome-tour-backdrop" role="dialog" aria-modal="true" aria-labelledby="welcome-tour-title">
-      <div className="welcome-tour">
+    <div className="welcome-tour-backdrop">
+      <div
+        className="welcome-tour"
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="welcome-tour-title"
+      >
         <button
           type="button"
           className="welcome-tour-close"
