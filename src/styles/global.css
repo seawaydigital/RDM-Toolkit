@@ -14647,22 +14647,39 @@ input:focus, textarea:focus, select:focus {
 }
 
 .welcome-tour-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--border);
+}
+
+.welcome-tour-dot::before {
+  content: '';
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--border);
-  border: none;
-  cursor: pointer;
-  transition: all 0.18s;
-  padding: 0;
+  background: currentColor;
+  transition: width 0.18s, border-radius 0.18s, background 0.18s;
 }
 
 .welcome-tour-dot:hover {
-  background: var(--text-muted);
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .welcome-tour-dot--active {
-  background: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.welcome-tour-dot--active::before {
   width: 22px;
   border-radius: 4px;
 }

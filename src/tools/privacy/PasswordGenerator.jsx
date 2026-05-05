@@ -94,10 +94,11 @@ export default function PasswordGenerator({ tool, navigateTo }) {
 
       {/* Length slider */}
       <div className="password-option-section">
-        <label className="password-option-label">
+        <label className="password-option-label" htmlFor="password-length">
           Length: <strong>{length}</strong>
         </label>
         <input
+          id="password-length"
           type="range"
           className="password-slider"
           min={8}
@@ -137,10 +138,11 @@ export default function PasswordGenerator({ tool, navigateTo }) {
 
       {/* Batch count */}
       <div className="password-option-section">
-        <label className="password-option-label">
+        <label className="password-option-label" htmlFor="password-count">
           Number of passwords: <strong>{count}</strong>
         </label>
         <input
+          id="password-count"
           type="range"
           className="password-slider"
           min={1}
