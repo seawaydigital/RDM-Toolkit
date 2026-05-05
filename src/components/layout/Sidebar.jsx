@@ -185,6 +185,15 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
             <CircleDollarSign size={16} aria-hidden="true" />
             Adobe Acrobat Alternative
           </a>
+          <a
+            href="#accessibility"
+            className={`sidebar-htw-link ${currentPage === 'accessibility' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+            aria-current={currentPage === 'accessibility' ? 'page' : undefined}
+          >
+            <ShieldCheck size={16} aria-hidden="true" />
+            Accessibility Statement
+          </a>
         </div>
 
         {/* Sister-site link — RS Toolkit (Research Security) */}

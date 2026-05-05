@@ -12,6 +12,7 @@ import DRACServices from './components/pages/DRACServices';
 import AcrobatAlternative from './components/pages/AcrobatAlternative';
 import LakeheadDataverse from './components/pages/LakeheadDataverse';
 import GrantsAndIdentifiers from './components/pages/GrantsAndIdentifiers';
+import AccessibilityStatement from './components/pages/AccessibilityStatement';
 import RelatedTools from './components/ui/RelatedTools';
 import HowItWorks from './components/ui/HowItWorks';
 import ToolSkeleton from './components/ui/ToolSkeleton';
@@ -98,7 +99,7 @@ const toolComponents = {
   'encoding-detector': lazy(() => import('./tools/privacy/EncodingDetector.jsx')),
 };
 
-const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy', 'drac-services', 'acrobat-alternative', 'lakehead-dataverse', 'grants-identifiers']);
+const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy', 'drac-services', 'acrobat-alternative', 'lakehead-dataverse', 'grants-identifiers', 'accessibility']);
 
 // Friendly titles for page routes (tools use tool.name from the registry).
 // Hoisted to module scope so the object isn't rebuilt on every render.
@@ -112,6 +113,7 @@ const PAGE_TITLES = {
   'drac-services': 'DRAC services',
   'acrobat-alternative': 'Adobe Acrobat alternative',
   'request-a-tool': 'Request a tool',
+  'accessibility': 'Accessibility statement',
 };
 
 function getRouteFromHash() {
@@ -269,7 +271,7 @@ export default function App() {
   const currentToolId = route.toolId;
   const currentPage = route.page;
 
-  const buildFeedbackContext = useCallback((error) => ({
+  const buildFeedbackContext = useCallback((error, extras = {}) => ({
     toolId: currentToolId,
     page: currentPage,
     url: window.location.href,
@@ -278,11 +280,19 @@ export default function App() {
     online: navigator.onLine,
     errorMessage: error?.message || null,
     errorStack: error?.stack || null,
+    ...extras,
   }), [currentToolId, currentPage]);
 
-  const openFeedback = useCallback((error) => {
-    setFeedbackContext(buildFeedbackContext(error));
+  const openFeedback = useCallback((error, extras = {}) => {
+    setFeedbackContext(buildFeedbackContext(error, extras));
   }, [buildFeedbackContext]);
+
+  const openAccessibilityBarrierFeedback = useCallback(() => {
+    setFeedbackContext(buildFeedbackContext(null, {
+      topic: 'accessibility-barrier',
+      page: currentPage || 'accessibility',
+    }));
+  }, [buildFeedbackContext, currentPage]);
 
   const closeFeedback = useCallback(() => setFeedbackContext(null), []);
 
@@ -473,6 +483,9 @@ export default function App() {
           {currentPage === 'acrobat-alternative' && <AcrobatAlternative />}
           {currentPage === 'lakehead-dataverse' && <LakeheadDataverse />}
           {currentPage === 'grants-identifiers' && <GrantsAndIdentifiers />}
+          {currentPage === 'accessibility' && (
+            <AccessibilityStatement onReportBarrier={openAccessibilityBarrierFeedback} />
+          )}
           {currentToolId && ToolComponent && (
             <ErrorBoundary
               resetKey={errorResetKey}

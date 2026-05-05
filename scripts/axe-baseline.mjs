@@ -2,7 +2,9 @@
 // Boots http-server against ./dist, runs axe CLI against representative routes,
 // writes raw JSON + a categorized markdown summary to docs/accessibility/.
 //
-// Usage: npm run build && node scripts/axe-baseline.mjs
+// Usage:
+//   npm run build && node scripts/axe-baseline.mjs
+//   A11Y_TAGS=wcag2a,wcag2aa A11Y_ROUTES=all node scripts/axe-baseline.mjs
 //
 // Windows: axe-cli drives Chrome via selenium-webdriver. For headless Chrome
 // to launch, chromedriver must match the installed Chrome version. Run
@@ -16,12 +18,28 @@ import { spawn } from 'node:child_process';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { writeFile, mkdir, readFile, unlink } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
+import { ALL_TOOLS } from '../src/data/toolRegistry.js';
 
 const PORT = 4173;
 const BASE = `http://localhost:${PORT}`;
 
-// 10 representative routes — covers all primitives, page types, tool categories
-const ROUTES = [
+const PAGE_ROUTES = [
+  '/#how-this-works',
+  '/#request-a-tool',
+  '/#data-classification',
+  '/#storage-calculator',
+  '/#tri-agency-policy',
+  '/#grants-identifiers',
+  '/#lakehead-dataverse',
+  '/#drac-services',
+  '/#acrobat-alternative',
+  '/#accessibility',
+];
+
+const TOOL_ROUTES = ALL_TOOLS.map((tool) => `/#${tool.id}`);
+
+// 10 representative routes: covers primitives, page types, and tool categories.
+const SAMPLE_ROUTES = [
   '/',
   '/#how-this-works',
   '/#data-classification',
@@ -34,7 +52,16 @@ const ROUTES = [
   '/#extract-zip',
 ];
 
-const TAGS = 'wcag2a,wcag2aa,wcag21a,wcag21aa,wcag22aa';
+const ROUTES = getRoutes();
+const TAGS = process.env.A11Y_TAGS || 'wcag2a,wcag2aa,wcag21a,wcag21aa,wcag22aa';
+
+function getRoutes() {
+  const routeMode = (process.env.A11Y_ROUTES || 'sample').toLowerCase();
+  if (routeMode === 'all') {
+    return ['/', ...PAGE_ROUTES, ...TOOL_ROUTES];
+  }
+  return SAMPLE_ROUTES;
+}
 
 // Build env vars for axe-cli subprocess.
 // axe-cli reads CHROME_TEST_PATH / CHROMEDRIVER_TEST_PATH to select binaries
@@ -57,12 +84,10 @@ async function main() {
     process.exit(1);
   }
 
-  // Start http-server
   const server = spawn('npx', ['http-server', 'dist', '-p', String(PORT), '-s'], {
     stdio: 'ignore',
     shell: true,
   });
-  // Wait for server to come up
   await sleep(2000);
 
   await mkdir('docs/accessibility', { recursive: true });
@@ -92,8 +117,6 @@ async function main() {
 }
 
 async function runAxe(url) {
-  // axe-cli's --save writes a JSON file; stdout is human-readable text.
-  // Use a unique tmpfile per route to avoid collisions.
   const safe = url.replace(/[^a-z0-9]/gi, '_');
   const outFile = `tmp-axe-${safe}.json`;
   await new Promise((resolve) => {
@@ -107,7 +130,6 @@ async function runAxe(url) {
   try {
     const raw = await readFile(outFile, 'utf8');
     const parsed = JSON.parse(raw);
-    // axe-cli --save always writes an array (one element per URL scanned).
     const page = Array.isArray(parsed) ? parsed[0] : parsed;
     await unlink(outFile).catch(() => {});
     return {
@@ -122,8 +144,9 @@ async function runAxe(url) {
 
 function buildSummary(results, today) {
   const sevCounts = { critical: 0, serious: 0, moderate: 0, minor: 0 };
-  const lines = [`# Accessibility baseline — ${today}`, ''];
+  const lines = [`# Accessibility baseline - ${today}`, ''];
   lines.push(`Routes scanned: ${results.length}`, '');
+  lines.push(`Axe tags: \`${TAGS}\``, '');
   lines.push('## Per-route summary', '');
   lines.push('| Route | Violations | Critical | Serious | Moderate | Minor |');
   lines.push('|---|---|---|---|---|---|');
@@ -143,12 +166,10 @@ function buildSummary(results, today) {
   lines.push(`- Serious: ${sevCounts.serious}`);
   lines.push(`- Moderate: ${sevCounts.moderate}`);
   lines.push(`- Minor: ${sevCounts.minor}`);
-  // Surface routes that failed to scan — otherwise a Chrome/axe-cli crash on
-  // a single route is hidden behind a phantom "0 violations" row in the table.
   const errorRoutes = results.filter((r) => r.parseError);
   if (errorRoutes.length > 0) {
-    lines.push('', '## ⚠️ Routes that failed to scan', '');
-    lines.push('These routes could not be parsed — counts above are missing them.', '');
+    lines.push('', '## Routes that failed to scan', '');
+    lines.push('These routes could not be parsed; counts above are missing them.', '');
     for (const r of errorRoutes) {
       lines.push(`- \`${r.route}\`: ${r.parseError}`);
     }

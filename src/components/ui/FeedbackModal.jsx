@@ -1,10 +1,30 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Mail, Copy, Check, ShieldAlert } from 'lucide-react';
-import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
+import { INSTITUTION } from '../../data/institutionConfig';
 import { useModalAccessibility } from '../../hooks/useModalAccessibility';
 
-function buildIssueBody({ description, context, includeLog, log }) {
+const FEEDBACK_TOPICS = [
+  { id: 'general', label: 'General feedback' },
+  { id: 'bug-report', label: 'Bug report' },
+  { id: 'accessibility-barrier', label: 'Accessibility barrier' },
+  { id: 'tool-request', label: 'Tool request' },
+];
+
+function getTopicLabel(topic) {
+  return FEEDBACK_TOPICS.find((item) => item.id === topic)?.label || 'General feedback';
+}
+
+function getDefaultTopic(context) {
+  if (context.topic) return context.topic;
+  if (context.errorMessage) return 'bug-report';
+  return 'general';
+}
+
+function buildIssueBody({ description, context, includeLog, log, topic }) {
   const lines = [
+    '## Topic',
+    getTopicLabel(topic),
+    '',
     '## What I was trying to do',
     description || '_(not provided)_',
     '',
@@ -27,16 +47,20 @@ function buildIssueBody({ description, context, includeLog, log }) {
   return lines.join('\n');
 }
 
-function buildMailtoHref({ description, context, includeLog, log }) {
-  const subject = context.errorMessage
-    ? `[RDM Toolkit] Error in ${context.toolId || 'tool'}`
-    : `[RDM Toolkit] Feedback: ${context.toolId || context.page || 'general'}`;
-  const body = buildIssueBody({ description, context, includeLog, log });
+function buildMailtoHref({ description, context, includeLog, log, topic }) {
+  const target = context.toolId || context.page || 'general';
+  const subject = topic === 'accessibility-barrier'
+    ? `[RDM Toolkit] Accessibility barrier: ${target}`
+    : context.errorMessage
+      ? `[RDM Toolkit] Error in ${context.toolId || 'tool'}`
+      : `[RDM Toolkit] ${getTopicLabel(topic)}: ${target}`;
+  const body = buildIssueBody({ description, context, includeLog, log, topic });
   return `mailto:${INSTITUTION.rdmEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 export default function FeedbackModal({ isOpen, onClose, context, log }) {
   const [description, setDescription] = useState('');
+  const [topic, setTopic] = useState(() => getDefaultTopic(context));
   const [includeLog, setIncludeLog] = useState(Boolean(log && log.length));
   const [copied, setCopied] = useState(false);
   const textareaRef = useRef(null);
@@ -51,12 +75,13 @@ export default function FeedbackModal({ isOpen, onClose, context, log }) {
       setCopied(false);
     } else {
       setIncludeLog(Boolean(log && log.length));
+      setTopic(getDefaultTopic(context));
     }
-  }, [isOpen, log]);
+  }, [isOpen, log, context.topic, context.errorMessage]);
 
   if (!isOpen) return null;
 
-  const payload = { description, context, includeLog, log };
+  const payload = { description, context, includeLog, log, topic };
 
   async function handleCopyLog() {
     try {
@@ -88,7 +113,7 @@ export default function FeedbackModal({ isOpen, onClose, context, log }) {
             className="feedback-modal-close"
             aria-label="Close feedback"
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         </header>
 
@@ -96,11 +121,33 @@ export default function FeedbackModal({ isOpen, onClose, context, log }) {
           <p className="feedback-modal-lede">
             {context.errorMessage
               ? `Sorry about this — the ${context.toolId || 'tool'} ran into an error. Your files are still safe in your browser. A short note about what you were doing will help us fix it.`
-              : 'Spot a bug, missing feature, or confusing step? Tell us what happened. Your files never leave your device — only the text you write here gets sent.'}
+              : topic === 'accessibility-barrier'
+                ? 'Tell us what accessibility barrier you encountered. Your files never leave your device; only the text you write here gets sent through your email client.'
+                : 'Spot a bug, missing feature, or confusing step? Tell us what happened. Your files never leave your device — only the text you write here gets sent.'}
           </p>
 
+          <fieldset className="feedback-modal-topic-group">
+            <legend className="feedback-modal-label">Feedback topic</legend>
+            <div className="feedback-modal-topic-options">
+              {FEEDBACK_TOPICS.map((item) => (
+                <label key={item.id} className="feedback-modal-topic-option">
+                  <input
+                    type="radio"
+                    name="feedback-topic"
+                    value={item.id}
+                    checked={topic === item.id}
+                    onChange={(e) => setTopic(e.target.value)}
+                  />
+                  <span>{item.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
           <label className="feedback-modal-label" htmlFor="feedback-description">
-            What were you trying to do?
+            {topic === 'accessibility-barrier'
+              ? 'What accessibility barrier did you encounter?'
+              : 'What were you trying to do?'}
           </label>
           <textarea
             id="feedback-description"
@@ -151,7 +198,7 @@ export default function FeedbackModal({ isOpen, onClose, context, log }) {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Mail size={15} /> Email us ({INSTITUTION.rdmEmail})
+            <Mail size={15} aria-hidden="true" /> Email us ({INSTITUTION.rdmEmail})
           </a>
           {log && log.length > 0 && (
             <button
@@ -159,7 +206,7 @@ export default function FeedbackModal({ isOpen, onClose, context, log }) {
               className="feedback-modal-cta feedback-modal-cta--ghost"
               onClick={handleCopyLog}
             >
-              {copied ? <Check size={15} /> : <Copy size={15} />}
+              {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
               {copied ? 'Copied!' : 'Copy log only'}
             </button>
           )}
