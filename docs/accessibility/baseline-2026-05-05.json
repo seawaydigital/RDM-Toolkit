@@ -1,0 +1,287 @@
+[
+  {
+    "route": "/",
+    "violations": [],
+    "passes": 24
+  },
+  {
+    "route": "/#how-this-works",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#request-a-tool",
+    "violations": [],
+    "passes": 24
+  },
+  {
+    "route": "/#data-classification",
+    "violations": [],
+    "passes": 25
+  },
+  {
+    "route": "/#storage-calculator",
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "route": "/#tri-agency-policy",
+    "violations": [],
+    "passes": 25
+  },
+  {
+    "route": "/#grants-identifiers",
+    "violations": [],
+    "passes": 25
+  },
+  {
+    "route": "/#lakehead-dataverse",
+    "violations": [],
+    "passes": 25
+  },
+  {
+    "route": "/#drac-services",
+    "violations": [],
+    "passes": 23
+  },
+  {
+    "route": "/#acrobat-alternative",
+    "violations": [],
+    "passes": 29
+  },
+  {
+    "route": "/#accessibility",
+    "violations": [],
+    "passes": 23
+  },
+  {
+    "route": "/#merge-pdfs",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#split-pdf",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#reorder-pages",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#pdf-page-delete",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#rotate-pages",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#compress-pdf",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#pdf-page-inspector",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#add-cover-page",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#add-page-numbers",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#pdf-watermark",
+    "violations": [],
+    "passes": 25
+  },
+  {
+    "route": "/#sign-pdf",
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "route": "/#fillable-pdf-form",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#pdf-redaction",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#password-protect-pdf",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#remove-pdf-password",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#extract-images-from-pdf",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#pdf-to-images",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#compress-image",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#resize-image",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#image-cropper",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#convert-image-format",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#strip-image-metadata",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#image-to-pdf",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#word-counter",
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "route": "/#find-replace",
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "route": "/#text-diff",
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "route": "/#json-formatter",
+    "violations": [],
+    "passes": 28
+  },
+  {
+    "route": "/#csv-json-converter",
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "route": "/#to-markdown",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#bibtex-formatter",
+    "violations": [],
+    "passes": 28
+  },
+  {
+    "route": "/#data-anonymizer",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#strip-file-metadata",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#encrypt-decrypt-text",
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "route": "/#password-generator",
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "route": "/#sha256-hasher",
+    "violations": [],
+    "passes": 28
+  },
+  {
+    "route": "/#create-zip",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#extract-zip",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#file-size-analyser",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#whitespace-cleaner",
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "route": "/#remove-duplicate-lines",
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "route": "/#csv-diff",
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "route": "/#csv-encoding-fixer",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#markdown-preview",
+    "violations": [],
+    "passes": 27
+  },
+  {
+    "route": "/#magic-byte-checker",
+    "violations": [],
+    "passes": 26
+  },
+  {
+    "route": "/#checksum-verifier",
+    "violations": [],
+    "passes": 28
+  },
+  {
+    "route": "/#encoding-detector",
+    "violations": [],
+    "passes": 26
+  }
+]
