@@ -14,7 +14,7 @@ export default function HowThisWorks() {
       {/* The Core Promise */}
       <section className="htw-section">
         <div className="htw-promise">
-          <Shield size={32} />
+          <Shield size={32} aria-hidden="true" />
           <div>
             <h2>The Short Version</h2>
             <p>
@@ -40,21 +40,21 @@ export default function HowThisWorks() {
               You select a file from your computer
             </span>
           </div>
-          <ArrowDown size={20} className="htw-diagram-arrow" />
+          <ArrowDown size={20} className="htw-diagram-arrow" aria-hidden="true" />
           <div className="htw-diagram-step">
             <span className="htw-diagram-step-number">2</span>
             <span className="htw-diagram-step-text">
               Your browser reads the file into its own memory
             </span>
           </div>
-          <ArrowDown size={20} className="htw-diagram-arrow" />
+          <ArrowDown size={20} className="htw-diagram-arrow" aria-hidden="true" />
           <div className="htw-diagram-step">
             <span className="htw-diagram-step-number">3</span>
             <span className="htw-diagram-step-text">
               The tool processes the file entirely on your device
             </span>
           </div>
-          <ArrowDown size={20} className="htw-diagram-arrow" />
+          <ArrowDown size={20} className="htw-diagram-arrow" aria-hidden="true" />
           <div className="htw-diagram-step">
             <span className="htw-diagram-step-number">4</span>
             <span className="htw-diagram-step-text">
@@ -62,7 +62,7 @@ export default function HowThisWorks() {
             </span>
           </div>
           <div className="htw-diagram-badge">
-            <CheckCircle size={16} />
+            <CheckCircle size={16} aria-hidden="true" />
             <span>Zero network transmissions. Zero copies on external servers.</span>
           </div>
         </div>
@@ -80,7 +80,7 @@ export default function HowThisWorks() {
         <div className="htw-comparison">
           <div className="htw-comparison-card htw-comparison-card--bad">
             <div className="htw-comparison-header">
-              <Wifi size={20} />
+              <Wifi size={20} aria-hidden="true" />
               <h3>Typical Conversion Sites</h3>
             </div>
             <ol className="htw-comparison-steps">
@@ -90,18 +90,18 @@ export default function HowThisWorks() {
               <li>Your original file stays on their server</li>
             </ol>
             <div className="htw-comparison-verdict">
-              <XCircle size={16} />
+              <XCircle size={16} aria-hidden="true" />
               <span>Your file leaves your control</span>
             </div>
           </div>
 
-          <div className="htw-comparison-arrow">
+          <div className="htw-comparison-arrow" aria-hidden="true">
             <ArrowRight size={24} />
           </div>
 
           <div className="htw-comparison-card htw-comparison-card--good">
             <div className="htw-comparison-header">
-              <Laptop size={20} />
+              <Laptop size={20} aria-hidden="true" />
               <h3>RDM Toolkit</h3>
             </div>
             <ol className="htw-comparison-steps">
@@ -111,7 +111,7 @@ export default function HowThisWorks() {
               <li>Nothing is sent anywhere</li>
             </ol>
             <div className="htw-comparison-verdict htw-comparison-verdict--good">
-              <CheckCircle size={16} />
+              <CheckCircle size={16} aria-hidden="true" />
               <span>Your file never leaves your device</span>
             </div>
           </div>
@@ -125,7 +125,7 @@ export default function HowThisWorks() {
           You might be wondering: if nothing is uploaded, how does the tool actually work?
         </p>
         <div className="htw-promise">
-          <Laptop size={32} />
+          <Laptop size={32} aria-hidden="true" />
           <div>
             <p>
               Modern web browsers (Chrome, Firefox, Safari, Edge) are powerful enough to
@@ -152,7 +152,7 @@ export default function HowThisWorks() {
       <section className="htw-section">
         <h2 className="htw-section-title">Why This Wasn't Possible Ten Years Ago</h2>
         <div className="htw-promise">
-          <Clock size={32} />
+          <Clock size={32} aria-hidden="true" />
           <div>
             <p>
               If your gut reaction to a website that offers to merge a PDF is
@@ -283,7 +283,7 @@ export default function HowThisWorks() {
         </ol>
 
         <div className="htw-promise" style={{ marginTop: 'var(--space-lg)' }}>
-          <Shield size={32} />
+          <Shield size={32} aria-hidden="true" />
           <div>
             <p>
               The upshot: a modern browser can now do — privately, on your own
@@ -308,7 +308,7 @@ export default function HowThisWorks() {
         <div className="htw-verify-grid">
           <div className="htw-verify-card">
             <div className="htw-verify-icon">
-              <WifiOff size={24} />
+              <WifiOff size={24} aria-hidden="true" />
             </div>
             <h3>Turn Off Your Internet</h3>
             <p>
@@ -318,7 +318,7 @@ export default function HowThisWorks() {
           </div>
           <div className="htw-verify-card">
             <div className="htw-verify-icon">
-              <Eye size={24} />
+              <Eye size={24} aria-hidden="true" />
             </div>
             <h3>Watch Your Network Activity</h3>
             <p>
@@ -328,7 +328,7 @@ export default function HowThisWorks() {
           </div>
           <div className="htw-verify-card">
             <div className="htw-verify-icon">
-              <FileCheck size={24} />
+              <FileCheck size={24} aria-hidden="true" />
             </div>
             <h3>Check the Source Code</h3>
             <p>
@@ -349,9 +349,17 @@ export default function HowThisWorks() {
         </p>
         <div className="htw-compliance-grid">
           <div className="htw-compliance-card">
-            <Lock size={20} />
+            <Lock size={20} aria-hidden="true" />
             <div>
-              <h3><a href="https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/" target="_blank" rel="noopener noreferrer">PIPEDA</a> &amp; <a href="https://www.ontario.ca/laws/statute/04p03" target="_blank" rel="noopener noreferrer">PHIPA</a></h3>
+              <h3>
+                <a href="https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/" target="_blank" rel="noopener noreferrer">
+                  PIPEDA<span className="visually-hidden"> (opens in new tab)</span>
+                </a>
+                {' '}&amp;{' '}
+                <a href="https://www.ontario.ca/laws/statute/04p03" target="_blank" rel="noopener noreferrer">
+                  PHIPA<span className="visually-hidden"> (opens in new tab)</span>
+                </a>
+              </h3>
               <p>
                 Canadian privacy legislation requires that personal information be
                 protected from unauthorised access. Uploading files to third-party
@@ -360,9 +368,13 @@ export default function HowThisWorks() {
             </div>
           </div>
           <div className="htw-compliance-card">
-            <Globe size={20} />
+            <Globe size={20} aria-hidden="true" />
             <div>
-              <h3><a href="https://gdpr.eu" target="_blank" rel="noopener noreferrer">GDPR</a></h3>
+              <h3>
+                <a href="https://gdpr.eu" target="_blank" rel="noopener noreferrer">
+                  GDPR<span className="visually-hidden"> (opens in new tab)</span>
+                </a>
+              </h3>
               <p>
                 The EU's data protection regulation requires a legal basis for
                 processing personal data. Free conversion sites typically don't
@@ -371,9 +383,13 @@ export default function HowThisWorks() {
             </div>
           </div>
           <div className="htw-compliance-card">
-            <Shield size={20} />
+            <Shield size={20} aria-hidden="true" />
             <div>
-              <h3><a href="https://www.science.gc.ca/site/science/en/interagency-research-funding/policies-and-guidelines/research-data-management/tri-agency-research-data-management-policy" target="_blank" rel="noopener noreferrer">Tri-Agency RDM Policy</a></h3>
+              <h3>
+                <a href="https://www.science.gc.ca/site/science/en/interagency-research-funding/policies-and-guidelines/research-data-management/tri-agency-research-data-management-policy" target="_blank" rel="noopener noreferrer">
+                  Tri-Agency RDM Policy<span className="visually-hidden"> (opens in new tab)</span>
+                </a>
+              </h3>
               <p>
                 Canada's research funding agencies require data management plans
                 that ensure data integrity and secure handling. Using unvetted
@@ -382,7 +398,7 @@ export default function HowThisWorks() {
             </div>
           </div>
           <div className="htw-compliance-card">
-            <MonitorSmartphone size={20} />
+            <MonitorSmartphone size={20} aria-hidden="true" />
             <div>
               <h3>With RDM Toolkit</h3>
               <p>
@@ -398,7 +414,7 @@ export default function HowThisWorks() {
       {/* ── Bridge to RS Toolkit ── */}
       <section className="htw-section">
         <div className="htw-promise">
-          <Shield size={32} />
+          <Shield size={32} aria-hidden="true" />
           <div>
             <h2>Protecting Your Research Data</h2>
             <p>
@@ -413,7 +429,8 @@ export default function HowThisWorks() {
                 className="htw-link"
               >
                 Research Security Toolkit — Cybersecurity Best Practices
-                <ExternalLink size={12} style={{ marginLeft: 4, verticalAlign: 'middle' }} />
+                <ExternalLink size={12} aria-hidden="true" style={{ marginLeft: 4, verticalAlign: 'middle' }} />
+                <span className="visually-hidden"> (opens in new tab)</span>
               </a>.
             </p>
           </div>
@@ -425,28 +442,28 @@ export default function HowThisWorks() {
         </p>
         <div className="htw-compliance-grid">
           <a href="#password-protect-pdf" className="htw-compliance-card htw-compliance-card--link">
-            <Lock size={20} />
+            <Lock size={20} aria-hidden="true" />
             <div>
               <h3>Password Protect PDF</h3>
               <p>Add AES-256 encryption to a PDF before sharing — the recipient needs the password to open it.</p>
             </div>
           </a>
           <a href="#strip-file-metadata" className="htw-compliance-card htw-compliance-card--link">
-            <Eye size={20} />
+            <Eye size={20} aria-hidden="true" />
             <div>
               <h3>Strip Metadata</h3>
               <p>Remove hidden author, location, and device information from files before sharing externally.</p>
             </div>
           </a>
           <a href="#sha256-hasher" className="htw-compliance-card htw-compliance-card--link">
-            <FileCheck size={20} />
+            <FileCheck size={20} aria-hidden="true" />
             <div>
               <h3>SHA-256 Hasher</h3>
               <p>Generate a hash fingerprint to verify a file hasn't been altered after transfer or storage.</p>
             </div>
           </a>
           <a href="#encrypt-decrypt-text" className="htw-compliance-card htw-compliance-card--link">
-            <Shield size={20} />
+            <Shield size={20} aria-hidden="true" />
             <div>
               <h3>Encrypt / Decrypt Text</h3>
               <p>Encrypt sensitive notes or data snippets with AES-256 before pasting them anywhere.</p>
