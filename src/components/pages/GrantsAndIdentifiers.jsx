@@ -46,7 +46,7 @@ const IDENTIFIERS = [
     color: '#FFC20E',
     description: 'A DOI (Digital Object Identifier) makes a dataset citable, discoverable, and permanent. Tri-Agency data deposit expects a DOI so the paper can link to the underlying data.',
     bullets: [
-      <>Depositing to <a href={INSTITUTION.dataverseUrl} target="_blank" rel="noopener noreferrer">{INSTITUTION.shortName} Dataverse</a> on Borealis mints a DOI automatically — no extra step</>,
+      <>Depositing to <a href={INSTITUTION.dataverseUrl} target="_blank" rel="noopener noreferrer">{INSTITUTION.shortName} Dataverse<span className="visually-hidden"> (opens in new tab)</span></a> on Borealis mints a DOI automatically — no extra step</>,
       'DataCite (the registry behind most research DOIs) issues DOIs through Scholars Portal for Ontario researchers',
       'Zenodo and FRDR also mint DOIs on deposit',
       'Cite the dataset DOI in your paper\u2019s Data Availability statement',
@@ -112,7 +112,7 @@ export default function GrantsAndIdentifiers() {
       {/* Intro */}
       <section className="htw-section">
         <div className="htw-promise">
-          <BadgeCheck size={32} />
+          <BadgeCheck size={32} aria-hidden="true" />
           <div>
             <h2>Why this matters</h2>
             <p>
@@ -142,7 +142,7 @@ export default function GrantsAndIdentifiers() {
             return (
               <div key={ident.id} className="gai-card" style={{ '--gai-accent': ident.color }}>
                 <div className="gai-card-head">
-                  <Icon size={22} />
+                  <Icon size={22} aria-hidden="true" />
                   <div>
                     <strong>{ident.title}</strong>
                     <span>{ident.tagline}</span>
@@ -152,7 +152,7 @@ export default function GrantsAndIdentifiers() {
                 <ul className="gai-card-bullets">
                   {ident.bullets.map((b, i) => (
                     <li key={i}>
-                      <CheckCircle size={12} />
+                      <CheckCircle size={12} aria-hidden="true" />
                       <span>{b}</span>
                     </li>
                   ))}
@@ -166,8 +166,11 @@ export default function GrantsAndIdentifiers() {
                   >
                     {ident.cta.label}
                     {ident.cta.internal
-                      ? <ArrowRight size={13} />
-                      : <ExternalLink size={11} />}
+                      ? <ArrowRight size={13} aria-hidden="true" />
+                      : <>
+                          <ExternalLink size={11} aria-hidden="true" />
+                          <span className="visually-hidden"> (opens in new tab)</span>
+                        </>}
                   </a>
                   <a
                     href={ident.learnMore.href}
@@ -175,7 +178,8 @@ export default function GrantsAndIdentifiers() {
                     rel="noopener noreferrer"
                     className="gai-card-secondary"
                   >
-                    {ident.learnMore.label} <ExternalLink size={11} />
+                    {ident.learnMore.label} <ExternalLink size={11} aria-hidden="true" />
+                    <span className="visually-hidden"> (opens in new tab)</span>
                   </a>
                 </div>
               </div>
@@ -252,7 +256,8 @@ export default function GrantsAndIdentifiers() {
               <strong>{r.title}</strong>
               <p>{r.body}</p>
               <a href={r.href} target="_blank" rel="noopener noreferrer">
-                {r.linkLabel} <ExternalLink size={11} />
+                {r.linkLabel} <ExternalLink size={11} aria-hidden="true" />
+                <span className="visually-hidden"> (opens in new tab)</span>
               </a>
             </div>
           ))}
@@ -262,7 +267,7 @@ export default function GrantsAndIdentifiers() {
       {/* Contact */}
       <section className="htw-section">
         <div className="htw-promise" style={{ borderLeftColor: 'var(--accent-primary)' }}>
-          <Users size={28} style={{ color: 'var(--accent-primary)' }} />
+          <Users size={28} aria-hidden="true" style={{ color: 'var(--accent-primary)' }} />
           <div>
             <h2>Need help?</h2>
             <p>

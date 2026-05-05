@@ -78,7 +78,7 @@ export default function RequestATool() {
       {/* Contact */}
       <section className="htw-section">
         <div className="htw-promise">
-          <Mail size={32} />
+          <Mail size={32} aria-hidden="true" />
           <div>
             <h2>Suggest a New Tool</h2>
             <p>
@@ -120,7 +120,7 @@ export default function RequestATool() {
               <details key={tool.name} className="htw-faq-item">
                 <summary>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Icon size={16} style={{ flexShrink: 0, color: 'var(--text-muted)' }} />
+                    <Icon size={16} aria-hidden="true" style={{ flexShrink: 0, color: 'var(--text-muted)' }} />
                     {tool.name}
                   </span>
                 </summary>
@@ -148,7 +148,7 @@ export default function RequestATool() {
       {/* Why these limits exist */}
       <section className="htw-section">
         <div className="htw-promise" style={{ borderLeftColor: 'var(--accent-amber)' }}>
-          <AlertTriangle size={28} style={{ color: 'var(--accent-amber)' }} />
+          <AlertTriangle size={28} aria-hidden="true" style={{ color: 'var(--accent-amber)' }} />
           <div>
             <h2>Why Some Tools Cannot Be Added</h2>
             <p>

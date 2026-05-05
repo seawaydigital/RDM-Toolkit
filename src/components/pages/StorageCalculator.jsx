@@ -627,18 +627,22 @@ function DoughnutChart({ contributions, totalLabel }) {
     ctx.fillText('Total Active', cx, cy + 10);
   }, [contributions, totalLabel]);
 
+  const visibleContributions = contributions.filter(c => c.value > 0);
   return (
     <div className="sc-chart-wrapper">
-      <canvas ref={canvasRef} className="sc-chart-canvas" />
-      <div className="sc-chart-legend">
-        {contributions.filter(c => c.value > 0).map(c => (
+      {/* Canvas is the visual representation; the dl below is the source of truth
+          for screen-reader users (and anyone using a high-contrast/forced-colours
+          mode where the canvas may not render). */}
+      <canvas ref={canvasRef} className="sc-chart-canvas" aria-hidden="true" />
+      <dl className="sc-chart-legend" aria-label={`Storage breakdown — ${totalLabel} total active`}>
+        {visibleContributions.map(c => (
           <div key={c.label} className="sc-legend-item">
-            <span className="sc-legend-swatch" style={{ background: c.color }} />
-            <span className="sc-legend-label">{c.label}</span>
-            <span className="sc-legend-value">{formatSize(c.value)}</span>
+            <span className="sc-legend-swatch" style={{ background: c.color }} aria-hidden="true" />
+            <dt className="sc-legend-label">{c.label}</dt>
+            <dd className="sc-legend-value">{formatSize(c.value)}</dd>
           </div>
         ))}
-      </div>
+      </dl>
     </div>
   );
 }
