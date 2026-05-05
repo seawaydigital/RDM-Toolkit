@@ -343,16 +343,34 @@ export default function DRACServices() {
       </div>
 
       {/* Tab nav */}
-      <div className="drac-tabs">
+      <div className="drac-tabs" role="tablist" aria-label="DRAC service categories">
         {tabs.map(t => {
           const Icon = t.icon;
+          const isActive = activeTab === t.id;
           return (
             <button
               key={t.id}
-              className={`drac-tab${activeTab === t.id ? ' drac-tab--active' : ''}`}
+              id={`drac-tab-${t.id}`}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`drac-panel-${t.id}`}
+              tabIndex={isActive ? 0 : -1}
+              className={`drac-tab${isActive ? ' drac-tab--active' : ''}`}
               onClick={() => setActiveTab(t.id)}
+              onKeyDown={(e) => {
+                const idx = tabs.findIndex(x => x.id === activeTab);
+                let nextIdx = idx;
+                if (e.key === 'ArrowRight') nextIdx = (idx + 1) % tabs.length;
+                else if (e.key === 'ArrowLeft') nextIdx = (idx - 1 + tabs.length) % tabs.length;
+                else if (e.key === 'Home') nextIdx = 0;
+                else if (e.key === 'End') nextIdx = tabs.length - 1;
+                else return;
+                e.preventDefault();
+                setActiveTab(tabs[nextIdx].id);
+                document.getElementById(`drac-tab-${tabs[nextIdx].id}`)?.focus();
+              }}
             >
-              <Icon size={15} />
+              <Icon size={15} aria-hidden="true" />
               {t.label}
             </button>
           );
@@ -361,7 +379,7 @@ export default function DRACServices() {
 
       {/* ── RDM Tab ── */}
       {activeTab === 'rdm' && (
-        <div className="drac-content">
+        <div className="drac-content" role="tabpanel" id="drac-panel-rdm" aria-labelledby="drac-tab-rdm" tabIndex={0}>
           <p className="drac-content-intro">
             The Alliance provides national platforms that cover every stage of the
             research data lifecycle — from planning and active storage, to deposit, to discovery.
@@ -452,7 +470,7 @@ export default function DRACServices() {
 
       {/* ── ARC Tab ── */}
       {activeTab === 'arc' && (
-        <div className="drac-content">
+        <div className="drac-content" role="tabpanel" id="drac-panel-arc" aria-labelledby="drac-tab-arc" tabIndex={0}>
           <p className="drac-content-intro">
             The Alliance operates a fleet of national supercomputers and cloud systems available free
             to all eligible Canadian researchers. Access starts the day your CCDB account is approved.
@@ -573,7 +591,7 @@ export default function DRACServices() {
 
       {/* ── Software Tab ── */}
       {activeTab === 'software' && (
-        <div className="drac-content">
+        <div className="drac-content" role="tabpanel" id="drac-panel-software" aria-labelledby="drac-tab-software" tabIndex={0}>
           <p className="drac-content-intro">
             The Alliance's Research Software program treats software as a first-class research output,
             supporting Canadian researchers who create, maintain, or depend on research software.
@@ -617,7 +635,7 @@ export default function DRACServices() {
 
       {/* ── Getting Started Tab ── */}
       {activeTab === 'start' && (
-        <div className="drac-content">
+        <div className="drac-content" role="tabpanel" id="drac-panel-start" aria-labelledby="drac-tab-start" tabIndex={0}>
           <p className="drac-content-intro">
             All services are free to eligible Canadian researchers. Here is how to get up and running.
           </p>
