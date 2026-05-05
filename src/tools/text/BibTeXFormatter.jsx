@@ -209,6 +209,7 @@ export default function BibTeXFormatter({ tool }) {
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
             className="json-formatter-select"
+            aria-label="Sort BibTeX entries by"
           >
             <option value="none">No sorting</option>
             <option value="key">Citation key</option>

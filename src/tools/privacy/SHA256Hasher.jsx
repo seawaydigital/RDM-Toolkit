@@ -135,6 +135,7 @@ export default function SHA256Hasher({ tool, navigateTo }) {
           className="hash-algorithm-select"
           value={algorithm}
           onChange={e => { setAlgorithm(e.target.value); setResults([]); }}
+          aria-label="Hash algorithm"
         >
           <option value="SHA-256">SHA-256 (recommended)</option>
           <option value="SHA-1">SHA-1 (legacy)</option>

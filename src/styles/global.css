@@ -12001,7 +12001,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .aa-cost-paid {
-  color: var(--accent-red);
+  color: #F87171;
   text-decoration: line-through;
   text-decoration-color: rgba(239, 68, 68, 0.5);
   font-size: 1rem;

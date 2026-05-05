@@ -228,6 +228,7 @@ export default function WhitespaceCleaner({ tool }) {
             <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Tab width:</label>
             <input
               type="number"
+              aria-label="Tab width"
               value={options.tabWidth}
               onChange={e => setOption('tabWidth', Math.max(1, parseInt(e.target.value, 10) || 4))}
               min={1}

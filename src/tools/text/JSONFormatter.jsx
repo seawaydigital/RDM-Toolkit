@@ -170,6 +170,7 @@ export default function JSONFormatter({ tool }) {
             value={indentSize}
             onChange={e => setIndentSize(Number(e.target.value))}
             className="json-formatter-select"
+            aria-label="Indent size"
           >
             <option value={2}>2 spaces</option>
             <option value={4}>4 spaces</option>

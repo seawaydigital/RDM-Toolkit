@@ -255,6 +255,7 @@ export default function MarkdownPreview({ tool }) {
             Markdown
           </div>
           <textarea
+            aria-label="Markdown source"
             value={text}
             onChange={e => setText(e.target.value)}
             spellCheck={false}
