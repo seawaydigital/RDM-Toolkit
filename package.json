@@ -12,7 +12,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "security:audit": "node scripts/security-audit.mjs",
-    "bundle:integrity": "node scripts/bundle-integrity.mjs"
+    "bundle:integrity": "node scripts/bundle-integrity.mjs",
+    "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@cantoo/pdf-lib": "1.21.1",
