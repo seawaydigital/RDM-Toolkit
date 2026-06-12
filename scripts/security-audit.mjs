@@ -215,6 +215,7 @@ const allowedDangerousHtml = new Set([
 ]);
 
 const allowedLocalStorage = new Set([
+  'src/components/ui/ClearLocalData.jsx', // wipe-only: clears storage, never writes
   'src/components/ui/SearchBar.jsx',
   'src/components/ui/WelcomeTour.jsx',
   'src/hooks/useRecentTools.js',

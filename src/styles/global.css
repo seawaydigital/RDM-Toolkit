@@ -5781,6 +5781,95 @@ input:focus, textarea:focus, select:focus {
   color: var(--accent-primary);
 }
 
+/* ── Live network-silence indicator (HowThisWorks verify section) ── */
+.htw-netsilence {
+  display: flex;
+  gap: var(--space-md);
+  align-items: flex-start;
+  margin-top: var(--space-lg);
+  padding: var(--space-lg);
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: var(--radius-lg);
+}
+.htw-netsilence svg {
+  color: var(--accent-green);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.htw-netsilence strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.htw-netsilence p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.htw-netsilence--active {
+  background: rgba(245, 158, 11, 0.06);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+.htw-netsilence--active svg {
+  color: var(--accent-amber);
+}
+
+/* ── Clear-local-data control (HowThisWorks limits section) ── */
+.htw-cleardata-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: var(--space-sm);
+  padding: 7px 14px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.htw-cleardata-btn:hover {
+  border-color: var(--accent-primary);
+}
+.htw-cleardata-btn--danger {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+.htw-cleardata-btn--danger:hover {
+  border-color: var(--accent-red);
+  background: rgba(239, 68, 68, 0.2);
+}
+.htw-cleardata-btn--ghost {
+  background: transparent;
+}
+.htw-cleardata-confirm {
+  margin-top: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--bg-inset);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+}
+.htw-cleardata-confirm p {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+.htw-cleardata-confirm p svg {
+  color: var(--accent-amber);
+  vertical-align: -2px;
+  margin-right: 4px;
+}
+.htw-cleardata-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
 /* ── Browser Capability Timeline ── */
 
 .htw-timeline {
@@ -11866,6 +11955,51 @@ input:focus, textarea:focus, select:focus {
   line-height: 1.7;
   font-size: 0.9375rem;
 }
+
+/* ── Rendered-markdown elements (Markdown Preview .md-rendered + File to
+   Markdown .ftm-preview panes). Styling lives in CSS because DOMPurify strips
+   style attributes from sanitized output and the strict CSP blocks them. ── */
+.md-rendered h1, .ftm-preview h1 { font-size: 1.6rem; font-weight: 700; margin: 24px 0 12px; color: var(--text-primary); }
+.md-rendered h2, .ftm-preview h2 { font-size: 1.3rem; font-weight: 700; margin: 20px 0 10px; color: var(--text-primary); }
+.md-rendered h3, .ftm-preview h3 { font-size: 1.1rem; font-weight: 700; margin: 16px 0 8px; color: var(--text-primary); }
+.md-rendered h4, .ftm-preview h4 { font-size: 1rem; font-weight: 700; margin: 14px 0 6px; color: var(--text-primary); }
+.md-rendered h5, .ftm-preview h5 { font-size: 0.9rem; font-weight: 700; margin: 12px 0 4px; color: var(--text-primary); }
+.md-rendered h6, .ftm-preview h6 { font-size: 0.85rem; font-weight: 700; margin: 10px 0 4px; color: var(--text-primary); }
+.md-rendered p, .ftm-preview p { margin: 6px 0; line-height: 1.65; }
+.md-rendered ul, .ftm-preview ul,
+.md-rendered ol, .ftm-preview ol { margin: 8px 0; padding-left: 24px; }
+.md-rendered li, .ftm-preview li { margin: 4px 0; }
+.md-rendered code, .ftm-preview code {
+  background: var(--bg-tertiary);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.85em;
+  font-family: var(--font-mono);
+}
+.md-rendered pre, .ftm-preview pre {
+  background: var(--bg-tertiary);
+  padding: 12px 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 12px 0;
+}
+.md-rendered pre code, .ftm-preview pre code { background: none; padding: 0; font-size: inherit; }
+.md-rendered blockquote, .ftm-preview blockquote {
+  border-left: 3px solid var(--border);
+  padding: 8px 16px;
+  margin: 12px 0;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border-radius: 0 6px 6px 0;
+}
+.md-rendered hr, .ftm-preview hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+.md-rendered img, .ftm-preview img { max-width: 100%; border-radius: 6px; margin: 8px 0; }
+.md-rendered a, .ftm-preview a { color: var(--accent-primary); text-decoration: underline; }
+.ftm-preview table { border-collapse: collapse; margin: 12px 0; width: 100%; }
+.ftm-preview th, .ftm-preview td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; font-size: 0.875rem; }
+.ftm-preview th { background: var(--bg-tertiary); font-weight: 600; }
 
 .ftm-raw {
   background: var(--bg-secondary);
