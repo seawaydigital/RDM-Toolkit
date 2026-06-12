@@ -1783,6 +1783,10 @@ input:focus, textarea:focus, select:focus {
   border-color: rgba(255, 194, 14, 0.3);
 }
 
+.homepage-tile--edu .homepage-tile-blurb {
+  color: var(--text-primary);
+}
+
 .homepage-tile--edu a {
   color: var(--accent-primary);
   text-decoration: underline;
