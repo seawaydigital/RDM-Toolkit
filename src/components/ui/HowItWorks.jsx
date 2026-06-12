@@ -1,8 +1,19 @@
 import { useState, useId } from 'react';
 import { ChevronDown, ShieldCheck, Cog, Lock, AlertTriangle, SearchCheck, ExternalLink } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { getExplainer } from '../../data/toolExplainers';
 
 const GITHUB_BASE = 'https://github.com/seawaydigital/RDM-Toolkit/blob/master/';
+
+// Explainer copy is static and CI-linted, but it still goes through DOMPurify
+// so the dangerouslySetInnerHTML sink only ever receives TrustedHTML (required
+// by the production CSP's require-trusted-types-for 'script').
+const renderInlineMarkup = (html) =>
+  DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['code', 'strong', 'em', 'kbd', 'br'],
+    ALLOWED_ATTR: [],
+    RETURN_TRUSTED_TYPE: true,
+  });
 
 /**
  * Collapsible "How this tool works" explainer.
@@ -73,7 +84,7 @@ export default function HowItWorks({ toolId }) {
                   {technicalDetails.flow && (
                     <ul className="hiw-technical-flow">
                       {technicalDetails.flow.map((step, i) => (
-                        <li key={i} dangerouslySetInnerHTML={{ __html: step }} />
+                        <li key={i} dangerouslySetInnerHTML={{ __html: renderInlineMarkup(step) }} />
                       ))}
                     </ul>
                   )}

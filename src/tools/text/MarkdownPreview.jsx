@@ -43,7 +43,7 @@ function parseMarkdown(md) {
   // Code blocks (fenced) — must come before inline processing
   html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
     const escaped = escapeHtml(code.trimEnd());
-    return `<pre style="background:var(--bg-tertiary);padding:12px 16px;border-radius:6px;overflow-x:auto;font-size:0.85rem;line-height:1.5;margin:12px 0"><code>${escaped}</code></pre>`;
+    return `<pre><code>${escaped}</code></pre>`;
   });
 
   // Process line by line for block elements
@@ -55,7 +55,7 @@ function parseMarkdown(md) {
 
   function flushBlockquote() {
     if (blockquoteLines.length > 0) {
-      result.push(`<blockquote style="border-left:3px solid var(--accent-blue);padding:8px 16px;margin:12px 0;color:var(--text-secondary);background:var(--bg-secondary);border-radius:0 6px 6px 0">${blockquoteLines.join('<br/>')}</blockquote>`);
+      result.push(`<blockquote>${blockquoteLines.join('<br/>')}</blockquote>`);
       blockquoteLines = [];
       inBlockquote = false;
     }
@@ -83,7 +83,7 @@ function parseMarkdown(md) {
     if (/^(-{3,}|\*{3,}|_{3,})$/.test(line.trim())) {
       flushBlockquote();
       flushList();
-      result.push('<hr style="border:none;border-top:1px solid var(--border-primary);margin:20px 0"/>');
+      result.push('<hr/>');
       continue;
     }
 
@@ -104,7 +104,7 @@ function parseMarkdown(md) {
       const level = headingMatch[1].length;
       const sizes = { 1: '1.6rem', 2: '1.3rem', 3: '1.1rem', 4: '1rem', 5: '0.9rem', 6: '0.85rem' };
       const margins = { 1: '24px 0 12px', 2: '20px 0 10px', 3: '16px 0 8px', 4: '14px 0 6px', 5: '12px 0 4px', 6: '10px 0 4px' };
-      result.push(`<h${level} style="font-size:${sizes[level]};font-weight:700;margin:${margins[level]};color:var(--text-primary)">${processInline(headingMatch[2])}</h${level}>`);
+      result.push(`<h${level}>${processInline(headingMatch[2])}</h${level}>`);
       continue;
     }
 
@@ -113,9 +113,9 @@ function parseMarkdown(md) {
       if (inList !== 'ul') {
         flushList();
         inList = 'ul';
-        result.push('<ul style="margin:8px 0;padding-left:24px">');
+        result.push('<ul>');
       }
-      result.push(`<li style="margin:4px 0">${processInline(line.replace(/^\s*[-*+]\s+/, ''))}</li>`);
+      result.push(`<li>${processInline(line.replace(/^\s*[-*+]\s+/, ''))}</li>`);
       continue;
     }
 
@@ -124,9 +124,9 @@ function parseMarkdown(md) {
       if (inList !== 'ol') {
         flushList();
         inList = 'ol';
-        result.push('<ol style="margin:8px 0;padding-left:24px">');
+        result.push('<ol>');
       }
-      result.push(`<li style="margin:4px 0">${processInline(line.replace(/^\s*\d+\.\s+/, ''))}</li>`);
+      result.push(`<li>${processInline(line.replace(/^\s*\d+\.\s+/, ''))}</li>`);
       continue;
     }
 
@@ -134,12 +134,12 @@ function parseMarkdown(md) {
 
     // Empty lines become breaks
     if (line.trim() === '') {
-      result.push('<div style="height:8px"></div>');
+      result.push('<br/>');
       continue;
     }
 
     // Regular paragraph
-    result.push(`<p style="margin:6px 0;line-height:1.65">${processInline(line)}</p>`);
+    result.push(`<p>${processInline(line)}</p>`);
   }
 
   flushBlockquote();
@@ -158,7 +158,7 @@ function escapeHtml(text) {
 
 function processInline(text) {
   // Inline code (must come before other inline processing)
-  text = text.replace(/`([^`]+)`/g, '<code style="background:var(--bg-tertiary);padding:2px 6px;border-radius:3px;font-size:0.85em;font-family:monospace">$1</code>');
+  text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
   // Bold + italic
   text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
   // Bold
@@ -170,9 +170,9 @@ function processInline(text) {
   // Strikethrough
   text = text.replace(/~~(.+?)~~/g, '<del>$1</del>');
   // Images (must come before links so ![alt](url) isn't consumed by link regex)
-  text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;border-radius:6px;margin:8px 0"/>');
+  text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2"/>');
   // Links
-  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:var(--accent-blue);text-decoration:underline" target="_blank" rel="noopener noreferrer">$1</a>');
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 
   return text;
 }
@@ -187,6 +187,7 @@ export default function MarkdownPreview({ tool }) {
     ALLOWED_ATTR: ['href','src','alt','target','rel'],
     ALLOW_DATA_ATTR: false,
     FORCE_BODY: true,
+    RETURN_TRUSTED_TYPE: true,
     // Block javascript: and data: URIs — only allow https/http/mailto/tel and relative paths
     ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
   }), [text]);
@@ -305,6 +306,7 @@ export default function MarkdownPreview({ tool }) {
               lineHeight: '1.6',
               minHeight: '460px',
             }}
+            className="md-rendered"
             dangerouslySetInnerHTML={{ __html: renderedHTML }}
           />
         </div>

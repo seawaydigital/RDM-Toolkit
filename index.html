@@ -27,9 +27,10 @@
       form-action 'self';
       upgrade-insecure-requests;
     " />
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <!-- X-Content-Type-Options and Permissions-Policy are header-only directives
+         (browsers ignore them in meta tags) — they are served via public/_headers
+         on hosts that support it, and by the vite preview middleware locally. -->
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
-    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=()" />
   </head>
   <body>
     <div id="root"></div>
