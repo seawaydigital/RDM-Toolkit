@@ -1494,6 +1494,7 @@ input:focus, textarea:focus, select:focus {
 
 .homepage-hero-copy {
   position: relative;
+  min-width: 0;
 }
 
 .homepage-hero-ctas {
@@ -1542,6 +1543,7 @@ input:focus, textarea:focus, select:focus {
 
 .homepage-diagram {
   position: relative;
+  min-width: 0;
   background: var(--bg-inset);
   border: 1px solid var(--border-hairline);
   border-radius: var(--radius-lg);
@@ -1605,6 +1607,8 @@ input:focus, textarea:focus, select:focus {
 
 .homepage-diagram-wire {
   flex: 1;
+  min-width: 0;
+  width: auto;
   height: 8px;
   margin: 19px 6px 0;
   overflow: visible;
