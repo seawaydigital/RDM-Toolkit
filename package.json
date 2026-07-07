@@ -12,7 +12,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "security:audit": "node scripts/security-audit.mjs",
-    "bundle:integrity": "node scripts/bundle-integrity.mjs"
+    "bundle:integrity": "node scripts/bundle-integrity.mjs",
+    "a11y:baseline": "node scripts/axe-baseline.mjs",
+    "a11y:contrast": "node scripts/check-contrast.js --strict",
+    "a11y:contrast:test": "node --test scripts/check-contrast.test.js"
   },
   "dependencies": {
     "@cantoo/pdf-lib": "1.21.1",
