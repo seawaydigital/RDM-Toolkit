@@ -24,7 +24,7 @@
   /* Text */
   --text-primary:   #F1F5F9;
   --text-secondary: #94A3B8;
-  --text-muted:     #7C9BBF;
+  --text-muted:     #86A6C9;  /* was #7C9BBF — 4.05:1 on --bg-tertiary; now ≥4.5:1 on every surface */
   --text-parchment: #EEE6D3;     /* warm off-white for display headings */
 
   /* Accents — Lakehead Blaze gold primary */
@@ -545,7 +545,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .sidebar-sister-rs {
-  color: #D53A3A;
+  color: #E25555; /* ≥4.5:1 on sidebar inset (WCAG 1.4.3); #D53A3A was 4.0:1 */
   font-style: italic;
   letter-spacing: -0.01em;
 }
@@ -1774,7 +1774,7 @@ input:focus, textarea:focus, select:focus {
 .homepage-cat-count {
   font-family: var(--font-mono);
   font-size: 10px;
-  color: var(--text-muted);
+  color: var(--text-secondary); /* text-muted fails 4.5:1 on the raised pill surface */
   background: rgba(255,255,255,0.04);
   padding: 2px 8px;
   border-radius: 10px;
@@ -5616,7 +5616,7 @@ input:focus, textarea:focus, select:focus {
 }
 
 .htw-comparison-card--bad .htw-comparison-header {
-  color: var(--accent-red);
+  color: #F87171; /* accent-red is 3.6:1 on card surfaces; this passes 4.5:1 */
 }
 
 .htw-comparison-card--good .htw-comparison-header {
@@ -6303,7 +6303,7 @@ input:focus, textarea:focus, select:focus {
   letter-spacing: 0.05em;
 }
 .tap-agency-badge--cihr  { background: rgba(220,38,38,0.15);  color: #F87171; border: 1px solid rgba(220,38,38,0.3); }
-.tap-agency-badge--nserc { background: rgba(59,130,246,0.15); color: #60A5FA; border: 1px solid rgba(59,130,246,0.3); }
+.tap-agency-badge--nserc { background: rgba(59,130,246,0.15); color: #93C5FD; border: 1px solid rgba(59,130,246,0.3); } /* #60A5FA was 4.4:1 */
 .tap-agency-badge--sshrc { background: rgba(16,185,129,0.15); color: #34D399; border: 1px solid rgba(16,185,129,0.3); }
 
 .tap-agency-sep { color: var(--text-muted); font-size: 18px; }
@@ -9647,7 +9647,7 @@ input:focus, textarea:focus, select:focus {
 
 .sc-badge--sensitive {
   background: rgba(239, 68, 68, 0.12);
-  color: var(--accent-red);
+  color: #F87171; /* accent-red fails 4.5:1 on the tinted pill */
 }
 
 .sc-badge--has-data {
@@ -14605,22 +14605,33 @@ input:focus, textarea:focus, select:focus {
   margin: 0 0 var(--space-lg);
 }
 
+/* 24×24 touch target (WCAG 2.5.8); the visible dot is drawn via ::before */
 .welcome-tour-dot {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.welcome-tour-dot::before {
+  content: '';
   width: 8px;
   height: 8px;
   border-radius: 50%;
   background: var(--border);
-  border: none;
-  cursor: pointer;
   transition: all 0.18s;
-  padding: 0;
 }
 
-.welcome-tour-dot:hover {
+.welcome-tour-dot:hover::before {
   background: var(--text-muted);
 }
 
-.welcome-tour-dot--active {
+.welcome-tour-dot--active::before {
   background: var(--accent-primary);
   width: 22px;
   border-radius: 4px;
@@ -14765,6 +14776,20 @@ select:focus-visible,
    the skip link — the visual target is the content itself. */
 .main-content:focus-visible {
   outline: none;
+}
+
+/* Visually hidden — content stays in the accessibility tree (route announcer,
+   screen-reader-only hints) but is not visually rendered. */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 /* Respect user's reduced-motion preference. Disable animations and transitions
