@@ -1,4 +1,6 @@
-import { Shield, WifiOff, Wifi, Eye, FileCheck, Lock, Globe, MonitorSmartphone, ArrowRight, ArrowDown, CheckCircle, XCircle, Laptop, ExternalLink, Clock, FileText, Image as ImageIcon, Cpu } from 'lucide-react';
+import { Shield, WifiOff, Wifi, Eye, FileCheck, Lock, Globe, MonitorSmartphone, ArrowRight, ArrowDown, CheckCircle, XCircle, Laptop, ExternalLink, Clock, FileText, Image as ImageIcon, Cpu, Puzzle, HardDrive, Users, FolderDown } from 'lucide-react';
+import NetworkSilence from '../ui/NetworkSilence';
+import ClearLocalData from '../ui/ClearLocalData';
 
 export default function HowThisWorks() {
   return (
@@ -337,6 +339,7 @@ export default function HowThisWorks() {
             </p>
           </div>
         </div>
+        <NetworkSilence />
       </section>
 
       {/* What this means for compliance */}
@@ -390,6 +393,67 @@ export default function HowThisWorks() {
                 no third-party processing, and no disclosure to manage. The data
                 stays under your control at all times.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Honest limits of the browser model ── */}
+      <section className="htw-section">
+        <h2 className="htw-section-title">Where This Model Ends — and What Covers the Rest</h2>
+        <p className="htw-section-intro">
+          "Your files never leave your browser" is a guarantee about <em>this site</em>.
+          It is not a guarantee about your browser, your device, or the computer you're
+          sitting at. For confidential or PHIPA/OCAP®-governed data, you should know
+          exactly where the boundary sits:
+        </p>
+        <div className="htw-compliance-grid">
+          <div className="htw-compliance-card">
+            <Puzzle size={20} />
+            <div>
+              <h3>Browser extensions can see this page</h3>
+              <p>
+                Any extension with "read site data" permission can read what's on your
+                screen — on this site and every other. No website can prevent that. For
+                highly sensitive sessions, use a guest window or a clean browser profile
+                with no extensions installed.
+              </p>
+            </div>
+          </div>
+          <div className="htw-compliance-card">
+            <HardDrive size={20} />
+            <div>
+              <h3>Your operating system may write memory to disk</h3>
+              <p>
+                While a file is open in a tool it lives in your computer's memory, and the
+                OS may swap that memory to disk or save it during hibernation. Full-disk
+                encryption (BitLocker, FileVault) closes this gap — and is required for
+                confidential data under most institutional policies anyway.
+              </p>
+            </div>
+          </div>
+          <div className="htw-compliance-card">
+            <FolderDown size={20} />
+            <div>
+              <h3>Downloads land unprotected</h3>
+              <p>
+                The moment you download a result, it's an ordinary file in your Downloads
+                folder. If the output is sensitive, encrypt it (Password Protect PDF, or
+                Encrypt Text for snippets) before it leaves your machine, and clear your
+                Downloads folder on shared computers.
+              </p>
+            </div>
+          </div>
+          <div className="htw-compliance-card">
+            <Users size={20} />
+            <div>
+              <h3>Shared computers remember small things</h3>
+              <p>
+                This site never stores your files or their contents, but it does keep a
+                short list of your recently used tools and preferences in this browser.
+                On a lab, library, or clinic computer, wipe that before you walk away:
+              </p>
+              <ClearLocalData />
             </div>
           </div>
         </div>
