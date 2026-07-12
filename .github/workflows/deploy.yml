@@ -9,6 +9,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  attestations: write
 
 concurrency:
   group: pages
@@ -37,6 +38,16 @@ jobs:
 
       - name: Record bundle integrity
         run: node scripts/bundle-integrity.mjs > dist/bundle-integrity.json
+
+      - name: Attest build provenance (SLSA)
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        with:
+          subject-path: |
+            dist/**/*.js
+            dist/**/*.mjs
+            dist/**/*.css
+            dist/index.html
+            dist/bundle-integrity.json
 
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
