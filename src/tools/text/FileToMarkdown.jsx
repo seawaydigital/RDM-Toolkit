@@ -29,15 +29,15 @@ function escapeHtml(text) {
 }
 
 function processInline(text) {
-  text = text.replace(/`([^`]+)`/g, '<code style="background:var(--bg-tertiary);padding:2px 6px;border-radius:3px;font-size:0.85em;font-family:monospace">$1</code>');
+  text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
   text = text.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
   text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   text = text.replace(/__(.+?)__/g, '<strong>$1</strong>');
   text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
   text = text.replace(/_(.+?)_/g, '<em>$1</em>');
   text = text.replace(/~~(.+?)~~/g, '<del>$1</del>');
-  text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2" style="max-width:100%;border-radius:6px;margin:8px 0"/>');
-  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:var(--accent-primary);text-decoration:underline" target="_blank" rel="noopener noreferrer">$1</a>');
+  text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2"/>');
+  text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
   return text;
 }
 
@@ -45,7 +45,7 @@ function renderMarkdown(md) {
   let html = md;
   html = html.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
     const escaped = escapeHtml(code.trimEnd());
-    return `<pre style="background:var(--bg-tertiary);padding:12px 16px;border-radius:6px;overflow-x:auto;font-size:0.85rem;line-height:1.5;margin:12px 0"><code>${escaped}</code></pre>`;
+    return `<pre><code>${escaped}</code></pre>`;
   });
 
   const lines = html.split('\n');
@@ -56,7 +56,7 @@ function renderMarkdown(md) {
 
   function flushBlockquote() {
     if (blockquoteLines.length > 0) {
-      result.push(`<blockquote style="border-left:3px solid var(--border);padding:8px 16px;margin:12px 0;color:var(--text-secondary);background:var(--bg-secondary);border-radius:0 6px 6px 0">${blockquoteLines.join('<br/>')}</blockquote>`);
+      result.push(`<blockquote>${blockquoteLines.join('<br/>')}</blockquote>`);
       blockquoteLines = [];
       inBlockquote = false;
     }
@@ -82,7 +82,7 @@ function renderMarkdown(md) {
     if (/^(-{3,}|\*{3,}|_{3,})$/.test(line.trim())) {
       flushBlockquote();
       flushList();
-      result.push('<hr style="border:none;border-top:1px solid var(--border);margin:20px 0"/>');
+      result.push('<hr/>');
       continue;
     }
 
@@ -101,7 +101,7 @@ function renderMarkdown(md) {
       const level = headingMatch[1].length;
       const sizes = { 1: '1.6rem', 2: '1.3rem', 3: '1.1rem', 4: '1rem', 5: '0.9rem', 6: '0.85rem' };
       const margins = { 1: '24px 0 12px', 2: '20px 0 10px', 3: '16px 0 8px', 4: '14px 0 6px', 5: '12px 0 4px', 6: '10px 0 4px' };
-      result.push(`<h${level} style="font-size:${sizes[level]};font-weight:700;margin:${margins[level]};color:var(--text-primary)">${processInline(headingMatch[2])}</h${level}>`);
+      result.push(`<h${level}>${processInline(headingMatch[2])}</h${level}>`);
       continue;
     }
 
@@ -109,9 +109,9 @@ function renderMarkdown(md) {
       if (inList !== 'ul') {
         flushList();
         inList = 'ul';
-        result.push('<ul style="margin:8px 0;padding-left:24px">');
+        result.push('<ul>');
       }
-      result.push(`<li style="margin:4px 0">${processInline(line.replace(/^\s*[-*+]\s+/, ''))}</li>`);
+      result.push(`<li>${processInline(line.replace(/^\s*[-*+]\s+/, ''))}</li>`);
       continue;
     }
 
@@ -119,20 +119,20 @@ function renderMarkdown(md) {
       if (inList !== 'ol') {
         flushList();
         inList = 'ol';
-        result.push('<ol style="margin:8px 0;padding-left:24px">');
+        result.push('<ol>');
       }
-      result.push(`<li style="margin:4px 0">${processInline(line.replace(/^\s*\d+\.\s+/, ''))}</li>`);
+      result.push(`<li>${processInline(line.replace(/^\s*\d+\.\s+/, ''))}</li>`);
       continue;
     }
 
     flushList();
 
     if (line.trim() === '') {
-      result.push('<div style="height:8px"></div>');
+      result.push('<br/>');
       continue;
     }
 
-    result.push(`<p style="margin:6px 0;line-height:1.65">${processInline(line)}</p>`);
+    result.push(`<p>${processInline(line)}</p>`);
   }
 
   flushBlockquote();
@@ -376,16 +376,17 @@ export default function FileToMarkdown() {
     setActiveTab('preview');
   }, []);
 
-  const sanitizedPreview = markdown
-    ? DOMPurify.sanitize(renderMarkdown(markdown), {
-        ALLOWED_TAGS: ['h1','h2','h3','h4','h5','h6','p','strong','em','del','code','pre',
-          'ul','ol','li','blockquote','hr','a','img','br','div','table','thead','tbody','tr','th','td'],
-        ALLOWED_ATTR: ['href','src','alt','target','rel'],
-        ALLOW_DATA_ATTR: false,
-        FORCE_BODY: true,
-        ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
-      })
-    : '';
+  // Always run through DOMPurify (even when empty) so dangerouslySetInnerHTML
+  // only ever receives TrustedHTML under Trusted Types enforcement.
+  const sanitizedPreview = DOMPurify.sanitize(markdown ? renderMarkdown(markdown) : '', {
+    ALLOWED_TAGS: ['h1','h2','h3','h4','h5','h6','p','strong','em','del','code','pre',
+      'ul','ol','li','blockquote','hr','a','img','br','div','table','thead','tbody','tr','th','td'],
+    ALLOWED_ATTR: ['href','src','alt','target','rel'],
+    ALLOW_DATA_ATTR: false,
+    FORCE_BODY: true,
+    RETURN_TRUSTED_TYPE: true,
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+  });
 
   return (
     <div className="tool-page">
