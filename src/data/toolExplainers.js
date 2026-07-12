@@ -38,9 +38,9 @@ const EXPLAINERS = {
     technicalDetails: {
       library: 'WebCrypto (<code>crypto.subtle</code>) — native browser API, no third-party crypto library.',
       flow: [
-        'Key derivation: <code>PBKDF2</code> with <code>SHA-256</code>, <strong>100,000 iterations</strong>, 16-byte random salt per message.',
+        'Key derivation: <code>PBKDF2</code> with <code>SHA-256</code>, <strong>600,000 iterations</strong> (current OWASP guidance), 16-byte random salt per message. Text encrypted with an earlier version of this tool (100,000 iterations) still decrypts normally.',
         'Encryption: <code>AES-256-GCM</code> with a 12-byte random IV per message.',
-        'Output: the salt + IV + ciphertext are concatenated and Base64-encoded into a single blob you can copy or paste.',
+        'Output: the salt + IV + ciphertext are concatenated and Base64-encoded into a single blob prefixed with <code>v2:</code>, which you can copy or paste.',
         'The password itself never touches a network request, never enters storage, and is never logged.',
       ],
       sourceFile: 'src/tools/privacy/EncryptDecryptText.jsx',
