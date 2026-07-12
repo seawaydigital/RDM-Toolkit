@@ -59,7 +59,7 @@ const allowedDependencies = new Map([
   ['@fontsource/ibm-plex-mono', '5.2.7'],
   ['@fontsource/ibm-plex-sans', '5.2.8'],
   ['@pdf-lib/fontkit', '1.1.1'],
-  ['dompurify', '3.4.1'],
+  ['dompurify', '3.4.11'],
   ['exifr', '7.1.3'],
   ['jszip', '3.10.1'],
   ['lucide-react', '0.577.0'],
@@ -72,7 +72,10 @@ const allowedDependencies = new Map([
 ]);
 
 const allowedDevDependencies = new Map([
+  ['@axe-core/cli', '4.12.1'],
+  ['@axe-core/react', '4.12.1'],
   ['@vitejs/plugin-react', '4.7.0'],
+  ['http-server', '14.1.1'],
   ['vite', '5.4.21'],
   ['vite-plugin-pwa', '1.2.0'],
 ]);
@@ -215,6 +218,7 @@ const allowedDangerousHtml = new Set([
 ]);
 
 const allowedLocalStorage = new Set([
+  'src/components/ui/ClearLocalData.jsx', // wipe-only: clears storage, never writes
   'src/components/ui/SearchBar.jsx',
   'src/components/ui/WelcomeTour.jsx',
   'src/hooks/useRecentTools.js',
