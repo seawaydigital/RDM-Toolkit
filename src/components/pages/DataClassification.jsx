@@ -25,7 +25,7 @@ const TIERS = {
   },
   confidential: {
     label: 'Confidential / Sensitive',
-    color: '#EF4444',
+    color: '#F87171', /* #EF4444 fails 4.5:1 contrast on the tinted tier card */
     bg: 'rgba(239, 68, 68, 0.12)',
     border: 'rgba(239, 68, 68, 0.4)',
     icon: ShieldX,
