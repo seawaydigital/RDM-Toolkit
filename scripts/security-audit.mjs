@@ -77,7 +77,7 @@ const allowedDevDependencies = new Map([
   ['@vitejs/plugin-react', '4.7.0'],
   ['http-server', '14.1.1'],
   ['vite', '5.4.21'],
-  ['vite-plugin-pwa', '1.2.0'],
+  ['vite-plugin-pwa', '1.3.0'],
 ]);
 
 function assertAllowedDependencySet(sectionName, actual = {}, allowed) {
