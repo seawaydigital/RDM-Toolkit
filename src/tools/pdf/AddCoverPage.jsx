@@ -10,6 +10,8 @@ import { X } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { pdfHasFormFields } from '../../utils/pdfFormDetect';
+import FormFieldsNotice from '../../components/ui/FormFieldsNotice';
 
 const DESCRIPTION =
   'Design and prepend a professional cover page to any PDF — set a title, author, department, date, and colour scheme. Everything runs entirely in your browser with no uploads.';
@@ -214,6 +216,7 @@ export default function AddCoverPage({ tool, navigateTo }) {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [encryptedError, setEncryptedError] = useState(false);
+  const [hasFormFields, setHasFormFields] = useState(false);
 
   const dateDisplay = useAutoDate ? todayString() : manualDate;
   const textColor = getTextHex(bgColor);
@@ -223,6 +226,7 @@ export default function AddCoverPage({ tool, navigateTo }) {
     setError(null);
     setEncryptedError(false);
     setResult(null);
+    setHasFormFields(false);
     try {
       const valid = await validatePDFHeader(f);
       if (!valid) {
@@ -241,6 +245,9 @@ export default function AddCoverPage({ tool, navigateTo }) {
       setFile(f);
       setFileBytes(uint8);
       setPageCount(pdfDoc.getPageCount());
+
+      // Advisory form-field scan (copies bytes synchronously).
+      pdfHasFormFields(uint8).then(setHasFormFields);
 
       const firstPage = pdfDoc.getPages()[0];
       const { width, height } = firstPage.getSize();
@@ -510,6 +517,8 @@ export default function AddCoverPage({ tool, navigateTo }) {
                 </button>
               </div>
             </div>
+
+            {hasFormFields && <FormFieldsNotice action="adding a cover page" />}
 
             <ActionButton
               label="Generate PDF with Cover Page"

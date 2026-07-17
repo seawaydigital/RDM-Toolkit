@@ -10,6 +10,8 @@ import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { pdfHasFormFields } from '../../utils/pdfFormDetect';
+import FormFieldsNotice from '../../components/ui/FormFieldsNotice';
 
 const FONT_SIZES = [24, 36, 48, 72];
 const COLORS = {
@@ -25,6 +27,7 @@ const ROTATIONS = {
 export default function PDFWatermark({ tool, navigateTo }) {
   const [file, setFile] = useState(null);
   const [fileBytes, setFileBytes] = useState(null);
+  const [hasFormFields, setHasFormFields] = useState(false);
   const [thumbnail, setThumbnail] = useState(null);
   const [thumbSize, setThumbSize] = useState(160);
   const [loading, setLoading] = useState(false);
@@ -43,6 +46,7 @@ export default function PDFWatermark({ tool, navigateTo }) {
     setError(null);
     setResult(null);
     setThumbnail(null);
+    setHasFormFields(false);
 
     const isValid = await validatePDFHeader(selectedFile);
     if (!isValid) {
@@ -62,6 +66,10 @@ export default function PDFWatermark({ tool, navigateTo }) {
 
       setFile(selectedFile);
       setFileBytes(bytesCopy);
+
+      // Advisory form-field scan (copies bytes synchronously — safe to run
+      // before the thumbnail render below slices this buffer).
+      pdfHasFormFields(bytesCopy).then(setHasFormFields);
 
       try {
         const pdfJsDoc = await loadPdfDocument(bytesCopy.slice());
@@ -335,6 +343,8 @@ export default function PDFWatermark({ tool, navigateTo }) {
               </div>
             </div>
           </div>
+
+          {hasFormFields && <FormFieldsNotice action="watermarking" />}
 
           <ActionButton
             label="Add Watermark"
