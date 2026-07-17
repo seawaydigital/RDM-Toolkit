@@ -432,7 +432,7 @@ const EXPLAINERS = {
     limitations: [
       'Bookmarks and table-of-contents links from your original PDFs won\u2019t carry over. Page content and links within the document do.',
       'Digital signatures on source PDFs are invalidated by the merge — any time a signed PDF is changed, the signature no longer matches.',
-      'PDFs with fillable form fields may open with a warning in Adobe Acrobat after merging. If your source has forms, print it to PDF first (File → Print → Save as PDF) to "flatten" it, then merge.',
+      'Fillable form fields and signature boxes do not survive the merge — the combined PDF loses its form layer, so a signature spot placed for Adobe Acrobat will stop working. If a document needs to be signed, collect the signature first, then merge. If the fields are no longer needed, flatten the source first (File → Print → Save as PDF).',
       'Password-protected PDFs are rejected. Remove the password first with our Remove PDF Password tool.',
     ],
     verify: {
@@ -738,3 +738,92 @@ export function getExplainer(toolId) {
 }
 
 export const EXPLAINER_TOOL_IDS = Object.keys(EXPLAINERS);
+
+/**
+ * Pre-use caveats — the 1-2 highest-impact things a user must know BEFORE
+ * using a tool. Rendered always-visible by src/components/ui/ToolCaveats.jsx
+ * above the tool UI (wired globally in App.jsx).
+ *
+ * Standalone map (not a field on EXPLAINERS entries) because caveat coverage
+ * is independent of explainer coverage — several structural PDF tools have
+ * caveats but no full explainer.
+ *
+ * Promotion criteria (see docs/superpowers/specs/2026-07-17-tool-caveats-design.md):
+ *   1. Feature/data loss the user may need later
+ *   2. Workflow-order advice ("do X first, then use this tool")
+ *   3. Compliance-critical (PHIPA / TCPS 2 / legal risk if misunderstood)
+ * Deliberately NOT every limitation — if every tool shouts, users stop reading.
+ * Plain strings only (no HTML). Max 2 per tool.
+ */
+export const TOOL_CAVEATS = {
+  'merge-pdfs': [
+    'Merging removes fillable form fields and signature boxes — they will not work in the combined PDF. If a document needs to be signed (for example through Adobe Acrobat), collect the signature first, then merge.',
+    'Existing digital signatures are invalidated by any merge — that’s how PDF signing works, not a flaw in this tool.',
+  ],
+  'split-pdf': [
+    'Splitting rebuilds the document, so fillable form fields and signature boxes will not work in the output files. If the document needs to be signed, collect the signature first, then split.',
+    'Existing digital signatures are invalidated — any change to a signed PDF breaks its signature.',
+  ],
+  'reorder-pages': [
+    'Reordering rebuilds the document, so fillable form fields and signature boxes will not work in the output. If the document needs to be signed, collect the signature first.',
+    'Existing digital signatures are invalidated — any change to a signed PDF breaks its signature.',
+  ],
+  'pdf-page-delete': [
+    'Deleting pages rebuilds the document, so fillable form fields and signature boxes will not survive in the output.',
+    'There is no undo — keep a copy of the original file.',
+  ],
+  'rotate-pages': [
+    'Saving a rotated copy can break fillable form fields and signature boxes. If the document needs to be signed, collect the signature first.',
+    'Existing digital signatures are invalidated by any edit, including rotation.',
+  ],
+  'add-page-numbers': [
+    'Adding page numbers re-saves the document, which can break fillable form fields and signature boxes. If the document needs to be signed, get it signed first.',
+    'Existing digital signatures are invalidated by any edit.',
+  ],
+  'add-cover-page': [
+    'Adding a cover page rebuilds the document, so fillable form fields and signature boxes will not survive. If the document needs to be signed, get it signed first.',
+    'Existing digital signatures are invalidated by any edit.',
+  ],
+  'pdf-watermark': [
+    'Watermarking re-saves the document, which can break fillable form fields and signature boxes. If the document needs to be signed, get it signed first.',
+    'Existing digital signatures are invalidated by any edit.',
+  ],
+  'compress-pdf': [
+    'Aggressive compression flattens pages into images — text stops being selectable, searchable, and screen-reader accessible. Use the Smart presets unless you need the absolute smallest file.',
+    'Form fields, signature boxes, and existing digital signatures do not survive compression. If a document needs to be signed, get it signed first.',
+  ],
+  'pdf-redaction': [
+    'Only pages you draw a redaction on are scrubbed. If sensitive content also appears on other pages, that text remains fully extractable — mark every page where it appears.',
+    'Redacted pages become images: no text selection, search, or screen-reader access on those pages.',
+  ],
+  'pdf-to-images': [
+    'The output images are pixels, not text — they are not searchable and not screen-reader accessible. Keep the original PDF if you’ll need either.',
+  ],
+  'sign-pdf': [
+    'This places a picture of a signature — it is not a cryptographic digital signature. There is no certificate, timestamp, or tamper protection, and anyone with a PDF editor can remove or move it.',
+    'For legally binding signatures, use a certified e-signature service (Adobe Acrobat Sign, DocuSign, or your institution’s provider).',
+  ],
+  'password-protect-pdf': [
+    'PDF password protection is older and weaker than modern container encryption. For genuinely sensitive data (health records, interview transcripts), put the file in an encrypted 7-Zip or VeraCrypt container instead — or as well.',
+  ],
+  'encrypt-decrypt-text': [
+    'There is no password reset, backdoor, or recovery. If you lose the password, the text is gone permanently — that’s the point. Store the password in a password manager.',
+  ],
+  'data-anonymizer': [
+    'Automated de-identification is a first pass, not a guarantee — it cannot catch context clues like “the only female PhD in the department.” TCPS 2 compliance still requires human review of the output.',
+    'If you use the coded strategy, store the key file separately from the coded data (TCPS 2 Art. 5.5).',
+  ],
+  'strip-file-metadata': [
+    'For PDFs, rare third-party metadata streams can survive. For sensitive documents, double-check afterwards with Adobe Acrobat’s Examine Document.',
+  ],
+  'strip-image-metadata': [
+    'Information burned into the pixels — timestamp watermarks, GPS overlays — is not metadata and won’t be removed. Crop it out with the Image Cropper instead.',
+  ],
+  'compress-image': [
+    'Animated GIFs and APNGs are flattened to their first frame — the animation is lost.',
+  ],
+};
+
+export function getCaveats(toolId) {
+  return TOOL_CAVEATS[toolId] || null;
+}
