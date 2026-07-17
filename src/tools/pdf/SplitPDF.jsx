@@ -9,6 +9,8 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { X, ZoomIn, ZoomOut, Download, Plus, Trash2, RotateCcw } from 'lucide-react';
 import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { pdfHasFormFields } from '../../utils/pdfFormDetect';
+import FormFieldsNotice from '../../components/ui/FormFieldsNotice';
 
 function parsePageRanges(rangeStr, totalPages) {
   if (!rangeStr.trim()) return { pages: [], error: null };
@@ -41,6 +43,7 @@ function parsePageRanges(rangeStr, totalPages) {
 export default function SplitPDF({ tool, navigateTo }) {
   const [file, setFile] = useState(null);
   const [fileBytes, setFileBytes] = useState(null);
+  const [hasFormFields, setHasFormFields] = useState(false);
   const [pageCount, setPageCount] = useState(0);
   const [thumbnails, setThumbnails] = useState({});
   const [thumbSize, setThumbSize] = useState(140);
@@ -94,6 +97,7 @@ export default function SplitPDF({ tool, navigateTo }) {
     setZipResult(null);
     setThumbnails({});
     setPageCount(0);
+    setHasFormFields(false);
     setSplits([{ id: 1, label: 'Part 1', rangeStr: '' }]);
     nextId.current = 2;
 
@@ -117,6 +121,10 @@ export default function SplitPDF({ tool, navigateTo }) {
       setFile(selectedFile);
       setFileBytes(bytesCopy);
       setPageCount(count);
+
+      // Advisory form-field scan (copies bytes synchronously — safe to run
+      // before the thumbnail render below slices this buffer).
+      pdfHasFormFields(bytesCopy).then(setHasFormFields);
 
       if (pdfJsDocRef.current) pdfJsDocRef.current.destroy();
       const pdfJsDoc = await loadPdfDocument(bytesCopy.slice());
@@ -459,6 +467,8 @@ export default function SplitPDF({ tool, navigateTo }) {
               );
             })}
           </div>
+
+          {hasFormFields && <FormFieldsNotice action="splitting" />}
 
           <ActionButton
             label={`Split into ${parsedSplits.filter(s => s.parsed.pages.length > 0).length} File${parsedSplits.filter(s => s.parsed.pages.length > 0).length !== 1 ? 's' : ''}`}
