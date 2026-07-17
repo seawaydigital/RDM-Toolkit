@@ -13,6 +13,8 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { pdfHasFormFields } from '../../utils/pdfFormDetect';
+import FormFieldsNotice from '../../components/ui/FormFieldsNotice';
 
 function SortableFileCard({ item, onRemove, index, thumbSize }) {
   const {
@@ -78,6 +80,11 @@ function SortableFileCard({ item, onRemove, index, thumbSize }) {
             <AlertTriangle size={12} /> Encrypted
           </p>
         )}
+        {item.hasFormFields && (
+          <p className="merge-file-formfields">
+            <AlertTriangle size={12} /> Form fields
+          </p>
+        )}
       </div>
     </div>
   );
@@ -113,6 +120,7 @@ export default function MergePDFs({ tool, navigateTo }) {
         thumbnail: null,
         pageCount: null,
         encrypted: false,
+        hasFormFields: false,
       };
 
       try {
@@ -123,6 +131,15 @@ export default function MergePDFs({ tool, navigateTo }) {
           item.encrypted = true;
         } else {
           item.pageCount = pdfDoc.getPageCount();
+          // Advisory form-field scan — updates the card + notice when it
+          // completes. Must be kicked off before the thumbnail render below
+          // transfers this buffer to the pdfjs worker (pdfHasFormFields
+          // copies the bytes synchronously at call time).
+          pdfHasFormFields(uint8).then(has => {
+            if (has) {
+              setFiles(prev => prev.map(f => (f.id === id ? { ...f, hasFormFields: true } : f)));
+            }
+          });
         }
 
         if (!item.encrypted) {
@@ -271,6 +288,13 @@ export default function MergePDFs({ tool, navigateTo }) {
             </DndContext>
           </div>
         </>
+      )}
+
+      {files.some(f => f.hasFormFields) && (
+        <FormFieldsNotice
+          action="merging"
+          filenames={files.filter(f => f.hasFormFields).map(f => f.name)}
+        />
       )}
 
       <ActionButton
