@@ -14,6 +14,7 @@ import LakeheadDataverse from './components/pages/LakeheadDataverse';
 import GrantsAndIdentifiers from './components/pages/GrantsAndIdentifiers';
 import RelatedTools from './components/ui/RelatedTools';
 import HowItWorks from './components/ui/HowItWorks';
+import ToolCaveats from './components/ui/ToolCaveats';
 import ToolSkeleton from './components/ui/ToolSkeleton';
 import FeedbackModal from './components/ui/FeedbackModal';
 import WelcomeTour, { hasDismissedTour } from './components/ui/WelcomeTour';
@@ -480,6 +481,7 @@ export default function App() {
                       <p className="tool-header-lede">{currentTool.description}</p>
                     )}
                   </header>
+                  <ToolCaveats toolId={currentToolId} />
                   <ToolComponent
                     tool={currentTool}
                     navigateTo={navigateTo}

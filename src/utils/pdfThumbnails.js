@@ -65,6 +65,44 @@ export async function loadPdfDocument(bytes) {
 }
 
 /**
+ * Returns true if any page of the PDF carries a Widget annotation
+ * (an interactive form field or signature box). Bails on first hit.
+ *
+ * pdfjs is used instead of pdf-lib's catalog API because it handles
+ * XFA forms, digital signatures, and malformed AcroForms more reliably
+ * (same approach as PdfPageInspector).
+ *
+ * Never throws — detection is advisory and must not break the host tool;
+ * any parse failure returns false. A defensive copy of the bytes is made
+ * internally because pdfjs transfers the underlying buffer to its worker,
+ * so callers may pass a Uint8Array they still need. Call this BEFORE any
+ * other code transfers the same buffer.
+ *
+ * Lives in this module (rather than its own file) so it ships inside the
+ * existing shared pdfThumbnails chunk — the bundle-integrity CI guard
+ * rejects any new JS chunk, and every consumer tool already imports this
+ * module.
+ */
+export async function pdfHasFormFields(bytes) {
+  let doc = null;
+  try {
+    doc = await loadPdfDocument(bytes.slice());
+    for (let i = 1; i <= doc.numPages; i++) {
+      const page = await doc.getPage(i);
+      const annotations = await page.getAnnotations();
+      if (annotations.some(a => a.subtype === 'Widget')) return true;
+    }
+    return false;
+  } catch {
+    return false;
+  } finally {
+    if (doc) {
+      try { doc.destroy(); } catch { /* already destroyed */ }
+    }
+  }
+}
+
+/**
  * Load a PDF with @cantoo/pdf-lib with maximum tolerance.
  * Tries multiple strategies to handle problematic PDFs.
  * Returns { pdfDoc, isEncrypted } or throws.

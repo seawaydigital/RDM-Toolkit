@@ -25,7 +25,8 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 const DESCRIPTION =
   'Rearranges the pages of a PDF into any order you choose. Drag thumbnails to reposition pages, or type a custom page order directly. Your PDF is processed entirely in your browser.';
@@ -80,6 +81,7 @@ function SortableCard({ id, originalPage, position, thumbUrl, selected, onSelect
 export default function ReorderPages({ tool, navigateTo }) {
   const [file, setFile] = useState(null);
   const [fileBytes, setFileBytes] = useState(null);
+  const [hasFormFields, setHasFormFields] = useState(false);
   const [pageCount, setPageCount] = useState(0);
   const [thumbnails, setThumbnails] = useState({});
   const [order, setOrder] = useState([]); // array of page ids like "page-1", "page-2"
@@ -118,6 +120,7 @@ export default function ReorderPages({ tool, navigateTo }) {
     setEncryptedError(false);
     setResult(null);
     setSinglePageMsg(false);
+    setHasFormFields(false);
     try {
       const valid = await validatePDFHeader(f);
       if (!valid) {
@@ -145,6 +148,11 @@ export default function ReorderPages({ tool, navigateTo }) {
       setFile(f);
       setFileBytes(uint8);
       setPageCount(count);
+
+      // Advisory form-field scan (copies bytes synchronously — safe to run
+      // before the thumbnail render below slices this buffer).
+      pdfHasFormFields(uint8).then(setHasFormFields);
+
       const ids = Array.from({ length: count }, (_, i) => `page-${i + 1}`);
       setOrder(ids);
       setManualInput(ids.map((_, i) => i + 1).join(', '));
@@ -480,6 +488,8 @@ export default function ReorderPages({ tool, navigateTo }) {
               </button>
             </div>
           )}
+
+          {hasFormFields && <FormFieldsNotice action="reordering" />}
 
           <ActionButton
             label="Reorder Pages"

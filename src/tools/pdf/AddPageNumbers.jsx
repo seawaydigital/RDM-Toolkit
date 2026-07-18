@@ -9,7 +9,8 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 const DESCRIPTION =
   'Embeds page numbers directly into the PDF at a position and style you choose. Essential for finalising reports, theses, or formal submissions.';
@@ -25,6 +26,7 @@ const FONT_SIZES = [10, 12, 14, 16, 18];
 export default function AddPageNumbers({ tool, navigateTo }) {
   const [file, setFile] = useState(null);
   const [fileBytes, setFileBytes] = useState(null);
+  const [hasFormFields, setHasFormFields] = useState(false);
   const [thumbnail, setThumbnail] = useState(null);
   const [pageCount, setPageCount] = useState(0);
   const [position, setPosition] = useState('bottom-centre');
@@ -40,6 +42,7 @@ export default function AddPageNumbers({ tool, navigateTo }) {
     setError(null);
     setEncryptedError(false);
     setResult(null);
+    setHasFormFields(false);
     try {
       const valid = await validatePDFHeader(f);
       if (!valid) {
@@ -58,6 +61,10 @@ export default function AddPageNumbers({ tool, navigateTo }) {
       setFile(f);
       setFileBytes(uint8);
       setPageCount(pdfDoc.getPageCount());
+
+      // Advisory form-field scan (copies bytes synchronously — safe to run
+      // before the thumbnail render below slices this buffer).
+      pdfHasFormFields(uint8).then(setHasFormFields);
 
       const pdfJsDoc = await loadPdfDocument(uint8.slice());
       const thumb = await renderPageThumbnail(pdfJsDoc, 1);
@@ -247,6 +254,8 @@ export default function AddPageNumbers({ tool, navigateTo }) {
               </select>
             </div>
           </div>
+
+          {hasFormFields && <FormFieldsNotice action="adding page numbers" />}
 
           <ActionButton
             label="Add Page Numbers"

@@ -9,11 +9,13 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 export default function PDFPageDelete({ tool, navigateTo }) {
   const [file, setFile] = useState(null);
   const [fileBytes, setFileBytes] = useState(null);
+  const [hasFormFields, setHasFormFields] = useState(false);
   const [pageCount, setPageCount] = useState(0);
   const [thumbnails, setThumbnails] = useState({});
   const [thumbSize, setThumbSize] = useState(140);
@@ -32,6 +34,7 @@ export default function PDFPageDelete({ tool, navigateTo }) {
     setThumbnails({});
     setPageCount(0);
     setDeletedPages(new Set());
+    setHasFormFields(false);
 
     const isValid = await validatePDFHeader(selectedFile);
     if (!isValid) {
@@ -53,6 +56,10 @@ export default function PDFPageDelete({ tool, navigateTo }) {
       setFile(selectedFile);
       setFileBytes(bytesCopy);
       setPageCount(count);
+
+      // Advisory form-field scan (copies bytes synchronously — safe to run
+      // before the thumbnail render below slices this buffer).
+      pdfHasFormFields(bytesCopy).then(setHasFormFields);
 
       if (pdfJsDocRef.current) pdfJsDocRef.current.destroy();
       const pdfJsDoc = await loadPdfDocument(bytesCopy.slice());
@@ -287,6 +294,8 @@ export default function PDFPageDelete({ tool, navigateTo }) {
               );
             })}
           </div>
+
+          {hasFormFields && <FormFieldsNotice action="deleting pages" />}
 
           <ActionButton
             label={`Delete ${deleteCount} Page${deleteCount !== 1 ? 's' : ''}`}

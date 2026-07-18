@@ -15363,3 +15363,77 @@ select:focus-visible,
   }
 }
 
+
+/* ============================================================
+   Pre-use tool caveats (ToolCaveats.jsx) + form-fields notice
+   ============================================================ */
+
+.tool-caveats {
+  margin: 0 0 var(--space-md);
+  padding: 12px 16px;
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--radius-md);
+}
+
+.tool-caveats-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-amber);
+}
+
+.tool-caveats-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tool-caveats-list li {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-primary);
+}
+
+/* Shared notice for PDFs that contain form fields / signature boxes
+   (FormFieldsNotice.jsx, used by the structural PDF tools) */
+.form-fields-notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: var(--space-md) 0;
+  padding: 12px 14px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+}
+
+.form-fields-notice svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--accent-amber);
+}
+
+.form-fields-notice p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* Merge PDFs: per-file form-fields badge (mirrors .merge-file-encrypted) */
+.merge-file-formfields {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: var(--accent-amber);
+}

@@ -9,11 +9,13 @@ import ErrorCard from '../../components/ui/ErrorCard';
 import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 export default function RotatePages({ tool, navigateTo }) {
   const [file, setFile] = useState(null);
   const [fileBytes, setFileBytes] = useState(null);
+  const [hasFormFields, setHasFormFields] = useState(false);
   const [pages, setPages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -26,6 +28,7 @@ export default function RotatePages({ tool, navigateTo }) {
     setError(null);
     setResult(null);
     setPages([]);
+    setHasFormFields(false);
 
     const isValid = await validatePDFHeader(selectedFile);
     if (!isValid) {
@@ -46,6 +49,10 @@ export default function RotatePages({ tool, navigateTo }) {
       const count = pdfDoc.getPageCount();
       setFile(selectedFile);
       setFileBytes(bytesCopy);
+
+      // Advisory form-field scan (copies bytes synchronously — safe to run
+      // before the thumbnail render below slices this buffer).
+      pdfHasFormFields(bytesCopy).then(setHasFormFields);
 
       const initial = Array.from({ length: count }, (_, i) => ({
         id: `page-${i + 1}`,
@@ -239,6 +246,8 @@ export default function RotatePages({ tool, navigateTo }) {
               </div>
             ))}
           </div>
+
+          {hasFormFields && <FormFieldsNotice action="rotating" />}
 
           <ActionButton
             label="Save Rotated PDF"

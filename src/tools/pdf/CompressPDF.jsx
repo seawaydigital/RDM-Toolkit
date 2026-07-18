@@ -9,7 +9,8 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { Download, RotateCcw, X, Loader2, Sparkles, ExternalLink, Info, Scissors } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 const DESCRIPTION =
   'Reduce PDF file size. Smart compression keeps your text selectable by re-encoding embedded images in place. Aggressive compression flattens everything to images for the smallest possible file. Both run entirely in your browser.';
@@ -540,6 +541,7 @@ export default function CompressPDF({ tool, navigateTo }) {
   const [compressingKey, setCompressingKey] = useState(null); // `${mode}-${presetId}` or null
   const [structuralLoading, setStructuralLoading] = useState(false);
   const [downloadedKey, setDownloadedKey] = useState(null);
+  const [hasFormFields, setHasFormFields] = useState(false);
 
   const objectUrlsRef = useRef([]);
 
@@ -570,6 +572,7 @@ export default function CompressPDF({ tool, navigateTo }) {
     setStructuralResult(null);
     setDownloadedKey(null);
     setThumbnail(null);
+    setHasFormFields(false);
     revokeAllUrls();
 
     const isValid = await validatePDFHeader(selectedFile);
@@ -590,6 +593,10 @@ export default function CompressPDF({ tool, navigateTo }) {
 
       setFile(selectedFile);
       setFileBytes(bytes);
+
+      // Advisory form-field scan (copies bytes synchronously \u2014 safe to run
+      // before the pdfjs load below slices this buffer).
+      pdfHasFormFields(bytes).then(setHasFormFields);
 
       setBusyMsg('Reading PDF\u2026');
       const pdfJsDoc = await loadPdfDocument(bytes.slice());
@@ -666,6 +673,7 @@ export default function CompressPDF({ tool, navigateTo }) {
     setError(null);
     setEncryptedError(false);
     setBusyMsg('');
+    setHasFormFields(false);
   }
 
   function handleStartOver() {
@@ -890,6 +898,8 @@ export default function CompressPDF({ tool, navigateTo }) {
           </div>
         </div>
       )}
+
+      {file && hasFormFields && <FormFieldsNotice action="compression" />}
 
       {file && file.size > LARGE_FILE_BYTES && !structuralResult && (
         <div className="compress-large-file">
