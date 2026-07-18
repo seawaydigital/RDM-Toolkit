@@ -7,7 +7,7 @@ import { resolve, sep } from 'node:path';
 
 const SECURITY_HEADERS = {
   'Content-Security-Policy':
-    "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests",
+    "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; trusted-types dompurify default; require-trusted-types-for 'script'; upgrade-insecure-requests",
   'Strict-Transport-Security': 'max-age=31536000',
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options': 'DENY',
@@ -24,6 +24,23 @@ const previewSecurityHeaders = () => ({
       }
       next();
     });
+  },
+});
+
+// Production builds get the strict CSP: no 'unsafe-inline' for styles (React
+// applies inline styles via CSSOM, which style-src does not block) and Trusted
+// Types enforcement on script sinks. Dev keeps the relaxed meta CSP from
+// index.html because Vite's HMR injects <style> elements at runtime.
+const buildCspTighten = () => ({
+  name: 'build-csp-tighten',
+  apply: 'build',
+  transformIndexHtml(html) {
+    return html
+      .replace("style-src 'self' 'unsafe-inline';", "style-src 'self';")
+      .replace(
+        "form-action 'self';",
+        "form-action 'self';\n      trusted-types dompurify default;\n      require-trusted-types-for 'script';",
+      );
   },
 });
 
@@ -94,6 +111,7 @@ export default defineConfig({
   plugins: [
     react(),
     previewSecurityHeaders(),
+    buildCspTighten(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',

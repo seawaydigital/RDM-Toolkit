@@ -1,5 +1,7 @@
 # AODA Compliance Implementation Plan
 
+> **STATUS (2026-07-07): Phase 0 complete · Phase 1 complete.** Executed on branch `claude/suspicious-newton-044ae2`. Deviations from plan: (1) much of Phase 1 (skip link, landmarks, focus-visible system, reduced-motion, `<main tabIndex=-1>`) was already implemented in the codebase before execution — those tasks were verified rather than re-built; (2) the chromedriver path in `axe-baseline.mjs` fails in some environments — the baseline was captured by injecting the same axe-core engine into a real Chromium session (see `docs/accessibility/baseline-summary-2026-07-07.md`); (3) new devDeps required allowlisting in `scripts/security-audit.mjs` (done in same branch); (4) all baseline findings were fixed immediately rather than deferred — post-fix scan shows **0 violations on all 10 routes** (`docs/accessibility/baseline-after-fixes-2026-07-07.md`). Phases 2–6 remain outlined below; remaining known gaps are listed at the end of the after-fixes doc.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Bring rdmtoolkit.ca to a defensible "best-effort improvements toward WCAG 2.2 Level AA" posture before formal user testing begins.

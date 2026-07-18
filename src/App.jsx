@@ -101,6 +101,21 @@ const toolComponents = {
 
 const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy', 'drac-services', 'acrobat-alternative', 'lakehead-dataverse', 'grants-identifiers']);
 
+// Human-readable titles for non-tool routes — used for document.title + the
+// screen-reader route announcer (hash navigation never triggers a page load,
+// so assistive tech needs an explicit announcement).
+const PAGE_TITLES = {
+  'how-this-works': 'How This Works',
+  'request-a-tool': 'Request a Tool',
+  'data-classification': 'Data Classification Tool',
+  'storage-calculator': 'Research Storage Calculator',
+  'tri-agency-policy': 'Tri-Agency RDM Policy',
+  'drac-services': 'DRAC Services',
+  'acrobat-alternative': 'Adobe Acrobat Alternative',
+  'lakehead-dataverse': 'Lakehead Dataverse',
+  'grants-identifiers': 'Grants & Identifiers',
+};
+
 function getRouteFromHash() {
   const hash = window.location.hash.slice(1);
   if (!hash) return { page: null, toolId: null };
@@ -242,6 +257,7 @@ export default function App() {
   const [globalDropActive, setGlobalDropActive] = useState(false);
   const [feedbackContext, setFeedbackContext] = useState(null);
   const [tourOpen, setTourOpen] = useState(() => !hasDismissedTour());
+  const [routeAnnouncement, setRouteAnnouncement] = useState('');
   const dragCounterRef = useRef(0);
   const { addRecentTool } = useRecentTools();
   const { logEvent, grantConsent, exportLog } = useUsageLog();
@@ -292,6 +308,17 @@ export default function App() {
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, [addRecentTool, logEvent]);
+
+  // WCAG 2.4.2 / 4.1.3 — update the tab title and announce hash-route changes
+  // to screen readers via the polite live region rendered below the skip link.
+  useEffect(() => {
+    const tool = route.toolId ? ALL_TOOLS.find(t => t.id === route.toolId) : null;
+    const title = tool ? tool.name : (route.page ? PAGE_TITLES[route.page] : null);
+    document.title = title
+      ? `${title} — RDM Toolkit`
+      : 'RDM Toolkit — Research Data Management Tools';
+    setRouteAnnouncement(`${title || 'Home'}, page loaded`);
+  }, [route]);
 
   useEffect(() => {
     function onResize() {
@@ -398,6 +425,9 @@ export default function App() {
   return (
     <div className="app-layout">
       <a href="#main-content" className="skip-to-content">Skip to main content</a>
+      <div role="status" aria-live="polite" aria-atomic="true" className="visually-hidden" id="route-announcer">
+        {routeAnnouncement}
+      </div>
       <Topbar
         onMenuToggle={() => setSidebarOpen(prev => !prev)}
         showMenuButton={isMobile}
