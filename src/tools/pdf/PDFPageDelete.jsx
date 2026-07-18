@@ -9,9 +9,8 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
-import { pdfHasFormFields } from '../../utils/pdfFormDetect';
-import FormFieldsNotice from '../../components/ui/FormFieldsNotice';
+import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 export default function PDFPageDelete({ tool, navigateTo }) {
   const [file, setFile] = useState(null);

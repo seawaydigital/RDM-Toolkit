@@ -9,9 +9,8 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { loadPdfLibDocument } from '../../utils/pdfThumbnails';
-import { pdfHasFormFields } from '../../utils/pdfFormDetect';
-import FormFieldsNotice from '../../components/ui/FormFieldsNotice';
+import { loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 const DESCRIPTION =
   'Design and prepend a professional cover page to any PDF — set a title, author, department, date, and colour scheme. Everything runs entirely in your browser with no uploads.';

@@ -9,9 +9,8 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
-import { pdfHasFormFields } from '../../utils/pdfFormDetect';
-import FormFieldsNotice from '../../components/ui/FormFieldsNotice';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 const FONT_SIZES = [24, 36, 48, 72];
 const COLORS = {

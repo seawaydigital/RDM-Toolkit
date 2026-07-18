@@ -9,9 +9,8 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
-import { pdfHasFormFields } from '../../utils/pdfFormDetect';
-import FormFieldsNotice from '../../components/ui/FormFieldsNotice';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 const DESCRIPTION =
   'Embeds page numbers directly into the PDF at a position and style you choose. Essential for finalising reports, theses, or formal submissions.';

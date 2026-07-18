@@ -12,9 +12,8 @@ import ErrorCard from '../../components/ui/ErrorCard';
 import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
-import { pdfHasFormFields } from '../../utils/pdfFormDetect';
-import FormFieldsNotice from '../../components/ui/FormFieldsNotice';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 function SortableFileCard({ item, onRemove, index, thumbSize }) {
   const {

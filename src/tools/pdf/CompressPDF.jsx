@@ -9,9 +9,8 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { Download, RotateCcw, X, Loader2, Sparkles, ExternalLink, Info, Scissors } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
-import { pdfHasFormFields } from '../../utils/pdfFormDetect';
-import FormFieldsNotice from '../../components/ui/FormFieldsNotice';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 const DESCRIPTION =
   'Reduce PDF file size. Smart compression keeps your text selectable by re-encoding embedded images in place. Aggressive compression flattens everything to images for the smallest possible file. Both run entirely in your browser.';
