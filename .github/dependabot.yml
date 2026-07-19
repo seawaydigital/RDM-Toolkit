@@ -1,11 +1,21 @@
 version: 2
 updates:
+  # Low-touch cadence (2026-07-18): monthly, grouped into a single PR per
+  # ecosystem. Security-fix PRs are NOT affected by this schedule — Dependabot
+  # opens those as soon as an advisory with a fix lands, which is exactly the
+  # signal we want. Routine version bumps wait for the monthly batch.
+  #
+  # Reminder: any npm bump must also update the exact-version allowlist in
+  # scripts/security-audit.mjs (same PR) or the `security` check fails.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 10
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    groups:
+      npm-monthly:
+        patterns:
+          - "*"
     labels:
       - "dependencies"
       - "security"
@@ -17,9 +27,12 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 10
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    groups:
+      actions-monthly:
+        patterns:
+          - "*"
     labels:
       - "dependencies"
       - "github-actions"
