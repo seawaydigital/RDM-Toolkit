@@ -79,6 +79,14 @@ function readJson(filePath) {
   return JSON.parse(readFileSync(resolveWorkspacePath(filePath, 'JSON path'), 'utf8'));
 }
 
+// One-time transition allowance for the Vite 5 (Rollup) -> Vite 8 (Rolldown)
+// bundler migration: Rolldown always emits a shared runtime-helpers chunk when
+// manual chunking is used (see rolldown docs, "Why there's always a runtime.js
+// chunk?") — there is no option to inline it. Exact logical-name match only.
+// This entry becomes inert once master's own baseline is a Rolldown build;
+// remove it in a later cleanup pass.
+const TRANSITION_ALLOWED_NEW_CHUNKS = new Set(['rolldown-runtime.js']);
+
 function compareBundles(base, current, maxGrowthPct) {
   const baseByLogicalName = new Map(base.files.map((file) => [file.logicalName, file]));
   const issues = [];
@@ -86,6 +94,7 @@ function compareBundles(base, current, maxGrowthPct) {
   for (const file of current.files) {
     const baseline = baseByLogicalName.get(file.logicalName);
     if (!baseline) {
+      if (TRANSITION_ALLOWED_NEW_CHUNKS.has(file.logicalName)) continue;
       issues.push(`new JS chunk ${file.logicalName} (${file.name})`);
       continue;
     }
