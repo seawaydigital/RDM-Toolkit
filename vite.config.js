@@ -161,12 +161,23 @@ export default defineConfig({
     target: 'es2020',
     rollupOptions: {
       output: {
-        manualChunks: {
-          'pdf-lib': ['@cantoo/pdf-lib'],
-          'pdfjs': ['pdfjs-dist'],
-          'jszip': ['jszip'],
-          'zxcvbn': ['zxcvbn'],
-          'dompurify': ['dompurify'],
+        // Rolldown (Vite 8's bundler) only accepts the function form of
+        // manualChunks. Chunk names must stay stable — the bundle-integrity
+        // CI guard compares logical chunk sets against master.
+        manualChunks(id) {
+          const normalized = id.replace(/\\/g, '/');
+          if (normalized.includes('node_modules/@cantoo/pdf-lib/')) return 'pdf-lib';
+          if (normalized.includes('node_modules/pdfjs-dist/')) return 'pdfjs';
+          if (normalized.includes('node_modules/jszip/')) return 'jszip';
+          if (normalized.includes('node_modules/zxcvbn/')) return 'zxcvbn';
+          if (normalized.includes('node_modules/dompurify/')) return 'dompurify';
+          // Rolldown splits these tiny always-loaded shared modules into their
+          // own chunks; Rollup kept them in the entry. Pin them to the entry
+          // chunk so the logical chunk set stays identical to the Vite 5 build
+          // (the bundle-integrity CI guard rejects new chunks).
+          if (normalized.includes('node_modules/react/jsx-runtime')) return 'index';
+          if (normalized.includes('lucide-react') && normalized.includes('createLucideIcon')) return 'index';
+          if (normalized.includes('rolldown:runtime') || normalized.includes('rolldown-runtime')) return 'index';
         },
       },
     },
