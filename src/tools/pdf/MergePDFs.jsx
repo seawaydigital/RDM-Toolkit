@@ -134,8 +134,17 @@ export default function MergePDFs({ tool, navigateTo }) {
           // completes. Must be kicked off before the thumbnail render below
           // transfers this buffer to the pdfjs worker (pdfHasFormFields
           // copies the bytes synchronously at call time).
+          //
+          // The scan races the rest of this loop, so it records the result both
+          // ways. On a small PDF it finishes first, before setFiles() below has
+          // put the card into state — the state update would find no matching
+          // id and the badge would be lost, so it also sets the flag on `item`,
+          // still a local object at that point and about to be inserted. On a
+          // large PDF the scan finishes after insertion, and the state update
+          // is what lands.
           pdfHasFormFields(uint8).then(has => {
             if (has) {
+              item.hasFormFields = true;
               setFiles(prev => prev.map(f => (f.id === id ? { ...f, hasFormFields: true } : f)));
             }
           });

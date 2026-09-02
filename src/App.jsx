@@ -21,7 +21,7 @@ import WelcomeTour, { hasDismissedTour } from './components/ui/WelcomeTour';
 import { ALL_TOOLS } from './data/toolRegistry';
 import { useRecentTools } from './hooks/useRecentTools';
 import { useUsageLog } from './hooks/useUsageLog';
-import { setDroppedFiles, DROPPED_FILES_EVENT } from './utils/droppedFile';
+import { setDroppedFiles, hasPendingDroppedFiles, DROPPED_FILES_EVENT } from './utils/droppedFile';
 
 // Map file extensions to tool IDs for global drop routing
 const EXT_TO_TOOL = {
@@ -255,6 +255,7 @@ export default function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [errorResetKey, setErrorResetKey] = useState(0);
   const [globalDropActive, setGlobalDropActive] = useState(false);
+  const [toolInstanceKey, setToolInstanceKey] = useState(0);
   const [feedbackContext, setFeedbackContext] = useState(null);
   const [tourOpen, setTourOpen] = useState(() => !hasDismissedTour());
   const [routeAnnouncement, setRouteAnnouncement] = useState('');
@@ -421,6 +422,15 @@ export default function App() {
         // Already on the target tool: the hash does not change, so nothing
         // remounts to collect the files — hand them to the open tool directly.
         window.dispatchEvent(new CustomEvent(DROPPED_FILES_EVENT));
+
+        if (hasPendingDroppedFiles()) {
+          // Nothing took them: most tools swap their drop zone out for an
+          // editor once a file is loaded, so there was no listener mounted.
+          // Remount the tool so it starts over on the dropped file — otherwise
+          // the drop looks like it did nothing, and the files would be picked
+          // up by whichever tool is opened next.
+          setToolInstanceKey(key => key + 1);
+        }
       } else {
         window.location.hash = targetToolId;
       }
@@ -513,6 +523,7 @@ export default function App() {
                   </header>
                   <ToolCaveats toolId={currentToolId} />
                   <ToolComponent
+                    key={toolInstanceKey}
                     tool={currentTool}
                     navigateTo={navigateTo}
                   />
