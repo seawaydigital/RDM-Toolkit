@@ -10,7 +10,37 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderAllThumbnails, loadPdfDocument } from '../../utils/pdfThumbnails';
+import { renderAllThumbnails, loadPdfDocument, destroyPdfDocument } from '../../utils/pdfThumbnails';
+
+/**
+ * Resolve the pdfjs image object behind a paintImage* operator.
+ *
+ * pdfjs 6 changed `objs.get(objId)` to throw when the object has not been
+ * resolved yet, and right after `getOperatorList()` the worker is usually
+ * still decoding — so the old synchronous read finds nothing. The callback
+ * form fires as soon as the data lands; the timeout keeps an image the worker
+ * never delivers from stalling the whole extraction.
+ *
+ * v6 also hands back `{ bitmap: ImageBitmap, width, height }` rather than raw
+ * `data`, which the drawing code below already handles.
+ */
+function resolveImageObject(page, objId, timeoutMs = 15000) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const timer = setTimeout(() => finish(null), timeoutMs);
+    function finish(value) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      resolve(value);
+    }
+    try {
+      page.objs.get(objId, finish);
+    } catch {
+      finish(null);
+    }
+  });
+}
 
 export default function ExtractImagesFromPDF({ tool, navigateTo }) {
   const [file, setFile] = useState(null);
@@ -117,7 +147,7 @@ export default function ExtractImagesFromPDF({ tool, navigateTo }) {
             const imageName = operatorList.argsArray[j][0];
 
             try {
-              const imgData = page.objs.get(imageName);
+              const imgData = await resolveImageObject(page, imageName);
               if (!imgData) continue;
 
               // Skip very small images (likely artifacts or masks)
@@ -200,7 +230,7 @@ export default function ExtractImagesFromPDF({ tool, navigateTo }) {
         page.cleanup();
       }
 
-      pdfJsDoc.destroy();
+      destroyPdfDocument(pdfJsDoc);
 
       if (totalImages === 0) {
         setError('No extractable images were found in this PDF.');

@@ -9,7 +9,7 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 const FONT_SIZES = [24, 36, 48, 72];
@@ -72,7 +72,7 @@ export default function PDFWatermark({ tool, navigateTo }) {
 
       try {
         const pdfJsDoc = await loadPdfDocument(bytesCopy.slice());
-        if (pdfJsDocRef.current) pdfJsDocRef.current.destroy();
+        if (pdfJsDocRef.current) destroyPdfDocument(pdfJsDocRef.current);
         pdfJsDocRef.current = pdfJsDoc;
         const thumbUrl = await renderPageThumbnail(pdfJsDoc, 1);
         setThumbnail(thumbUrl);
@@ -139,7 +139,7 @@ export default function PDFWatermark({ tool, navigateTo }) {
 
   const handleRemoveFile = useCallback(() => {
     if (thumbnail) URL.revokeObjectURL(thumbnail);
-    if (pdfJsDocRef.current) { pdfJsDocRef.current.destroy(); pdfJsDocRef.current = null; }
+    if (pdfJsDocRef.current) { destroyPdfDocument(pdfJsDocRef.current); pdfJsDocRef.current = null; }
     setFile(null);
     setFileBytes(null);
     setThumbnail(null);
@@ -149,7 +149,7 @@ export default function PDFWatermark({ tool, navigateTo }) {
   const handleStartOver = useCallback(() => {
     if (result?.downloadUrl) URL.revokeObjectURL(result.downloadUrl);
     if (thumbnail) URL.revokeObjectURL(thumbnail);
-    if (pdfJsDocRef.current) { pdfJsDocRef.current.destroy(); pdfJsDocRef.current = null; }
+    if (pdfJsDocRef.current) { destroyPdfDocument(pdfJsDocRef.current); pdfJsDocRef.current = null; }
     setFile(null);
     setFileBytes(null);
     setThumbnail(null);

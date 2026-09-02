@@ -8,7 +8,7 @@ import ErrorCard from '../../components/ui/ErrorCard';
 import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { X, ZoomIn, ZoomOut, Download, Plus, Trash2, RotateCcw } from 'lucide-react';
-import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 function parsePageRanges(rangeStr, totalPages) {
@@ -125,7 +125,7 @@ export default function SplitPDF({ tool, navigateTo }) {
       // before the thumbnail render below slices this buffer).
       pdfHasFormFields(bytesCopy).then(setHasFormFields);
 
-      if (pdfJsDocRef.current) pdfJsDocRef.current.destroy();
+      if (pdfJsDocRef.current) destroyPdfDocument(pdfJsDocRef.current);
       const pdfJsDoc = await loadPdfDocument(bytesCopy.slice());
       pdfJsDocRef.current = pdfJsDoc;
       renderAllThumbnails(pdfJsDoc, (pageNum, dataUrl) => {
@@ -217,7 +217,7 @@ export default function SplitPDF({ tool, navigateTo }) {
 
   /* ---- cleanup ---- */
   function handleRemoveFile() {
-    if (pdfJsDocRef.current) { pdfJsDocRef.current.destroy(); pdfJsDocRef.current = null; }
+    if (pdfJsDocRef.current) { destroyPdfDocument(pdfJsDocRef.current); pdfJsDocRef.current = null; }
     setFile(null);
     setFileBytes(null);
     setPageCount(0);

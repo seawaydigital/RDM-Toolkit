@@ -9,7 +9,7 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut, Download, RotateCcw } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, destroyPdfDocument } from '../../utils/pdfThumbnails';
 
 const FORMATS = [
   { value: 'png', label: 'PNG' },
@@ -64,7 +64,7 @@ export default function PDFToImages({ tool, navigateTo }) {
       setFileBytes(bytesCopy);
       setPageCount(count);
 
-      if (pdfJsDocRef.current) pdfJsDocRef.current.destroy();
+      if (pdfJsDocRef.current) destroyPdfDocument(pdfJsDocRef.current);
       const pdfJsDoc = await loadPdfDocument(bytesCopy.slice());
       pdfJsDocRef.current = pdfJsDoc;
       renderAllThumbnails(pdfJsDoc, (pageNum, dataUrl) => {
@@ -153,7 +153,7 @@ export default function PDFToImages({ tool, navigateTo }) {
   }, [fileBytes, file, pageCount, format, quality, scale]);
 
   const handleRemoveFile = useCallback(() => {
-    if (pdfJsDocRef.current) { pdfJsDocRef.current.destroy(); pdfJsDocRef.current = null; }
+    if (pdfJsDocRef.current) { destroyPdfDocument(pdfJsDocRef.current); pdfJsDocRef.current = null; }
     setFile(null);
     setFileBytes(null);
     setPageCount(0);
@@ -166,7 +166,7 @@ export default function PDFToImages({ tool, navigateTo }) {
       result.files.forEach(f => URL.revokeObjectURL(f.url));
       if (result.zipUrl) URL.revokeObjectURL(result.zipUrl);
     }
-    if (pdfJsDocRef.current) { pdfJsDocRef.current.destroy(); pdfJsDocRef.current = null; }
+    if (pdfJsDocRef.current) { destroyPdfDocument(pdfJsDocRef.current); pdfJsDocRef.current = null; }
     setFile(null);
     setFileBytes(null);
     setPageCount(0);

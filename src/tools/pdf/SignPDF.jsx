@@ -9,7 +9,7 @@ import ErrorCard from '../../components/ui/ErrorCard';
 import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderAllThumbnails, renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { renderAllThumbnails, renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, destroyPdfDocument } from '../../utils/pdfThumbnails';
 
 const DESCRIPTION =
   'Draw or type a signature and place it anywhere on a PDF page \u2014 entirely in your browser. Your document and signature are never uploaded or transmitted.';
@@ -254,7 +254,7 @@ export default function SignPDF({ tool, navigateTo }) {
       // Render at scale 1.5 for a large, detailed preview
       const preview = await renderPageThumbnail(pdfJsDoc, pageNum, 1.5);
       setPagePreview(preview);
-      pdfJsDoc.destroy();
+      destroyPdfDocument(pdfJsDoc);
     } catch (e) {
       console.error('Page preview rendering failed:', e);
       setError('Failed to render page preview.');

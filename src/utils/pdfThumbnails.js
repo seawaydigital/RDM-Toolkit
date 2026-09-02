@@ -65,6 +65,21 @@ export async function loadPdfDocument(bytes) {
 }
 
 /**
+ * Release a pdfjs document and tear down its worker.
+ *
+ * pdfjs 6 removed `PDFDocumentProxy.destroy()` — teardown now goes through the
+ * document's loading task. Never throws: every caller uses this on a cleanup
+ * path (unmount, reset, replacing a file) where a failure must not surface.
+ */
+export function destroyPdfDocument(pdfJsDoc) {
+  try {
+    pdfJsDoc?.loadingTask?.destroy();
+  } catch {
+    // Already torn down, or the document never finished loading.
+  }
+}
+
+/**
  * Returns true if any page of the PDF carries a Widget annotation
  * (an interactive form field or signature box). Bails on first hit.
  *
@@ -97,7 +112,7 @@ export async function pdfHasFormFields(bytes) {
     return false;
   } finally {
     if (doc) {
-      try { doc.destroy(); } catch { /* already destroyed */ }
+      destroyPdfDocument(doc);
     }
   }
 }
