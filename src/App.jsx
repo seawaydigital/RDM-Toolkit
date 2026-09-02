@@ -21,7 +21,7 @@ import WelcomeTour, { hasDismissedTour } from './components/ui/WelcomeTour';
 import { ALL_TOOLS } from './data/toolRegistry';
 import { useRecentTools } from './hooks/useRecentTools';
 import { useUsageLog } from './hooks/useUsageLog';
-import { setDroppedFiles } from './utils/droppedFile';
+import { setDroppedFiles, DROPPED_FILES_EVENT } from './utils/droppedFile';
 
 // Map file extensions to tool IDs for global drop routing
 const EXT_TO_TOOL = {
@@ -351,18 +351,19 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  // Task 4 — Global drag-and-drop overlay
+  // Task 4a — Global drag overlay visibility.
+  //
+  // Bound on `window` in the CAPTURE phase, which runs before the event reaches
+  // its target. A tool's own drop target stops propagation of its drag events —
+  // DropZone does, so that Task 4b does not re-route a drop the tool has already
+  // handled — and in the bubble phase that also swallowed the drop/dragleave the
+  // overlay needs to dismiss itself, stranding it on screen over the whole app.
   useEffect(() => {
-    function onDragEnter(e) {
-      e.preventDefault();
+    function onDragEnter() {
       dragCounterRef.current += 1;
       if (dragCounterRef.current === 1) {
         setGlobalDropActive(true);
       }
-    }
-
-    function onDragOver(e) {
-      e.preventDefault();
     }
 
     function onDragLeave() {
@@ -373,10 +374,34 @@ export default function App() {
       }
     }
 
-    function onDrop(e) {
-      e.preventDefault();
+    function onDragFinished() {
       dragCounterRef.current = 0;
       setGlobalDropActive(false);
+    }
+
+    window.addEventListener('dragenter', onDragEnter, true);
+    window.addEventListener('dragleave', onDragLeave, true);
+    window.addEventListener('drop', onDragFinished, true);
+    window.addEventListener('dragend', onDragFinished, true);
+
+    return () => {
+      window.removeEventListener('dragenter', onDragEnter, true);
+      window.removeEventListener('dragleave', onDragLeave, true);
+      window.removeEventListener('drop', onDragFinished, true);
+      window.removeEventListener('dragend', onDragFinished, true);
+    };
+  }, []);
+
+  // Task 4b — Global drop routing: a file dropped anywhere outside a tool's own
+  // drop zone opens the tool that handles that file type. Stays on the bubble
+  // phase, where a tool's stopPropagation() correctly means "already handled".
+  useEffect(() => {
+    function allowDrop(e) {
+      e.preventDefault();
+    }
+
+    function onDrop(e) {
+      e.preventDefault();
 
       const files = e.dataTransfer.files;
       if (!files || files.length === 0) return;
@@ -391,18 +416,23 @@ export default function App() {
       }
 
       setDroppedFiles(Array.from(files));
-      window.location.hash = targetToolId;
+
+      if (targetToolId === currentToolId) {
+        // Already on the target tool: the hash does not change, so nothing
+        // remounts to collect the files — hand them to the open tool directly.
+        window.dispatchEvent(new CustomEvent(DROPPED_FILES_EVENT));
+      } else {
+        window.location.hash = targetToolId;
+      }
     }
 
-    document.body.addEventListener('dragenter', onDragEnter);
-    document.body.addEventListener('dragover', onDragOver);
-    document.body.addEventListener('dragleave', onDragLeave);
+    document.body.addEventListener('dragenter', allowDrop);
+    document.body.addEventListener('dragover', allowDrop);
     document.body.addEventListener('drop', onDrop);
 
     return () => {
-      document.body.removeEventListener('dragenter', onDragEnter);
-      document.body.removeEventListener('dragover', onDragOver);
-      document.body.removeEventListener('dragleave', onDragLeave);
+      document.body.removeEventListener('dragenter', allowDrop);
+      document.body.removeEventListener('dragover', allowDrop);
       document.body.removeEventListener('drop', onDrop);
     };
   }, [currentToolId]);

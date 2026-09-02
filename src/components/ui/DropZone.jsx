@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Upload } from 'lucide-react';
 import { validateFile } from '../../utils/fileValidation';
-import { getDroppedFiles } from '../../utils/droppedFile';
+import { getDroppedFiles, DROPPED_FILES_EVENT } from '../../utils/droppedFile';
 
 /**
  * Format the accept string into a human-readable label.
@@ -62,12 +62,19 @@ export default function DropZone({
     }
   }, [validationConfig, multiple, onFilesSelected]);
 
-  // Pick up any file that was globally dropped onto the app
+  // Pick up any file that was globally dropped onto the app — on mount (the
+  // drop routed here from another tool) and on DROPPED_FILES_EVENT (the drop
+  // landed on this tool while it was already open, so nothing remounted).
   useEffect(() => {
-    const dropped = getDroppedFiles();
-    if (dropped && dropped.length > 0) {
-      processFiles(dropped);
+    function consumeDroppedFiles() {
+      const dropped = getDroppedFiles();
+      if (dropped && dropped.length > 0) {
+        processFiles(dropped);
+      }
     }
+    consumeDroppedFiles();
+    window.addEventListener(DROPPED_FILES_EVENT, consumeDroppedFiles);
+    return () => window.removeEventListener(DROPPED_FILES_EVENT, consumeDroppedFiles);
   }, [processFiles]);
 
   function handleDragOver(e) {
