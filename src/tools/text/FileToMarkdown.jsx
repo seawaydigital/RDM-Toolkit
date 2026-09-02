@@ -16,6 +16,42 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 
 // Turndown instance — created once outside component
 const td = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+
+// Blocks javascript: and data: URIs while allowing ordinary links.
+const URI_ALLOWLIST = /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i;
+
+// Tags Turndown (plus the GFM plugin) knows how to convert. Anything else is
+// dropped on the way in rather than surfacing as stray HTML in the Markdown.
+const TURNDOWN_INPUT_SANITIZE = {
+  ALLOWED_TAGS: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr', 'a', 'img',
+    'strong', 'b', 'em', 'i', 'del', 's', 'code', 'pre', 'blockquote',
+    'ul', 'ol', 'li', 'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
+    'div', 'span'],
+  ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'colspan', 'rowspan'],
+  ALLOW_DATA_ATTR: false,
+  FORCE_BODY: true,
+  RETURN_DOM: true,
+  ALLOWED_URI_REGEXP: URI_ALLOWLIST,
+};
+
+/**
+ * Convert an HTML string to Markdown.
+ *
+ * Turndown parses a *string* argument with `DOMParser.parseFromString(…, 'text/html')`
+ * and falls back to `document.write` — both are TrustedHTML sinks. The app's
+ * `default` Trusted Types policy deliberately exposes no `createHTML` (see
+ * src/main.jsx), so under the production CSP every conversion here threw
+ * "This document requires 'TrustedHTML' assignment": the tool was unusable on
+ * the deployed site while working fine in dev, where the CSP is relaxed.
+ *
+ * Handing Turndown a DOM *node* skips its parser entirely. DOMPurify does the
+ * parsing through its own `dompurify` policy, which the CSP allows, and
+ * sanitizes on the way through — worth having for the .html branch, where the
+ * markup is a file that came from somewhere else.
+ */
+function htmlToMarkdown(html) {
+  return td.turndown(DOMPurify.sanitize(html, TURNDOWN_INPUT_SANITIZE));
+}
 td.use(gfm);
 
 // ---- Markdown renderer (duplicated from MarkdownPreview) ----
@@ -219,11 +255,11 @@ async function convertFile(file, mode) {
   } else if (ext === 'txt') {
     const text = await readFileAs(file, 'text');
     const html = text.split(/\n\n+/).map(p => `<p>${p.replace(/\n/g, ' ')}</p>`).join('');
-    md = td.turndown(html);
+    md = htmlToMarkdown(html);
 
   } else if (ext === 'html' || ext === 'htm') {
     const text = await readFileAs(file, 'text');
-    md = td.turndown(text);
+    md = htmlToMarkdown(text);
 
   } else if (ext === 'pdf') {
     const buf = await readFileAs(file, 'arraybuffer');
@@ -270,7 +306,7 @@ async function convertFile(file, mode) {
       if (i < pdfDoc.numPages) html += '<hr>';
     }
 
-    md = td.turndown(html);
+    md = htmlToMarkdown(html);
 
   } else if (ext === 'csv') {
     const text = await readFileAs(file, 'text');
@@ -280,7 +316,7 @@ async function convertFile(file, mode) {
     const text = await readFileAs(file, 'text');
     const plain = stripRtf(text);
     const html = plain.split('\n\n').map(p => `<p>${p.replace(/\n/g, ' ')}</p>`).join('');
-    md = td.turndown(html);
+    md = htmlToMarkdown(html);
 
   } else if (ext === 'json') {
     const text = await readFileAs(file, 'text');
@@ -385,7 +421,7 @@ export default function FileToMarkdown() {
     ALLOW_DATA_ATTR: false,
     FORCE_BODY: true,
     RETURN_TRUSTED_TYPE: true,
-    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    ALLOWED_URI_REGEXP: URI_ALLOWLIST,
   });
 
   return (
