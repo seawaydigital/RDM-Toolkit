@@ -9,7 +9,7 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, destroyPdfDocument } from '../../utils/pdfThumbnails';
 
 const REDACTION_DPI = 200;
 const REDACTION_JPEG_QUALITY = 0.88;
@@ -104,7 +104,7 @@ async function verifyRedactedPagesAreImages(pdfBytes, redactedPageNums) {
     }
     page.cleanup();
   }
-  pdfJsDoc.destroy();
+  destroyPdfDocument(pdfJsDoc);
   return { leakedPages, verifiedPageCount: redactedPageNums.length };
 }
 
@@ -190,7 +190,7 @@ export default function PDFRedaction({ tool, navigateTo }) {
       setFileBytes(bytesCopy);
       setPageCount(count);
 
-      if (pdfJsDocRef.current) pdfJsDocRef.current.destroy();
+      if (pdfJsDocRef.current) destroyPdfDocument(pdfJsDocRef.current);
       const pdfJsDoc = await loadPdfDocument(bytesCopy.slice());
       pdfJsDocRef.current = pdfJsDoc;
     } catch (e) {
@@ -381,7 +381,7 @@ export default function PDFRedaction({ tool, navigateTo }) {
   }, [fileBytes, file, redactions, totalRedactions]);
 
   const handleRemoveFile = useCallback(() => {
-    if (pdfJsDocRef.current) { pdfJsDocRef.current.destroy(); pdfJsDocRef.current = null; }
+    if (pdfJsDocRef.current) { destroyPdfDocument(pdfJsDocRef.current); pdfJsDocRef.current = null; }
     setFile(null);
     setFileBytes(null);
     setPageCount(0);
@@ -394,7 +394,7 @@ export default function PDFRedaction({ tool, navigateTo }) {
 
   const handleStartOver = useCallback(() => {
     if (result?.downloadUrl) URL.revokeObjectURL(result.downloadUrl);
-    if (pdfJsDocRef.current) { pdfJsDocRef.current.destroy(); pdfJsDocRef.current = null; }
+    if (pdfJsDocRef.current) { destroyPdfDocument(pdfJsDocRef.current); pdfJsDocRef.current = null; }
     setFile(null);
     setFileBytes(null);
     setPageCount(0);

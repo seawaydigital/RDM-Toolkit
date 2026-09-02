@@ -9,7 +9,7 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { Download, RotateCcw, X, Loader2, Sparkles, ExternalLink, Info, Scissors } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 const DESCRIPTION =
@@ -609,7 +609,7 @@ export default function CompressPDF({ tool, navigateTo }) {
         info = await analyzePdfContent(pdfJsDoc);
         setAnalysis(info);
       } finally {
-        pdfJsDoc.destroy();
+        destroyPdfDocument(pdfJsDoc);
       }
 
       if (info.imageDensity >= IMAGE_HEAVY_RATIO) {
@@ -635,7 +635,7 @@ export default function CompressPDF({ tool, navigateTo }) {
             setRasterEstimates(ests);
             setMode('raster');
           } finally {
-            pdfJsDoc2.destroy();
+            destroyPdfDocument(pdfJsDoc2);
           }
         }
         setBusyMsg('');
@@ -751,7 +751,7 @@ export default function CompressPDF({ tool, navigateTo }) {
         triggerBrowserDownload(url, buildOutputFilename(file.name, `compressed-aggressive-${preset.id}`, 'pdf'));
         setDownloadedKey(key);
       } finally {
-        pdfJsDoc.destroy();
+        destroyPdfDocument(pdfJsDoc);
       }
     } catch (e) {
       console.error('Aggressive compression failed:', e);
@@ -778,7 +778,7 @@ export default function CompressPDF({ tool, navigateTo }) {
         setRasterEstimates(ests);
         setAggressiveRevealed(true);
       } finally {
-        pdfJsDoc.destroy();
+        destroyPdfDocument(pdfJsDoc);
       }
     } catch (e) {
       console.error('Raster estimation failed:', e);

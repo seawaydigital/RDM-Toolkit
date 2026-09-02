@@ -9,7 +9,7 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 export default function PDFPageDelete({ tool, navigateTo }) {
@@ -61,7 +61,7 @@ export default function PDFPageDelete({ tool, navigateTo }) {
       // before the thumbnail render below slices this buffer).
       pdfHasFormFields(bytesCopy).then(setHasFormFields);
 
-      if (pdfJsDocRef.current) pdfJsDocRef.current.destroy();
+      if (pdfJsDocRef.current) destroyPdfDocument(pdfJsDocRef.current);
       const pdfJsDoc = await loadPdfDocument(bytesCopy.slice());
       pdfJsDocRef.current = pdfJsDoc;
       renderAllThumbnails(pdfJsDoc, (pageNum, dataUrl) => {
@@ -140,7 +140,7 @@ export default function PDFPageDelete({ tool, navigateTo }) {
   }, [fileBytes, file, pageCount, deletedPages, deleteCount]);
 
   const handleRemoveFile = useCallback(() => {
-    if (pdfJsDocRef.current) { pdfJsDocRef.current.destroy(); pdfJsDocRef.current = null; }
+    if (pdfJsDocRef.current) { destroyPdfDocument(pdfJsDocRef.current); pdfJsDocRef.current = null; }
     setFile(null);
     setFileBytes(null);
     setPageCount(0);
@@ -151,7 +151,7 @@ export default function PDFPageDelete({ tool, navigateTo }) {
 
   const handleStartOver = useCallback(() => {
     if (result?.downloadUrl) URL.revokeObjectURL(result.downloadUrl);
-    if (pdfJsDocRef.current) { pdfJsDocRef.current.destroy(); pdfJsDocRef.current = null; }
+    if (pdfJsDocRef.current) { destroyPdfDocument(pdfJsDocRef.current); pdfJsDocRef.current = null; }
     setFile(null);
     setFileBytes(null);
     setPageCount(0);

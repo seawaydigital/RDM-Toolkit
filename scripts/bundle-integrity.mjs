@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { isAbsolute, resolve, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
 const DEFAULT_ASSET_DIR = 'dist/assets';
@@ -87,24 +88,48 @@ function readJson(filePath) {
 // remove it in a later cleanup pass.
 const TRANSITION_ALLOWED_NEW_CHUNKS = new Set(['rolldown-runtime.js']);
 
-function compareBundles(base, current, maxGrowthPct) {
-  const baseByLogicalName = new Map(base.files.map((file) => [file.logicalName, file]));
+// Stripping the content hash is not injective: several distinct chunks can share
+// one logical name. The app entry (index.html -> index-<hash>.js) and React's own
+// index.js both reduce to `index.js`. Keying a Map on the logical name silently
+// kept whichever chunk happened to sort last, so a hash reshuffle could compare
+// the 8 KB React chunk against the 489 KB entry and report a 5827% regression
+// (or, in the other direction, hide a real one). Compare the summed size of every
+// chunk sharing a logical name instead — stable whatever order the files arrive in.
+function groupByLogicalName(files) {
+  const groups = new Map();
+  for (const file of files) {
+    const group = groups.get(file.logicalName);
+    if (group) {
+      group.bytes += file.bytes;
+      group.names.push(file.name);
+    } else {
+      groups.set(file.logicalName, { bytes: file.bytes, names: [file.name] });
+    }
+  }
+  return groups;
+}
+
+export function compareBundles(base, current, maxGrowthPct) {
+  const baseGroups = groupByLogicalName(base.files);
+  const currentGroups = groupByLogicalName(current.files);
   const issues = [];
 
-  for (const file of current.files) {
-    const baseline = baseByLogicalName.get(file.logicalName);
+  for (const [logicalName, group] of currentGroups) {
+    const baseline = baseGroups.get(logicalName);
     if (!baseline) {
-      if (TRANSITION_ALLOWED_NEW_CHUNKS.has(file.logicalName)) continue;
-      issues.push(`new JS chunk ${file.logicalName} (${file.name})`);
+      if (TRANSITION_ALLOWED_NEW_CHUNKS.has(logicalName)) continue;
+      issues.push(`new JS chunk ${logicalName} (${group.names.join(', ')})`);
       continue;
     }
 
     if (baseline.bytes === 0) continue;
-    const growthPct = ((file.bytes - baseline.bytes) / baseline.bytes) * 100;
-    const growthBytes = file.bytes - baseline.bytes;
+    const growthPct = ((group.bytes - baseline.bytes) / baseline.bytes) * 100;
+    const growthBytes = group.bytes - baseline.bytes;
     if (growthPct > maxGrowthPct && growthBytes > 10 * 1024) {
+      const chunkCount = group.names.length > 1 ? ` across ${group.names.length} chunks` : '';
       issues.push(
-        `${file.logicalName} grew by ${growthPct.toFixed(1)}% (${baseline.bytes} -> ${file.bytes} bytes)`,
+        `${logicalName} grew by ${growthPct.toFixed(1)}%${chunkCount} ` +
+          `(${baseline.bytes} -> ${group.bytes} bytes)`,
       );
     }
   }
@@ -113,8 +138,12 @@ function compareBundles(base, current, maxGrowthPct) {
 }
 
 const maxGrowthPct = Number(getArg('--max-growth-pct', '10'));
+const invokedDirectly =
+  process.argv[1] !== undefined && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
 
-if (hasArg('--compare')) {
+if (!invokedDirectly) {
+  // Imported (by tests): expose compareBundles without running the CLI.
+} else if (hasArg('--compare')) {
   const basePath = getArg('--compare');
   const currentPath = getArg('--current');
   if (!basePath) throw new Error('--compare requires a baseline JSON path');

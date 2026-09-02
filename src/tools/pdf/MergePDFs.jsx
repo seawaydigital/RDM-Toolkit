@@ -12,7 +12,7 @@ import ErrorCard from '../../components/ui/ErrorCard';
 import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 function SortableFileCard({ item, onRemove, index, thumbSize }) {
@@ -145,7 +145,7 @@ export default function MergePDFs({ tool, navigateTo }) {
           try {
             const pdfJsDoc = await loadPdfDocument(new Uint8Array(bytes));
             item.thumbnail = await renderPageThumbnail(pdfJsDoc, 1);
-            pdfJsDoc.destroy();
+            destroyPdfDocument(pdfJsDoc);
           } catch (e) {
             console.error('Thumbnail rendering failed:', e);
             // Thumbnail failure is non-critical

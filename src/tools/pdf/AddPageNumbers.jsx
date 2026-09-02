@@ -9,7 +9,7 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields } from '../../utils/pdfThumbnails';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 const DESCRIPTION =
@@ -69,7 +69,7 @@ export default function AddPageNumbers({ tool, navigateTo }) {
       const pdfJsDoc = await loadPdfDocument(uint8.slice());
       const thumb = await renderPageThumbnail(pdfJsDoc, 1);
       setThumbnail(thumb);
-      pdfJsDoc.destroy();
+      destroyPdfDocument(pdfJsDoc);
     } catch (e) {
       console.error('PDF load failed:', e);
       setError('Failed to load PDF. The file may be corrupted or in an unsupported format.');

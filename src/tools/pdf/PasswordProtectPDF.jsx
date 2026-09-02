@@ -9,7 +9,7 @@ import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument } from '../../utils/pdfThumbnails';
+import { renderPageThumbnail, loadPdfDocument, destroyPdfDocument } from '../../utils/pdfThumbnails';
 
 const DESCRIPTION =
   'Applies password protection to a PDF so it requires a password to open. Encryption is applied using PDF-standard security, and the output remains a normal .pdf file that any PDF reader can prompt for a password.';
@@ -88,7 +88,7 @@ export default function PasswordProtectPDF({ tool, navigateTo }) {
       const pdfJsDoc = await loadPdfDocument(uint8.slice());
       const thumb = await renderPageThumbnail(pdfJsDoc, 1);
       setThumbnail(thumb);
-      pdfJsDoc.destroy();
+      destroyPdfDocument(pdfJsDoc);
     } catch {
       setError('Something went wrong while reading the PDF. Please try a different file.');
     }

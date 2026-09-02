@@ -378,7 +378,7 @@ const EXPLAINERS = {
       'You see three preset sizes (Low / Medium / High compression) side by side before you commit to downloading — a sample-based estimate runs up front to project the output size within about ±15%. If a preset won\u2019t shrink your file enough to matter, it\u2019s hidden.',
     ],
     technicalDetails: {
-      library: '<code>@cantoo/pdf-lib</code>, <code>pdfjs-dist</code> v5.6.205, and Canvas API.',
+      library: '<code>@cantoo/pdf-lib</code>, <code>pdfjs-dist</code> v6.3.289, and Canvas API.',
       flow: [
         '<strong>Analysis:</strong> pdfjs <code>getOperatorList()</code> finds <code>paintImageXObject</code> operations; total image bytes vs. total file bytes routes to smart or text-only mode.',
         '<strong>Smart mode:</strong> <code>pdfDoc.context.enumerateIndirectObjects()</code> walks every JPEG XObject; each is decoded via <code>createImageBitmap()</code>, re-encoded with <code>OffscreenCanvas.convertToBlob(\'image/jpeg\', quality)</code>, and swapped back in via <code>PDFRawStream.of()</code>. Text and vectors are untouched.',
@@ -446,7 +446,7 @@ const EXPLAINERS = {
       'The tool opens your PDF inside your browser, walks through each page, and looks for image objects. When it finds one, it extracts the image bytes directly — not a re-rendered copy — so the original resolution and quality are preserved. All the images get bundled into a ZIP for you to download.',
     ],
     technicalDetails: {
-      library: '<code>pdfjs-dist</code> v5.6.205 for PDF parsing; <code>jszip</code> v3 for packaging.',
+      library: '<code>pdfjs-dist</code> v6.3.289 for PDF parsing; <code>jszip</code> v3 for packaging.',
       flow: [
         'For each page, <code>page.getOperatorList()</code> finds <code>OPS.paintImageXObject</code> and <code>OPS.paintJpegImageXObject</code> operations.',
         '<code>page.objs.get(imageRef)</code> returns the raw image data (bitmap or JPEG bytes).',
@@ -504,7 +504,7 @@ const EXPLAINERS = {
       'A PDF rendering engine runs inside your browser and paints each page onto a canvas at a scale you choose (1×, 2×, or 3× for higher resolution). Each canvas is then exported as an image. All the images are packaged as a ZIP you can download.',
     ],
     technicalDetails: {
-      library: '<code>pdfjs-dist</code> v5.6.205 + Canvas API + <code>jszip</code>.',
+      library: '<code>pdfjs-dist</code> v6.3.289 + Canvas API + <code>jszip</code>.',
       flow: [
         '<code>page.getViewport({ scale })</code> defines the render resolution.',
         '<code>page.render({ canvasContext, viewport })</code> paints the page onto an off-screen canvas.',

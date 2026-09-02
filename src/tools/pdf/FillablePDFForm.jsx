@@ -22,7 +22,7 @@ import ErrorCard from '../../components/ui/ErrorCard';
 import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
-import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument } from '../../utils/pdfThumbnails';
+import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, destroyPdfDocument } from '../../utils/pdfThumbnails';
 
 const DESCRIPTION =
   'Turn a flat PDF into a fillable form. Add text fields, checkboxes, radio buttons, dropdowns, and signature boxes by clicking on the page. Everything runs in your browser — your file is never uploaded.';
@@ -171,7 +171,7 @@ export default function FillablePDFForm({ tool, navigateTo }) {
           thumbnail: thumb,
         });
       }
-      pdfJsDoc.destroy();
+      destroyPdfDocument(pdfJsDoc);
 
       setFile(f);
       setFileBytes(bytes);
