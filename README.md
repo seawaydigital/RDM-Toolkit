@@ -4,6 +4,15 @@
 
 **Live site:** [rdmtoolkit.ca](https://rdmtoolkit.ca/)
 
+**Hosting this yourself?** Start with [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — build, publish, required headers, and verification steps.
+
+**Licence:** MIT, © Lakehead University. See [LICENSE](LICENSE).
+
+> **A note on repository layout:** `CLAUDE.md`, `AGENTS.md`, `memory/` and
+> `docs/superpowers/` are working notes and implementation plans kept from
+> development. They are not needed to build, deploy or maintain the site, and
+> nothing in the application reads them.
+
 ---
 
 ## Why This Exists

@@ -378,6 +378,10 @@ npm run a11y:contrast    # CSS token contrast audit (--strict exits 1 on any AA 
 4. **pdf-lib + AcroForm PDFs** — pdf-lib's serializer produces structurally broken output for PDFs with form fields, digital signatures, or XFA forms. PDF Page Inspector detects form fields via pdfjs Widget annotations and advises users to flatten via File → Print → Save as PDF before resizing.
 5. ~~**PBKDF2 iteration count**~~ — **resolved 2026-06-11.** `encryptText()` now uses 600k iterations (OWASP-current) and prefixes output with `v2:`; `decryptText()` falls back to 100k for legacy unprefixed blobs (pure base64 can never contain `:`, so the prefix is unambiguous). Covered by `tests/crypto.test.mjs`.
 
+6. **Two benign `TrustedHTML` console errors on `#to-markdown`** — Turndown runs `canParseHTMLNatively()` at module-evaluation time (`turndown.cjs.js:451`), calling `new DOMParser().parseFromString('', 'text/html')` as soon as the lazy chunk loads. It is `try/catch`-wrapped so nothing throws, but the browser logs the blocked action; it is logged twice because the production CSP is delivered via both a real header and the `<meta>` tag, and each enforcing mechanism reports separately. **This is not a bug and File to Markdown works.** The conversion path was fixed 2026-09-05 to hand Turndown a DOM node (via DOMPurify `RETURN_DOM`) instead of a string, so the `document.write` fallback is never reached. Judge that tool by whether conversion succeeds and whether the error count *changes* after converting — not by it being zero. `scripts/security-audit.mjs` now bans `new DOMParser()` and `document.write`/`writeln` in `src/` to stop the class of bug recurring.
+
+7. **The sandboxed agent browser cannot render pdfjs page thumbnails** — `renderPageThumbnail()` never resolves there, so Merge PDFs, Compress PDF and other thumbnail-rendering tools hang at "Reading PDF…" when driven by an automated browser session. This is an environment limitation, not a product defect (the same fixtures render correctly in a normal browser). Verify those tools by hand, or exercise the bundled helpers directly.
+
 ---
 
 ## External Sources Referenced in the App
@@ -506,13 +510,13 @@ All external sources are hyperlinked (`target="_blank" rel="noopener noreferrer"
 | File | Trigger | Purpose |
 |---|---|---|
 | `.github/workflows/deploy.yml` | Push to master | `npm ci --ignore-scripts` → `npm run security:audit` → `npm audit signatures` → `npm audit --omit=dev --audit-level=high` → `npm run build` → bundle-integrity record → SLSA provenance attestation → deploy to GitHub Pages |
-| `.github/workflows/security.yml` | PR, push to master, weekly Monday | Standalone guardrail run: `npm ci --ignore-scripts` → lockfile-diff-guard (PR only) → `security:audit` → `npm audit signatures` → `npm audit --audit-level=high` |
+| `.github/workflows/security.yml` | PR, push to master, weekly Monday | Standalone guardrail run: `npm ci --ignore-scripts` → lockfile-diff-guard (PR only) → `security:audit` → `npm audit signatures` → `npm audit --omit=dev --audit-level=high` |
 | `.github/workflows/lighthouse.yml` | PR | Build + preview + Lighthouse CI with explicit `csp-xss` audit assertion at `minScore: 1`; uploads report as artifact |
 | `.github/workflows/codeql.yml` | Push, PR, weekly Monday | CodeQL JS static analysis; results in GitHub → Security → Code scanning alerts |
 | `.github/workflows/bundle-size.yml` | PR | Tracks bundle size deltas |
 | `.github/dependabot.yml` | Weekly Monday | Opens PRs for npm dependency updates (major versions excluded) |
 
-**CI audit strategy:** `--omit=dev` scopes the deploy gate to production deps. `--audit-level=high` blocks any high or critical production CVE (raised from `critical` on 2026-05-02). Since the Vite 8 migration (2026-07-18) the **full** tree — dev deps included — audits at 0 vulnerabilities.
+**CI audit strategy:** Both gates use `--omit=dev`, scoping them to production deps. `--audit-level=high` blocks any high or critical production CVE (raised from `critical` on 2026-05-02). The full tree drifts as new advisories are published against the build toolchain; that is expected and blocks nothing, because no CI gate reads it. Run `npm audit fix` periodically to keep it tidy (last done 2026-09-05).
 
 ### Local scripts
 
