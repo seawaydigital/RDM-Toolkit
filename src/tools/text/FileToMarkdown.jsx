@@ -22,12 +22,17 @@ td.use(gfm);
 // via DOMParser.parseFromString and then document.write — both TrustedHTML
 // sinks — and the production CSP enforces require-trusted-types-for 'script'
 // with a default policy that deliberately has no createHTML, so both throw and
-// conversion dies. Given a *node* (turndown.cjs.js:477) it just clones and
-// walks it, touching no sink at all.
+// conversion dies. Given a *node* (see RootNode in turndown's browser build) it
+// just clones and walks it, touching no sink at all.
 //
 // DOMPurify owns a 'dompurify' Trusted Types policy that the CSP allowlists, so
 // routing the string through it with RETURN_DOM gives us that node legitimately
 // — and sanitizes the untrusted .html files this tool accepts on the way.
+//
+// DO NOT "simplify" this to match sanitizedPreview below: swapping RETURN_DOM
+// for RETURN_TRUSTED_TYPE hands Turndown a string again and reintroduces this
+// exact production breakage. It looks fine in dev — the dev CSP is relaxed for
+// HMR — and only fails in the production build, which is how it shipped once.
 // Block-level containers matter as much as the semantic tags. DOMPurify strips
 // a disallowed tag but keeps its children inline, whereas Turndown treats
 // div/section/article as block-level and separates them. Omit them and a
