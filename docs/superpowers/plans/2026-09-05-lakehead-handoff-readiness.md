@@ -351,23 +351,23 @@ Note the surrounding structure — the new rule must match it (same `fail()` hel
 
 - [ ] **Step 2: Add the rule**
 
-Add these two patterns alongside the existing banned-pattern checks in the `src/` scan. Match the file's existing style for how a pattern and its message are declared:
+The script scans source with a `lineReports(file, pattern, label, allowFile?)` helper (defined at `scripts/security-audit.mjs:33`) called from a `for (const file of sourceFiles)` loop. Match that style exactly.
+
+Add these two calls immediately after the existing `'raw HTML mutation'` line in that loop:
 
 ```js
-  // Trusted Types: both of these are TrustedHTML sinks. Under the production
-  // CSP (require-trusted-types-for 'script') they throw, and the default policy
-  // in main.jsx has no createHTML by design. Anything that needs to turn an
-  // HTML string into nodes must go through DOMPurify with RETURN_DOM, whose
-  // 'dompurify' policy the CSP allowlists. See FileToMarkdown.htmlToMarkdown.
-  {
-    pattern: /new\s+DOMParser\s*\(/,
-    message: 'new DOMParser() is a TrustedHTML sink and throws under the production CSP — use DOMPurify.sanitize(html, { RETURN_DOM: true }) instead',
-  },
-  {
-    pattern: /\bdocument\s*\.\s*write\s*\(/,
-    message: 'document.write is a TrustedHTML sink and throws under the production CSP — use DOMPurify.sanitize(html, { RETURN_DOM: true }) instead',
-  },
+  // Both are TrustedHTML sinks. Under the production CSP
+  // (require-trusted-types-for 'script') they throw, and the default policy in
+  // main.jsx has no createHTML by design — so they work in dev and fail only in
+  // the production build, which is exactly how the File to Markdown breakage
+  // shipped. Turning an HTML string into nodes must go through DOMPurify with
+  // RETURN_DOM, whose 'dompurify' policy the CSP allowlists. See
+  // htmlToMarkdown in src/tools/text/FileToMarkdown.jsx.
+  lineReports(file, /\bnew\s+DOMParser\s*\(/, 'TrustedHTML sink (new DOMParser — use DOMPurify RETURN_DOM instead)');
+  lineReports(file, /\bdocument\s*\.\s*write\s*\(/, 'TrustedHTML sink (document.write — use DOMPurify RETURN_DOM instead)');
 ```
+
+Note the scan covers `src/components`, `src/hooks`, `src/tools` and `src/utils` (see the `sourceFiles` definition around line 208) — not `src/main.jsx`. That is fine: the rule targets tool and component code, and `main.jsx` legitimately handles Trusted Types policy setup.
 
 - [ ] **Step 3: Verify the rule passes on the fixed tree (green)**
 
