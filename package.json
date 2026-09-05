@@ -18,6 +18,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:handoff": "vite build && node scripts/build-handoff.mjs --domain rdmtoolkit.lakeheadu.ca",
     "preview": "vite preview",
     "security:audit": "node scripts/security-audit.mjs",
     "bundle:integrity": "node scripts/bundle-integrity.mjs",
