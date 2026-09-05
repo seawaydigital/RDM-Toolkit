@@ -79,12 +79,18 @@ Ready-made configs are in `docs/hosting/`:
 | nginx | `docs/hosting/nginx.conf` |
 | IIS 7+ | `docs/hosting/web.config` |
 
-These are not cosmetic. The Content-Security-Policy enforces Trusted Types
-(`trusted-types dompurify default; require-trusted-types-for 'script'`) and
-blocks the site being framed (`frame-ancestors 'none'`). There is a fallback
-`<meta>` CSP baked into `index.html`, but **browsers ignore `frame-ancestors`
-and Trusted Types directives in a `<meta>` tag** — without a real HTTP header
-the site silently loses both protections.
+These are not cosmetic. `index.html` carries a fallback `<meta>` CSP that does
+cover most directives — including Trusted Types enforcement — but a meta tag
+cannot deliver everything:
+
+- **`frame-ancestors 'none'`** is ignored in a `<meta>` tag per the CSP spec.
+  Without the header, the site can be framed and is open to clickjacking.
+- **`Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`,
+  `Permissions-Policy` and `Referrer-Policy`** are HTTP headers that browsers
+  do not honour from meta tags at all.
+
+So the meta CSP is a genuine fallback, not a substitute. Serve these headers
+and the site keeps the security posture it was built with.
 
 The nginx config carries an extra warning worth reading before you add any
 further `location` blocks: `add_header` does not inherit into a block that
@@ -105,7 +111,7 @@ of these each server needs:
 
 | Extension | Type | Breaks if wrong |
 |---|---|---|
-| `.mjs` | `application/javascript` | The PDF worker and every lazily-loaded tool chunk |
+| `.mjs` | `text/javascript` | The PDF worker and every lazily-loaded tool chunk |
 | `.webmanifest` | `application/manifest+json` | Install-as-app (PWA) support |
 | `.woff2` | `font/woff2` | Typography falls back to system fonts (IIS only — Apache/nginx normally already know this type) |
 
