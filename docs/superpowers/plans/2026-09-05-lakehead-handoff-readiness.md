@@ -580,7 +580,16 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
 
 ### Task 5: Server header configurations
 
-`public/_headers` is Cloudflare/Netlify syntax. Nothing else reads it. It carries the CSP that actually matters — `frame-ancestors 'none'` and Trusted Types enforcement **cannot** be delivered by `<meta>` (the browser says so out loud in the console), so on a server with no equivalent config the site silently loses its strongest protections.
+`public/_headers` is Cloudflare/Netlify syntax. Nothing else reads it.
+
+**Corrected during execution — the original claim here was wrong.** This plan initially said `<meta>` cannot deliver Trusted Types. It can, and this project's own `buildCspTighten()` plugin does exactly that: the built `index.html` carries `trusted-types dompurify default; require-trusted-types-for 'script'` in its meta CSP. The claim propagated into all three generated configs and `docs/DEPLOYMENT.md` before code review caught it; fixed in `a6828d5`.
+
+The accurate justification, which is still more than sufficient:
+
+- **`frame-ancestors 'none'`** is ignored in `<meta>` per the CSP spec — without the header the site can be framed (clickjacking).
+- **`Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`, `Permissions-Policy`, `Referrer-Policy`** are HTTP headers browsers do not honour from meta tags at all. `index.html` already carries a comment saying so for two of them.
+
+So the meta CSP is a real fallback, not a substitute, and the configs remain required.
 
 Source of truth for the directive values: `public/_headers`. Copy them exactly; do not retype from memory.
 
@@ -607,9 +616,10 @@ Create `docs/hosting/apache.conf`:
 #
 # Requires: a2enmod headers
 #
-# These are not optional hardening. The app enforces Trusted Types and blocks
-# framing through this CSP; the <meta> fallback in index.html cannot deliver
-# frame-ancestors or Trusted Types at all.
+# These are not optional hardening. index.html carries a fallback <meta> CSP,
+# but a meta tag cannot deliver frame-ancestors (ignored per the CSP spec) or
+# the header-only directives (HSTS, X-Content-Type-Options, X-Frame-Options,
+# Permissions-Policy, Referrer-Policy).
 
 <IfModule mod_headers.c>
     Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; img-src 'self' blob: data:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; trusted-types dompurify default; require-trusted-types-for 'script'; upgrade-insecure-requests"
@@ -650,9 +660,10 @@ Create `docs/hosting/nginx.conf`:
 #
 # Include inside the site's server { } block.
 #
-# These are not optional hardening. The app enforces Trusted Types and blocks
-# framing through this CSP; the <meta> fallback in index.html cannot deliver
-# frame-ancestors or Trusted Types at all.
+# These are not optional hardening. index.html carries a fallback <meta> CSP,
+# but a meta tag cannot deliver frame-ancestors (ignored per the CSP spec) or
+# the header-only directives (HSTS, X-Content-Type-Options, X-Frame-Options,
+# Permissions-Policy, Referrer-Policy).
 #
 # Note: add_header directives do not inherit into a location { } block that
 # declares its own add_header. If you add headers in a location, repeat all
@@ -695,9 +706,10 @@ Create `docs/hosting/web.config`:
   Place in the site root. If the site already has a web.config, merge the
   <customHeaders> and <staticContent> entries into it rather than replacing it.
 
-  These are not optional hardening. The app enforces Trusted Types and blocks
-  framing through this CSP; the <meta> fallback in index.html cannot deliver
-  frame-ancestors or Trusted Types at all.
+  These are not optional hardening. index.html carries a fallback meta-tag CSP,
+  but a meta tag cannot deliver frame-ancestors (ignored per the CSP spec) or
+  the header-only directives (HSTS, X-Content-Type-Options, X-Frame-Options,
+  Permissions-Policy, Referrer-Policy).
 -->
 <configuration>
   <system.webServer>
