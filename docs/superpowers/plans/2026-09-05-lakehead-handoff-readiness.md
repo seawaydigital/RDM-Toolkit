@@ -215,11 +215,19 @@ Insert immediately after it:
 // DOMPurify owns a 'dompurify' Trusted Types policy that the CSP allowlists, so
 // routing the string through it with RETURN_DOM gives us that node legitimately
 // — and sanitizes the untrusted .html files this tool accepts on the way.
+// Block-level containers matter as much as the semantic tags. DOMPurify strips
+// a disallowed tag but keeps its children inline, whereas Turndown treats
+// div/section/article as block-level and separates them. Omit them and a
+// Word or Google Docs HTML export — div-per-paragraph, the most common .html
+// a researcher will feed this tool — converts to one concatenated wall of text.
 const TURNDOWN_ALLOWED_TAGS = [
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr',
   'strong', 'em', 'del', 'code', 'pre', 'blockquote',
+  'b', 'i', 'u', 'sub', 'sup', 'mark',
   'ul', 'ol', 'li', 'a', 'img',
   'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
+  'div', 'span', 'section', 'article', 'header', 'footer', 'aside',
+  'figure', 'figcaption', 'main', 'nav',
 ];
 
 function htmlToMarkdown(html) {
@@ -291,7 +299,19 @@ In a browser at `http://localhost:4173/#to-markdown`:
 
 Also convert a `.txt` and a `.pdf` file and confirm both produce Markdown with no console errors.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Record the known residual**
+
+Two `TrustedHTML` console errors remain on route load after this fix, and that is expected. They are **not** the bug being fixed here and no correct implementation of this task removes them.
+
+Cause, traced during implementation: Turndown runs `canParseHTMLNatively()` at module-evaluation time (`turndown.cjs.js:451`), which calls `new DOMParser().parseFromString('', 'text/html')` the moment the lazy chunk imports the module — before any of the four call sites run, and regardless of whether Turndown is ever handed a string. It is wrapped in `try/catch`, so it does not throw; the browser logs the blocked action anyway. It is reported twice because `vite preview` delivers `require-trusted-types-for 'script'` through both the real HTTP header and the `<meta>` CSP, and each enforcing delivery mechanism logs the violation separately.
+
+This is non-functional noise: caught internally, never surfaced to the user, and it no longer leads anywhere near `document.write` because Turndown is never handed a string at runtime.
+
+**Judge this fix by:** conversion succeeding with no error card, and the console error count being *unchanged* after converting a file. Not by the count being zero. Removing the residual would require patching or deferring the Turndown import, or resolving the header/meta CSP duplication site-wide — both outside this task, and neither worth doing for a caught, invisible log line.
+
+Task 12 records this in `CLAUDE.md` so it is not rediscovered and misread as "File to Markdown is still broken."
+
+- [ ] **Step 6: Commit**
 
 ```bash
 git add src/tools/text/FileToMarkdown.jsx
@@ -1929,6 +1949,12 @@ In `docs/HANDOFF.md`, the "Where things stand" bullet claims `npm audit` (full t
 `npm audit --omit=dev` (the CI gate): **0 vulnerabilities**. Full-tree audit drifts with new build-toolchain advisories; neither CI gate reads it.
 ```
 
+Finally, add a new entry to the **Known gaps / deployment notes** list in `CLAUDE.md`, so the Task 2 residual is not rediscovered and misread as the tool still being broken:
+
+```markdown
+6. **Two benign `TrustedHTML` console errors on `#to-markdown`** — Turndown runs `canParseHTMLNatively()` at module-evaluation time (`turndown.cjs.js:451`), calling `new DOMParser().parseFromString('', 'text/html')` as soon as the lazy chunk loads. It is `try/catch`-wrapped so nothing throws, but the browser logs the blocked action; it is logged twice because the production CSP is delivered via both a real header and the `<meta>` tag, and each enforcing mechanism reports separately. **This is not a bug and File to Markdown works.** The conversion path was fixed in 2026-09-05 to hand Turndown a DOM node (via DOMPurify `RETURN_DOM`) instead of a string, so the `document.write` fallback is never reached. Judge that tool by whether conversion succeeds and whether the error count *changes* after converting — not by it being zero.
+```
+
 - [ ] **Step 4: Verify the whole package end to end**
 
 ```bash
@@ -1966,7 +1992,7 @@ npm run preview
 
 Check each of these:
 1. `/` — no console errors.
-2. `/#to-markdown` — **no TrustedHTML errors** (Task 2), and a `.html` file converts.
+2. `/#to-markdown` — a `.html` file **converts successfully with no error card**, and conversion adds **no new** console errors (Task 2). Note: exactly two `TrustedHTML` errors appear on route load and are expected — see the Task 2 known-residual note. Judge the fix by whether conversion works and whether the count changes after converting, not by the count being zero.
 3. `/#accessibility` — statement page renders (Task 8).
 4. `/#merge-pdfs` — small form PDF badges correctly (Task 11).
 5. DevTools → Network — no outbound request carries file data.
