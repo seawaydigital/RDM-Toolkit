@@ -18,6 +18,35 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker;
 const td = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
 td.use(gfm);
 
+// Turndown must never be handed a raw HTML string. Given a string it parses
+// via DOMParser.parseFromString and then document.write — both TrustedHTML
+// sinks — and the production CSP enforces require-trusted-types-for 'script'
+// with a default policy that deliberately has no createHTML, so both throw and
+// conversion dies. Given a *node* (turndown.cjs.js:477) it just clones and
+// walks it, touching no sink at all.
+//
+// DOMPurify owns a 'dompurify' Trusted Types policy that the CSP allowlists, so
+// routing the string through it with RETURN_DOM gives us that node legitimately
+// — and sanitizes the untrusted .html files this tool accepts on the way.
+const TURNDOWN_ALLOWED_TAGS = [
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr',
+  'strong', 'em', 'del', 'code', 'pre', 'blockquote',
+  'ul', 'ol', 'li', 'a', 'img',
+  'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
+];
+
+function htmlToMarkdown(html) {
+  const node = DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: TURNDOWN_ALLOWED_TAGS,
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'title'],
+    ALLOW_DATA_ATTR: false,
+    RETURN_DOM: true,
+    // Block javascript: and data: URIs — matches MarkdownPreview.jsx:192.
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+  });
+  return td.turndown(node);
+}
+
 // ---- Markdown renderer (duplicated from MarkdownPreview) ----
 
 function escapeHtml(text) {
@@ -219,11 +248,11 @@ async function convertFile(file, mode) {
   } else if (ext === 'txt') {
     const text = await readFileAs(file, 'text');
     const html = text.split(/\n\n+/).map(p => `<p>${p.replace(/\n/g, ' ')}</p>`).join('');
-    md = td.turndown(html);
+    md = htmlToMarkdown(html);
 
   } else if (ext === 'html' || ext === 'htm') {
     const text = await readFileAs(file, 'text');
-    md = td.turndown(text);
+    md = htmlToMarkdown(text);
 
   } else if (ext === 'pdf') {
     const buf = await readFileAs(file, 'arraybuffer');
@@ -270,7 +299,7 @@ async function convertFile(file, mode) {
       if (i < pdfDoc.numPages) html += '<hr>';
     }
 
-    md = td.turndown(html);
+    md = htmlToMarkdown(html);
 
   } else if (ext === 'csv') {
     const text = await readFileAs(file, 'text');
@@ -280,7 +309,7 @@ async function convertFile(file, mode) {
     const text = await readFileAs(file, 'text');
     const plain = stripRtf(text);
     const html = plain.split('\n\n').map(p => `<p>${p.replace(/\n/g, ' ')}</p>`).join('');
-    md = td.turndown(html);
+    md = htmlToMarkdown(html);
 
   } else if (ext === 'json') {
     const text = await readFileAs(file, 'text');
