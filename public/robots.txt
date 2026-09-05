@@ -1,0 +1,5 @@
+# RDM Toolkit — https://rdmtoolkit.ca/
+User-agent: *
+Allow: /
+
+Sitemap: https://rdmtoolkit.ca/sitemap.xml

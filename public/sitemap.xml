@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Routing is hash-based (/#merge-pdfs). A fragment is never sent to the server
+  and is not a separately indexable URL, so this sitemap correctly contains a
+  single entry. Do not add fragment URLs here.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://rdmtoolkit.ca/</loc>
+    <lastmod>2026-09-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
