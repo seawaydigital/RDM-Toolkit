@@ -181,8 +181,17 @@ build.
 ## Known limitations at handoff
 
 - **Accessibility:** automated axe-core testing reports zero WCAG 2.2 AA
-  violations across 10 representative routes, and a manual NVDA pass covers
-  the five most-used tools. A broader ARIA-pattern pass across all 46 tools
-  is documented as future work, not yet complete. See `docs/accessibility/`
-  and the public statement at `/#accessibility`.
+  violations across 10 representative routes, and an accessibility-tree audit
+  of the five most-used tools found and fixed a set of defects axe-core does
+  not detect — including a keyboard-unreachable control. See
+  `docs/accessibility/a11y-tree-audit-2026-09-05.md`.
+
+  **No screen-reader testing has been done.** Both methods above are
+  automated. A person using NVDA, JAWS or VoiceOver has not yet tested this
+  site, and that is the single most valuable accessibility work outstanding —
+  automated tooling covers roughly a third of WCAG. A broader ARIA-pattern
+  pass across all 46 tools, and a known heading-level defect in the tool
+  explainer panels, are also outstanding. All of this is stated publicly at
+  `/#accessibility`; if you publish under a Lakehead domain, AODA
+  responsibility for it follows.
 - **Browser support:** see `docs/BROWSER-SUPPORT.md`.

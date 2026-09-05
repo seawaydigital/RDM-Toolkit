@@ -14,8 +14,8 @@ const CONFORMANCE = [
   },
   {
     icon: CheckCircle,
-    title: 'Screen reader testing',
-    body: 'The five most-used tools have been tested manually with NVDA on Windows. Page changes are announced, headings follow a single logical hierarchy per route, and form controls carry accessible names.',
+    title: 'Assistive technology compatibility',
+    body: 'The five most-used tools have been audited against the accessibility tree — the same information a screen reader reads — to confirm that every control has an accessible name, form fields are properly labelled, and results and errors are announced without moving focus. Defects that automated scanning missed were found and fixed this way.',
   },
   {
     icon: CheckCircle,
@@ -41,6 +41,14 @@ const LIMITATIONS = [
   {
     title: 'Generated files',
     body: 'This site does not alter the accessibility of the files you process. A PDF that was inaccessible before you merged or compressed it will still be inaccessible afterwards.',
+  },
+  {
+    title: 'Heading levels inside tool explainers',
+    body: 'Expanding the "How this tool works" panel on a tool page introduces a heading that skips a level. The content is fully readable and correctly ordered, but the outline a screen reader reports is not as clean as it should be. This is a known defect with a fix planned.',
+  },
+  {
+    title: 'No screen-reader testing yet',
+    body: 'Our testing so far is automated: an accessibility scanner plus an audit of the accessibility tree that screen readers read from. Neither is a substitute for a person using NVDA, JAWS or VoiceOver and telling us how it actually sounds. That testing has not happened yet. If you use a screen reader and something does not work, please tell us — we will treat it as a defect, not a preference.',
   },
   {
     title: 'Ongoing work',
@@ -151,10 +159,9 @@ export default function AccessibilityStatement() {
         <h2 className="htw-section-title">Technical notes</h2>
         <p className="acc-lede">
           Accessibility here depends on HTML, CSS, JavaScript and WAI-ARIA. The
-          site is tested in current versions of Chrome, Edge, Firefox and Safari,
-          with NVDA on Windows. It runs entirely in your browser, so it also
-          works with the operating system accessibility settings you already
-          use — including offline.
+          site is tested in current versions of Chrome, Edge, Firefox and Safari.
+          It runs entirely in your browser, so it also works with the operating
+          system accessibility settings you already use — including offline.
         </p>
         <p className="acc-meta">
           <Accessibility size={14} aria-hidden="true" /> This statement was last
