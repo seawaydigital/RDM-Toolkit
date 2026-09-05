@@ -23,7 +23,7 @@ export default function ResultPanel({
   }
 
   return (
-    <div className="result-panel">
+    <div className="result-panel" role="status">
       {preview && <div className="result-panel-preview">{preview}</div>}
 
       <div className="result-panel-info">

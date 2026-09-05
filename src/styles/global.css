@@ -15349,6 +15349,15 @@ select:focus-visible,
   border: 0 !important;
 }
 
+/* De-identify Research Data: column-selection chips wrap a visually-hidden
+   checkbox (see .visually-hidden above) behind a styled <label>. The
+   checkbox's own focus outline is clipped away with it, so show the
+   indicator on the chip itself when the hidden checkbox has focus. */
+.danon-col-chip:focus-within {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
 /* Respect user's reduced-motion preference. Disable animations and transitions
    globally except for critical visibility cues (outlines, opacity fades under
    0.1s). */
