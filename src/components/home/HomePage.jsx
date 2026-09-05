@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CATEGORIES, PRIMARY_CATEGORIES, MORE_CATEGORIES } from '../../data/toolRegistry';
 import { useRecentTools } from '../../hooks/useRecentTools';
+import { PROJECT } from '../../data/institutionConfig';
 import HeroDiagram from './HeroDiagram';
 import { ChevronDown, ChevronRight, Shield, HardDrive, BookOpen, Globe } from 'lucide-react';
 
@@ -198,7 +199,7 @@ export default function HomePage({ onNavigate }) {
               <li className="homepage-proof-row">
                 <span className="homepage-proof-no" aria-hidden="true">№02</span>
                 Every line of code is{' '}
-                <a href="https://github.com/seawaydigital/RDM-Toolkit" target="_blank" rel="noopener noreferrer">public on GitHub</a>.
+                <a href={PROJECT.repoUrl} target="_blank" rel="noopener noreferrer">public on GitHub</a>.
               </li>
               <li className="homepage-proof-row">
                 <span className="homepage-proof-no" aria-hidden="true">№03</span>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronDown, ChevronRight, HelpCircle, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, CircleDollarSign, Database, ArrowUpRight, BadgeCheck } from 'lucide-react';
 import { PRIMARY_CATEGORIES, MORE_CATEGORIES, CATEGORIES } from '../../data/toolRegistry';
+import { PROJECT } from '../../data/institutionConfig';
 
 export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen, onClose }) {
   const [expanded, setExpanded] = useState(new Set());
@@ -177,7 +178,7 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
         {/* Sister-site link — RS Toolkit (Research Security) */}
         <div className="sidebar-sister">
           <a
-            href="https://rs.rdmtoolkit.ca"
+            href={PROJECT.rsToolkitUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="sidebar-sister-link"

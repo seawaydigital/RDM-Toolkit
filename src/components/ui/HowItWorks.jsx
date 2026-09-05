@@ -2,8 +2,9 @@ import { useState, useId } from 'react';
 import { ChevronDown, ShieldCheck, Cog, Lock, AlertTriangle, SearchCheck, ExternalLink } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { getExplainer } from '../../data/toolExplainers';
+import { PROJECT } from '../../data/institutionConfig';
 
-const GITHUB_BASE = 'https://github.com/seawaydigital/RDM-Toolkit/blob/master/';
+const GITHUB_BASE = PROJECT.sourceBaseUrl;
 
 // Explainer copy is static and CI-linted, but it still goes through DOMPurify
 // so the dangerouslySetInnerHTML sink only ever receives TrustedHTML (required

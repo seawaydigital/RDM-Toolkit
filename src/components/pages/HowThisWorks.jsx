@@ -1,6 +1,7 @@
 import { Shield, WifiOff, Wifi, Eye, FileCheck, Lock, Globe, MonitorSmartphone, ArrowRight, ArrowDown, CheckCircle, XCircle, Laptop, ExternalLink, Clock, FileText, Image as ImageIcon, Cpu, Puzzle, HardDrive, Users, FolderDown } from 'lucide-react';
 import NetworkSilence from '../ui/NetworkSilence';
 import ClearLocalData from '../ui/ClearLocalData';
+import { PROJECT } from '../../data/institutionConfig';
 
 export default function HowThisWorks() {
   return (
@@ -471,7 +472,7 @@ export default function HowThisWorks() {
               device encryption, passwords &amp; 2FA, backups, AI tool risks, and
               requirements for controlled research data, visit the{' '}
               <a
-                href="https://seawaydigital.github.io/RSToolkit/#cybersecurity-guide"
+                href={PROJECT.rsCybersecurityGuideUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="htw-link"
