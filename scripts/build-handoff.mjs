@@ -8,7 +8,15 @@
 //      deployed the folder to GitHub Pages.
 //   2. rewrites security.txt's Canonical: — RFC 9116 says a security.txt whose
 //      Canonical does not match its own URL should not be trusted.
-//   3. rewrites the absolute og:url / og:image meta URLs in index.html.
+//   3. replaces EVERY occurrence of https://rdmtoolkit.ca in index.html. In
+//      practice that is the absolute social-meta URLs (og:url, og:image) and
+//      the canonical link, which have to be absolute per their specs. It is a
+//      blanket replace rather than a per-tag one, so anything absolute added
+//      to index.html later is carried along automatically — but that also
+//      means any deliberate reference to the rdmtoolkit.ca origin placed in
+//      index.html would be rewritten too. Keep such references out of the
+//      HTML entry (they belong in a component) or teach this script to skip
+//      them.
 //
 // Usage: node scripts/build-handoff.mjs --domain rdmtoolkit.lakeheadu.ca
 
