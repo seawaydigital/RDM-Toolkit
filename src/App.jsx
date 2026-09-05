@@ -12,6 +12,7 @@ import DRACServices from './components/pages/DRACServices';
 import AcrobatAlternative from './components/pages/AcrobatAlternative';
 import LakeheadDataverse from './components/pages/LakeheadDataverse';
 import GrantsAndIdentifiers from './components/pages/GrantsAndIdentifiers';
+import AccessibilityStatement from './components/pages/AccessibilityStatement';
 import RelatedTools from './components/ui/RelatedTools';
 import HowItWorks from './components/ui/HowItWorks';
 import ToolCaveats from './components/ui/ToolCaveats';
@@ -99,7 +100,7 @@ const toolComponents = {
   'encoding-detector': lazy(() => import('./tools/privacy/EncodingDetector.jsx')),
 };
 
-const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy', 'drac-services', 'acrobat-alternative', 'lakehead-dataverse', 'grants-identifiers']);
+const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy', 'drac-services', 'acrobat-alternative', 'lakehead-dataverse', 'grants-identifiers', 'accessibility']);
 
 // Human-readable titles for non-tool routes — used for document.title + the
 // screen-reader route announcer (hash navigation never triggers a page load,
@@ -114,6 +115,7 @@ const PAGE_TITLES = {
   'acrobat-alternative': 'Adobe Acrobat Alternative',
   'lakehead-dataverse': 'Lakehead Dataverse',
   'grants-identifiers': 'Grants & Identifiers',
+  'accessibility': 'Accessibility Statement',
 };
 
 function getRouteFromHash() {
@@ -485,6 +487,7 @@ export default function App() {
           {currentPage === 'acrobat-alternative' && <AcrobatAlternative />}
           {currentPage === 'lakehead-dataverse' && <LakeheadDataverse />}
           {currentPage === 'grants-identifiers' && <GrantsAndIdentifiers />}
+          {currentPage === 'accessibility' && <AccessibilityStatement />}
           {currentToolId && ToolComponent && (
             <ErrorBoundary
               resetKey={errorResetKey}

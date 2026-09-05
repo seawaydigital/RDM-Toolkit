@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronRight, HelpCircle, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, CircleDollarSign, Database, ArrowUpRight, BadgeCheck } from 'lucide-react';
+import { ChevronDown, ChevronRight, HelpCircle, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, CircleDollarSign, Database, ArrowUpRight, BadgeCheck, Accessibility } from 'lucide-react';
 import { PRIMARY_CATEGORIES, MORE_CATEGORIES, CATEGORIES } from '../../data/toolRegistry';
 import { PROJECT } from '../../data/institutionConfig';
 
@@ -172,6 +172,14 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
           >
             <CircleDollarSign size={16} />
             Adobe Acrobat Alternative
+          </a>
+          <a
+            href="#accessibility"
+            className={`sidebar-htw-link ${currentPage === 'accessibility' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <Accessibility size={16} />
+            Accessibility
           </a>
         </div>
 
