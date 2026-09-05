@@ -247,7 +247,7 @@ for (const file of sourceFiles) {
   // RETURN_DOM, whose 'dompurify' policy the CSP allowlists. See
   // htmlToMarkdown in src/tools/text/FileToMarkdown.jsx.
   lineReports(file, /\bnew\s+DOMParser\s*\(/, 'TrustedHTML sink (new DOMParser — use DOMPurify RETURN_DOM instead)');
-  lineReports(file, /\bdocument\s*\.\s*write\s*\(/, 'TrustedHTML sink (document.write — use DOMPurify RETURN_DOM instead)');
+  lineReports(file, /\bdocument\s*\.\s*writeln?\s*\(/, 'TrustedHTML sink (document.write/writeln — use DOMPurify RETURN_DOM instead)');
   lineReports(file, /dangerouslySetInnerHTML/, 'React HTML injection', (relative) => allowedDangerousHtml.has(relative));
   lineReports(file, /\blocalStorage\b|\bsessionStorage\b/, 'local/session storage', (relative) => allowedLocalStorage.has(relative));
   lineReports(file, /ALLOWED_ATTR\s*:\s*\[[^\]]*['"]style['"]/, 'DOMPurify style attribute allowlist');
