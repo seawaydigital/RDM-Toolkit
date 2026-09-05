@@ -20,7 +20,7 @@
 //
 // Usage: node scripts/build-handoff.mjs --domain rdmtoolkit.lakeheadu.ca
 
-import { readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, rmSync, existsSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const args = process.argv.slice(2);
@@ -37,8 +37,26 @@ if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(domain)) {
 }
 
 const distDir = resolve(process.cwd(), 'dist');
-if (!existsSync(distDir)) {
+if (!existsSync(distDir) || !statSync(distDir).isDirectory()) {
   console.error('dist/ not found — run `npm run build` first.');
+  process.exit(1);
+}
+
+// CNAME may legitimately be absent (an earlier run already removed it), but
+// index.html and security.txt are produced by every build. If either is
+// missing, something is wrong with the build and staying quiet would ship an
+// unrewritten security.txt — the exact RFC 9116 mismatch this script exists to
+// prevent — while printing a success message. Fail loudly instead.
+const required = {
+  'index.html': resolve(distDir, 'index.html'),
+  '.well-known/security.txt': resolve(distDir, '.well-known', 'security.txt'),
+};
+const missing = Object.entries(required)
+  .filter(([, path]) => !existsSync(path))
+  .map(([name]) => name);
+if (missing.length > 0) {
+  console.error(`dist/ is missing expected build output: ${missing.join(', ')}`);
+  console.error('Re-run `npm run build` — do not publish this dist/.');
   process.exit(1);
 }
 
