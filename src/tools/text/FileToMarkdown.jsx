@@ -28,11 +28,19 @@ td.use(gfm);
 // DOMPurify owns a 'dompurify' Trusted Types policy that the CSP allowlists, so
 // routing the string through it with RETURN_DOM gives us that node legitimately
 // — and sanitizes the untrusted .html files this tool accepts on the way.
+// Block-level containers matter as much as the semantic tags. DOMPurify strips
+// a disallowed tag but keeps its children inline, whereas Turndown treats
+// div/section/article as block-level and separates them. Omit them and a
+// Word or Google Docs HTML export — div-per-paragraph, the most common .html
+// a researcher will feed this tool — converts to one concatenated wall of text.
 const TURNDOWN_ALLOWED_TAGS = [
   'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr',
   'strong', 'em', 'del', 'code', 'pre', 'blockquote',
+  'b', 'i', 'u', 'sub', 'sup', 'mark',
   'ul', 'ol', 'li', 'a', 'img',
   'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
+  'div', 'span', 'section', 'article', 'header', 'footer', 'aside',
+  'figure', 'figcaption', 'main', 'nav',
 ];
 
 function htmlToMarkdown(html) {
