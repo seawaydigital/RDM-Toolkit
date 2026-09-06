@@ -860,10 +860,15 @@ Ready-made configs are in `docs/hosting/`:
 | nginx | `docs/hosting/nginx.conf` |
 | IIS 7+ | `docs/hosting/web.config` |
 
-These are not cosmetic. The Content-Security-Policy enforces Trusted Types and
-blocks the site being framed. There is a fallback `<meta>` CSP in the HTML, but
-browsers **ignore** `frame-ancestors` and Trusted Types in meta tags — without
-a real header the site loses both.
+These are not cosmetic. `index.html` carries a fallback `<meta>` CSP that does
+cover most directives — including Trusted Types enforcement — but a meta tag
+cannot deliver everything:
+
+- **`frame-ancestors 'none'`** is ignored in a `<meta>` tag per the CSP spec.
+  Without the header, the site can be framed and is open to clickjacking.
+- **`Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`,
+  `Permissions-Policy` and `Referrer-Policy`** are HTTP headers that browsers
+  do not honour from meta tags at all.
 
 `public/_headers` in the repo is Cloudflare/Netlify syntax and is ignored by
 every other server. It is the source of truth for the values, not a config you
