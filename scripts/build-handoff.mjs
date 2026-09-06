@@ -70,30 +70,43 @@ if (existsSync(cnamePath)) {
   changes.push('removed CNAME');
 }
 
-// 2. Repoint security.txt Canonical.
-const securityPath = resolve(distDir, '.well-known', 'security.txt');
-if (existsSync(securityPath)) {
-  const before = readFileSync(securityPath, 'utf8');
-  const after = before.replace(
-    /^Canonical: https:\/\/[^/]+\/\.well-known\/security\.txt$/m,
-    `Canonical: ${origin}/.well-known/security.txt`,
-  );
-  if (before !== after) {
-    writeFileSync(securityPath, after);
-    changes.push('rewrote security.txt Canonical');
+// Rewrite a file in place, but only if the replacement actually changes it.
+//
+// Reads directly and handles ENOENT rather than testing with existsSync first:
+// a check-then-read pair is a time-of-check/time-of-use race (the file can
+// vanish between the two calls), which is both a real if unlikely failure mode
+// and something CodeQL flags. Both required files are already verified present
+// above, so a miss here means the build output changed underneath us.
+function rewriteInPlace(path, transform, label) {
+  let before;
+  try {
+    before = readFileSync(path, 'utf8');
+  } catch (error) {
+    if (error.code === 'ENOENT') return;
+    throw error;
   }
+  const after = transform(before);
+  if (before === after) return;
+  writeFileSync(path, after);
+  changes.push(label);
 }
 
+// 2. Repoint security.txt Canonical.
+rewriteInPlace(
+  resolve(distDir, '.well-known', 'security.txt'),
+  (text) => text.replace(
+    /^Canonical: https:\/\/[^/]+\/\.well-known\/security\.txt$/m,
+    `Canonical: ${origin}/.well-known/security.txt`,
+  ),
+  'rewrote security.txt Canonical',
+);
+
 // 3. Repoint absolute social-meta URLs.
-const indexPath = resolve(distDir, 'index.html');
-if (existsSync(indexPath)) {
-  const before = readFileSync(indexPath, 'utf8');
-  const after = before.replace(/https:\/\/rdmtoolkit\.ca/g, origin);
-  if (before !== after) {
-    writeFileSync(indexPath, after);
-    changes.push('rewrote absolute meta URLs in index.html');
-  }
-}
+rewriteInPlace(
+  resolve(distDir, 'index.html'),
+  (text) => text.replace(/https:\/\/rdmtoolkit\.ca/g, origin),
+  'rewrote absolute meta URLs in index.html',
+);
 
 if (changes.length === 0) {
   console.log(`No changes needed for ${domain}.`);
