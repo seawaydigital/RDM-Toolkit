@@ -130,15 +130,17 @@ export default function MergePDFs({ tool, navigateTo }) {
           item.encrypted = true;
         } else {
           item.pageCount = pdfDoc.getPageCount();
-          // Advisory form-field scan — updates the card + notice when it
-          // completes. Must be kicked off before the thumbnail render below
-          // transfers this buffer to the pdfjs worker (pdfHasFormFields
-          // copies the bytes synchronously at call time).
-          pdfHasFormFields(uint8).then(has => {
-            if (has) {
-              setFiles(prev => prev.map(f => (f.id === id ? { ...f, hasFormFields: true } : f)));
-            }
-          });
+          // Advisory form-field scan. Must run before the thumbnail render
+          // below, which transfers this buffer to the pdfjs worker
+          // (pdfHasFormFields copies the bytes synchronously at call time).
+          //
+          // Awaited rather than fired-and-forgotten: the previous version
+          // resolved into a setFiles(prev.map(...)) that could run before
+          // these items were ever added to state, so on small PDFs the badge
+          // and the notice were silently dropped. The loop already awaits the
+          // pdf-lib load and the thumbnail render, and this scan bails on the
+          // first Widget annotation, so awaiting costs effectively nothing.
+          item.hasFormFields = await pdfHasFormFields(uint8);
         }
 
         if (!item.encrypted) {

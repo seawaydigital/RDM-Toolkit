@@ -1007,6 +1007,7 @@ export default function CompressPDF({ tool, navigateTo }) {
                           onClick={() => handleDownloadSmartPreset(p)}
                           disabled={anyCompressing}
                           type="button"
+                          aria-label={`Download ${p.label}, ${!cached ? '~' : ''}${formatFileSize(displayBytes)}`}
                         >
                           {isCompressing ? (
                             <>
@@ -1086,6 +1087,7 @@ export default function CompressPDF({ tool, navigateTo }) {
                           onClick={() => handleDownloadRasterPreset(p)}
                           disabled={anyCompressing}
                           type="button"
+                          aria-label={`Download ${p.label}, ${!cached ? '~' : ''}${formatFileSize(displayBytes)}`}
                         >
                           {isCompressing ? (
                             <>
@@ -1232,6 +1234,7 @@ export default function CompressPDF({ tool, navigateTo }) {
                       onClick={() => handleDownloadRasterPreset(p)}
                       disabled={anyCompressing}
                       type="button"
+                      aria-label={`Download ${p.label}, ${!cached ? '~' : ''}${formatFileSize(displayBytes)}`}
                     >
                       {isCompressing ? (
                         <>

@@ -4,7 +4,7 @@
 
 ## Where things stand
 
-- **Deployed:** rdmtoolkit.ca (GitHub Pages, auto-deploy on push to master). `npm audit` (full tree, dev included): **0 vulnerabilities** since the Vite 8 migration (2026-07-18). Dependabot alert dashboard: clean (adm-zip fixed via override in #91; the 4 dev-server-only vite/esbuild alerts dismissed as tolerable risk, then mooted by the migration).
+- **Deployed:** rdmtoolkit.ca (GitHub Pages, auto-deploy on push to master). `npm audit --omit=dev` (the CI gate): **0 vulnerabilities**. The full-tree audit drifts with new build-toolchain advisories and neither CI gate reads it; last cleared with `npm audit fix` on 2026-09-05. Dependabot alert dashboard: clean (adm-zip fixed via override in #91; the 4 dev-server-only vite/esbuild alerts dismissed as tolerable risk, then mooted by the migration).
 - **Accessibility:** AODA plan Phases 0–1 complete (2026-07-07). axe-core 4.12.1 reports **0 violations** on all 10 representative routes (wcag2a/2aa/21aa/22aa). Docs in `docs/accessibility/`.
 - **Branch protection:** live on `master` since 2026-07-12 (PR + 1 review + 4 required checks + up-to-date branches). Signed-commits requirement tried and **disabled** (no local signing configured).
 - **Dependabot backlog:** **0 open dependency PRs.** Vite 8 migration completed 2026-07-18 (superseding the long-deferred #88, now closed). Cadence is monthly + grouped (one PR per ecosystem per month) since #91; security-fix PRs still arrive immediately.

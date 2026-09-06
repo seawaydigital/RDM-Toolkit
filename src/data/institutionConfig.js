@@ -40,3 +40,20 @@ export const MAILTO = {
   storage: `mailto:${INSTITUTION.storageEmail}`,
   dataLibrarian: `mailto:${INSTITUTION.dataLibrarian.email}`,
 };
+
+// Single source of truth for project, source-code and sister-site URLs.
+//
+// Two separate concerns live here, both of which outlive any one maintainer:
+//   - repoUrl / sourceBaseUrl back the site's trust claim ("don't take our word
+//     for it — read the source"). If the repository is transferred or mirrored,
+//     change it here and every link in the app follows.
+//   - rsToolkitUrl / rsCybersecurityGuideUrl point at the sister Research
+//     Security site, which is hosted separately. Whoever hosts RDM Toolkit does
+//     not necessarily control those domains — keeping them here makes that
+//     dependency obvious rather than buried in a component.
+export const PROJECT = {
+  repoUrl: 'https://github.com/seawaydigital/RDM-Toolkit',
+  sourceBaseUrl: 'https://github.com/seawaydigital/RDM-Toolkit/blob/master/',
+  rsToolkitUrl: 'https://rs.rdmtoolkit.ca',
+  rsCybersecurityGuideUrl: 'https://seawaydigital.github.io/RSToolkit/#cybersecurity-guide',
+};

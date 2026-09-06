@@ -105,10 +105,11 @@ export default function EncryptDecryptText({ tool, navigateTo }) {
 
       {/* Input area */}
       <div className="encrypt-input-section">
-        <label className="encrypt-label">
+        <label className="encrypt-label" htmlFor="encrypt-input-text">
           {mode === 'encrypt' ? 'Plain text to encrypt:' : 'Encrypted text (Base64) to decrypt:'}
         </label>
         <textarea
+          id="encrypt-input-text"
           className="text-tool-textarea"
           value={inputText}
           onChange={e => { setInputText(e.target.value); setOutput(''); }}
@@ -122,8 +123,9 @@ export default function EncryptDecryptText({ tool, navigateTo }) {
 
       {/* Password input */}
       <div className="encrypt-password-section">
-        <label className="encrypt-label">Password / Passphrase:</label>
+        <label className="encrypt-label" htmlFor="encrypt-password">Password / Passphrase:</label>
         <input
+          id="encrypt-password"
           type="password"
           className="encrypt-password-input"
           value={password}

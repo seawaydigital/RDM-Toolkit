@@ -1,8 +1,16 @@
 {
-  "name": "scrubbed",
-  "version": "1.0.0",
+  "name": "rdm-toolkit",
   "private": true,
+  "version": "1.0.0",
   "type": "module",
+  "description": "A privacy-first toolkit of 46 browser-based research data management utilities. All processing happens locally in the browser; no file is ever uploaded.",
+  "license": "MIT",
+  "author": "Andrew Austin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seawaydigital/RDM-Toolkit.git"
+  },
+  "homepage": "https://rdmtoolkit.ca/",
   "engines": {
     "node": ">=24 <25",
     "npm": ">=10 <12"
@@ -10,6 +18,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:handoff": "vite build && node scripts/build-handoff.mjs --domain rdmtoolkit.lakeheadu.ca",
     "preview": "vite preview",
     "security:audit": "node scripts/security-audit.mjs",
     "bundle:integrity": "node scripts/bundle-integrity.mjs",

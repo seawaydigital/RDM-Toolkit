@@ -452,13 +452,14 @@ function CSVMode() {
             padding: 'var(--space-lg)',
             marginBottom: 'var(--space-lg)',
           }}>
-            <label style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)', fontWeight: 600 }}>
+            <label id="danon-cols-group-label" style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)', fontWeight: 600 }}>
               Select columns to de-identify:
             </label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
+            <div role="group" aria-labelledby="danon-cols-group-label" style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--space-sm)' }}>
               {headers.map((header, idx) => (
                 <label
                   key={idx}
+                  className="danon-col-chip"
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -478,7 +479,7 @@ function CSVMode() {
                     type="checkbox"
                     checked={selectedCols.has(idx)}
                     onChange={() => toggleColumn(idx)}
-                    style={{ display: 'none' }}
+                    className="visually-hidden"
                   />
                   {header}
                 </label>
@@ -618,10 +619,11 @@ function CSVMode() {
             padding: 'var(--space-lg)',
             marginBottom: 'var(--space-lg)',
           }}>
-            <label style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)', fontWeight: 600 }}>
+            <label htmlFor="danon-csv-strategy" style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)', fontWeight: 600 }}>
               Replacement strategy:
             </label>
             <select
+              id="danon-csv-strategy"
               value={strategy}
               onChange={e => setStrategy(e.target.value)}
               style={{
@@ -902,10 +904,11 @@ function TextMode() {
         <>
           {/* Text input */}
           <div style={{ marginBottom: 'var(--space-lg)' }}>
-            <label style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-xs)', fontWeight: 600 }}>
+            <label htmlFor="danon-text-input" style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-xs)', fontWeight: 600 }}>
               Paste your text:
             </label>
             <textarea
+              id="danon-text-input"
               value={inputText}
               onChange={e => {
                 setInputText(e.target.value);
@@ -1042,10 +1045,11 @@ function TextMode() {
                 padding: 'var(--space-lg)',
                 marginBottom: 'var(--space-lg)',
               }}>
-                <label style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)', fontWeight: 600 }}>
+                <label htmlFor="danon-text-strategy" style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)', fontWeight: 600 }}>
                   Replacement strategy:
                 </label>
                 <select
+                  id="danon-text-strategy"
                   value={strategy}
                   onChange={e => setStrategy(e.target.value)}
                   style={{

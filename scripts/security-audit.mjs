@@ -239,6 +239,15 @@ for (const file of sourceFiles) {
   lineReports(file, /\beval\s*\(|\bnew Function\s*\(/, 'dynamic code execution');
   lineReports(file, /\bdocument\.cookie\b|\bindexedDB\b/, 'persistent browser storage API');
   lineReports(file, /\.(innerHTML|outerHTML)\b|insertAdjacentHTML\s*\(/, 'raw HTML mutation');
+  // Both are TrustedHTML sinks. Under the production CSP
+  // (require-trusted-types-for 'script') they throw, and the default policy in
+  // main.jsx has no createHTML by design — so they work in dev and fail only in
+  // the production build, which is exactly how the File to Markdown breakage
+  // shipped. Turning an HTML string into nodes must go through DOMPurify with
+  // RETURN_DOM, whose 'dompurify' policy the CSP allowlists. See
+  // htmlToMarkdown in src/tools/text/FileToMarkdown.jsx.
+  lineReports(file, /\bnew\s+DOMParser\s*\(/, 'TrustedHTML sink (new DOMParser — use DOMPurify RETURN_DOM instead)');
+  lineReports(file, /\bdocument\s*\.\s*writeln?\s*\(/, 'TrustedHTML sink (document.write/writeln — use DOMPurify RETURN_DOM instead)');
   lineReports(file, /dangerouslySetInnerHTML/, 'React HTML injection', (relative) => allowedDangerousHtml.has(relative));
   lineReports(file, /\blocalStorage\b|\bsessionStorage\b/, 'local/session storage', (relative) => allowedLocalStorage.has(relative));
   lineReports(file, /ALLOWED_ATTR\s*:\s*\[[^\]]*['"]style['"]/, 'DOMPurify style attribute allowlist');
