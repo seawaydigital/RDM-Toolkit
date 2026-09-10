@@ -12,7 +12,7 @@
 4. **`dangerouslySetInnerHTML` and `localStorage` are allowlisted per-file** in `security-audit.mjs`. Don't add new call sites without updating the allowlist and having a genuine reason.
 5. **GitHub Actions must be pinned to full 40-char commit SHAs**, workflows must use `npm ci --ignore-scripts`, and must not use `npx` — the security audit enforces all three.
 6. **codeql-action `init` and `analyze` must always be bumped to the same SHA together** — skewed versions fail CodeQL with "configuration error". (They're subpaths of one repo, so one SHA covers all sub-actions.)
-7. **Do not merge or casually apply the Vite 8 upgrade** (open PR #88) — it's a deliberate, deferred breaking migration. See [docs/HANDOFF.md](docs/HANDOFF.md).
+7. **The bundle's chunk inventory is guarded.** The `bundle-size` check fails any PR that introduces a new logical JS chunk or grows one >10% (+10 KB) vs master. Put new shared code in an existing chunk (see `ToolCaveats.jsx` hosting `FormFieldsNotice` for the pattern) rather than creating new modules that Rolldown will split out. Vite 8/Rolldown notes: `manualChunks` must stay in function form (object form is a hard build error), and the `TRANSITION_ALLOWED_NEW_CHUNKS` allowance in `scripts/bundle-integrity.mjs` is a one-time migration artifact — do not add entries to it to sneak new chunks past the guard.
 8. **Accessibility is a maintained property**: axe-core scans are clean (0 violations) on the 10 representative routes as of 2026-07-07. Follow [docs/accessibility/patterns.md](docs/accessibility/patterns.md) for conventions (focus rings, live regions, contrast-safe colors on tinted surfaces, 24px targets, labels). New UI must not reintroduce violations.
 
 ## Before claiming done
