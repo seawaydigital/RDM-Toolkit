@@ -408,7 +408,7 @@ const EXPLAINERS = {
   // ============================================================
 
   'merge-pdfs': {
-    whatItDoes: 'Combines two or more PDFs into a single document, in the order you arrange them. Text stays selectable; fonts and images come through unchanged.',
+    whatItDoes: 'Combines two or more PDFs into a single document, in the order you arrange them. Rotate individual pages or every page in a file before exporting. Text stays selectable; fonts and images come through unchanged.',
     howItWorks: [
       'When you drop your files in, your browser opens them the same way it would open any PDF you click on — temporarily, in memory. A PDF tool library (already downloaded when you first visited this site) copies each page into a new combined document, then hands the new file to your browser\u2019s download prompt.',
       'That\u2019s it. There\u2019s no "upload," no server step, no cloud. If you closed this tab right now, every trace of your files would be gone.',

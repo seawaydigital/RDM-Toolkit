@@ -1,9 +1,9 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { GripVertical, X, AlertTriangle, ZoomIn, ZoomOut } from 'lucide-react';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, rectSortingStrategy, useSortable, arrayMove } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { PDFDocument } from '@cantoo/pdf-lib';
+import { PDFDocument, degrees } from '@cantoo/pdf-lib';
 import InfoCard from '../../components/ui/InfoCard';
 import DropZone from '../../components/ui/DropZone';
 import ActionButton from '../../components/ui/ActionButton';
@@ -11,11 +11,32 @@ import ResultPanel from '../../components/ui/ResultPanel';
 import ErrorCard from '../../components/ui/ErrorCard';
 import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
-import { buildOutputFilename } from '../../utils/filename';
 import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
-function SortableFileCard({ item, onRemove, index, thumbSize }) {
+function SortableFileCard({ item, onRemove, onRotate, onMove, index, fileCount, thumbSize }) {
+  const [pageIndex, setPageIndex] = useState(0);
+  const [preview, setPreview] = useState(null);
+  useEffect(() => {
+    if (pageIndex === 0 || item.encrypted) return;
+    let cancelled = false;
+    let document;
+    setPreview(null);
+    (async () => {
+      try {
+        document = await loadPdfDocument(new Uint8Array(await item.file.arrayBuffer()));
+        const thumbnail = await renderPageThumbnail(document, pageIndex + 1);
+        if (!cancelled) setPreview({ pageIndex, thumbnail });
+      } catch {
+        // Rotation remains available even when a preview cannot be rendered.
+      } finally {
+        if (document) destroyPdfDocument(document);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [item.file, item.encrypted, pageIndex]);
+  const thumbnail = pageIndex === 0 ? item.thumbnail : preview?.pageIndex === pageIndex ? preview.thumbnail : null;
+  const rotation = item.rotations[pageIndex] || 0;
   const {
     attributes,
     listeners,
@@ -58,8 +79,8 @@ function SortableFileCard({ item, onRemove, index, thumbSize }) {
           className="merge-file-thumb-wrap"
           style={{ width: thumbSize, height: thumbH }}
         >
-          {item.thumbnail
-            ? <img src={item.thumbnail} alt="" className="merge-file-thumbnail" />
+          {thumbnail
+            ? <img src={thumbnail} alt={`Page ${pageIndex + 1} of ${item.name}`} className="merge-file-thumbnail" style={{ transform: `rotate(${rotation}deg) scale(${rotation % 180 ? 0.7 : 1})` }} />
             : <div className="merge-file-thumb-placeholder"><AlertTriangle size={20} /></div>
           }
         </div>
@@ -84,6 +105,22 @@ function SortableFileCard({ item, onRemove, index, thumbSize }) {
             <AlertTriangle size={12} /> Form fields
           </p>
         )}
+      </div>
+      {!item.encrypted && (
+        <div className="merge-file-controls">
+          <label htmlFor={`${item.id}-page`}>Preview page</label>
+          <select id={`${item.id}-page`} value={pageIndex} onChange={event => setPageIndex(Number(event.target.value))}>
+            {item.rotations.map((_, i) => <option key={i} value={i}>{i + 1} of {item.pageCount}</option>)}
+          </select>
+          <span aria-live="polite">Added rotation: {rotation}°</span>
+          <button className="rotate-toolbar-btn" onClick={() => onRotate(item.id, pageIndex)}>Rotate page 90°</button>
+          <button className="rotate-toolbar-btn" onClick={() => onRotate(item.id, null)}>Rotate all pages 90°</button>
+          <button className="rotate-toolbar-btn" onClick={() => onRotate(item.id, null, true)}>Reset rotations</button>
+        </div>
+      )}
+      <div className="merge-file-controls">
+        <button className="rotate-toolbar-btn" disabled={index === 0} onClick={() => onMove(index, index - 1)} aria-label={`Move ${item.name} earlier`}>Move earlier</button>
+        <button className="rotate-toolbar-btn" disabled={index === fileCount - 1} onClick={() => onMove(index, index + 1)} aria-label={`Move ${item.name} later`}>Move later</button>
       </div>
     </div>
   );
@@ -120,6 +157,7 @@ export default function MergePDFs({ tool, navigateTo }) {
         pageCount: null,
         encrypted: false,
         hasFormFields: false,
+        rotations: [],
       };
 
       try {
@@ -141,6 +179,7 @@ export default function MergePDFs({ tool, navigateTo }) {
           // pdf-lib load and the thumbnail render, and this scan bails on the
           // first Widget annotation, so awaiting costs effectively nothing.
           item.hasFormFields = await pdfHasFormFields(uint8);
+          item.rotations = Array(item.pageCount).fill(0);
         }
 
         if (!item.encrypted) {
@@ -172,13 +211,24 @@ export default function MergePDFs({ tool, navigateTo }) {
 
   const handleDragEnd = useCallback((event) => {
     const { active, over } = event;
-    if (active.id !== over?.id) {
+    if (over && active.id !== over.id) {
       setFiles(prev => {
         const oldIndex = prev.findIndex(f => f.id === active.id);
         const newIndex = prev.findIndex(f => f.id === over.id);
         return arrayMove(prev, oldIndex, newIndex);
       });
     }
+  }, []);
+
+  const handleRotate = useCallback((id, pageIndex, reset = false) => {
+    setFiles(prev => prev.map(item => item.id === id ? {
+      ...item,
+      rotations: item.rotations.map((rotation, i) => reset ? 0 : pageIndex === null || pageIndex === i ? (rotation + 90) % 360 : rotation),
+    } : item));
+  }, []);
+
+  const handleMove = useCallback((from, to) => {
+    setFiles(prev => arrayMove(prev, from, to));
   }, []);
 
   const handleMerge = useCallback(async () => {
@@ -192,7 +242,8 @@ export default function MergePDFs({ tool, navigateTo }) {
         const bytes = await item.file.arrayBuffer();
         const { pdfDoc: donor } = await loadPdfLibDocument(new Uint8Array(bytes), { PDFDocument });
         const pages = await merged.copyPages(donor, donor.getPageIndices());
-        for (const page of pages) {
+        for (const [pageIndex, page] of pages.entries()) {
+          page.setRotation(degrees((page.getRotation().angle + item.rotations[pageIndex]) % 360));
           merged.addPage(page);
         }
       }
@@ -250,7 +301,7 @@ export default function MergePDFs({ tool, navigateTo }) {
   return (
     <div>
       <InfoCard
-        description="Combines multiple PDF files into a single document in the order you choose. All merging happens in your browser using pdf-lib — your documents are never sent anywhere. Useful for compiling reports, consolidating research materials, or bundling submission documents."
+        description="Combine PDFs and fix page orientation in one export. Arrange files, choose a page to preview and rotate, or rotate all pages in a file. Rotations are clockwise and added to the original orientation. Everything happens in your browser."
       />
 
       {error === '__encrypted__' ? (
@@ -283,7 +334,7 @@ export default function MergePDFs({ tool, navigateTo }) {
             <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
               <SortableContext items={files.map(f => f.id)} strategy={rectSortingStrategy}>
                 {files.map((item, i) => (
-                  <SortableFileCard key={item.id} item={item} index={i} onRemove={handleRemove} thumbSize={thumbSize} />
+                  <SortableFileCard key={item.id} item={item} index={i} fileCount={files.length} onRemove={handleRemove} onRotate={handleRotate} onMove={handleMove} thumbSize={thumbSize} />
                 ))}
               </SortableContext>
             </DndContext>
