@@ -7,7 +7,7 @@ export const CATEGORIES = [
     description: 'Merge, split, compress, rotate, sign, and encrypt PDF documents.',
     tools: [
       // Structure — rearrange pages
-      { id: 'merge-pdfs', name: 'Merge PDFs', slug: 'merged', description: 'Combine multiple PDF files into a single document in the order you choose.', tags: ['pdf', 'documentation'], related: ['split-pdf', 'compress-pdf', 'add-page-numbers'] },
+      { id: 'merge-pdfs', name: 'Merge & Rotate PDFs', slug: 'merged', description: 'Combine PDF files in your chosen order and rotate individual pages or entire files in one export.', tags: ['pdf', 'documentation', 'rotate'], related: ['split-pdf', 'compress-pdf', 'add-page-numbers'] },
       { id: 'split-pdf', name: 'Split PDF', slug: 'split', description: 'Extract specific pages or page ranges from a PDF into separate files.', tags: ['pdf', 'documentation'], related: ['merge-pdfs', 'pdf-page-delete', 'reorder-pages'] },
       { id: 'reorder-pages', name: 'Reorder PDF Pages', slug: 'reordered', description: 'Rearrange the pages of a PDF into any order you choose.', tags: ['pdf'], related: ['rotate-pages', 'split-pdf', 'pdf-page-delete'] },
       { id: 'pdf-page-delete', name: 'Delete PDF Pages', slug: 'pages-deleted', description: 'Remove specific pages from a PDF document.', tags: ['pdf'], related: ['split-pdf', 'reorder-pages', 'rotate-pages'] },
