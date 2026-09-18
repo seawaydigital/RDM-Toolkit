@@ -204,6 +204,15 @@ export async function encryptPdfBytes(bytes, { userPassword, ownerPassword, perm
     throw new Error('A user (open) password is required to encrypt a PDF.');
   }
   const pdfDoc = await PDFDocument.load(bytes.slice());
+  // A direct /Info dictionary in the trailer would be written into the new
+  // cross-reference stream dictionary, which is never encrypted (found in the
+  // browser pass with a hand-written PDF; indirect Info dicts are fine).
+  // Promote it to an indirect object so it lands inside an encrypted object
+  // stream. Covered by the "direct trailer /Info" leak test.
+  const info = pdfDoc.context.trailerInfo.Info;
+  if (info instanceof PDFDict && !(info instanceof PDFRef)) {
+    pdfDoc.context.trailerInfo.Info = pdfDoc.context.register(info);
+  }
   pdfDoc.encrypt({
     userPassword,
     ownerPassword: ownerPassword || userPassword,
