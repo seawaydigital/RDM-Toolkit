@@ -119,12 +119,11 @@ test('independent reader (pdfjs) is password-gated and reads strings back intact
   doc.addPage([612, 792]).drawText('HELLOWORLD', { x: 40, y: 700, size: 14 });
   const out = await encryptPdfBytes(await doc.save(), OPTS);
 
-  await assert.rejects(
-    () => pdfjs.getDocument({ data: out.slice() }).promise,
-    (err) => err?.name === 'PasswordException',
-  );
+  const lockedTask = pdfjs.getDocument({ data: out.slice(), verbosity: 0 });
+  await assert.rejects(() => lockedTask.promise, (err) => err?.name === 'PasswordException');
+  await lockedTask.destroy();
 
-  const task = pdfjs.getDocument({ data: out.slice(), password: OPTS.userPassword });
+  const task = pdfjs.getDocument({ data: out.slice(), password: OPTS.userPassword, verbosity: 0 });
   const pdf = await task.promise;
   try {
     const { info } = await pdf.getMetadata();
@@ -138,6 +137,7 @@ test('independent reader (pdfjs) is password-gated and reads strings back intact
 
 test('removePdfPassword yields a file that opens with no password in pdf-lib and pdfjs', async () => {
   const doc = await PDFDocument.create();
+  doc.setTitle('KEEPME');
   const page = doc.addPage([612, 792]);
   page.drawText('HELLOWORLD', { x: 40, y: 700, size: 14 });
   const field = doc.getForm().createTextField('dx');
@@ -149,13 +149,15 @@ test('removePdfPassword yields a file that opens with no password in pdf-lib and
   assert.doesNotMatch(new TextDecoder('latin1').decode(unlocked), /\/Encrypt \d+ \d+ R/);
   const reopened = await PDFDocument.load(unlocked);
   assert.equal(reopened.getForm().getTextField('dx').getText(), 'VAL');
+  assert.equal(reopened.getTitle(), 'KEEPME');
 
-  const task = pdfjs.getDocument({ data: unlocked.slice() });
+  const task = pdfjs.getDocument({ data: unlocked.slice(), verbosity: 0 });
   const pdf = await task.promise;
   try {
     const p1 = await pdf.getPage(1);
     assert.equal((await p1.getTextContent()).items.map((i) => i.str).join(''), 'HELLOWORLD');
     assert.ok((await p1.getAnnotations()).some((a) => a.fieldName === 'dx' && a.fieldValue === 'VAL'));
+    assert.equal((await pdf.getMetadata()).info.Title, 'KEEPME');
   } finally {
     await task.destroy();
   }
@@ -166,6 +168,8 @@ test('removePdfPassword propagates a wrong-password error the tool can recognise
   await assert.rejects(() => removePdfPassword(locked, 'wrong'), /password|encrypt|incorrect/i);
 });
 
+// Mirrors the canary in tests/pdf-lib-surface.test.mjs: when the library stops
+// retaining these artifacts, this test fails too — retire the purge then.
 test('purgeStaleEncryptionArtifacts removes exactly the Encrypt dictionary and stale xref stream', async () => {
   const locked = await encryptPdfBytes(await samplePdf(), OPTS);
   const doc = await PDFDocument.load(locked.slice(), { password: OPTS.userPassword });

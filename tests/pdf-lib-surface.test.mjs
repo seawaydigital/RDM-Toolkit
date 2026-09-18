@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { PDFDocument, PDFName, PDFRawStream, StandardFonts, rgb, degrees } from '@cantoo/pdf-lib';
+import { PDFDocument, PDFDict, PDFName, PDFNumber, PDFRawStream, PDFString, StandardFonts, rgb, degrees, EncryptedPDFError } from '@cantoo/pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 
 // Every pdf-lib call the 17 PDF tools rely on. If a future upgrade removes or
@@ -98,5 +98,51 @@ test('canary: plain load({ password }) + save() still carries the stale /Encrypt
   const locked = await e.save({ useObjectStreams: true });
   const resaved = await (await PDFDocument.load(locked, { password: 'pw' })).save();
   assert.match(new TextDecoder('latin1').decode(resaved), /\/Encrypt \d+ \d+ R/);
-  await assert.rejects(() => PDFDocument.load(resaved));
+  await assert.rejects(() => PDFDocument.load(resaved), (e) => e instanceof EncryptedPDFError);
+});
+
+const TINY_JPEG = Uint8Array.from(
+  atob('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA='),
+  (c) => c.charCodeAt(0),
+);
+
+test('redaction/compress/image-to-pdf path: embedJpg', async () => {
+  const doc = await PDFDocument.create();
+  const jpg = await doc.embedJpg(TINY_JPEG);
+  doc.addPage([612, 792]).drawImage(jpg, { x: 0, y: 0, width: 10, height: 10 });
+  assert.equal(jpg.width, 1);
+});
+
+test('redaction/compress path: catalog.lookupMaybe(Names, PDFDict)', async () => {
+  const a = await PDFDocument.load(await sourcePdf());
+  assert.equal(a.catalog.lookupMaybe(PDFName.of('Names'), PDFDict), undefined);
+  a.catalog.set(PDFName.of('Names'), a.context.obj({ EmbeddedFiles: a.context.obj({}) }));
+  assert.ok(a.catalog.lookupMaybe(PDFName.of('Names'), PDFDict) instanceof PDFDict);
+});
+
+test('fillable-form path: low-level /Sig widget registration + high-level field creators', async () => {
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([612, 792]);
+  const form = doc.getForm();
+  form.createCheckBox('cb').addToPage(page, { x: 10, y: 10, width: 12, height: 12 });
+  form.createDropdown('dd').addToPage(page, { x: 10, y: 30, width: 80, height: 16 });
+  form.createRadioGroup('rg').addOptionToPage('a', page, { x: 10, y: 50, width: 12, height: 12 });
+  const ctx = doc.context;
+  const apStream = ctx.stream('q 0.95 g 0 0 100 30 re f Q', {
+    Type: 'XObject', Subtype: 'Form', BBox: [0, 0, 100, 30], Matrix: [1, 0, 0, 1, 0, 0],
+    Resources: ctx.obj({ ProcSet: ['PDF'] }), FormType: 1,
+  });
+  const widgetDict = ctx.obj({
+    Type: 'Annot', Subtype: 'Widget', FT: 'Sig', T: PDFString.of('sig1'),
+    Rect: [50, 600, 150, 630], F: 4, P: page.ref,
+    BS: ctx.obj({ W: 1, S: 'S' }), MK: ctx.obj({ BC: [0.4, 0.4, 0.4] }),
+    AP: ctx.obj({ N: ctx.register(apStream) }),
+  });
+  const widgetRef = ctx.register(widgetDict);
+  form.acroForm.addField(widgetRef);
+  form.acroForm.dict.set(PDFName.of('SigFlags'), PDFNumber.of(3));
+  page.node.addAnnot(widgetRef);
+  const bytes = await doc.save({ useObjectStreams: false });
+  const reloaded = await PDFDocument.load(bytes);
+  assert.deepEqual(reloaded.getForm().getFields().map((f) => f.getName()).sort(), ['cb', 'dd', 'rg', 'sig1']);
 });

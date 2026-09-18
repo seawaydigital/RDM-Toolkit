@@ -1,4 +1,4 @@
-import { PDFDocument, PDFDict, PDFStream, PDFName, PDFInvalidObject, EncryptedPDFError } from '@cantoo/pdf-lib';
+import { PDFDocument, PDFDict, PDFName, PDFRef, PDFInvalidObject, EncryptedPDFError } from '@cantoo/pdf-lib';
 
 /**
  * Encrypt a PDF with the standard security handler (AES-256, ISO 32000-2
@@ -71,22 +71,40 @@ export async function verifyPdfIsLocked(bytes, { userPassword } = {}) {
  * dictionary itself. Its own parser then trusts that stale trailer on reopen
  * and reports the file as still encrypted. Delete both before saving. Only the
  * encrypted parse path retains these; a plain xref-stream PDF loads clean.
- * Returns human-readable labels of what was removed (for tests/UI).
+ * Also restores the original /Info dictionary reference found in the stale
+ * trailer: the decrypting parse mints a fresh Info dict, so Title/Author/
+ * Keywords would otherwise be lost on unlock. Returns human-readable labels
+ * of what was removed (for tests/UI).
  */
 export function purgeStaleEncryptionArtifacts(pdfDoc) {
   const ctx = pdfDoc.context;
   const removed = [];
+  let originalInfoRef = null;
+
   for (const [ref, obj] of ctx.enumerateIndirectObjects()) {
-    const isStaleXref = obj instanceof PDFInvalidObject
-      && /\/Type\s*\/XRef/.test(new TextDecoder('latin1').decode(obj.data));
-    const isEncryptDict = obj instanceof PDFDict && !(obj instanceof PDFStream)
-      && String(obj.get(PDFName.of('Filter'))) === '/Standard'
-      && obj.has(PDFName.of('O')) && obj.has(PDFName.of('U'));
-    if (isStaleXref || isEncryptDict) {
+    if (obj instanceof PDFInvalidObject) {
+      const text = new TextDecoder('latin1').decode(obj.data);
+      if (!/\/Type\s*\/XRef/.test(text)) continue;
+      const info = text.match(/\/Info\s+(\d+)\s+(\d+)\s+R/);
+      if (info) originalInfoRef = PDFRef.of(Number(info[1]), Number(info[2]));
       ctx.delete(ref);
-      removed.push(isStaleXref ? 'stale cross-reference stream' : 'encryption dictionary');
+      removed.push('stale cross-reference stream');
+      continue;
+    }
+    const isEncryptDict = obj instanceof PDFDict
+      && String(obj.lookup(PDFName.of('Filter'))) === '/Standard'
+      && obj.has(PDFName.of('O')) && obj.has(PDFName.of('U'));
+    if (isEncryptDict) {
+      ctx.delete(ref);
+      removed.push('encryption dictionary');
     }
   }
+
+  if (originalInfoRef && ctx.lookup(originalInfoRef) instanceof PDFDict) {
+    ctx.trailerInfo.Info = originalInfoRef;
+  }
+  // pdf-lib already drops trailerInfo.Encrypt on a successful password load;
+  // belt-and-braces for any future parser path that does not.
   delete ctx.trailerInfo.Encrypt;
   return removed;
 }
@@ -100,7 +118,10 @@ export function purgeStaleEncryptionArtifacts(pdfDoc) {
 export async function removePdfPassword(bytes, password) {
   const pdfDoc = await PDFDocument.load(bytes.slice(), { password });
   purgeStaleEncryptionArtifacts(pdfDoc);
-  const out = await pdfDoc.save({ useObjectStreams: true });
+  // Plain save(): pdf-lib picks object streams from the file's own header
+  // (and refuses them for PDF/A-1). Forcing them rewrote every pre-1.5 PDF to
+  // 1.7 and could throw on PDF/A-1 input.
+  const out = await pdfDoc.save();
   try {
     await PDFDocument.load(out.slice());
   } catch {

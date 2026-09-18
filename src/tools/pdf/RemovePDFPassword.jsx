@@ -126,7 +126,7 @@ export default function RemovePDFPassword({ tool, navigateTo }) {
           pdfBytes = await removePdfPassword(fileBytes, password);
         } catch (e) {
           if (e.message?.startsWith('VERIFY:')) {
-            setError('The unlocked file could not be verified, so it has NOT been offered for download. Please report this.');
+            setError('The unlocked file could not be verified, so it has NOT been offered for download. Please report this with the Feedback button in the top bar.');
             setLoading(false);
             return;
           }

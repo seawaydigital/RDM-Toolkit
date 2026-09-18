@@ -88,6 +88,12 @@ function readJson(filePath) {
 // remove it in a later cleanup pass.
 const TRANSITION_ALLOWED_NEW_CHUNKS = new Set(['rolldown-runtime.js']);
 
+// Per-chunk growth allowance for a reviewed dependency major bump. Exact
+// logical-name match; every other chunk keeps the CLI's --max-growth-pct.
+// pdf-lib 1.21 -> 2.11 (2026-09-18, encryption support) grew the chunk 15.6%.
+// Inert once master's baseline is itself a 2.x build — remove it then.
+const TRANSITION_ALLOWED_GROWTH_PCT = new Map([['pdf-lib.js', 20]]);
+
 // Stripping the content hash is not injective: several distinct chunks can share
 // one logical name. The app entry (index.html -> index-<hash>.js) and React's own
 // index.js both reduce to `index.js`. Keying a Map on the logical name silently
@@ -125,7 +131,8 @@ export function compareBundles(base, current, maxGrowthPct) {
     if (baseline.bytes === 0) continue;
     const growthPct = ((group.bytes - baseline.bytes) / baseline.bytes) * 100;
     const growthBytes = group.bytes - baseline.bytes;
-    if (growthPct > maxGrowthPct && growthBytes > 10 * 1024) {
+    const limitPct = TRANSITION_ALLOWED_GROWTH_PCT.get(logicalName) ?? maxGrowthPct;
+    if (growthPct > limitPct && growthBytes > 10 * 1024) {
       const chunkCount = group.names.length > 1 ? ` across ${group.names.length} chunks` : '';
       issues.push(
         `${logicalName} grew by ${growthPct.toFixed(1)}%${chunkCount} ` +
