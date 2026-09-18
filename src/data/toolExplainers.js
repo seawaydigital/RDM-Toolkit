@@ -223,13 +223,13 @@ const EXPLAINERS = {
   'strip-file-metadata': {
     whatItDoes: 'Removes hidden metadata (author, edit history, GPS coordinates, camera make, etc.) from PDFs and images.',
     howItWorks: [
-      'Your file is read into browser memory. For PDFs, a PDF library clears the standard metadata fields (title, author, subject, keywords, producer) and saves a clean copy. For images, the file is parsed to locate EXIF/XMP metadata blocks, then re-encoded through a canvas so those blocks are left behind.',
+      'Your file is read into browser memory. For PDFs, the Info dictionary (title, author, subject, keywords, producer) is blanked and the XMP metadata stream, application PieceInfo, embedded attachments and page thumbnails are deleted — objects included, not just the references — before the file is re-saved. For images, the file is re-encoded through a canvas so EXIF/XMP blocks are left behind.',
       'The cleaned file downloads to your device. Nothing is uploaded — the entire scrubbing happens in this browser tab.',
     ],
     technicalDetails: {
       library: '<code>@cantoo/pdf-lib</code> for PDFs; <code>exifr</code> v7 + Canvas API for images.',
       flow: [
-        'PDFs: parsed with <code>PDFDocument.load()</code>; <code>setTitle("")</code>, <code>setAuthor("")</code>, <code>setSubject("")</code>, <code>setKeywords([])</code>, <code>setProducer("")</code>, <code>setCreator("")</code> are called; document re-saved.',
+        'PDFs: parsed with <code>PDFDocument.load()</code>; <code>stripPdfIdentityMetadata()</code> blanks the Info dictionary and deletes catalog <code>/Metadata</code> (XMP), <code>/PieceInfo</code>, <code>/Names/EmbeddedFiles</code> and per-page <code>/PieceInfo</code>/<code>/Thumb</code>, recursively removing the objects they point at (pdf-lib would otherwise re-serialise orphaned objects); document re-saved. The before/after table lists any hidden carriers found.',
         'Images: <code>exifr</code> parses the original metadata for a before-snapshot; the image is drawn onto a <code>&lt;canvas&gt;</code> and exported via <code>canvas.toBlob()</code>, which by specification does not emit EXIF/XMP.',
         'A second <code>exifr</code> pass on the output verifies the metadata is gone and shows you the before/after comparison.',
       ],
@@ -241,7 +241,7 @@ const EXPLAINERS = {
       'Output files are built in memory and handed to your browser\u2019s download dialog.',
     ],
     limitations: [
-      'For PDFs, we strip the standard Info dictionary and XMP block. Custom or third-party metadata streams (e.g. embedded review comments, form data, attached files) are handled by the main pdf-lib serializer but may survive in edge cases. Inspect sensitive PDFs in Adobe Acrobat\u2019s "Examine Document" afterwards for double-check.',
+      'For PDFs: text and images on the pages are untouched, so a name printed in a header, a signature, or a scanned letterhead is not metadata and will remain. Review-comment annotations and form-field values also stay. For sensitive documents, follow up with Adobe Acrobat\u2019s "Examine Document" or the PDF Redaction tool.',
       'For images, re-encoding through a canvas may slightly change pixel data. For archival originals, keep an untouched copy.',
       'GPS coordinates embedded directly in the image pixels (e.g. burned-in watermarks) cannot be removed by any metadata tool. Crop them out with Image Cropper.',
     ],
@@ -816,7 +816,7 @@ export const TOOL_CAVEATS = {
     'If you use the coded strategy, store the key file separately from the coded data (TCPS 2 Art. 5.5).',
   ],
   'strip-file-metadata': [
-    'For PDFs, rare third-party metadata streams can survive. For sensitive documents, double-check afterwards with Adobe Acrobat’s Examine Document.',
+    'Only hidden metadata is removed. Names in headers, footers, signatures or scanned letterheads are page content — use PDF Redaction for those.',
   ],
   'strip-image-metadata': [
     'Information burned into the pixels — timestamp watermarks, GPS overlays — is not metadata and won’t be removed. Crop it out with the Image Cropper instead.',
