@@ -105,13 +105,69 @@ test('ownerPassword defaults to the user password when blank', async () => {
   assert.equal(doc.getPageCount(), 1);
 });
 
+test('permissions with printing disabled are accepted', async () => {
+  const out = await encryptPdfBytes(await samplePdf(), {
+    ...OPTS,
+    permissions: { printing: false, copying: false, modifying: false },
+  });
+  assert.match(new TextDecoder('latin1').decode(out), /\/Encrypt/);
+});
+
+test('encryptPdfBytes refuses an empty user password', async () => {
+  await assert.rejects(
+    () => encryptPdfBytes(await samplePdf(), { ...OPTS, userPassword: '' }),
+    /user \(open\) password/,
+  );
+});
+
+// @cantoo/pdf-lib 2.11.1 encrypts stream objects but not bare string objects.
+// Saved with a plain xref table, Title/Author/form values sit in the file in
+// cleartext (as literal strings or UTF-16BE hex). Object streams cover them.
+test('no document strings leak into the encrypted bytes', async () => {
+  const doc = await PDFDocument.create();
+  doc.setTitle('PATIENTROSTER');
+  doc.setAuthor('DRSMITH');
+  const page = doc.addPage([612, 792]);
+  const field = doc.getForm().createTextField('diagnosis');
+  field.setText('HIVPOSITIVE');
+  field.addToPage(page, { x: 50, y: 600, width: 200, height: 20 });
+  const out = await encryptPdfBytes(await doc.save(), OPTS);
+  const text = new TextDecoder('latin1').decode(out);
+  const utf16Hex = (s) => Array.from(s).map((c) => c.charCodeAt(0).toString(16).padStart(4, '0').toUpperCase()).join('');
+  for (const secret of ['PATIENTROSTER', 'DRSMITH', 'HIVPOSITIVE']) {
+    assert.ok(!text.includes(secret), `${secret} leaked as a literal string`);
+    assert.ok(!text.includes(utf16Hex(secret)), `${secret} leaked as UTF-16BE hex`);
+  }
+  const opened = await PDFDocument.load(out, { password: OPTS.userPassword });
+  assert.equal(opened.getForm().getTextField('diagnosis').getText(), 'HIVPOSITIVE');
+});
+
 test('verifyPdfIsLocked accepts encrypted output and rejects a plain PDF', async () => {
   const plain = await samplePdf();
   const locked = await encryptPdfBytes(plain, OPTS);
-  assert.deepEqual(await verifyPdfIsLocked(locked), { locked: true, reason: null });
-  const verdict = await verifyPdfIsLocked(plain);
+  assert.deepEqual(await verifyPdfIsLocked(locked, { userPassword: OPTS.userPassword }), { locked: true, reason: null });
+  const verdict = await verifyPdfIsLocked(plain, { userPassword: OPTS.userPassword });
   assert.equal(verdict.locked, false);
   assert.match(verdict.reason, /no \/Encrypt/);
+});
+
+test('verifyPdfIsLocked rejects an owner-only file that opens with an empty password', async () => {
+  const doc = await PDFDocument.load(await samplePdf());
+  doc.encrypt({ userPassword: '', ownerPassword: 'owner only' });
+  const ownerOnly = await doc.save({ useObjectStreams: true });
+  const verdict = await verifyPdfIsLocked(ownerOnly, { userPassword: '' });
+  assert.equal(verdict.locked, false);
+  assert.match(verdict.reason, /empty password/);
+});
+
+test('verifyPdfIsLocked reports a wrong expected password and never throws on garbage', async () => {
+  const locked = await encryptPdfBytes(await samplePdf(), OPTS);
+  const wrong = await verifyPdfIsLocked(locked, { userPassword: 'not it' });
+  assert.equal(wrong.locked, false);
+  assert.match(wrong.reason, /did not open with the chosen password/);
+  const garbage = await verifyPdfIsLocked(new Uint8Array([1, 2, 3, 4]), { userPassword: 'x' });
+  assert.equal(garbage.locked, false);
+  assert.match(garbage.reason, /could not be parsed/);
 });
 ```
 
@@ -131,37 +187,65 @@ import { PDFDocument } from '@cantoo/pdf-lib';
  * Encrypt a PDF with the standard security handler (AES-256, ISO 32000-2
  * revision 6 — the @cantoo/pdf-lib 2.x default). Returns the encrypted bytes.
  *
- * `bytes` is sliced because pdf-lib may hand the buffer to a worker-style
- * consumer elsewhere; callers keep their original copy.
+ * `bytes` is a Uint8Array. It is copied because callers keep using their
+ * buffer afterwards (thumbnail rendering, a second run with a new password).
+ *
+ * The output MUST be saved with object streams. @cantoo/pdf-lib 2.11.1
+ * encrypts stream objects but not bare string objects: with a plain xref
+ * table, document metadata (Title/Author), form-field values, annotation
+ * text and outline titles sit in the file unencrypted, while conformant
+ * readers garble them on open. Inside an object stream those strings are
+ * covered by the stream's encryption. Verified 2026-09-18 (see the leak test).
  */
 export async function encryptPdfBytes(bytes, { userPassword, ownerPassword, permissions }) {
+  if (!userPassword) {
+    throw new Error('A user (open) password is required to encrypt a PDF.');
+  }
   const pdfDoc = await PDFDocument.load(bytes.slice());
   pdfDoc.encrypt({
     userPassword,
     ownerPassword: ownerPassword || userPassword,
     permissions,
   });
-  // Object streams are fine with encryption, but plain xref tables open in the
-  // widest range of viewers — same choice the rest of the toolkit makes.
-  return pdfDoc.save({ useObjectStreams: false });
+  return pdfDoc.save({ useObjectStreams: true });
 }
 
 /**
- * Independent post-save check. The download must never be offered unless the
- * bytes (a) carry an /Encrypt dictionary and (b) refuse a password-less open.
- * This is the guard that would have caught the pdf-lib 1.x silent no-op.
+ * Independent post-save check. Never throws. The download must not be
+ * offered unless the bytes carry an /Encrypt dictionary, refuse both a
+ * password-less and an empty-password open, and open with the chosen
+ * password. This is the guard that would have caught the pdf-lib 1.x silent
+ * no-op, and the owner-password-only variant of it.
  */
-export async function verifyPdfIsLocked(bytes) {
-  const probe = await PDFDocument.load(bytes.slice(), { ignoreEncryption: true });
-  if (!probe.isEncrypted) {
-    return { locked: false, reason: 'no /Encrypt dictionary in output' };
-  }
+export async function verifyPdfIsLocked(bytes, { userPassword }) {
+  const fail = (reason) => ({ locked: false, reason });
+
   try {
-    await PDFDocument.load(bytes.slice());
+    const probe = await PDFDocument.load(bytes.slice(), { ignoreEncryption: true });
+    if (!probe.isEncrypted) return fail('no /Encrypt dictionary in output');
   } catch {
-    return { locked: true, reason: null };
+    return fail('output could not be parsed');
   }
-  return { locked: false, reason: 'output opened without a password' };
+
+  const mustRefuse = [
+    ['no password', {}],
+    ['an empty password', { password: '' }],
+  ];
+  for (const [label, options] of mustRefuse) {
+    try {
+      await PDFDocument.load(bytes.slice(), options);
+    } catch {
+      continue; // refused, as required
+    }
+    return fail(`output opened with ${label}`);
+  }
+
+  try {
+    await PDFDocument.load(bytes.slice(), { password: userPassword });
+  } catch {
+    return fail('output did not open with the chosen password');
+  }
+  return { locked: true, reason: null };
 }
 ```
 
@@ -199,7 +283,7 @@ Run:
 npm run security:audit && npm audit signatures && npm audit --omit=dev --audit-level=high && npm test
 ```
 
-Expected: `Security audit passed for 46 registered tools.`, all signatures verified, `found 0 vulnerabilities`, all tests pass (16 existing + 5 new).
+Expected: `Security audit passed for 46 registered tools.`, all signatures verified, `found 0 vulnerabilities`, all tests pass (16 existing + 10 new).
 
 - [ ] **Step 8: Commit**
 
@@ -322,12 +406,22 @@ test('remove-password path: load({ password }) and load({ ignoreEncryption })', 
   const probe = await PDFDocument.load(bytes, { ignoreEncryption: true });
   assert.equal(probe.isEncrypted, true);
 });
+
+test('remove-password path: load({ password }) then save() yields a file that opens with no password', async () => {
+  const e = await PDFDocument.load(await sourcePdf());
+  e.encrypt({ userPassword: 'pw' });
+  const locked = await e.save();
+  const unlocked = await (await PDFDocument.load(locked, { password: 'pw' })).save();
+  assert.doesNotMatch(new TextDecoder('latin1').decode(unlocked), /\/Encrypt/);
+  const reopened = await PDFDocument.load(unlocked);
+  assert.equal(reopened.getPageCount(), 1);
+});
 ```
 
 - [ ] **Step 2: Run it**
 
 Run: `node --test tests/pdf-lib-surface.test.mjs`
-Expected: `# pass 7`.
+Expected: `# pass 8`.
 
 - [ ] **Step 3: Build and check the chunk gate locally**
 
@@ -387,7 +481,7 @@ Replace lines ~100–118 (from `// Load the PDF with pdf-lib` through the closin
       });
 
       // Independent lock check — never offer a download that is not encrypted.
-      const lock = await verifyPdfIsLocked(encryptedBytes);
+      const lock = await verifyPdfIsLocked(encryptedBytes, { userPassword });
       if (!lock.locked) {
         throw new Error(`VERIFY: ${lock.reason}`);
       }
@@ -1033,7 +1127,7 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 
 ## Definition of done
 
-- `npm test` reports 31 passing tests (16 existing + 5 encrypt + 7 surface + 3 metadata).
+- `npm test` reports 37 passing tests (16 existing + 10 encrypt + 8 surface + 3 metadata).
 - `npm run security:audit`, `npm audit signatures`, `npm audit --omit=dev --audit-level=high` and `npm audit` (full tree) all clean.
 - A PDF produced by Password Protect PDF prompts for a password in Chrome, Adobe Reader and macOS Preview, and Remove PDF Password can open it.
 - A Word-exported PDF run through Strip File Metadata shows no `dc:creator` in `exiftool` output.
