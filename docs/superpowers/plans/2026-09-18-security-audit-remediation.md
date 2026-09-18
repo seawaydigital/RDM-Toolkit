@@ -148,7 +148,7 @@ test('verifyPdfIsLocked accepts encrypted output and rejects a plain PDF', async
   assert.deepEqual(await verifyPdfIsLocked(locked, { userPassword: OPTS.userPassword }), { locked: true, reason: null });
   const verdict = await verifyPdfIsLocked(plain, { userPassword: OPTS.userPassword });
   assert.equal(verdict.locked, false);
-  assert.match(verdict.reason, /no \/Encrypt/);
+  assert.match(verdict.reason, /opened with no password/);
 });
 
 test('verifyPdfIsLocked rejects an owner-only file that opens with an empty password', async () => {
@@ -168,6 +168,8 @@ test('verifyPdfIsLocked reports a wrong expected password and never throws on ga
   const garbage = await verifyPdfIsLocked(new Uint8Array([1, 2, 3, 4]), { userPassword: 'x' });
   assert.equal(garbage.locked, false);
   assert.match(garbage.reason, /could not be parsed/);
+  const noOptions = await verifyPdfIsLocked(locked);
+  assert.equal(noOptions.locked, false);
 });
 ```
 
@@ -181,7 +183,7 @@ Expected: all 5 FAIL with `Cannot find module '../src/utils/pdfEncrypt.js'`.
 Create `src/utils/pdfEncrypt.js`:
 
 ```js
-import { PDFDocument } from '@cantoo/pdf-lib';
+import { PDFDocument, EncryptedPDFError } from '@cantoo/pdf-lib';
 
 /**
  * Encrypt a PDF with the standard security handler (AES-256, ISO 32000-2
@@ -217,16 +219,12 @@ export async function encryptPdfBytes(bytes, { userPassword, ownerPassword, perm
  * password. This is the guard that would have caught the pdf-lib 1.x silent
  * no-op, and the owner-password-only variant of it.
  */
-export async function verifyPdfIsLocked(bytes, { userPassword }) {
+export async function verifyPdfIsLocked(bytes, { userPassword } = {}) {
   const fail = (reason) => ({ locked: false, reason });
 
-  try {
-    const probe = await PDFDocument.load(bytes.slice(), { ignoreEncryption: true });
-    if (!probe.isEncrypted) return fail('no /Encrypt dictionary in output');
-  } catch {
-    return fail('output could not be parsed');
-  }
-
+  // Each load is a full parse of a file that may be 200 MB, so this does the
+  // minimum: an unencrypted output is caught by the "no password" arm below,
+  // which makes a separate /Encrypt probe redundant.
   const mustRefuse = [
     ['no password', {}],
     ['an empty password', { password: '' }],
@@ -234,8 +232,11 @@ export async function verifyPdfIsLocked(bytes, { userPassword }) {
   for (const [label, options] of mustRefuse) {
     try {
       await PDFDocument.load(bytes.slice(), options);
-    } catch {
-      continue; // refused, as required
+    } catch (err) {
+      if (err instanceof EncryptedPDFError || /encrypt|password/i.test(err?.message || '')) {
+        continue; // refused for the right reason
+      }
+      return fail('output could not be parsed');
     }
     return fail(`output opened with ${label}`);
   }
