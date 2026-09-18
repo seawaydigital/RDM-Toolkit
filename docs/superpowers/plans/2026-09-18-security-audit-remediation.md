@@ -408,14 +408,19 @@ test('remove-password path: load({ password }) and load({ ignoreEncryption })', 
   assert.equal(probe.isEncrypted, true);
 });
 
-test('remove-password path: load({ password }) then save() yields a file that opens with no password', async () => {
+// KNOWN QUIRK in @cantoo/pdf-lib 2.11.1 (found 2026-09-18): the parser keeps the
+// original cross-reference stream of a password-decrypted document as an opaque
+// PDFInvalidObject and re-emits it verbatim, stale /Encrypt reference included,
+// and its own parser then trusts that stale trailer on reopen. removePdfPassword()
+// in src/utils/pdfEncrypt.js purges the artifacts. When this canary fails, the
+// library has fixed it and the purge can be retired.
+test('canary: plain load({ password }) + save() still carries the stale /Encrypt trailer', async () => {
   const e = await PDFDocument.load(await sourcePdf());
   e.encrypt({ userPassword: 'pw' });
-  const locked = await e.save();
-  const unlocked = await (await PDFDocument.load(locked, { password: 'pw' })).save();
-  assert.doesNotMatch(new TextDecoder('latin1').decode(unlocked), /\/Encrypt/);
-  const reopened = await PDFDocument.load(unlocked);
-  assert.equal(reopened.getPageCount(), 1);
+  const locked = await e.save({ useObjectStreams: true });
+  const resaved = await (await PDFDocument.load(locked, { password: 'pw' })).save();
+  assert.match(new TextDecoder('latin1').decode(resaved), /\/Encrypt \d+ \d+ R/);
+  await assert.rejects(() => PDFDocument.load(resaved));
 });
 ```
 
@@ -434,7 +439,7 @@ npm run build && node scripts/bundle-integrity.mjs > "$TMP/pr-integrity.json" &&
 
 (Use the scratchpad path for `$TMP`.) Expected: a build with no new warnings and the `pdf-lib` chunk about 9–10% larger than before (previous raw size is in the CI comment on any recent PR, or build `master` in a temporary worktree and run the same command for a baseline).
 
-If the CI `bundle-size` check later reports `pdf-lib.js grew by 1x.x%` above 10%, change line 132 of `.github/workflows/bundle-size.yml` to `--max-growth-pct 15` with the comment `# temporary: pdf-lib 1.21 -> 2.11 (encryption support); restore to 10 once master's baseline is a 2.x build` and open a follow-up issue to restore it. This mirrors the documented Rolldown transition allowance.
+Measured 2026-09-18 against a master baseline: `pdf-lib` chunk 489,879 → 566,368 bytes (**+15.6%**, gzip 212 → 245 KB), 69 chunks both sides, no new chunk names. So the gate WILL fail. Change line 132 of `.github/workflows/bundle-size.yml` to `--max-growth-pct 20` with the comment `# temporary: pdf-lib 1.21 -> 2.11 (encryption support, +15.6%); restore to 10 once master's baseline is a 2.x build` on the line above, and open a follow-up issue to restore it. This mirrors the documented Rolldown transition allowance. The Rolldown "chunks larger than 500 kB" build warning now also covers `pdf-lib` (566 kB, lazy-loaded); it is informational.
 
 - [ ] **Step 4: Manual regression pass in a real browser** (the sandboxed agent browser cannot render pdfjs thumbnails — CLAUDE.md known gap #7)
 
@@ -445,6 +450,153 @@ Run `npm run preview` (production build, real headers) and exercise, with any sm
 ```bash
 git add tests/pdf-lib-surface.test.mjs .github/workflows/bundle-size.yml
 git commit -m "test(pdf): pin the pdf-lib API surface the toolkit depends on
+
+Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
+```
+
+### Task 2b: Remove PDF Password must purge pdf-lib's stale encryption artifacts
+
+Found by Task 2's surface test. On 2.11.1, `PDFDocument.load(bytes, { password })` followed by `save()` produces a file that still contains `/Encrypt N 0 R` (the original cross-reference stream is retained as a `PDFInvalidObject` and re-emitted verbatim, and the Encrypt dictionary object is kept) and the 2.x parser then refuses to open it without a password. 1.21.1 emitted the same stale bytes but its parser ignored them, so the tool used to work by accident. Our own Password Protect output now uses cross-reference streams, so without this fix the two tools would not round-trip. Verified fix: delete the Encrypt dictionary and every `PDFInvalidObject` whose bytes contain `/Type /XRef`, then save. A plain, never-encrypted xref-stream PDF loads with zero such artifacts, so no other tool is affected.
+
+**Files:**
+- Modify: `src/utils/pdfEncrypt.js` (add two exports)
+- Modify: `tests/pdf-encrypt.test.mjs` (three tests)
+- Modify: `src/tools/pdf/RemovePDFPassword.jsx:1-12`, `:123-135`
+- Modify: `vite.config.js` `manualChunks` (pin the helper into the `pdf-lib` chunk — two lazy tools now import it, and Rolldown would otherwise emit a new shared chunk, which the bundle gate rejects)
+
+- [ ] **Step 1: Failing tests** — append to `tests/pdf-encrypt.test.mjs` (extend the import line to include `removePdfPassword, purgeStaleEncryptionArtifacts`):
+
+```js
+test('removePdfPassword yields a file that opens with no password in pdf-lib and pdfjs', async () => {
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([612, 792]);
+  page.drawText('HELLOWORLD', { x: 40, y: 700, size: 14 });
+  const field = doc.getForm().createTextField('dx');
+  field.setText('VAL');
+  field.addToPage(page, { x: 50, y: 600, width: 200, height: 20 });
+  const locked = await encryptPdfBytes(await doc.save(), OPTS);
+
+  const unlocked = await removePdfPassword(locked, OPTS.userPassword);
+  assert.doesNotMatch(new TextDecoder('latin1').decode(unlocked), /\/Encrypt \d+ \d+ R/);
+  const reopened = await PDFDocument.load(unlocked);
+  assert.equal(reopened.getForm().getTextField('dx').getText(), 'VAL');
+
+  const task = pdfjs.getDocument({ data: unlocked.slice() });
+  const pdf = await task.promise;
+  try {
+    const p1 = await pdf.getPage(1);
+    assert.equal((await p1.getTextContent()).items.map((i) => i.str).join(''), 'HELLOWORLD');
+    assert.ok((await p1.getAnnotations()).some((a) => a.fieldName === 'dx' && a.fieldValue === 'VAL'));
+  } finally {
+    await task.destroy();
+  }
+});
+
+test('removePdfPassword propagates a wrong-password error the tool can recognise', async () => {
+  const locked = await encryptPdfBytes(await samplePdf(), OPTS);
+  await assert.rejects(() => removePdfPassword(locked, 'wrong'), /password|encrypt|incorrect/i);
+});
+
+test('purgeStaleEncryptionArtifacts removes exactly the Encrypt dictionary and stale xref stream', async () => {
+  const locked = await encryptPdfBytes(await samplePdf(), OPTS);
+  const doc = await PDFDocument.load(locked.slice(), { password: OPTS.userPassword });
+  const removed = purgeStaleEncryptionArtifacts(doc);
+  assert.deepEqual(removed.sort(), ['encryption dictionary', 'stale cross-reference stream']);
+  assert.deepEqual(purgeStaleEncryptionArtifacts(doc), []);
+});
+```
+
+Run `node --test tests/pdf-encrypt.test.mjs` — expected: 3 failures (`removePdfPassword is not a function` / not exported).
+
+- [ ] **Step 2: Implement** — add to `src/utils/pdfEncrypt.js` (extend the import to `import { PDFDocument, PDFDict, PDFStream, PDFName, PDFInvalidObject, EncryptedPDFError } from '@cantoo/pdf-lib';`):
+
+```js
+/**
+ * @cantoo/pdf-lib 2.11.1 keeps the original cross-reference stream of a
+ * password-decrypted document as an opaque PDFInvalidObject and re-emits it
+ * verbatim — stale /Encrypt reference and all — together with the Encrypt
+ * dictionary itself. Its own parser then trusts that stale trailer on reopen
+ * and reports the file as still encrypted. Delete both before saving. Only the
+ * encrypted parse path retains these; a plain xref-stream PDF loads clean.
+ * Returns human-readable labels of what was removed (for tests/UI).
+ */
+export function purgeStaleEncryptionArtifacts(pdfDoc) {
+  const ctx = pdfDoc.context;
+  const removed = [];
+  for (const [ref, obj] of ctx.enumerateIndirectObjects()) {
+    const isStaleXref = obj instanceof PDFInvalidObject
+      && /\/Type\s*\/XRef/.test(new TextDecoder('latin1').decode(obj.data));
+    const isEncryptDict = obj instanceof PDFDict && !(obj instanceof PDFStream)
+      && String(obj.get(PDFName.of('Filter'))) === '/Standard'
+      && obj.has(PDFName.of('O')) && obj.has(PDFName.of('U'));
+    if (isStaleXref || isEncryptDict) {
+      ctx.delete(ref);
+      removed.push(isStaleXref ? 'stale cross-reference stream' : 'encryption dictionary');
+    }
+  }
+  delete ctx.trailerInfo.Encrypt;
+  return removed;
+}
+
+/**
+ * Open an encrypted PDF with its password and return bytes that open with no
+ * password at all. Load errors (wrong password, not a PDF) propagate unchanged
+ * so the tool can keep its own messaging. Throws a `VERIFY:` error if the
+ * output still refuses a password-less open — never hand such a file out.
+ */
+export async function removePdfPassword(bytes, password) {
+  const pdfDoc = await PDFDocument.load(bytes.slice(), { password });
+  purgeStaleEncryptionArtifacts(pdfDoc);
+  const out = await pdfDoc.save({ useObjectStreams: true });
+  try {
+    await PDFDocument.load(out.slice());
+  } catch {
+    throw new Error('VERIFY: the unlocked output could not be reopened');
+  }
+  return out;
+}
+```
+
+Run the tests — expected 14/14 in `tests/pdf-encrypt.test.mjs`.
+
+- [ ] **Step 3: Wire the tool** — in `src/tools/pdf/RemovePDFPassword.jsx` add `import { removePdfPassword } from '../../utils/pdfEncrypt';` (keep the `PDFDocument` import; the "is it encrypted?" probe still uses it) and replace the standard-encryption branch (`let pdfDoc; try { pdfDoc = await PDFDocument.load(fileBytes.slice(), { password }); } catch (e) {...} pdfBytes = await pdfDoc.save();`) with:
+
+```js
+        // Standard PDF encryption via pdf-lib
+        try {
+          pdfBytes = await removePdfPassword(fileBytes, password);
+        } catch (e) {
+          if (e.message?.startsWith('VERIFY:')) {
+            setError('The unlocked file could not be verified, so it has NOT been offered for download. Please report this.');
+            setLoading(false);
+            return;
+          }
+          if (e.message && (e.message.includes('encrypted') || e.message.includes('password') || e.message.includes('incorrect'))) {
+            setError('Incorrect password. Please try again.');
+            setLoading(false);
+            return;
+          }
+          throw e;
+        }
+```
+
+- [ ] **Step 4: Keep the chunk set stable** — in `vite.config.js` `manualChunks(id)`, add directly after the `@cantoo/pdf-lib` line:
+
+```js
+          // Pure pdf-lib helpers shared by more than one lazy tool. Pinned here so
+          // Rolldown does not emit a new shared chunk (the bundle-integrity gate
+          // rejects new chunk names).
+          if (normalized.includes('/src/utils/pdfEncrypt.js')) return 'pdf-lib';
+```
+
+Run `npm run build` and `node scripts/bundle-integrity.mjs` — the chunk list must still have 69 entries and no `pdfEncrypt` chunk.
+
+- [ ] **Step 5: Guardrails and commit**
+
+```bash
+npm run security:audit && npm test
+git add src/utils/pdfEncrypt.js tests/pdf-encrypt.test.mjs src/tools/pdf/RemovePDFPassword.jsx vite.config.js
+git commit -m "fix(pdf): Remove PDF Password purges pdf-lib's stale /Encrypt trailer on 2.x
 
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 ```
@@ -510,6 +662,8 @@ In `src/data/toolExplainers.js`, entry `'password-protect-pdf'`:
 - line 101 `library:` → `'<code>@cantoo/pdf-lib</code> v2.11.1 (maintained fork of <code>pdf-lib</code>) — AES-256, ISO 32000-2 revision 6.'`
 - line 104 flow bullet → `'<code>encrypt({ userPassword, ownerPassword, permissions })</code> is called, then <code>save()</code>. The output is re-opened without a password and must be refused before the download button appears.'`
 - line 117 first limitation → `'The output uses AES-256 (PDF 2.0, revision 6). Very old viewers (roughly pre-2010) and some lightweight mobile viewers cannot open revision-6 files; if a recipient reports that, ask them to use Adobe Reader, Chrome, Firefox, or macOS Preview.'`
+- add a flow bullet after the `encrypt()` one: `'The file is written with object streams on purpose: the library encrypts streams but not bare strings, so a plain cross-reference save would leave the title, author and form values readable. Do not "harmonise" this save to <code>useObjectStreams: false</code>.'`
+- also update the `'remove-pdf-password'` explainer, if present, to mention that the tool now strips the stale encryption dictionary and cross-reference stream the library would otherwise carry over, and verifies the result opens without a password.
 
 In the `TOOL_CAVEATS` map, replace the `'password-protect-pdf'` entry (lines ~806–808) with:
 
@@ -519,9 +673,14 @@ In the `TOOL_CAVEATS` map, replace the `'password-protect-pdf'` entry (lines ~80
   ],
 ```
 
-- [ ] **Step 5: Update CLAUDE.md**
+- [ ] **Step 5: Update CLAUDE.md** (everything the upgrade made stale)
 
-Dependency table row → `| \`@cantoo/pdf-lib\` | 2.11.1 | PDF manipulation (merge, split, sign, watermark) + AES-256 R6 encryption via \`encrypt()\` (2.x only — 1.x silently ignored password options) |`. Add to the Security Model runtime list: `- **Password Protect PDF post-save lock check** — output is re-opened without a password and must be refused (\`verifyPdfIsLocked()\`) before the download is offered.` Add a Recent Changes row dated 2026-09-18 describing the defect, the upgrade, and the new tests.
+- Dependency table row → `| \`@cantoo/pdf-lib\` | 2.11.1 | PDF manipulation (merge, split, sign, watermark) + AES-256 R6 encryption via \`encrypt()\` (2.x only — 1.x silently ignored password options). Transitive set changed with 2.x: \`culori\`, \`fflate\`, \`tslib\`, \`node-html-better-parser\` (+ peer \`html-entities\`) in; \`@pdf-lib/standard-fonts\`, \`@pdf-lib/upng\`, \`color\` out (\`pako\` stays for fontkit/jszip). All inlined into the \`pdf-lib\` chunk. Upstream declares open ranges for these (\`>=4\`, \`>=2\`); only \`package-lock.json\` pins them. |`
+- Security Model runtime list, add two bullets: `- **Password Protect PDF post-save lock check** — output must refuse a password-less and an empty-password open and must open with the chosen password (\`verifyPdfIsLocked()\`) before the download is offered. Saved with object streams on purpose: pdf-lib 2.11.1 encrypts streams but not bare string objects, so a plain-xref save leaks Title/Author/form values in cleartext (covered by a byte-level leak test).` and `- **Remove PDF Password purges pdf-lib's stale encryption artifacts** — 2.x re-emits the original xref stream (with its \`/Encrypt\` reference) and the Encrypt dictionary after a password load and then treats the re-saved file as still encrypted; \`removePdfPassword()\` deletes both and verifies a password-less reopen.`
+- Known gaps #4 (pdf-lib AcroForm serializer): re-check on 2.x by running Fillable PDF Form → Merge in the browser pass (Task 2 Step 4). If 2.x fixed it, note that and leave the caveats in place until a separate PR verifies; if not, leave the text unchanged.
+- Manual Chunks section: add `src/utils/pdfEncrypt.js` (and later `pdfMetadata.js`) to the \`pdf-lib\` chunk description.
+- Local scripts table: add the three new test files.
+- Recent Changes row dated 2026-09-18 describing the defect (every file the tool produced before this fix is unencrypted), the upgrade, the object-stream leak finding, the Remove PDF Password regression + fix, the temporary 20% bundle allowance, and the new tests.
 
 - [ ] **Step 6: Verify in the preview build**
 
@@ -844,12 +1003,12 @@ Export `removeEntry` from `src/utils/pdfMetadata.js` (add `export` before `funct
 
 Replace the two `namesEntry.delete(...)` calls with `removeEntry(pdfDoc.context, namesEntry, 'EmbeddedFiles')` / `removeEntry(pdfDoc.context, namesEntry, 'JavaScript')` (keeping the `if` + `stats.stripped.push` around each), and the three per-page `node.delete(...)` calls with `removeEntry(pdfDoc.context, node, 'Thumb')` etc. Leave `/OpenAction` and `/AA` handling as-is — actions can be shared with link annotations, and the compress tool must never dangle a reference.
 
-- [ ] **Step 2: Verify** — in the dev server, compress a Word-exported PDF in text-heavy mode; the note still lists "XMP metadata", and `grep -c xmpmeta` on the downloaded file is `0`. Run `npm run security:audit && npm run build` (pdfMetadata.js is now imported by two lazy tools; Rolldown may split it into a tiny shared chunk — if the bundle-integrity gate reports a new chunk named `pdfMetadata`, add it to `TRANSITION_ALLOWED_NEW_CHUNKS` in `scripts/bundle-integrity.mjs` with a comment, exactly as was done for `rolldown-runtime.js`).
+- [ ] **Step 2: Keep the chunk set stable and verify** — `pdfMetadata.js` is now imported by two lazy tools, so Rolldown would emit a new shared chunk (rejected by the bundle gate). In `vite.config.js` `manualChunks(id)`, next to the `pdfEncrypt.js` line added in Task 2b, add `if (normalized.includes('/src/utils/pdfMetadata.js')) return 'pdf-lib';`. Then in the dev server, compress a Word-exported PDF in text-heavy mode; the note still lists "XMP metadata", and `grep -c xmpmeta` on the downloaded file is `0`. Run `npm run security:audit && npm run build && node scripts/bundle-integrity.mjs` — 69 chunks, none named after `pdfMetadata`.
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add src/tools/pdf/CompressPDF.jsx src/utils/pdfMetadata.js scripts/bundle-integrity.mjs
+git add src/tools/pdf/CompressPDF.jsx src/utils/pdfMetadata.js vite.config.js
 git commit -m "fix(pdf): Compress PDF actually drops the bytes of stripped XMP/attachments
 
 Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
@@ -1128,7 +1287,8 @@ Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>"
 
 ## Definition of done
 
-- `npm test` reports 37 passing tests (16 existing + 10 encrypt + 8 surface + 3 metadata).
+- `npm test` reports 41 passing tests (16 existing + 14 encrypt + 8 surface + 3 metadata).
+- Password Protect PDF → Remove PDF Password round-trips in the browser (and the unlocked file opens in Chrome with no prompt).
 - `npm run security:audit`, `npm audit signatures`, `npm audit --omit=dev --audit-level=high` and `npm audit` (full tree) all clean.
 - A PDF produced by Password Protect PDF prompts for a password in Chrome, Adobe Reader and macOS Preview, and Remove PDF Password can open it.
 - A Word-exported PDF run through Strip File Metadata shows no `dc:creator` in `exiftool` output.
