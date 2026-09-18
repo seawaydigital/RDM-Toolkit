@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PDFDocument } from '@cantoo/pdf-lib';
-import { encryptPdfBytes, verifyPdfIsLocked, removePdfPassword, purgeStaleEncryptionArtifacts } from '../src/utils/pdfEncrypt.js';
+import { encryptPdfBytes, verifyPdfIsLocked, removePdfPassword, purgeStaleEncryptionArtifacts, randomOwnerPassword } from '../src/utils/pdfEncrypt.js';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 async function samplePdf() {
@@ -9,6 +9,12 @@ async function samplePdf() {
   doc.addPage([612, 792]).drawText('CONFIDENTIAL PATIENT DATA', { x: 50, y: 700, size: 14 });
   return doc.save();
 }
+
+// Shared by the leak tests below: a secret string can survive a plain
+// cross-reference save as a literal string, as UTF-16BE hex, or as
+// PDFDocEncoding/ASCII hex — check all three encodings.
+const utf16Hex = (s) => Array.from(s).map((c) => c.charCodeAt(0).toString(16).padStart(4, '0').toUpperCase()).join('');
+const asciiHex = (s) => Array.from(s).map((c) => c.charCodeAt(0).toString(16).padStart(2, '0').toUpperCase()).join('');
 
 const OPTS = {
   userPassword: 'correct horse',
@@ -60,6 +66,14 @@ test('permissions with printing disabled are accepted', async () => {
   assert.equal((await PDFDocument.load(out, { password: OPTS.userPassword })).getPageCount(), 1);
 });
 
+test('randomOwnerPassword yields 48 lowercase hex chars from the CSPRNG and never repeats', () => {
+  const a = randomOwnerPassword();
+  const b = randomOwnerPassword();
+  assert.match(a, /^[0-9a-f]{48}$/);
+  assert.match(b, /^[0-9a-f]{48}$/);
+  assert.notEqual(a, b);
+});
+
 test('encryptPdfBytes refuses an empty user password', async () => {
   await assert.rejects(
     async () => encryptPdfBytes(await samplePdf(), { ...OPTS, userPassword: '' }),
@@ -80,10 +94,10 @@ test('no document strings leak into the encrypted bytes', async () => {
   field.addToPage(page, { x: 50, y: 600, width: 200, height: 20 });
   const out = await encryptPdfBytes(await doc.save(), OPTS);
   const text = new TextDecoder('latin1').decode(out);
-  const utf16Hex = (s) => Array.from(s).map((c) => c.charCodeAt(0).toString(16).padStart(4, '0').toUpperCase()).join('');
   for (const secret of ['PATIENTROSTER', 'DRSMITH', 'HIVPOSITIVE']) {
     assert.ok(!text.includes(secret), `${secret} leaked as a literal string`);
     assert.ok(!text.includes(utf16Hex(secret)), `${secret} leaked as UTF-16BE hex`);
+    assert.ok(!text.includes(asciiHex(secret)), `${secret} leaked as ASCII hex`);
   }
   const opened = await PDFDocument.load(out, { password: OPTS.userPassword });
   assert.equal(opened.getForm().getTextField('diagnosis').getText(), 'HIVPOSITIVE');
@@ -206,10 +220,10 @@ test('a direct trailer /Info dictionary is not leaked into the encrypted bytes',
   );
   const out = await encryptPdfBytes(source, OPTS);
   const text = new TextDecoder('latin1').decode(out);
-  const utf16Hex = (s) => Array.from(s).map((c) => c.charCodeAt(0).toString(16).padStart(4, '0').toUpperCase()).join('');
   for (const secret of ['DIRECTTITLE', 'DIRECTAUTHOR']) {
     assert.ok(!text.includes(secret), `${secret} leaked as a literal string`);
     assert.ok(!text.includes(utf16Hex(secret)), `${secret} leaked as UTF-16BE hex`);
+    assert.ok(!text.includes(asciiHex(secret)), `${secret} leaked as ASCII hex`);
   }
   const task = pdfjs.getDocument({ data: out.slice(), password: OPTS.userPassword, verbosity: 0 });
   const pdf = await task.promise;

@@ -1,5 +1,11 @@
 import { PDFDocument, PDFDict, PDFName, PDFRef, PDFInvalidObject, EncryptedPDFError } from '@cantoo/pdf-lib';
 
+/** 48 hex chars from the CSPRNG — used when the caller leaves the owner password blank. */
+export function randomOwnerPassword() {
+  const bytes = crypto.getRandomValues(new Uint8Array(24));
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 /**
  * Encrypt a PDF with the standard security handler (AES-256, ISO 32000-2
  * revision 6 — the @cantoo/pdf-lib 2.x default). Returns the encrypted bytes.
@@ -21,13 +27,6 @@ import { PDFDocument, PDFDict, PDFName, PDFRef, PDFInvalidObject, EncryptedPDFEr
  * actually enforced by readers (an owner password equal to the open password
  * grants full access to anyone who can open the file).
  */
-
-/** 48 hex chars from the CSPRNG — used when the caller leaves the owner password blank. */
-function randomOwnerPassword() {
-  const bytes = crypto.getRandomValues(new Uint8Array(24));
-  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
-}
-
 export async function encryptPdfBytes(bytes, { userPassword, ownerPassword, permissions }) {
   if (!userPassword) {
     throw new Error('A user (open) password is required to encrypt a PDF.');
@@ -37,8 +36,9 @@ export async function encryptPdfBytes(bytes, { userPassword, ownerPassword, perm
   // A direct /Info dictionary in the trailer would be written into the new
   // cross-reference stream dictionary, which is never encrypted. Promote it to
   // an indirect object so it lands inside an encrypted object stream.
+  // An already-indirect Info is a PDFRef (not a PDFDict) and is skipped.
   const info = pdfDoc.context.trailerInfo.Info;
-  if (info instanceof PDFDict && !(info instanceof PDFRef)) {
+  if (info instanceof PDFDict) {
     pdfDoc.context.trailerInfo.Info = pdfDoc.context.register(info);
   }
 

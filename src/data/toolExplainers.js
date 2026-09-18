@@ -101,7 +101,7 @@ const EXPLAINERS = {
       library: '<code>@cantoo/pdf-lib</code> v2.11.1 (maintained fork of <code>pdf-lib</code>) — AES-256, ISO 32000-2 revision 6.',
       flow: [
         'PDF is parsed via <code>PDFDocument.load()</code> into an object tree in memory.',
-        '<code>encrypt({ userPassword, ownerPassword, permissions })</code> is called, then <code>save()</code>. The output is re-opened without a password and with an empty password (both must be refused) and with your password (must succeed) before the download button appears.',
+        'A direct trailer <code>/Info</code> dictionary is first promoted to an indirect object (the trailer is never encrypted), and a blank owner password is replaced with 48 random hex characters from <code>crypto.getRandomValues</code>. Then <code>encrypt({ userPassword, ownerPassword, permissions })</code> is called, then <code>save()</code>. The output is re-opened without a password and with an empty password (both must be refused) and with your password (must succeed) before the download button appears.',
         'The file is written with object streams on purpose: the library encrypts streams but not bare strings, so a plain cross-reference save would leave the title, author and form values readable.',
         'The output is downloaded as a <code>Blob</code> via a local <code>URL.createObjectURL()</code>; the URL is revoked on reset.',
         'Your password lives in memory for the duration of the save, then is garbage-collected.',
@@ -117,7 +117,7 @@ const EXPLAINERS = {
     limitations: [
       'The output uses AES-256 (PDF 2.0, revision 6). Very old viewers (roughly pre-2010) and some lightweight mobile viewers cannot open revision-6 files; if a recipient reports that, ask them to use Adobe Reader, Chrome, Firefox, or macOS Preview.',
       'A short or common password can be brute-forced quickly. Use a strong generated password (at least 16 characters).',
-      'If you set only an owner password (not a user password), most PDF readers will still let people open the document. Set both for full protection.',
+      'Leave the Owner Password blank and a random one is generated, so the permission limits are enforced. If you set your own owner password, do not make it the same as the open password — readers grant full access to anyone who can authenticate as owner.',
     ],
     verify: {
       quick: 'Turn off your Wi-Fi, drop in a PDF, set a password, and download. It still works — nothing needs a server.',
