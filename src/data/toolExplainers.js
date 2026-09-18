@@ -98,10 +98,11 @@ const EXPLAINERS = {
       'The password is never sent anywhere. It\u2019s used to derive the encryption key in the moment, and then discarded as soon as the save completes.',
     ],
     technicalDetails: {
-      library: '<code>@cantoo/pdf-lib</code> v1.17.1 (maintained fork of <code>pdf-lib</code>).',
+      library: '<code>@cantoo/pdf-lib</code> v2.11.1 (maintained fork of <code>pdf-lib</code>) — AES-256, ISO 32000-2 revision 6.',
       flow: [
         'PDF is parsed via <code>PDFDocument.load()</code> into an object tree in memory.',
-        '<code>save()</code> is called with <code>userPassword</code> and <code>ownerPassword</code>, triggering PDF standard-security handler encryption.',
+        '<code>encrypt({ userPassword, ownerPassword, permissions })</code> is called, then <code>save()</code>. The output is re-opened without a password and with an empty password (both must be refused) and with your password (must succeed) before the download button appears.',
+        'The file is written with object streams on purpose: the library encrypts streams but not bare strings, so a plain cross-reference save would leave the title, author and form values readable. Do not "harmonise" this save to <code>useObjectStreams: false</code>.',
         'The output is downloaded as a <code>Blob</code> via a local <code>URL.createObjectURL()</code>; the URL is revoked on reset.',
         'Your password lives in memory for the duration of the save, then is garbage-collected.',
       ],
@@ -114,7 +115,7 @@ const EXPLAINERS = {
       'Close the tab and everything (PDF, password, output) is gone.',
     ],
     limitations: [
-      'PDF encryption is older and weaker than modern AES-based container formats. For truly sensitive data (interview transcripts, health records), pair this with our Encrypt/Decrypt Text tool inside a 7-Zip or VeraCrypt container.',
+      'The output uses AES-256 (PDF 2.0, revision 6). Very old viewers (roughly pre-2010) and some lightweight mobile viewers cannot open revision-6 files; if a recipient reports that, ask them to use Adobe Reader, Chrome, Firefox, or macOS Preview.',
       'A short or common password can be brute-forced quickly. Use a strong generated password (at least 16 characters).',
       'If you set only an owner password (not a user password), most PDF readers will still let people open the document. Set both for full protection.',
     ],
@@ -133,6 +134,7 @@ const EXPLAINERS = {
       library: '<code>@cantoo/pdf-lib</code> for standard PDF encryption; WebCrypto AES-GCM for our own <code>.pdf.enc</code> bundle format.',
       flow: [
         'PDF is loaded via <code>PDFDocument.load(bytes, { password })</code> — pdf-lib validates the password and decrypts the object tree in memory.',
+        'After the password load, the stale encryption dictionary and cross-reference stream that pdf-lib would otherwise carry over are removed, the original document information (title, author) is re-attached, and the result is re-opened without a password before download.',
         'The document is re-saved with no encryption options, producing a clean output file.',
         'If the file is a <code>.pdf.enc</code> bundle (produced by our Encrypt/Decrypt tool), WebCrypto\u2019s <code>PBKDF2</code> + <code>AES-GCM</code> decrypts it with 100,000 iterations.',
         'Your password is in memory for the length of the operation, then dropped.',
@@ -804,7 +806,7 @@ export const TOOL_CAVEATS = {
     'For legally binding signatures, use a certified e-signature service (Adobe Acrobat Sign, DocuSign, or your institution’s provider).',
   ],
   'password-protect-pdf': [
-    'PDF password protection is older and weaker than modern container encryption. For genuinely sensitive data (health records, interview transcripts), put the file in an encrypted 7-Zip or VeraCrypt container instead — or as well.',
+    'The password is the only key. A short or guessable password can be brute-forced offline; use a generated password of 16+ characters and share it over a different channel than the file.',
   ],
   'encrypt-decrypt-text': [
     'There is no password reset, backdoor, or recovery. If you lose the password, the text is gone permanently — that’s the point. Store the password in a password manager.',

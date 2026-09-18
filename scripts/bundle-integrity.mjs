@@ -90,7 +90,7 @@ const TRANSITION_ALLOWED_NEW_CHUNKS = new Set(['rolldown-runtime.js']);
 
 // Per-chunk growth allowance for a reviewed dependency major bump. Exact
 // logical-name match; every other chunk keeps the CLI's --max-growth-pct.
-// pdf-lib 1.21 -> 2.11 (2026-09-18, encryption support) grew the chunk 15.6%.
+// pdf-lib 1.21 -> 2.11 (2026-09-18, encryption support) grew the chunk ~15.8%.
 // Inert once master's baseline is itself a 2.x build — remove it then.
 const TRANSITION_ALLOWED_GROWTH_PCT = new Map([['pdf-lib.js', 20]]);
 

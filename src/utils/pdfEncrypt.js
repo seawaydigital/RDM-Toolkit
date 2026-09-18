@@ -83,10 +83,11 @@ export function purgeStaleEncryptionArtifacts(pdfDoc) {
 
   for (const [ref, obj] of ctx.enumerateIndirectObjects()) {
     if (obj instanceof PDFInvalidObject) {
-      const text = new TextDecoder('latin1').decode(obj.data);
+      const raw = new TextDecoder('latin1').decode(obj.data);
+      const text = raw.slice(0, raw.indexOf('stream') === -1 ? raw.length : raw.indexOf('stream'));
       if (!/\/Type\s*\/XRef/.test(text)) continue;
       const info = text.match(/\/Info\s+(\d+)\s+(\d+)\s+R/);
-      if (info) originalInfoRef = PDFRef.of(Number(info[1]), Number(info[2]));
+      if (info && !originalInfoRef) originalInfoRef = PDFRef.of(Number(info[1]), Number(info[2]));
       ctx.delete(ref);
       removed.push('stale cross-reference stream');
       continue;
@@ -100,7 +101,8 @@ export function purgeStaleEncryptionArtifacts(pdfDoc) {
     }
   }
 
-  if (originalInfoRef && ctx.lookup(originalInfoRef) instanceof PDFDict) {
+  const originalInfo = originalInfoRef ? ctx.lookup(originalInfoRef) : undefined;
+  if (originalInfo instanceof PDFDict && !originalInfo.has(PDFName.of('Type'))) {
     ctx.trailerInfo.Info = originalInfoRef;
   }
   // pdf-lib already drops trailerInfo.Encrypt on a successful password load;

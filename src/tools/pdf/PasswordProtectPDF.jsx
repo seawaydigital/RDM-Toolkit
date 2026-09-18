@@ -10,9 +10,10 @@ import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderPageThumbnail, loadPdfDocument, destroyPdfDocument } from '../../utils/pdfThumbnails';
+import { encryptPdfBytes, verifyPdfIsLocked } from '../../utils/pdfEncrypt';
 
 const DESCRIPTION =
-  'Applies password protection to a PDF so it requires a password to open. Encryption is applied using PDF-standard security, and the output remains a normal .pdf file that any PDF reader can prompt for a password.';
+  'Applies AES-256 password protection to a PDF so it requires a password to open. The output is verified to refuse a password-less open before it is offered for download, and stays a normal .pdf file that any modern PDF reader can prompt for a password.';
 
 function getPasswordStrength(pw) {
   if (!pw) return { label: 'Too Short', level: 0 };
@@ -98,23 +99,21 @@ export default function PasswordProtectPDF({ tool, navigateTo }) {
     setProcessing(true);
     setError(null);
     try {
-      // Load the PDF with pdf-lib
-      const pdfDoc = await PDFDocument.load(fileBytes.slice());
-
-      // Use the owner password if provided, otherwise default to the user password
-      const effectiveOwnerPassword = ownerPassword.trim() || userPassword;
-
-      // Save with encryption options applied via pdf-lib
-      const encryptedBytes = await pdfDoc.save({
-        useObjectStreams: false,
-        userPassword: userPassword,
-        ownerPassword: effectiveOwnerPassword,
+      const encryptedBytes = await encryptPdfBytes(fileBytes, {
+        userPassword,
+        ownerPassword: ownerPassword.trim(),
         permissions: {
-          printing: printingAllowed ? 'highResolution' : undefined,
+          printing: printingAllowed ? 'highResolution' : false,
           copying: copyingAllowed,
           modifying: editingAllowed,
         },
       });
+
+      // Independent lock check — never offer a download that is not encrypted.
+      const lock = await verifyPdfIsLocked(encryptedBytes, { userPassword });
+      if (!lock.locked) {
+        throw new Error(`VERIFY: ${lock.reason}`);
+      }
 
       // Verify the output is non-empty and starts with %PDF
       if (!encryptedBytes || encryptedBytes.byteLength < 100) {
@@ -136,7 +135,11 @@ export default function PasswordProtectPDF({ tool, navigateTo }) {
       });
     } catch (err) {
       console.error('PDF encryption failed:', err);
-      setError('Something went wrong while encrypting the PDF. Please try again.');
+      if (err?.message?.startsWith('VERIFY:')) {
+        setError(`Encryption could not be verified (${err.message.slice(8)}). The file has NOT been offered for download. Please report this with the Feedback button in the top bar.`);
+      } else {
+        setError('Something went wrong while encrypting the PDF. Please try again.');
+      }
     } finally {
       setProcessing(false);
     }
