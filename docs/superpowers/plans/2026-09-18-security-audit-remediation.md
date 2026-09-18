@@ -439,7 +439,7 @@ npm run build && node scripts/bundle-integrity.mjs > "$TMP/pr-integrity.json" &&
 
 (Use the scratchpad path for `$TMP`.) Expected: a build with no new warnings and the `pdf-lib` chunk about 9–10% larger than before (previous raw size is in the CI comment on any recent PR, or build `master` in a temporary worktree and run the same command for a baseline).
 
-Measured 2026-09-18 against a master baseline: `pdf-lib` chunk 489,879 → 566,368 bytes (**+15.6%**, gzip 212 → 245 KB), 69 chunks both sides, no new chunk names. So the gate WILL fail. Change line 132 of `.github/workflows/bundle-size.yml` to `--max-growth-pct 20` with the comment `# temporary: pdf-lib 1.21 -> 2.11 (encryption support, +15.6%); restore to 10 once master's baseline is a 2.x build` on the line above, and open a follow-up issue to restore it. This mirrors the documented Rolldown transition allowance. The Rolldown "chunks larger than 500 kB" build warning now also covers `pdf-lib` (566 kB, lazy-loaded); it is informational.
+Measured 2026-09-18 against a master baseline: `pdf-lib` chunk 489,879 → 566,368 bytes (**+15.6%**, gzip 212 → 245 KB), 69 chunks both sides, no new chunk names. So the 10% gate WILL fail for that one chunk. Do NOT raise the global `--max-growth-pct` (that would let every other chunk grow 19% unnoticed). Instead add a named per-chunk allowance next to `TRANSITION_ALLOWED_NEW_CHUNKS` in `scripts/bundle-integrity.mjs` — `const TRANSITION_ALLOWED_GROWTH_PCT = new Map([['pdf-lib.js', 20]]);` used as `const limitPct = TRANSITION_ALLOWED_GROWTH_PCT.get(logicalName) ?? maxGrowthPct;` in `compareBundles` — with a comment saying it is inert once master's baseline is a 2.x build, and a unit test in `tests/bundle-integrity.test.mjs` proving a 15% `jszip.js` growth is still reported while 15% `pdf-lib.js` passes. The workflow keeps `--max-growth-pct 10`. The Rolldown "chunks larger than 500 kB" build warning now also covers `pdf-lib` (566 kB, lazy-loaded); it is informational.
 
 - [ ] **Step 4: Manual regression pass in a real browser** (the sandboxed agent browser cannot render pdfjs thumbnails — CLAUDE.md known gap #7)
 
@@ -508,7 +508,7 @@ test('purgeStaleEncryptionArtifacts removes exactly the Encrypt dictionary and s
 
 Run `node --test tests/pdf-encrypt.test.mjs` — expected: 3 failures (`removePdfPassword is not a function` / not exported).
 
-- [ ] **Step 2: Implement** — add to `src/utils/pdfEncrypt.js` (extend the import to `import { PDFDocument, PDFDict, PDFStream, PDFName, PDFInvalidObject, EncryptedPDFError } from '@cantoo/pdf-lib';`):
+- [ ] **Step 2: Implement** — add to `src/utils/pdfEncrypt.js` (extend the import to `import { PDFDocument, PDFDict, PDFName, PDFRef, PDFInvalidObject, EncryptedPDFError } from '@cantoo/pdf-lib';`). The `removePdfPassword` test also asserts `doc.setTitle('KEEPME')` survives the unlock in both pdf-lib (`getTitle()`) and pdfjs (`getMetadata().info.Title`). Surface test additionally pins `embedJpg` (1×1 JPEG fixture), `catalog.lookupMaybe(Names, PDFDict)`, and the Fillable PDF Form low-level `/Sig` widget path (`ctx.stream`/`ctx.obj`/`ctx.register`, `form.acroForm.addField`, `acroForm.dict.set(SigFlags)`, `page.node.addAnnot`, `PDFString.of`, `PDFNumber.of`) plus `createCheckBox`/`createDropdown`/`createRadioGroup`; pdfjs calls pass `verbosity: 0`; the canary's `assert.rejects` uses `(e) => e instanceof EncryptedPDFError`.
 
 ```js
 /**
@@ -523,17 +523,35 @@ Run `node --test tests/pdf-encrypt.test.mjs` — expected: 3 failures (`removePd
 export function purgeStaleEncryptionArtifacts(pdfDoc) {
   const ctx = pdfDoc.context;
   const removed = [];
+  let originalInfoRef = null;
+
   for (const [ref, obj] of ctx.enumerateIndirectObjects()) {
-    const isStaleXref = obj instanceof PDFInvalidObject
-      && /\/Type\s*\/XRef/.test(new TextDecoder('latin1').decode(obj.data));
-    const isEncryptDict = obj instanceof PDFDict && !(obj instanceof PDFStream)
-      && String(obj.get(PDFName.of('Filter'))) === '/Standard'
-      && obj.has(PDFName.of('O')) && obj.has(PDFName.of('U'));
-    if (isStaleXref || isEncryptDict) {
+    if (obj instanceof PDFInvalidObject) {
+      const text = new TextDecoder('latin1').decode(obj.data);
+      if (!/\/Type\s*\/XRef/.test(text)) continue;
+      // The stale trailer is the only surviving pointer to the original /Info
+      // dictionary: the decrypting parse mints a fresh one, so Title, Author
+      // and Keywords would otherwise be lost on unlock.
+      const info = text.match(/\/Info\s+(\d+)\s+(\d+)\s+R/);
+      if (info) originalInfoRef = PDFRef.of(Number(info[1]), Number(info[2]));
       ctx.delete(ref);
-      removed.push(isStaleXref ? 'stale cross-reference stream' : 'encryption dictionary');
+      removed.push('stale cross-reference stream');
+      continue;
+    }
+    const isEncryptDict = obj instanceof PDFDict
+      && String(obj.lookup(PDFName.of('Filter'))) === '/Standard'
+      && obj.has(PDFName.of('O')) && obj.has(PDFName.of('U'));
+    if (isEncryptDict) {
+      ctx.delete(ref);
+      removed.push('encryption dictionary');
     }
   }
+
+  if (originalInfoRef && ctx.lookup(originalInfoRef) instanceof PDFDict) {
+    ctx.trailerInfo.Info = originalInfoRef;
+  }
+  // pdf-lib already drops trailerInfo.Encrypt on a successful password load;
+  // belt-and-braces for any future parser path that does not.
   delete ctx.trailerInfo.Encrypt;
   return removed;
 }
@@ -547,7 +565,10 @@ export function purgeStaleEncryptionArtifacts(pdfDoc) {
 export async function removePdfPassword(bytes, password) {
   const pdfDoc = await PDFDocument.load(bytes.slice(), { password });
   purgeStaleEncryptionArtifacts(pdfDoc);
-  const out = await pdfDoc.save({ useObjectStreams: true });
+  // Plain save(): pdf-lib picks object streams from the file's own header
+  // (and refuses them for PDF/A-1). Forcing them rewrote every pre-1.5 PDF to
+  // 1.7 and could throw on PDF/A-1 input.
+  const out = await pdfDoc.save();
   try {
     await PDFDocument.load(out.slice());
   } catch {
