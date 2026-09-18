@@ -171,6 +171,7 @@ export default defineConfig({
           // Rolldown does not emit a new shared chunk (the bundle-integrity gate
           // rejects new chunk names).
           if (normalized.includes('/src/utils/pdfEncrypt.js')) return 'pdf-lib';
+          if (normalized.includes('/src/utils/pdfMetadata.js')) return 'pdf-lib';
           if (normalized.includes('node_modules/pdfjs-dist/')) return 'pdfjs';
           if (normalized.includes('node_modules/jszip/')) return 'jszip';
           if (normalized.includes('node_modules/zxcvbn/')) return 'zxcvbn';
