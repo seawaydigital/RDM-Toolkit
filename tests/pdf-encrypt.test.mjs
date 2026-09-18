@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PDFDocument } from '@cantoo/pdf-lib';
-import { encryptPdfBytes, verifyPdfIsLocked } from '../src/utils/pdfEncrypt.js';
+import { encryptPdfBytes, verifyPdfIsLocked, removePdfPassword, purgeStaleEncryptionArtifacts } from '../src/utils/pdfEncrypt.js';
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 async function samplePdf() {
@@ -134,4 +134,42 @@ test('independent reader (pdfjs) is password-gated and reads strings back intact
   } finally {
     await task.destroy();
   }
+});
+
+test('removePdfPassword yields a file that opens with no password in pdf-lib and pdfjs', async () => {
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([612, 792]);
+  page.drawText('HELLOWORLD', { x: 40, y: 700, size: 14 });
+  const field = doc.getForm().createTextField('dx');
+  field.setText('VAL');
+  field.addToPage(page, { x: 50, y: 600, width: 200, height: 20 });
+  const locked = await encryptPdfBytes(await doc.save(), OPTS);
+
+  const unlocked = await removePdfPassword(locked, OPTS.userPassword);
+  assert.doesNotMatch(new TextDecoder('latin1').decode(unlocked), /\/Encrypt \d+ \d+ R/);
+  const reopened = await PDFDocument.load(unlocked);
+  assert.equal(reopened.getForm().getTextField('dx').getText(), 'VAL');
+
+  const task = pdfjs.getDocument({ data: unlocked.slice() });
+  const pdf = await task.promise;
+  try {
+    const p1 = await pdf.getPage(1);
+    assert.equal((await p1.getTextContent()).items.map((i) => i.str).join(''), 'HELLOWORLD');
+    assert.ok((await p1.getAnnotations()).some((a) => a.fieldName === 'dx' && a.fieldValue === 'VAL'));
+  } finally {
+    await task.destroy();
+  }
+});
+
+test('removePdfPassword propagates a wrong-password error the tool can recognise', async () => {
+  const locked = await encryptPdfBytes(await samplePdf(), OPTS);
+  await assert.rejects(() => removePdfPassword(locked, 'wrong'), /password|encrypt|incorrect/i);
+});
+
+test('purgeStaleEncryptionArtifacts removes exactly the Encrypt dictionary and stale xref stream', async () => {
+  const locked = await encryptPdfBytes(await samplePdf(), OPTS);
+  const doc = await PDFDocument.load(locked.slice(), { password: OPTS.userPassword });
+  const removed = purgeStaleEncryptionArtifacts(doc);
+  assert.deepEqual(removed.sort(), ['encryption dictionary', 'stale cross-reference stream']);
+  assert.deepEqual(purgeStaleEncryptionArtifacts(doc), []);
 });

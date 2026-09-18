@@ -167,6 +167,10 @@ export default defineConfig({
         manualChunks(id) {
           const normalized = id.replace(/\\/g, '/');
           if (normalized.includes('node_modules/@cantoo/pdf-lib/')) return 'pdf-lib';
+          // Pure pdf-lib helpers shared by more than one lazy tool. Pinned here so
+          // Rolldown does not emit a new shared chunk (the bundle-integrity gate
+          // rejects new chunk names).
+          if (normalized.includes('/src/utils/pdfEncrypt.js')) return 'pdf-lib';
           if (normalized.includes('node_modules/pdfjs-dist/')) return 'pdfjs';
           if (normalized.includes('node_modules/jszip/')) return 'jszip';
           if (normalized.includes('node_modules/zxcvbn/')) return 'zxcvbn';

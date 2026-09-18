@@ -8,6 +8,7 @@ import ResultPanel from '../../components/ui/ResultPanel';
 import ErrorCard from '../../components/ui/ErrorCard';
 import { PDF_VALIDATION, ANY_FILE_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
+import { removePdfPassword } from '../../utils/pdfEncrypt';
 
 const DESCRIPTION =
   'Removes password protection from a PDF. Supports both standard PDF encryption and .pdf.enc files created by the Password Protect tool. Your file and password are processed locally and never transmitted.';
@@ -121,10 +122,14 @@ export default function RemovePDFPassword({ tool, navigateTo }) {
         }
       } else {
         // Standard PDF encryption via pdf-lib
-        let pdfDoc;
         try {
-          pdfDoc = await PDFDocument.load(fileBytes.slice(), { password });
+          pdfBytes = await removePdfPassword(fileBytes, password);
         } catch (e) {
+          if (e.message?.startsWith('VERIFY:')) {
+            setError('The unlocked file could not be verified, so it has NOT been offered for download. Please report this.');
+            setLoading(false);
+            return;
+          }
           if (e.message && (e.message.includes('encrypted') || e.message.includes('password') || e.message.includes('incorrect'))) {
             setError('Incorrect password. Please try again.');
             setLoading(false);
@@ -132,7 +137,6 @@ export default function RemovePDFPassword({ tool, navigateTo }) {
           }
           throw e;
         }
-        pdfBytes = await pdfDoc.save();
       }
 
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
