@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { PDFDocument } from '@cantoo/pdf-lib';
 import { encryptPdfBytes, verifyPdfIsLocked } from '../src/utils/pdfEncrypt.js';
+import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 async function samplePdf() {
   const doc = await PDFDocument.create();
@@ -107,4 +108,30 @@ test('verifyPdfIsLocked reports a wrong expected password and never throws on ga
 
   const noOptions = await verifyPdfIsLocked(locked);
   assert.equal(noOptions.locked, false);
+});
+
+// pdf-lib is both writer and reader in the tests above. pdfjs is a second,
+// unrelated implementation: it must refuse the file without the password and
+// read every string back correctly with it.
+test('independent reader (pdfjs) is password-gated and reads strings back intact', async () => {
+  const doc = await PDFDocument.create();
+  doc.setTitle('PATIENTROSTER');
+  doc.addPage([612, 792]).drawText('HELLOWORLD', { x: 40, y: 700, size: 14 });
+  const out = await encryptPdfBytes(await doc.save(), OPTS);
+
+  await assert.rejects(
+    () => pdfjs.getDocument({ data: out.slice() }).promise,
+    (err) => err?.name === 'PasswordException',
+  );
+
+  const task = pdfjs.getDocument({ data: out.slice(), password: OPTS.userPassword });
+  const pdf = await task.promise;
+  try {
+    const { info } = await pdf.getMetadata();
+    assert.equal(info.Title, 'PATIENTROSTER');
+    const content = await (await pdf.getPage(1)).getTextContent();
+    assert.equal(content.items.map((item) => item.str).join(''), 'HELLOWORLD');
+  } finally {
+    await task.destroy();
+  }
 });

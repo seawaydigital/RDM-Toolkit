@@ -129,4 +129,5 @@ jobs:
             if (dEntry > 50) { console.error(`Entry chunk grew by ${dEntry} KB (> 50 KB limit)`); process.exit(1); }
             if (dTotal > 200) { console.error(`Total bundle grew by ${dTotal} KB (> 200 KB limit)`); process.exit(1); }
           '
-          node /tmp/bundle-integrity.mjs --compare /tmp/base-integrity.json --current /tmp/pr-integrity.json --max-growth-pct 10
+          # temporary: pdf-lib 1.21 -> 2.11 (encryption support, +15.6%); restore to 10 once master's baseline is a 2.x build
+          node /tmp/bundle-integrity.mjs --compare /tmp/base-integrity.json --current /tmp/pr-integrity.json --max-growth-pct 20
