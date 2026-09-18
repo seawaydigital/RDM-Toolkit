@@ -284,14 +284,13 @@ const EXPLAINERS = {
   'data-anonymizer': {
     whatItDoes: 'De-identifies CSV or free-text research data by replacing direct identifiers with codes, pseudonyms, or redactions — so you can share it or work with it without exposing participants.',
     howItWorks: [
-      'You paste in text or upload a CSV, pick the columns or entity types that need de-identification, and choose a strategy: <strong>coded</strong> (consistent pseudonyms + a separate key file that maps codes back to originals), <strong>pseudonymized</strong> (one-way hash — no way back), or <strong>anonymized</strong> (redacted to [REDACTED], irreversible).',
+      'You paste in text or upload a CSV, pick the columns or entity types that need de-identification, and choose a strategy: <strong>coded</strong> (consistent pseudonyms + a separate key file that maps codes back to originals) or <strong>anonymized</strong> (redacted to [REDACTED], irreversible).',
       'Everything runs inside your browser. If you pick the coded strategy, the key file is generated as a second download — and per TCPS 2 guidance, you should store it <strong>separately</strong> from the coded data so the two can\u2019t be joined without explicit access.',
     ],
     technicalDetails: {
       library: 'WebCrypto <code>crypto.subtle.digest(\'SHA-256\')</code>; regex patterns for PII detection in text mode.',
       flow: [
         '<strong>Coded:</strong> unique composite values (e.g. <code>First Name | Last Name</code>) are assigned incremental pseudonyms like <code>Person-1</code>, <code>Person-2</code>. The mapping is emitted as a separate CSV <em>key file</em>.',
-        '<strong>Pseudonymized:</strong> each value is hashed with SHA-256 and the first 8 hex chars used as the pseudonym — irreversible without a brute-force search over a known input space.',
         '<strong>Anonymized:</strong> values replaced with <code>[REDACTED]</code>.',
         'Free-text mode detects emails, phone numbers, SIN-like patterns, Canadian postal codes, IPs, URLs, and dates via regex and applies the chosen strategy to each match.',
       ],
@@ -305,8 +304,8 @@ const EXPLAINERS = {
     ],
     limitations: [
       'Regex-based PII detection for free text is a helpful first pass, not a guarantee. It will miss context-specific identifiers (e.g. "the only female PhD in Dept. X"), rare name spellings, and typos.',
-      'For TCPS 2–compliant research, always pair this tool with manual review. The coded/pseudonymized/anonymized labels match TCPS 2 Article 5.5 language, but the legal and ethical responsibility for adequate de-identification is yours, not the tool\u2019s.',
-      'SHA-256 pseudonyms are reversible if the attacker can guess the input space (e.g. a small closed list of employees). For small-N datasets, use coded mode with a key file stored separately — or anonymized mode if no re-identification is ever needed.',
+      'For TCPS 2–compliant research, always pair this tool with manual review. The coded/anonymized labels match TCPS 2 Article 5.5 language, but the legal and ethical responsibility for adequate de-identification is yours, not the tool\u2019s.',
+      'An earlier version offered a "pseudonymized" mode built on an unsalted SHA-256 hash. It was removed on 2026-09-18 because a hash of a name or ID can be reversed by hashing a list of candidates. If you need pseudonyms that stay consistent across several files, use coded mode with the same key file.',
     ],
     verify: {
       quick: 'Turn off your Wi-Fi, paste in a CSV of test data, run the tool, and download both the coded file and the key file. Everything worked — because everything happened in your browser.',

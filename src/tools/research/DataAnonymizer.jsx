@@ -24,12 +24,6 @@ const STRATEGIES = [
     filenameSlug: 'coded',
   },
   {
-    value: 'pseudonymized',
-    label: 'Pseudonymized \u2014 one-way hash, no key retained',
-    blurb: 'Each value replaced with a short SHA-256 hash. Consistent across rows, but no mapping is saved \u2014 you cannot reverse this without the original dataset.',
-    filenameSlug: 'pseudonymized',
-  },
-  {
     value: 'anonymized',
     label: 'Anonymized \u2014 irreversible redaction',
     blurb: 'Every selected value is replaced with [REDACTED]. Destructive and not reversible.',
@@ -58,14 +52,6 @@ const DETECTION_PATTERNS = [
     regex: /\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b|\b\d{1,2}[-\/]\d{1,2}[-\/]\d{4}\b/g },
 ];
 
-// Simple SHA-256 using SubtleCrypto
-async function sha256(text) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(text);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 function parseCSV(text) {
   const lines = text.split(/\r?\n/);
@@ -117,7 +103,7 @@ export default function DataAnonymizer({ tool }) {
 
   return (
     <div>
-      <InfoCard description="De-identify sensitive data in CSV files or free text for REB / Tri-Agency / PHIPA workflows. Choose coded (reversible with a key file), pseudonymized (one-way hash), or anonymized (irreversible). All processing runs in your browser \u2014 your data never leaves your machine." />
+      <InfoCard description="De-identify sensitive data in CSV files or free text for REB / Tri-Agency / PHIPA workflows. Choose coded (consistent pseudonyms plus a separately stored key file \u2014 TCPS 2 \u201ccoded information\u201d) or anonymized (irreversible redaction). All processing runs in your browser \u2014 your data never leaves your machine." />
 
       {/* Tab bar */}
       <div style={{
@@ -297,9 +283,6 @@ function CSVMode() {
             if (strategy === 'coded') {
               gs.counter++;
               gs.map.set(composite, `${gs.prefix}-${gs.counter}`);
-            } else if (strategy === 'pseudonymized') {
-              const hash = await sha256(composite);
-              gs.map.set(composite, hash.slice(0, 8));
             } else {
               gs.map.set(composite, '[REDACTED]');
             }
@@ -792,9 +775,6 @@ function TextMode() {
         if (strategy === 'coded') {
           counter++;
           mapping.set(item.text, `Person-${counter}`);
-        } else if (strategy === 'pseudonymized') {
-          const hash = await sha256(item.text);
-          mapping.set(item.text, hash.slice(0, 8));
         } else {
           mapping.set(item.text, '[REDACTED]');
         }
