@@ -13,12 +13,24 @@ import { PDFDocument, PDFDict, PDFName, PDFRef, PDFInvalidObject, EncryptedPDFEr
  * text and outline titles sit in the file unencrypted, while conformant
  * readers garble them on open. Inside an object stream those strings are
  * covered by the stream's encryption. Verified 2026-09-18 (see the leak test).
+ *
+ * A direct trailer /Info dictionary is promoted to an indirect object first,
+ * because the trailer is never encrypted.
  */
 export async function encryptPdfBytes(bytes, { userPassword, ownerPassword, permissions }) {
   if (!userPassword) {
     throw new Error('A user (open) password is required to encrypt a PDF.');
   }
   const pdfDoc = await PDFDocument.load(bytes.slice());
+
+  // A direct /Info dictionary in the trailer would be written into the new
+  // cross-reference stream dictionary, which is never encrypted. Promote it to
+  // an indirect object so it lands inside an encrypted object stream.
+  const info = pdfDoc.context.trailerInfo.Info;
+  if (info instanceof PDFDict && !(info instanceof PDFRef)) {
+    pdfDoc.context.trailerInfo.Info = pdfDoc.context.register(info);
+  }
+
   pdfDoc.encrypt({
     userPassword,
     ownerPassword: ownerPassword || userPassword,

@@ -177,3 +177,35 @@ test('purgeStaleEncryptionArtifacts removes exactly the Encrypt dictionary and s
   assert.deepEqual(removed.sort(), ['encryption dictionary', 'stale cross-reference stream']);
   assert.deepEqual(purgeStaleEncryptionArtifacts(doc), []);
 });
+
+// A legal but unusual layout: the /Info dictionary written directly inside the
+// trailer. The trailer (cross-reference stream dictionary) is never encrypted,
+// so a direct Info dict would land there in cleartext unless promoted to an
+// indirect object first.
+test('a direct trailer /Info dictionary is not leaked into the encrypted bytes', async () => {
+  const body =
+    '%PDF-1.4\n' +
+    '1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n' +
+    '2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n' +
+    '3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >> endobj\n';
+  const source = new TextEncoder().encode(
+    body +
+    'xref\n0 4\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n0000000115 00000 n \n' +
+    'trailer << /Size 4 /Root 1 0 R /Info << /Title (DIRECTTITLE) /Author (DIRECTAUTHOR) >> >>\n' +
+    `startxref\n${body.length}\n%%EOF`,
+  );
+  const out = await encryptPdfBytes(source, OPTS);
+  const text = new TextDecoder('latin1').decode(out);
+  const utf16Hex = (s) => Array.from(s).map((c) => c.charCodeAt(0).toString(16).padStart(4, '0').toUpperCase()).join('');
+  for (const secret of ['DIRECTTITLE', 'DIRECTAUTHOR']) {
+    assert.ok(!text.includes(secret), `${secret} leaked as a literal string`);
+    assert.ok(!text.includes(utf16Hex(secret)), `${secret} leaked as UTF-16BE hex`);
+  }
+  const task = pdfjs.getDocument({ data: out.slice(), password: OPTS.userPassword, verbosity: 0 });
+  const pdf = await task.promise;
+  try {
+    assert.equal((await pdf.getMetadata()).info.Title, 'DIRECTTITLE');
+  } finally {
+    await task.destroy();
+  }
+});
