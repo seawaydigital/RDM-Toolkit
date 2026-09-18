@@ -115,7 +115,7 @@ test('permissions with printing disabled are accepted', async () => {
 
 test('encryptPdfBytes refuses an empty user password', async () => {
   await assert.rejects(
-    () => encryptPdfBytes(await samplePdf(), { ...OPTS, userPassword: '' }),
+    async () => encryptPdfBytes(await samplePdf(), { ...OPTS, userPassword: '' }),
     /user \(open\) password/,
   );
 });
