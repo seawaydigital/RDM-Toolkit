@@ -84,7 +84,7 @@ test('verifyPdfIsLocked accepts encrypted output and rejects a plain PDF', async
   assert.deepEqual(await verifyPdfIsLocked(locked, { userPassword: OPTS.userPassword }), { locked: true, reason: null });
   const verdict = await verifyPdfIsLocked(plain, { userPassword: OPTS.userPassword });
   assert.equal(verdict.locked, false);
-  assert.match(verdict.reason, /no \/Encrypt/);
+  assert.match(verdict.reason, /opened with no password/);
 });
 
 test('verifyPdfIsLocked rejects an owner-only file that opens with an empty password', async () => {
@@ -104,4 +104,7 @@ test('verifyPdfIsLocked reports a wrong expected password and never throws on ga
   const garbage = await verifyPdfIsLocked(new Uint8Array([1, 2, 3, 4]), { userPassword: 'x' });
   assert.equal(garbage.locked, false);
   assert.match(garbage.reason, /could not be parsed/);
+
+  const noOptions = await verifyPdfIsLocked(locked);
+  assert.equal(noOptions.locked, false);
 });
