@@ -102,7 +102,7 @@ const EXPLAINERS = {
       flow: [
         'PDF is parsed via <code>PDFDocument.load()</code> into an object tree in memory.',
         '<code>encrypt({ userPassword, ownerPassword, permissions })</code> is called, then <code>save()</code>. The output is re-opened without a password and with an empty password (both must be refused) and with your password (must succeed) before the download button appears.',
-        'The file is written with object streams on purpose: the library encrypts streams but not bare strings, so a plain cross-reference save would leave the title, author and form values readable. Do not "harmonise" this save to <code>useObjectStreams: false</code>.',
+        'The file is written with object streams on purpose: the library encrypts streams but not bare strings, so a plain cross-reference save would leave the title, author and form values readable.',
         'The output is downloaded as a <code>Blob</code> via a local <code>URL.createObjectURL()</code>; the URL is revoked on reset.',
         'Your password lives in memory for the duration of the save, then is garbage-collected.',
       ],
@@ -416,7 +416,7 @@ const EXPLAINERS = {
       'That\u2019s it. There\u2019s no "upload," no server step, no cloud. If you closed this tab right now, every trace of your files would be gone.',
     ],
     technicalDetails: {
-      library: '<code>@cantoo/pdf-lib</code> v1.17.1 (maintained fork of <code>pdf-lib</code>).',
+      library: '<code>@cantoo/pdf-lib</code> v2.11.1 (maintained fork of <code>pdf-lib</code>).',
       flow: [
         'Each PDF is read into a <code>Uint8Array</code> in your tab\u2019s memory.',
         '<code>PDFDocument.load()</code> parses each source into an object tree.',
@@ -535,7 +535,7 @@ const EXPLAINERS = {
       'You drop in a flat PDF (one without existing form fields). For each field you want, you click on the page preview to place and size it. When you\u2019re done, a PDF library in your browser adds those fields to the PDF\u2019s underlying form layer and saves a new version that anyone with Adobe Reader, Foxit, or a browser can fill in.',
     ],
     technicalDetails: {
-      library: '<code>@cantoo/pdf-lib</code> v1.17.1 (AcroForm API).',
+      library: '<code>@cantoo/pdf-lib</code> v2.11.1 (AcroForm API).',
       flow: [
         '<code>pdfDoc.getForm().getFields()</code> pre-flight check detects existing form fields and refuses to proceed — adding fields to a PDF that already has them produces broken output in Adobe Acrobat.',
         '<code>form.createTextField(name)</code>, <code>createCheckBox()</code>, <code>createRadioGroup()</code>, <code>createDropdown()</code> build the field definitions.',

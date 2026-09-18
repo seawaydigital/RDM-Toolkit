@@ -16,7 +16,18 @@ import { PDFDocument, PDFDict, PDFName, PDFRef, PDFInvalidObject, EncryptedPDFEr
  *
  * A direct trailer /Info dictionary is promoted to an indirect object first,
  * because the trailer is never encrypted.
+ *
+ * A blank owner password gets a random one, so the permission flags are
+ * actually enforced by readers (an owner password equal to the open password
+ * grants full access to anyone who can open the file).
  */
+
+/** 48 hex chars from the CSPRNG — used when the caller leaves the owner password blank. */
+function randomOwnerPassword() {
+  const bytes = crypto.getRandomValues(new Uint8Array(24));
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 export async function encryptPdfBytes(bytes, { userPassword, ownerPassword, permissions }) {
   if (!userPassword) {
     throw new Error('A user (open) password is required to encrypt a PDF.');
@@ -33,7 +44,7 @@ export async function encryptPdfBytes(bytes, { userPassword, ownerPassword, perm
 
   pdfDoc.encrypt({
     userPassword,
-    ownerPassword: ownerPassword || userPassword,
+    ownerPassword: ownerPassword || randomOwnerPassword(),
     permissions,
   });
   return pdfDoc.save({ useObjectStreams: true });
@@ -99,7 +110,9 @@ export function purgeStaleEncryptionArtifacts(pdfDoc) {
       const text = raw.slice(0, raw.indexOf('stream') === -1 ? raw.length : raw.indexOf('stream'));
       if (!/\/Type\s*\/XRef/.test(text)) continue;
       const info = text.match(/\/Info\s+(\d+)\s+(\d+)\s+R/);
-      if (info && !originalInfoRef) originalInfoRef = PDFRef.of(Number(info[1]), Number(info[2]));
+      // Last match wins: objects enumerate in ascending number order, and the
+      // most recent trailer of a /Prev chain is normally the highest-numbered.
+      if (info) originalInfoRef = PDFRef.of(Number(info[1]), Number(info[2]));
       ctx.delete(ref);
       removed.push('stale cross-reference stream');
       continue;

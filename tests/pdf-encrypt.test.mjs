@@ -36,18 +36,28 @@ test('encrypted output opens with the user password and refuses a wrong one', as
   await assert.rejects(() => PDFDocument.load(out, { password: 'wrong' }));
 });
 
-test('ownerPassword defaults to the user password when blank', async () => {
+test('a blank ownerPassword gets a random owner password and the file still opens with the user password', async () => {
   const out = await encryptPdfBytes(await samplePdf(), { ...OPTS, ownerPassword: '' });
   const doc = await PDFDocument.load(out, { password: OPTS.userPassword });
   assert.equal(doc.getPageCount(), 1);
+  await assert.rejects(() => PDFDocument.load(out, { password: '' }));
 });
 
 test('permissions with printing disabled are accepted', async () => {
   const out = await encryptPdfBytes(await samplePdf(), {
     ...OPTS,
-    permissions: { printing: false, copying: false, modifying: false },
+    permissions: {
+      printing: false,
+      copying: false,
+      modifying: false,
+      annotating: false,
+      fillingForms: false,
+      documentAssembly: false,
+      contentAccessibility: true,
+    },
   });
   assert.match(new TextDecoder('latin1').decode(out), /\/Encrypt/);
+  assert.equal((await PDFDocument.load(out, { password: OPTS.userPassword })).getPageCount(), 1);
 });
 
 test('encryptPdfBytes refuses an empty user password', async () => {

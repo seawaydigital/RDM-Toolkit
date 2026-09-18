@@ -106,6 +106,10 @@ export default function PasswordProtectPDF({ tool, navigateTo }) {
           printing: printingAllowed ? 'highResolution' : false,
           copying: copyingAllowed,
           modifying: editingAllowed,
+          annotating: editingAllowed,
+          fillingForms: editingAllowed,
+          documentAssembly: editingAllowed,
+          contentAccessibility: true,
         },
       });
 
@@ -169,7 +173,7 @@ export default function PasswordProtectPDF({ tool, navigateTo }) {
         <InfoCard description={DESCRIPTION} />
         <div className="info-card" style={{ borderLeftColor: 'var(--accent-green)', marginBottom: 'var(--space-lg)' }}>
           <p className="info-card-description" style={{ color: 'var(--accent-green)' }}>
-            Password protection applied successfully. The PDF now requires the password you set to open.
+            AES-256 encryption applied. We re-opened the file to confirm it refuses to open without your password.
           </p>
         </div>
         <ResultPanel
@@ -283,7 +287,7 @@ export default function PasswordProtectPDF({ tool, navigateTo }) {
 
             {/* Owner Password (optional) */}
             <div className="tool-option-row" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-              <label className="tool-option-label">Owner Password <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 'normal' }}>(optional, defaults to user password)</span></label>
+              <label className="tool-option-label">Owner Password <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 'normal' }}>(optional — leave blank and a random one is generated so the permission limits below are enforced)</span></label>
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={ownerPassword}
@@ -321,6 +325,9 @@ export default function PasswordProtectPDF({ tool, navigateTo }) {
                 />
                 Allow editing and annotations
               </label>
+              <p className="tool-page-meta">
+                PDF readers only enforce these limits when the owner password differs from the open password. Anyone who knows the owner password has full access.
+              </p>
             </div>
           </div>
 
