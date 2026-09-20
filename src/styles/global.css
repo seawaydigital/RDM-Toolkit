@@ -15372,6 +15372,21 @@ select:focus-visible,
   border: 0 !important;
 }
 
+/* Rendered by main.jsx instead of the app when the page is inside a foreign
+   frame (GitHub Pages cannot send frame-ancestors). */
+.framed-notice {
+  margin: var(--space-2xl) auto;
+  max-width: 480px;
+  padding: var(--space-lg);
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+.framed-notice a { color: var(--accent-primary); }
+
 /* De-identify Research Data: column-selection chips wrap a visually-hidden
    checkbox (see .visually-hidden above) behind a styled <label>. The
    checkbox's own focus outline is clipped away with it, so show the
