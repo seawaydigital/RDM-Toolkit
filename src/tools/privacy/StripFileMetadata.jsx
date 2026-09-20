@@ -42,7 +42,10 @@ function isImage(file) {
 
 async function readPDFMetadata(bytes) {
   try {
-    const pdfDoc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+    // updateMetadata: false — by default pdf-lib stamps its own Producer and a
+    // fresh ModificationDate into the Info dictionary on load, which would make
+    // the "After" table show values that are not actually in the file.
+    const pdfDoc = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
     const carriers = findPdfIdentityCarriers(pdfDoc);
     return {
       title: pdfDoc.getTitle() || '',
