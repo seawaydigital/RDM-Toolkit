@@ -204,8 +204,9 @@ export default function BibTeXFormatter({ tool }) {
         border: '1px solid var(--border-primary)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Sort by:</label>
+          <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 500 }} htmlFor="bibtex-sort">Sort by:</label>
           <select
+            id="bibtex-sort"
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
             className="json-formatter-select"

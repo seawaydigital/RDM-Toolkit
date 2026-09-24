@@ -433,7 +433,6 @@ export default function FileToMarkdown() {
   return (
     <div className="tool-page">
       <div className="tool-page-header">
-        <h1>File to Markdown</h1>
         <p className="tool-page-meta">
           Convert text-shaped documents to clean Markdown for use with AI tools. All processing happens in your browser — no files are uploaded.
         </p>

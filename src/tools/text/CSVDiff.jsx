@@ -210,7 +210,7 @@ export default function CSVDiff({ tool }) {
             <span className="text-diff-stat text-diff-stat--changed">{diffResult.changedRows} changed</span>
             <span className="text-diff-stat text-diff-stat--unchanged">{diffResult.unchangedRows} unchanged</span>
           </div>
-          <div className="csv-diff-table-wrapper">
+          <div className="csv-diff-table-wrapper" tabIndex={0} role="region" aria-label="Differences table">
             <table className="csv-diff-table">
               <thead>
                 <tr>

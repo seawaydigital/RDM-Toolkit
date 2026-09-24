@@ -331,7 +331,7 @@ export default function AcrobatAlternative() {
           A task-by-task comparison of common Acrobat Pro workflows and the free
           tools that handle them.
         </p>
-        <div className="aa-table-wrap">
+        <div className="aa-table-wrap" tabIndex={0} role="region" aria-label="Task coverage table">
           <table className="aa-table">
             <thead>
               <tr>

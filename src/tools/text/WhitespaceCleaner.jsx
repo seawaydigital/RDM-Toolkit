@@ -225,8 +225,9 @@ export default function WhitespaceCleaner({ tool }) {
             Convert spaces to tabs
           </label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Tab width:</label>
+            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }} htmlFor="ws-tab-width">Tab width:</label>
             <input
+              id="ws-tab-width"
               type="number"
               value={options.tabWidth}
               onChange={e => setOption('tabWidth', Math.max(1, parseInt(e.target.value, 10) || 4))}

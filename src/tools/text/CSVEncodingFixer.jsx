@@ -236,7 +236,7 @@ export default function CSVEncodingFixer({ tool }) {
           </div>
 
           {preview && (
-            <div className="csv-encoding-preview">
+            <div className="csv-encoding-preview" tabIndex={0} role="region" aria-label="Original preview">
               <h4 className="csv-encoding-preview-title">Preview (first rows)</h4>
               <div className="csv-encoding-preview-table">
                 {preview.map((line, i) => (
@@ -256,7 +256,7 @@ export default function CSVEncodingFixer({ tool }) {
           )}
 
           {fixedPreview && (
-            <div className="csv-encoding-preview" style={{ borderLeftColor: 'var(--accent-green)' }}>
+            <div className="csv-encoding-preview" style={{ borderLeftColor: 'var(--accent-green)' }} tabIndex={0} role="region" aria-label="Fixed preview">
               <h4 className="csv-encoding-preview-title" style={{ color: 'var(--accent-green)' }}>
                 Fixed Preview (UTF-8)
               </h4>

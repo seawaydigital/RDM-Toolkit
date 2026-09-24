@@ -165,8 +165,9 @@ export default function JSONFormatter({ tool }) {
 
       <div className="json-formatter-toolbar">
         <div className="json-formatter-indent">
-          <label className="find-replace-label">Indent:</label>
+          <label className="find-replace-label" htmlFor="json-indent">Indent:</label>
           <select
+            id="json-indent"
             value={indentSize}
             onChange={e => setIndentSize(Number(e.target.value))}
             className="json-formatter-select"

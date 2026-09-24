@@ -253,7 +253,7 @@ export default function MagicByteChecker({ tool, navigateTo }) {
           {/* Hex dump */}
           <div className="magic-byte-hex-section">
             <h4 className="magic-byte-hex-title">First 32 bytes (hex dump)</h4>
-            <pre className="magic-byte-hex-dump">{analysis.hexDump}</pre>
+            <pre className="magic-byte-hex-dump" tabIndex={0} aria-label="Hex dump of the first bytes">{analysis.hexDump}</pre>
           </div>
 
           <button className="result-panel-startover" onClick={handleStartOver} style={{ marginTop: 'var(--space-lg)' }}>
