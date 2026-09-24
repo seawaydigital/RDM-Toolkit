@@ -3,7 +3,7 @@ import {
   Server, Database, Code2, BookOpen, ChevronDown, ChevronRight,
   ExternalLink, Users, Cpu, Cloud, Search, FileText,
   Globe, Zap, ArrowRight, Star, CheckCircle, Info, Terminal,
-  FolderOpen, Layers, LayoutDashboard, Bot
+  FolderOpen, Layers, LayoutDashboard
 } from 'lucide-react';
 import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
 
@@ -223,7 +223,7 @@ const SOFTWARE_AREAS = [
     icon: Code2,
     title: 'Research Software Platforms',
     desc: 'Curated Canadian research software platforms, open-source and publicly funded, covering a wide range of disciplines.',
-    link: 'https://alliancecan.ca/en/services/research-software/canadian-research-software-platforms',
+    link: 'https://www.alliancecan.ca/en/services/research-software',
     linkText: 'Browse platforms',
   },
   {
@@ -255,7 +255,7 @@ const GETTING_STARTED = [
     step: 1,
     title: 'Access the national platforms',
     detail: 'All DRAC national platforms — CCDB (HPC), FRDR (large datasets), DMP Assistant, Borealis, and Nextcloud — are accessed from one login page. New users can create a free account there. Faculty can register directly; students and staff must be sponsored by a faculty supervisor.',
-    link: 'https://www.alliancecan.ca/en/login',
+    link: 'https://ccdb.alliancecan.ca/',
     linkText: 'Log in to national platforms',
   },
   {
@@ -554,13 +554,7 @@ export default function DRACServices() {
               <div className="drac-concept-icon"><LayoutDashboard size={18} /></div>
               <h4>Open OnDemand (No command line needed)</h4>
               <p>A browser-based portal that lets you launch <strong>Jupyter Notebooks</strong>, <strong>RStudio</strong>, and <strong>VS Code</strong> directly on cluster compute nodes — no SSH required.</p>
-              <a href="https://ondemand.alliancecan.ca" target="_blank" rel="noopener noreferrer" className="drac-concept-link">Open OnDemand portal <ExternalLink size={11} /></a>
-            </div>
-            <div className="drac-concept-card">
-              <div className="drac-concept-icon"><Bot size={18} /></div>
-              <h4>Helpy — AI Cluster Assistant</h4>
-              <p>Helpy is the Alliance's AI concierge for cluster questions. Ask it anything about job scripts, module loading, storage, or debugging errors on the clusters.</p>
-              <a href="https://helpy.vulcan.alliancecan.ca" target="_blank" rel="noopener noreferrer" className="drac-concept-link">Ask Helpy <ExternalLink size={11} /></a>
+              <a href="https://docs.alliancecan.ca/wiki/Open_OnDemand" target="_blank" rel="noopener noreferrer" className="drac-concept-link">Open OnDemand guide <ExternalLink size={11} /></a>
             </div>
           </div>
 

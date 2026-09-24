@@ -145,7 +145,7 @@ export default function AccessibilityStatement() {
           </a>
           <a
             className="acc-contact-secondary"
-            href="https://www.lakeheadu.ca/faculty-and-staff/departments/services/human-rights-and-equity/accessibility"
+            href="https://www.lakeheadu.ca/about/accessibility"
             target="_blank"
             rel="noopener noreferrer"
           >

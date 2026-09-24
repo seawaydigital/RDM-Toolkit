@@ -35,7 +35,7 @@ const IDENTIFIERS = [
       'Contributions and memberships carry forward between submissions',
     ],
     cta: { label: 'Access the CCV', href: 'https://ccv-cvc.ca/' },
-    learnMore: { label: 'CCV user guides', href: 'https://ccv-cvc.ca/home-en.frm' },
+    learnMore: { label: 'CCV user guides', href: 'https://cihr-irsc.gc.ca/e/45641.html' },
   },
   {
     id: 'doi',
@@ -66,7 +66,7 @@ const ETHICS_RESOURCES = [
   {
     title: 'TCPS 2 (full policy)',
     body: 'The Tri-Council Policy Statement is the authoritative document. Chapter 5 covers privacy; Chapter 9 covers research with First Nations, Inuit, and Métis Peoples. Reference it directly in your REB application.',
-    href: 'https://ethics.gc.ca/eng/policy-politique_2022.html',
+    href: 'https://ethics.gc.ca/eng/policy-politique_tcps2-eptc2_2022.html',
     linkLabel: 'Read TCPS 2 (2022)',
   },
   {
