@@ -1,6 +1,5 @@
 import {
-  BadgeCheck, Fingerprint, FileText, BookOpen, Database,
-  ExternalLink, CheckCircle, Info, ArrowRight, Users, ClipboardList
+  BadgeCheck, Fingerprint, ExternalLink, CheckCircle, ArrowRight, Users, ClipboardList
 } from 'lucide-react';
 import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
 

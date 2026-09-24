@@ -102,8 +102,6 @@ function parseMarkdown(md) {
     if (headingMatch) {
       flushList();
       const level = headingMatch[1].length;
-      const sizes = { 1: '1.6rem', 2: '1.3rem', 3: '1.1rem', 4: '1rem', 5: '0.9rem', 6: '0.85rem' };
-      const margins = { 1: '24px 0 12px', 2: '20px 0 10px', 3: '16px 0 8px', 4: '14px 0 6px', 5: '12px 0 4px', 6: '10px 0 4px' };
       result.push(`<h${level}>${processInline(headingMatch[2])}</h${level}>`);
       continue;
     }

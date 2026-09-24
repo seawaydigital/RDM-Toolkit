@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import {
   Search, Database, Share2, RefreshCw, ChevronDown, ChevronRight,
-  CheckCircle, AlertCircle, Clock, Building2, Users, FlaskConical,
-  FileText, Upload, BookOpen, ArrowRight, ArrowDown, Info, ExternalLink,
-  Feather, Globe, Shield, Star, Scale, Heart
+  CheckCircle, AlertCircle, Clock, Building2, FlaskConical,
+  FileText, Upload, BookOpen, ArrowDown, Info, ExternalLink,
+  Feather, Star, Scale
 } from 'lucide-react';
 import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
 
@@ -192,7 +192,6 @@ export default function TriAgencyPolicy() {
   const [activeRole, setActiveRole] = useState('pi');
   const [openDmpSection, setOpenDmpSection] = useState(0);
   const [openFaq, setOpenFaq] = useState(null);
-  const [depositStep, setDepositStep] = useState(null);
 
   const currentRole = ROLES.find(r => r.id === activeRole);
 

@@ -78,17 +78,6 @@ export default function ImageCropper({ tool }) {
     setIsDragging(true);
   }, [eventToImageCoords]);
 
-  const handleMouseMove = useCallback((e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    const coords = eventToImageCoords(e);
-    if (coords) setCropEnd(coords);
-  }, [isDragging, eventToImageCoords]);
-
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
   // Listen for mouseup and mousemove on window to handle drag outside image
   useEffect(() => {
     if (!isDragging) return;

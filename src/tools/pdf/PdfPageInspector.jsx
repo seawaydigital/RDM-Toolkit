@@ -175,7 +175,7 @@ export default function PdfPageInspector({ navigateTo }) {
       const bytes = new Uint8Array(rawBytes);
 
       // Check encryption via pdf-lib; also detect AcroForm fields
-      const { pdfDoc: libDoc, isEncrypted } = await loadPdfLibDocument(bytes.slice(), { PDFDocument });
+      const { isEncrypted } = await loadPdfLibDocument(bytes.slice(), { PDFDocument });
       if (isEncrypted) {
         setError('__encrypted__');
         setLoading(false);

@@ -1,4 +1,4 @@
-import { Mail, Server, AlertTriangle, FileText, Video, Globe, Cpu, Image, Code } from 'lucide-react';
+import { Mail, AlertTriangle, FileText, Video, Globe, Cpu, Image, Code } from 'lucide-react';
 import { INSTITUTION } from '../../data/institutionConfig';
 
 const CONSIDERED_TOOLS = [

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Server, Database, Code2, BookOpen, ChevronDown, ChevronRight,
-  ExternalLink, Users, Cpu, HardDrive, Cloud, Search, FileText,
+  ExternalLink, Users, Cpu, Cloud, Search, FileText,
   Globe, Zap, ArrowRight, Star, CheckCircle, Info, Terminal,
   FolderOpen, Layers, LayoutDashboard, Bot
 } from 'lucide-react';

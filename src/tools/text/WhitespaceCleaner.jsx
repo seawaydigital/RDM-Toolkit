@@ -33,7 +33,7 @@ function cleanWhitespace(text, options) {
   // Convert spaces to tabs
   if (options.spacesToTabs && !options.tabsToSpaces) {
     const spaces = ' '.repeat(options.tabWidth);
-    const regex = new RegExp(spaces.replace(/ /g, ' '), 'g');
+    const regex = new RegExp(spaces, 'g'); // spaces only — no regex metacharacters
     // Only convert leading spaces
     const lineEnd = options.normalizeCRLF ? '\r\n' : '\n';
     result = result.split(/\r?\n/).map(line => {

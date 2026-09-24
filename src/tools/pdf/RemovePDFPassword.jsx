@@ -6,7 +6,7 @@ import DropZone from '../../components/ui/DropZone';
 import ActionButton from '../../components/ui/ActionButton';
 import ResultPanel from '../../components/ui/ResultPanel';
 import ErrorCard from '../../components/ui/ErrorCard';
-import { PDF_VALIDATION, ANY_FILE_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
+import { ANY_FILE_VALIDATION } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { removePdfPassword } from '../../utils/pdfEncrypt';
 
