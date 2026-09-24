@@ -11,6 +11,11 @@ export function setDroppedFiles(files) {
   _droppedFiles = files;
 }
 
+/** True while files are waiting for a DropZone to collect them. */
+export function hasPendingDroppedFiles() {
+  return _droppedFiles !== null && _droppedFiles.length > 0;
+}
+
 export function getDroppedFiles() {
   const f = _droppedFiles;
   _droppedFiles = null;
