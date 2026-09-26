@@ -121,6 +121,8 @@ export default defineConfig({
         runtimeCaching: [],
         skipWaiting: true,   // activate new SW immediately on deploy
         clientsClaim: true,  // take control of all open tabs right away
+        // …and reload them, or they keep running the old build (public/sw-reload.js)
+        importScripts: ['sw-reload.js'],
       },
       manifest: {
         name: 'RDM Toolkit',
