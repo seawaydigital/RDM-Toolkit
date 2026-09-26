@@ -1,6 +1,6 @@
 # Session handoff — updated 2026-09-24
 
-> **Launching?** Start with [LAUNCH-CHECKLIST.md](LAUNCH-CHECKLIST.md). Four stacked security PRs (#115–#118) are open; merge #118 with a merge commit and the other three land with it.
+> **Launching?** Start with [LAUNCH-CHECKLIST.md](LAUNCH-CHECKLIST.md). The four stacked security PRs (#115–#118) shipped on 2026-09-25 as one squash commit (`83b3bc6`). The remaining owner steps start at item 3.
 
 > State-of-the-repo snapshot for the next working session. Update this file at the end of any substantial session. Architecture/context lives in [CLAUDE.md](../CLAUDE.md); agent rules in [AGENTS.md](../AGENTS.md).
 

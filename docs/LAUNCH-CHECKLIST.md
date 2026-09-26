@@ -15,17 +15,12 @@ can follow in the weeks after.
 
 They are stacked: #115 → #116 → #117 → #118, each containing the one before it.
 
-**Merge #118 alone, using "Create a merge commit" — not squash.** That lands all
-four in one step. Because the commits of #115, #116 and #117 are then part of
-`master`, GitHub marks those three as merged automatically. If it does not,
-close them with a comment that they shipped in #118.
+**Done 2026-09-25.** #118 was squash-merged as `83b3bc6`, which landed all
+four, and #115–#117 were closed by hand.
 
-Squash-merging them one at a time rewrites the shared commits and makes each
-following PR conflict with `master`.
-
-The owner cannot approve their own PRs, so use the admin
-"Merge without waiting for requirements" option once all four required checks
-are green on #118.
+This repo does not allow merge commits: the "Protect master" ruleset requires
+linear history, so GitHub refuses them. Squash-merging only the top PR of a
+stack is safe. Squashing the stacked PRs one at a time is what causes conflicts.
 
 ### 2. Confirm the deploy
 

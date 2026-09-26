@@ -75,7 +75,8 @@ jobs:
         run: |
           base="${PAGE_URL%/}"
           for attempt in 1 2 3 4 5 6; do
-            if curl -fsS "$base/" | grep -q 'id="root"' \n              && curl -fsS "$base/.well-known/security.txt" | grep -q '^Contact:'; then
+            if curl -fsS "$base/" | grep -q 'id="root"' &&
+               curl -fsS "$base/.well-known/security.txt" | grep -q '^Contact:'; then
               echo "Live site and security.txt OK"; exit 0
             fi
             sleep 20
