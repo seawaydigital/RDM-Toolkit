@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Mail, Copy, Check, ShieldAlert } from 'lucide-react';
-import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
+import { INSTITUTION } from '../../data/institutionConfig';
 
 function buildIssueBody({ description, context, includeLog, log }) {
   const lines = [

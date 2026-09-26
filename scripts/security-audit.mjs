@@ -51,7 +51,7 @@ const bannedPackages = [
 ];
 
 const allowedDependencies = new Map([
-  ['@cantoo/pdf-lib', '1.21.1'],
+  ['@cantoo/pdf-lib', '2.11.1'],
   ['@dnd-kit/core', '6.3.1'],
   ['@dnd-kit/sortable', '8.0.0'],
   ['@dnd-kit/utilities', '3.2.2'],

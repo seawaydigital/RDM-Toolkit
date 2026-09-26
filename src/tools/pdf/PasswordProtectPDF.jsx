@@ -10,9 +10,10 @@ import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderPageThumbnail, loadPdfDocument, destroyPdfDocument } from '../../utils/pdfThumbnails';
+import { encryptPdfBytes, verifyPdfIsLocked } from '../../utils/pdfEncrypt';
 
 const DESCRIPTION =
-  'Applies password protection to a PDF so it requires a password to open. Encryption is applied using PDF-standard security, and the output remains a normal .pdf file that any PDF reader can prompt for a password.';
+  'Applies AES-256 password protection to a PDF so it requires a password to open. The output is verified to refuse a password-less open before it is offered for download, and stays a normal .pdf file that any modern PDF reader can prompt for a password.';
 
 function getPasswordStrength(pw) {
   if (!pw) return { label: 'Too Short', level: 0 };
@@ -98,23 +99,25 @@ export default function PasswordProtectPDF({ tool, navigateTo }) {
     setProcessing(true);
     setError(null);
     try {
-      // Load the PDF with pdf-lib
-      const pdfDoc = await PDFDocument.load(fileBytes.slice());
-
-      // Use the owner password if provided, otherwise default to the user password
-      const effectiveOwnerPassword = ownerPassword.trim() || userPassword;
-
-      // Save with encryption options applied via pdf-lib
-      const encryptedBytes = await pdfDoc.save({
-        useObjectStreams: false,
-        userPassword: userPassword,
-        ownerPassword: effectiveOwnerPassword,
+      const encryptedBytes = await encryptPdfBytes(fileBytes, {
+        userPassword,
+        ownerPassword: ownerPassword.trim(),
         permissions: {
-          printing: printingAllowed ? 'highResolution' : undefined,
+          printing: printingAllowed ? 'highResolution' : false,
           copying: copyingAllowed,
           modifying: editingAllowed,
+          annotating: editingAllowed,
+          fillingForms: editingAllowed,
+          documentAssembly: editingAllowed,
+          contentAccessibility: true,
         },
       });
+
+      // Independent lock check — never offer a download that is not encrypted.
+      const lock = await verifyPdfIsLocked(encryptedBytes, { userPassword });
+      if (!lock.locked) {
+        throw new Error(`VERIFY: ${lock.reason}`);
+      }
 
       // Verify the output is non-empty and starts with %PDF
       if (!encryptedBytes || encryptedBytes.byteLength < 100) {
@@ -136,7 +139,11 @@ export default function PasswordProtectPDF({ tool, navigateTo }) {
       });
     } catch (err) {
       console.error('PDF encryption failed:', err);
-      setError('Something went wrong while encrypting the PDF. Please try again.');
+      if (err?.message?.startsWith('VERIFY:')) {
+        setError(`Encryption could not be verified (${err.message.slice(8)}). The file has NOT been offered for download. Please report this with the Feedback button in the top bar.`);
+      } else {
+        setError('Something went wrong while encrypting the PDF. Please try again.');
+      }
     } finally {
       setProcessing(false);
     }
@@ -166,7 +173,7 @@ export default function PasswordProtectPDF({ tool, navigateTo }) {
         <InfoCard description={DESCRIPTION} />
         <div className="info-card" style={{ borderLeftColor: 'var(--accent-green)', marginBottom: 'var(--space-lg)' }}>
           <p className="info-card-description" style={{ color: 'var(--accent-green)' }}>
-            Password protection applied successfully. The PDF now requires the password you set to open.
+            AES-256 encryption applied. We re-opened the file to confirm it refuses to open without your password.
           </p>
         </div>
         <ResultPanel
@@ -280,7 +287,7 @@ export default function PasswordProtectPDF({ tool, navigateTo }) {
 
             {/* Owner Password (optional) */}
             <div className="tool-option-row" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-              <label className="tool-option-label">Owner Password <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 'normal' }}>(optional, defaults to user password)</span></label>
+              <label className="tool-option-label">Owner Password <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 'normal' }}>(optional — leave blank and a random one is generated so the permission limits below are enforced)</span></label>
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={ownerPassword}
@@ -318,6 +325,9 @@ export default function PasswordProtectPDF({ tool, navigateTo }) {
                 />
                 Allow editing and annotations
               </label>
+              <p className="tool-page-meta">
+                PDF readers only enforce these limits when the owner password differs from the open password. Anyone who knows the owner password has full access.
+              </p>
             </div>
           </div>
 

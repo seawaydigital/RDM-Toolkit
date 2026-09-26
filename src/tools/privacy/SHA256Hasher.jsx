@@ -130,8 +130,9 @@ export default function SHA256Hasher({ tool, navigateTo }) {
 
       {/* Algorithm selector */}
       <div className="hash-algorithm-selector">
-        <label className="hash-algorithm-label">Algorithm:</label>
+        <label className="hash-algorithm-label" htmlFor="hash-algorithm">Algorithm:</label>
         <select
+          id="hash-algorithm"
           className="hash-algorithm-select"
           value={algorithm}
           onChange={e => { setAlgorithm(e.target.value); setResults([]); }}

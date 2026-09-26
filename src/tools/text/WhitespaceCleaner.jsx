@@ -33,7 +33,7 @@ function cleanWhitespace(text, options) {
   // Convert spaces to tabs
   if (options.spacesToTabs && !options.tabsToSpaces) {
     const spaces = ' '.repeat(options.tabWidth);
-    const regex = new RegExp(spaces.replace(/ /g, ' '), 'g');
+    const regex = new RegExp(spaces, 'g'); // spaces only — no regex metacharacters
     // Only convert leading spaces
     const lineEnd = options.normalizeCRLF ? '\r\n' : '\n';
     result = result.split(/\r?\n/).map(line => {
@@ -225,8 +225,9 @@ export default function WhitespaceCleaner({ tool }) {
             Convert spaces to tabs
           </label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Tab width:</label>
+            <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }} htmlFor="ws-tab-width">Tab width:</label>
             <input
+              id="ws-tab-width"
               type="number"
               value={options.tabWidth}
               onChange={e => setOption('tabWidth', Math.max(1, parseInt(e.target.value, 10) || 4))}

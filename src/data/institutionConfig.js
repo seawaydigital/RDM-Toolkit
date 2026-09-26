@@ -31,7 +31,7 @@ export const INSTITUTION = {
   indigenousResearchOffice: "Lakehead's Indigenous Research Support Office",
 
   // Research Ethics Board — used by Grants & Identifiers page.
-  rebContactUrl: 'https://www.lakeheadu.ca/research-and-innovation/research-services/research-ethics',
+  rebContactUrl: 'https://www.lakeheadu.ca/research-and-innovation/ethics/human-subjects',
 };
 
 // Helper: pre-built mailto: hrefs so callers don't concatenate strings.

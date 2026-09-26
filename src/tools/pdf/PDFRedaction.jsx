@@ -7,7 +7,7 @@ import ResultPanel from '../../components/ui/ResultPanel';
 import ErrorCard from '../../components/ui/ErrorCard';
 import EncryptedPDFError from '../../components/ui/EncryptedPDFError';
 import { X, ZoomIn, ZoomOut, ShieldCheck, AlertTriangle } from 'lucide-react';
-import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
+import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, destroyPdfDocument } from '../../utils/pdfThumbnails';
 

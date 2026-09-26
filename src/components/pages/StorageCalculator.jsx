@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { HardDrive, ChevronDown, ChevronUp, Search, Copy, Check, Printer, Link, RotateCcw, AlertTriangle, Shield, Info, Play } from 'lucide-react';
-import { INSTITUTION } from '../../data/institutionConfig';
 
 /* ============================================================
    CONSTANTS — FILE CATEGORIES
@@ -997,21 +996,6 @@ export default function StorageCalculator() {
   const handlePrint = useCallback(() => {
     window.print();
   }, []);
-
-  // --- Export: Consultation Email ---
-  const generateConsultationEmail = useCallback(() => {
-    const subject = encodeURIComponent('Research Data Storage Consultation Request');
-    const body = encodeURIComponent(
-      `Dear RDM Team,\n\nI would like to request a consultation regarding my research data storage needs.\n\n` +
-      `Estimated Active Storage: ${formatSize(totalActiveGB)}\n` +
-      `Estimated Archival Storage: ${formatSize(totalArchivalGB)}\n` +
-      `Data Classification: ${classificationLevel}\n` +
-      `Active Duration: ${activeDuration} years\n` +
-      `Archival Duration: ${archivalDuration} years\n\n` +
-      `Please let me know available times for a meeting.\n\nThank you.`
-    );
-    window.open(`mailto:${INSTITUTION.storageEmail}?subject=${subject}&body=${body}`);
-  }, [totalActiveGB, totalArchivalGB, classificationLevel, activeDuration, archivalDuration]);
 
   // --- Export: Save Configuration ---
   const saveConfiguration = useCallback(async () => {

@@ -52,6 +52,10 @@ jobs:
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: dist
+          # v5 drops every dot-prefixed path by default, which silently kept
+          # /.well-known/security.txt (RFC 9116) off the live site even after
+          # #113 added .nojekyll. dist/ contains no other dotfiles.
+          include-hidden-files: true
 
   deploy:
     needs: build
@@ -62,3 +66,20 @@ jobs:
     steps:
       - uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
         id: deployment
+
+      # Post-deploy smoke check: the page and the security contact must both be
+      # reachable. Retries cover the CDN catching up with the new artifact.
+      - name: Smoke-check the live site
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          base="${PAGE_URL%/}"
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsS "$base/" | grep -q 'id="root"' \n              && curl -fsS "$base/.well-known/security.txt" | grep -q '^Contact:'; then
+              echo "Live site and security.txt OK"; exit 0
+            fi
+            sleep 20
+          done
+          echo "::error::Live site or /.well-known/security.txt not reachable after deploy"
+          exit 1
+

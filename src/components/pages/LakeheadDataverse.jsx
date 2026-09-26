@@ -185,7 +185,7 @@ export default function LakeheadDataverse() {
           Most Lakehead researchers should start with the LU Dataverse. Use this table if you
           need to compare options.
         </p>
-        <div className="lud-picker-wrap">
+        <div className="lud-picker-wrap" tabIndex={0} role="region" aria-label="Repository comparison table">
           <table className="lud-picker-table">
             <thead>
               <tr>

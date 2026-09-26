@@ -141,8 +141,6 @@ function renderMarkdown(md) {
     if (headingMatch) {
       flushList();
       const level = headingMatch[1].length;
-      const sizes = { 1: '1.6rem', 2: '1.3rem', 3: '1.1rem', 4: '1rem', 5: '0.9rem', 6: '0.85rem' };
-      const margins = { 1: '24px 0 12px', 2: '20px 0 10px', 3: '16px 0 8px', 4: '14px 0 6px', 5: '12px 0 4px', 6: '10px 0 4px' };
       result.push(`<h${level}>${processInline(headingMatch[2])}</h${level}>`);
       continue;
     }
@@ -208,7 +206,9 @@ function csvToMarkdown(text) {
     cells.push(cell.trim());
     return cells;
   };
-  const escapeCell = cell => cell.replace(/\|/g, '\\|');
+  // Escape backslashes first, then pipes: a cell ending in a backslash would
+  // otherwise escape the column delimiter that follows it.
+  const escapeCell = cell => cell.replace(/\\/g, '\\\\').replace(/\|/g, '\\|');
   const rows = lines.map(parseRow);
   const header = '| ' + rows[0].map(escapeCell).join(' | ') + ' |';
   const divider = '| ' + rows[0].map(() => '---').join(' | ') + ' |';
@@ -433,7 +433,6 @@ export default function FileToMarkdown() {
   return (
     <div className="tool-page">
       <div className="tool-page-header">
-        <h1>File to Markdown</h1>
         <p className="tool-page-meta">
           Convert text-shaped documents to clean Markdown for use with AI tools. All processing happens in your browser — no files are uploaded.
         </p>

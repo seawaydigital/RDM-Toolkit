@@ -64,3 +64,17 @@ test('an unrecognised new chunk is reported, the rolldown runtime allowance is n
   assert.equal(issues.length, 1);
   assert.match(issues[0], /^new JS chunk surprise\.js/);
 });
+
+test('the pdf-lib transition allowance is per-chunk: 15% passes for pdf-lib.js only', () => {
+  const base = { files: [
+    { name: 'pdf-lib-aaa.js', logicalName: 'pdf-lib.js', bytes: 400_000 },
+    { name: 'jszip-aaa.js', logicalName: 'jszip.js', bytes: 400_000 },
+  ] };
+  const current = { files: [
+    { name: 'pdf-lib-bbb.js', logicalName: 'pdf-lib.js', bytes: 460_000 },
+    { name: 'jszip-bbb.js', logicalName: 'jszip.js', bytes: 460_000 },
+  ] };
+  const issues = compareBundles(base, current, 10);
+  assert.equal(issues.length, 1, issues.join('; '));
+  assert.match(issues[0], /^jszip\.js grew by 15\.0%/);
+});

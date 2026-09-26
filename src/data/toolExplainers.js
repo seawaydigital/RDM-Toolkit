@@ -98,10 +98,11 @@ const EXPLAINERS = {
       'The password is never sent anywhere. It\u2019s used to derive the encryption key in the moment, and then discarded as soon as the save completes.',
     ],
     technicalDetails: {
-      library: '<code>@cantoo/pdf-lib</code> v1.17.1 (maintained fork of <code>pdf-lib</code>).',
+      library: '<code>@cantoo/pdf-lib</code> v2.11.1 (maintained fork of <code>pdf-lib</code>) — AES-256, ISO 32000-2 revision 6.',
       flow: [
         'PDF is parsed via <code>PDFDocument.load()</code> into an object tree in memory.',
-        '<code>save()</code> is called with <code>userPassword</code> and <code>ownerPassword</code>, triggering PDF standard-security handler encryption.',
+        'A direct trailer <code>/Info</code> dictionary is first promoted to an indirect object (the trailer is never encrypted), and a blank owner password is replaced with 48 random hex characters from <code>crypto.getRandomValues</code>. Then <code>encrypt({ userPassword, ownerPassword, permissions })</code> is called, then <code>save()</code>. The output is re-opened without a password and with an empty password (both must be refused) and with your password (must succeed) before the download button appears.',
+        'The file is written with object streams on purpose: the library encrypts streams but not bare strings, so a plain cross-reference save would leave the title, author and form values readable.',
         'The output is downloaded as a <code>Blob</code> via a local <code>URL.createObjectURL()</code>; the URL is revoked on reset.',
         'Your password lives in memory for the duration of the save, then is garbage-collected.',
       ],
@@ -114,9 +115,9 @@ const EXPLAINERS = {
       'Close the tab and everything (PDF, password, output) is gone.',
     ],
     limitations: [
-      'PDF encryption is older and weaker than modern AES-based container formats. For truly sensitive data (interview transcripts, health records), pair this with our Encrypt/Decrypt Text tool inside a 7-Zip or VeraCrypt container.',
+      'The output uses AES-256 (PDF 2.0, revision 6). Very old viewers (roughly pre-2010) and some lightweight mobile viewers cannot open revision-6 files; if a recipient reports that, ask them to use Adobe Reader, Chrome, Firefox, or macOS Preview.',
       'A short or common password can be brute-forced quickly. Use a strong generated password (at least 16 characters).',
-      'If you set only an owner password (not a user password), most PDF readers will still let people open the document. Set both for full protection.',
+      'Leave the Owner Password blank and a random one is generated, so the permission limits are enforced. If you set your own owner password, do not make it the same as the open password — readers grant full access to anyone who can authenticate as owner.',
     ],
     verify: {
       quick: 'Turn off your Wi-Fi, drop in a PDF, set a password, and download. It still works — nothing needs a server.',
@@ -133,6 +134,7 @@ const EXPLAINERS = {
       library: '<code>@cantoo/pdf-lib</code> for standard PDF encryption; WebCrypto AES-GCM for our own <code>.pdf.enc</code> bundle format.',
       flow: [
         'PDF is loaded via <code>PDFDocument.load(bytes, { password })</code> — pdf-lib validates the password and decrypts the object tree in memory.',
+        'After the password load, the stale encryption dictionary and cross-reference stream that pdf-lib would otherwise carry over are removed, the original document information (title, author) is re-attached, and the result is re-opened without a password before download.',
         'The document is re-saved with no encryption options, producing a clean output file.',
         'If the file is a <code>.pdf.enc</code> bundle (produced by our Encrypt/Decrypt tool), WebCrypto\u2019s <code>PBKDF2</code> + <code>AES-GCM</code> decrypts it with 100,000 iterations.',
         'Your password is in memory for the length of the operation, then dropped.',
@@ -221,13 +223,13 @@ const EXPLAINERS = {
   'strip-file-metadata': {
     whatItDoes: 'Removes hidden metadata (author, edit history, GPS coordinates, camera make, etc.) from PDFs and images.',
     howItWorks: [
-      'Your file is read into browser memory. For PDFs, a PDF library clears the standard metadata fields (title, author, subject, keywords, producer) and saves a clean copy. For images, the file is parsed to locate EXIF/XMP metadata blocks, then re-encoded through a canvas so those blocks are left behind.',
+      'Your file is read into browser memory. For PDFs, the Info dictionary (title, author, subject, keywords, producer) is blanked and the XMP metadata stream, application PieceInfo, embedded attachments and page thumbnails are deleted — objects included, not just the references — before the file is re-saved. For images, the file is re-encoded through a canvas so EXIF/XMP blocks are left behind.',
       'The cleaned file downloads to your device. Nothing is uploaded — the entire scrubbing happens in this browser tab.',
     ],
     technicalDetails: {
       library: '<code>@cantoo/pdf-lib</code> for PDFs; <code>exifr</code> v7 + Canvas API for images.',
       flow: [
-        'PDFs: parsed with <code>PDFDocument.load()</code>; <code>setTitle("")</code>, <code>setAuthor("")</code>, <code>setSubject("")</code>, <code>setKeywords([])</code>, <code>setProducer("")</code>, <code>setCreator("")</code> are called; document re-saved.',
+        'PDFs: parsed with <code>PDFDocument.load()</code>; <code>stripPdfIdentityMetadata()</code> blanks the Info dictionary and deletes catalog <code>/Metadata</code> (XMP), <code>/PieceInfo</code>, <code>/Names/EmbeddedFiles</code> and per-page <code>/PieceInfo</code>/<code>/Thumb</code>, recursively removing the objects they point at (pdf-lib would otherwise re-serialise orphaned objects); document re-saved. The before/after table lists any hidden carriers found.',
         'Images: <code>exifr</code> parses the original metadata for a before-snapshot; the image is drawn onto a <code>&lt;canvas&gt;</code> and exported via <code>canvas.toBlob()</code>, which by specification does not emit EXIF/XMP.',
         'A second <code>exifr</code> pass on the output verifies the metadata is gone and shows you the before/after comparison.',
       ],
@@ -239,7 +241,7 @@ const EXPLAINERS = {
       'Output files are built in memory and handed to your browser\u2019s download dialog.',
     ],
     limitations: [
-      'For PDFs, we strip the standard Info dictionary and XMP block. Custom or third-party metadata streams (e.g. embedded review comments, form data, attached files) are handled by the main pdf-lib serializer but may survive in edge cases. Inspect sensitive PDFs in Adobe Acrobat\u2019s "Examine Document" afterwards for double-check.',
+      'For PDFs: text and images on the pages are untouched, so a name printed in a header, a signature, or a scanned letterhead is not metadata and will remain. Review-comment annotations and form-field values also stay. For sensitive documents, follow up with Adobe Acrobat\u2019s "Examine Document" or the PDF Redaction tool.',
       'For images, re-encoding through a canvas may slightly change pixel data. For archival originals, keep an untouched copy.',
       'GPS coordinates embedded directly in the image pixels (e.g. burned-in watermarks) cannot be removed by any metadata tool. Crop them out with Image Cropper.',
     ],
@@ -282,14 +284,13 @@ const EXPLAINERS = {
   'data-anonymizer': {
     whatItDoes: 'De-identifies CSV or free-text research data by replacing direct identifiers with codes, pseudonyms, or redactions — so you can share it or work with it without exposing participants.',
     howItWorks: [
-      'You paste in text or upload a CSV, pick the columns or entity types that need de-identification, and choose a strategy: <strong>coded</strong> (consistent pseudonyms + a separate key file that maps codes back to originals), <strong>pseudonymized</strong> (one-way hash — no way back), or <strong>anonymized</strong> (redacted to [REDACTED], irreversible).',
+      'You paste in text or upload a CSV, pick the columns or entity types that need de-identification, and choose a strategy: <strong>coded</strong> (consistent pseudonyms + a separate key file that maps codes back to originals) or <strong>anonymized</strong> (redacted to [REDACTED], irreversible).',
       'Everything runs inside your browser. If you pick the coded strategy, the key file is generated as a second download — and per TCPS 2 guidance, you should store it <strong>separately</strong> from the coded data so the two can\u2019t be joined without explicit access.',
     ],
     technicalDetails: {
       library: 'WebCrypto <code>crypto.subtle.digest(\'SHA-256\')</code>; regex patterns for PII detection in text mode.',
       flow: [
         '<strong>Coded:</strong> unique composite values (e.g. <code>First Name | Last Name</code>) are assigned incremental pseudonyms like <code>Person-1</code>, <code>Person-2</code>. The mapping is emitted as a separate CSV <em>key file</em>.',
-        '<strong>Pseudonymized:</strong> each value is hashed with SHA-256 and the first 8 hex chars used as the pseudonym — irreversible without a brute-force search over a known input space.',
         '<strong>Anonymized:</strong> values replaced with <code>[REDACTED]</code>.',
         'Free-text mode detects emails, phone numbers, SIN-like patterns, Canadian postal codes, IPs, URLs, and dates via regex and applies the chosen strategy to each match.',
       ],
@@ -303,8 +304,8 @@ const EXPLAINERS = {
     ],
     limitations: [
       'Regex-based PII detection for free text is a helpful first pass, not a guarantee. It will miss context-specific identifiers (e.g. "the only female PhD in Dept. X"), rare name spellings, and typos.',
-      'For TCPS 2–compliant research, always pair this tool with manual review. The coded/pseudonymized/anonymized labels match TCPS 2 Article 5.5 language, but the legal and ethical responsibility for adequate de-identification is yours, not the tool\u2019s.',
-      'SHA-256 pseudonyms are reversible if the attacker can guess the input space (e.g. a small closed list of employees). For small-N datasets, use coded mode with a key file stored separately — or anonymized mode if no re-identification is ever needed.',
+      'For TCPS 2–compliant research, always pair this tool with manual review. The coded/anonymized labels match TCPS 2 Article 5.5 language, but the legal and ethical responsibility for adequate de-identification is yours, not the tool\u2019s.',
+      'An earlier version offered a "pseudonymized" mode built on an unsalted SHA-256 hash. It was removed on 2026-09-18 because a hash of a name or ID can be reversed by hashing a list of candidates. If you need pseudonyms that stay consistent across several files, use coded mode with the same key file.',
     ],
     verify: {
       quick: 'Turn off your Wi-Fi, paste in a CSV of test data, run the tool, and download both the coded file and the key file. Everything worked — because everything happened in your browser.',
@@ -414,7 +415,7 @@ const EXPLAINERS = {
       'That\u2019s it. There\u2019s no "upload," no server step, no cloud. If you closed this tab right now, every trace of your files would be gone.',
     ],
     technicalDetails: {
-      library: '<code>@cantoo/pdf-lib</code> v1.17.1 (maintained fork of <code>pdf-lib</code>).',
+      library: '<code>@cantoo/pdf-lib</code> v2.11.1 (maintained fork of <code>pdf-lib</code>).',
       flow: [
         'Each PDF is read into a <code>Uint8Array</code> in your tab\u2019s memory.',
         '<code>PDFDocument.load()</code> parses each source into an object tree.',
@@ -533,7 +534,7 @@ const EXPLAINERS = {
       'You drop in a flat PDF (one without existing form fields). For each field you want, you click on the page preview to place and size it. When you\u2019re done, a PDF library in your browser adds those fields to the PDF\u2019s underlying form layer and saves a new version that anyone with Adobe Reader, Foxit, or a browser can fill in.',
     ],
     technicalDetails: {
-      library: '<code>@cantoo/pdf-lib</code> v1.17.1 (AcroForm API).',
+      library: '<code>@cantoo/pdf-lib</code> v2.11.1 (AcroForm API).',
       flow: [
         '<code>pdfDoc.getForm().getFields()</code> pre-flight check detects existing form fields and refuses to proceed — adding fields to a PDF that already has them produces broken output in Adobe Acrobat.',
         '<code>form.createTextField(name)</code>, <code>createCheckBox()</code>, <code>createRadioGroup()</code>, <code>createDropdown()</code> build the field definitions.',
@@ -804,7 +805,7 @@ export const TOOL_CAVEATS = {
     'For legally binding signatures, use a certified e-signature service (Adobe Acrobat Sign, DocuSign, or your institution’s provider).',
   ],
   'password-protect-pdf': [
-    'PDF password protection is older and weaker than modern container encryption. For genuinely sensitive data (health records, interview transcripts), put the file in an encrypted 7-Zip or VeraCrypt container instead — or as well.',
+    'The password is the only key. A short or guessable password can be brute-forced offline; use a generated password of 16+ characters and share it over a different channel than the file.',
   ],
   'encrypt-decrypt-text': [
     'There is no password reset, backdoor, or recovery. If you lose the password, the text is gone permanently — that’s the point. Store the password in a password manager.',
@@ -814,7 +815,7 @@ export const TOOL_CAVEATS = {
     'If you use the coded strategy, store the key file separately from the coded data (TCPS 2 Art. 5.5).',
   ],
   'strip-file-metadata': [
-    'For PDFs, rare third-party metadata streams can survive. For sensitive documents, double-check afterwards with Adobe Acrobat’s Examine Document.',
+    'Only hidden metadata is removed. Names in headers, footers, signatures or scanned letterheads are page content — use PDF Redaction for those.',
   ],
   'strip-image-metadata': [
     'Information burned into the pixels — timestamp watermarks, GPS overlays — is not metadata and won’t be removed. Crop it out with the Image Cropper instead.',

@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { Copy, Check, RefreshCw } from 'lucide-react';
 import InfoCard from '../../components/ui/InfoCard';
+import { secureRandomIndices } from '../../utils/crypto';
 
 function calculateEntropy(length, charset) {
   if (!charset || charset.length === 0) return 0;
@@ -36,8 +37,9 @@ function buildCharset(options) {
 }
 
 function generatePasswordFromCharset(length, charset) {
-  const values = crypto.getRandomValues(new Uint32Array(length));
-  return Array.from(values).map(v => charset[v % charset.length]).join('');
+  // Rejection-sampled indices — a plain modulo of a 32-bit value slightly
+  // favours the low indices (CodeQL js/biased-cryptographic-random).
+  return secureRandomIndices(length, charset.length).map(i => charset[i]).join('');
 }
 
 function PasswordRow({ password, index }) {

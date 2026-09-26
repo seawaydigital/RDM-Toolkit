@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import {
   Search, Database, Share2, RefreshCw, ChevronDown, ChevronRight,
-  CheckCircle, AlertCircle, Clock, Building2, Users, FlaskConical,
-  FileText, Upload, BookOpen, ArrowRight, ArrowDown, Info, ExternalLink,
-  Feather, Globe, Shield, Star, Scale, Heart
+  CheckCircle, AlertCircle, Clock, Building2, FlaskConical,
+  FileText, Upload, BookOpen, ArrowDown, Info, ExternalLink,
+  Feather, Star, Scale
 } from 'lucide-react';
 import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
 
@@ -192,7 +192,6 @@ export default function TriAgencyPolicy() {
   const [activeRole, setActiveRole] = useState('pi');
   const [openDmpSection, setOpenDmpSection] = useState(0);
   const [openFaq, setOpenFaq] = useState(null);
-  const [depositStep, setDepositStep] = useState(null);
 
   const currentRole = ROLES.find(r => r.id === activeRole);
 
@@ -699,7 +698,7 @@ export default function TriAgencyPolicy() {
               <p>
                 <strong>C</strong>ollective benefit, <strong>A</strong>uthority to control,{' '}
                 <strong>R</strong>esponsibility, <strong>E</strong>thics. Published by the{' '}
-                <a href="https://www.gida-global.org/care" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+                <a href="https://www.gida-global.org/careprinciples" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
                   Global Indigenous Data Alliance (GIDA) <ExternalLink size={11} />
                 </a>
                 {' '}in 2020. CARE complements the FAIR principles by adding people- and purpose-oriented considerations.
@@ -720,7 +719,7 @@ export default function TriAgencyPolicy() {
               <p>
                 <strong>U</strong>tility, <strong>S</strong>elf-voicing, <strong>A</strong>ccess,{' '}
                 <strong>I</strong>nter-relationality. Developed by the{' '}
-                <a href="https://ofifc.org/research/usai-research-framework/" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
+                <a href="https://ofifc.org/wp-content/uploads/2020/03/USAI-Research-Framework-Second-Edition.pdf" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
                   Ontario Federation of Indigenous Friendship Centres (OFIFC) <ExternalLink size={11} />
                 </a>
                 {' '}— the framework for urban Indigenous research, highly relevant in Thunder Bay.

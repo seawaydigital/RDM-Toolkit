@@ -10,6 +10,7 @@ import { Download, RotateCcw, X, Loader2, Sparkles, ExternalLink, Info, Scissors
 import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields, destroyPdfDocument } from '../../utils/pdfThumbnails';
+import { removeEntry } from '../../utils/pdfMetadata';
 import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
 
 const DESCRIPTION =
@@ -397,33 +398,40 @@ function stripDeadweight(pdfDoc) {
   const stats = { stripped: [] };
   const catalog = pdfDoc.catalog;
 
-  const tryDeleteCatalog = (key, label) => {
+  // `purge` also deletes the objects the entry points at. pdf-lib re-serialises
+  // every indirect object it holds, so dropping only the catalog key leaves
+  // the XMP/PieceInfo bytes in the output (and saves no space). Actions are
+  // NOT purged: /OpenAction and /AA can share objects with link annotations,
+  // and a dangling reference is worse than a few stale bytes.
+  const tryDeleteCatalog = (key, label, purge = false) => {
     try {
-      if (catalog.has(PDFName.of(key))) {
-        catalog.delete(PDFName.of(key));
-        stats.stripped.push(label);
+      const name = PDFName.of(key);
+      if (!catalog.has(name)) return;
+      if (purge) {
+        removeEntry(pdfDoc.context, catalog, key);
+      } else {
+        catalog.delete(name);
       }
+      stats.stripped.push(label);
     } catch {
       // defensive: never let cleanup failure block the compression
     }
   };
 
-  tryDeleteCatalog('Metadata',   'XMP metadata');
+  tryDeleteCatalog('Metadata',   'XMP metadata', true);
   tryDeleteCatalog('OpenAction', 'open-document action');
   tryDeleteCatalog('AA',         'document additional actions');
-  tryDeleteCatalog('PieceInfo',  'application piece info');
+  tryDeleteCatalog('PieceInfo',  'application piece info', true);
 
   // /Names holds several name trees — remove only the deadweight ones,
   // keep /Dests so outline links keep working.
   try {
     const namesEntry = catalog.lookupMaybe(PDFName.of('Names'), PDFDict);
     if (namesEntry) {
-      if (namesEntry.has(PDFName.of('EmbeddedFiles'))) {
-        namesEntry.delete(PDFName.of('EmbeddedFiles'));
+      if (removeEntry(pdfDoc.context, namesEntry, 'EmbeddedFiles')) {
         stats.stripped.push('embedded file attachments');
       }
-      if (namesEntry.has(PDFName.of('JavaScript'))) {
-        namesEntry.delete(PDFName.of('JavaScript'));
+      if (removeEntry(pdfDoc.context, namesEntry, 'JavaScript')) {
         stats.stripped.push('JavaScript');
       }
     }
@@ -438,8 +446,8 @@ function stripDeadweight(pdfDoc) {
   for (const page of pdfDoc.getPages()) {
     const node = page.node;
     try {
-      if (node.has(PDFName.of('Thumb')))     { node.delete(PDFName.of('Thumb')); thumbsRemoved++; }
-      if (node.has(PDFName.of('PieceInfo'))) { node.delete(PDFName.of('PieceInfo')); piecesRemoved++; }
+      if (removeEntry(pdfDoc.context, node, 'Thumb'))     thumbsRemoved++;
+      if (removeEntry(pdfDoc.context, node, 'PieceInfo')) piecesRemoved++;
       if (node.has(PDFName.of('AA')))        { node.delete(PDFName.of('AA')); pageAAsRemoved++; }
     } catch {
       // skip this page, keep going

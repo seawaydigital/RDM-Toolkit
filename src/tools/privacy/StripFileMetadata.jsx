@@ -9,6 +9,7 @@ import { X } from 'lucide-react';
 import { formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { stripImageMetadata } from '../../utils/imageUtils';
+import { findPdfIdentityCarriers, stripPdfIdentityMetadata } from '../../utils/pdfMetadata';
 
 const ACCEPTED_MIMES = [
   'application/pdf',
@@ -41,7 +42,11 @@ function isImage(file) {
 
 async function readPDFMetadata(bytes) {
   try {
-    const pdfDoc = await PDFDocument.load(bytes, { ignoreEncryption: true });
+    // updateMetadata: false — by default pdf-lib stamps its own Producer and a
+    // fresh ModificationDate into the Info dictionary on load, which would make
+    // the "After" table show values that are not actually in the file.
+    const pdfDoc = await PDFDocument.load(bytes, { ignoreEncryption: true, updateMetadata: false });
+    const carriers = findPdfIdentityCarriers(pdfDoc);
     return {
       title: pdfDoc.getTitle() || '',
       author: pdfDoc.getAuthor() || '',
@@ -51,6 +56,7 @@ async function readPDFMetadata(bytes) {
       keywords: pdfDoc.getKeywords() || '',
       creationDate: pdfDoc.getCreationDate()?.toISOString() || '',
       modificationDate: pdfDoc.getModificationDate()?.toISOString() || '',
+      'hidden carriers': carriers.length ? carriers.join(', ') : '',
     };
   } catch {
     return null;
@@ -59,14 +65,7 @@ async function readPDFMetadata(bytes) {
 
 async function stripPDFMetadata(bytes) {
   const pdfDoc = await PDFDocument.load(bytes);
-  pdfDoc.setTitle('');
-  pdfDoc.setAuthor('');
-  pdfDoc.setSubject('');
-  pdfDoc.setCreator('');
-  pdfDoc.setProducer('');
-  pdfDoc.setKeywords([]);
-  pdfDoc.setCreationDate(new Date(0));
-  pdfDoc.setModificationDate(new Date(0));
+  stripPdfIdentityMetadata(pdfDoc);
   return await pdfDoc.save();
 }
 
@@ -207,7 +206,7 @@ export default function StripFileMetadata({ tool, navigateTo }) {
           )}
           {!beforeMetadata?.note && (
             <div className="metadata-stripped-status">
-              <span className="metadata-stripped-badge metadata-stripped-badge--success">PDF metadata cleared</span>
+              <span className="metadata-stripped-badge metadata-stripped-badge--success">Info dictionary and XMP cleared</span>
             </div>
           )}
         </div>
