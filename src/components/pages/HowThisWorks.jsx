@@ -232,8 +232,8 @@ export default function HowThisWorks() {
               <p className="htw-timeline-body">
                 A new standard called WebAssembly lets desktop-grade code run
                 inside a browser tab at near-native speed. That's why the PDF
-                tools on this site can open, edit, split, merge, and rebuild
-                files the way Acrobat Pro does — without ever touching a server.
+                tools on this site can open, split, merge, redact, and rebuild
+                files much as Acrobat Pro does — without ever touching a server.
               </p>
               <span className="htw-timeline-tech">WebAssembly</span>
             </div>
