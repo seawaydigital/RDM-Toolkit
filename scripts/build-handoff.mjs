@@ -17,6 +17,7 @@
 //      index.html would be rewritten too. Keep such references out of the
 //      HTML entry (they belong in a component) or teach this script to skip
 //      them.
+//   4. does the same for robots.txt and sitemap.xml.
 //
 // Usage: node scripts/build-handoff.mjs --domain rdmtoolkit.lakeheadu.ca
 
@@ -107,6 +108,16 @@ rewriteInPlace(
   (text) => text.replace(/https:\/\/rdmtoolkit\.ca/g, origin),
   'rewrote absolute meta URLs in index.html',
 );
+
+// 4. Repoint robots.txt's Sitemap: line and the sitemap's <loc>. Left alone,
+//    the new host would tell crawlers its sitemap lives on rdmtoolkit.ca.
+for (const name of ['robots.txt', 'sitemap.xml']) {
+  rewriteInPlace(
+    resolve(distDir, name),
+    (text) => text.replace(/https:\/\/rdmtoolkit\.ca/g, origin),
+    `rewrote ${name}`,
+  );
+}
 
 if (changes.length === 0) {
   console.log(`No changes needed for ${domain}.`);

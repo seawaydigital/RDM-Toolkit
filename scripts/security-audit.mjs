@@ -59,7 +59,7 @@ const allowedDependencies = new Map([
   ['@fontsource/ibm-plex-mono', '5.2.7'],
   ['@fontsource/ibm-plex-sans', '5.2.8'],
   ['@pdf-lib/fontkit', '1.1.1'],
-  ['dompurify', '3.4.14'],
+  ['dompurify', '3.4.16'],
   ['exifr', '7.1.3'],
   ['jszip', '3.10.1'],
   ['lucide-react', '0.577.0'],
@@ -284,6 +284,8 @@ if (!fs.existsSync(headersPath)) {
     'referrer-policy',
     'permissions-policy',
     'x-frame-options',
+    'cross-origin-opener-policy',
+    'cross-origin-resource-policy',
   ]) {
     if (!headers.includes(required)) fail(`public/_headers is missing ${required}`);
   }
@@ -292,6 +294,32 @@ if (!fs.existsSync(headersPath)) {
   }
   if (!headers.includes("object-src 'none'")) {
     fail("public/_headers CSP must include object-src 'none'");
+  }
+
+  // The server configs handed to hosting teams (docs/hosting/) and the
+  // `vite preview` headers must carry exactly the values in public/_headers.
+  // Each header value from _headers has to appear verbatim in every one of
+  // them, so a CSP change cannot land in one place and silently not the others.
+  const headerValues = readText(headersPath)
+    .split(/\r?\n/)
+    .map((line) => line.match(/^\s+([A-Za-z-]+):\s*(.+?)\s*$/))
+    .filter(Boolean)
+    .map(([, name, value]) => ({ name, value }));
+  for (const target of [
+    'docs/hosting/apache.conf',
+    'docs/hosting/nginx.conf',
+    'docs/hosting/web.config',
+    'vite.config.js',
+  ]) {
+    const targetPath = fromRoot(target);
+    if (!fs.existsSync(targetPath)) {
+      fail(`${target} is missing`);
+      continue;
+    }
+    const text = readText(targetPath);
+    for (const { name, value } of headerValues) {
+      if (!text.includes(value)) fail(`${target} does not set ${name} to the value in public/_headers`);
+    }
   }
 }
 

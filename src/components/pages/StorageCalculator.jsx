@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { HardDrive, ChevronDown, ChevronUp, Search, Copy, Check, Printer, Link, RotateCcw, AlertTriangle, Shield, Info, Play } from 'lucide-react';
+import { decodeStorageConfig } from '../../utils/storageConfig';
 
 /* ============================================================
    CONSTANTS — FILE CATEGORIES
@@ -672,12 +673,18 @@ export default function StorageCalculator() {
       const params = new URLSearchParams(window.location.search);
       const config = params.get('config');
       if (config) {
-        const decoded = JSON.parse(atob(config));
+        // Shared links are untrusted input — see utils/storageConfig.js.
+        const decoded = decodeStorageConfig(config, findFileById);
         if (decoded.inputs) setInputs(decoded.inputs);
         if (decoded.fileSizes) setFileSizes(decoded.fileSizes);
         if (decoded.formatSelections) setFormatSelections(decoded.formatSelections);
         if (decoded.durations) setDurations(decoded.durations);
-        if (decoded.multiplier !== undefined) setMultiplier(decoded.multiplier);
+        if (decoded.multiplier !== undefined) {
+          setMultiplier(decoded.multiplier);
+          const strategy = BACKUP_STRATEGIES.find(b => b.multiplier === decoded.multiplier);
+          setSelectedBackup(strategy ? strategy.id : 'custom');
+          if (!strategy) setCustomMultiplier(decoded.multiplier);
+        }
         if (decoded.activeDuration !== undefined) setActiveDuration(decoded.activeDuration);
         if (decoded.archivalDuration !== undefined) setArchivalDuration(decoded.archivalDuration);
         if (decoded.indigenousData !== undefined) setIndigenousData(decoded.indigenousData);
@@ -1012,7 +1019,7 @@ export default function StorageCalculator() {
       customSize,
     };
     const encoded = btoa(JSON.stringify(config));
-    const url = `${window.location.origin}${window.location.pathname}?config=${encoded}`;
+    const url = `${window.location.origin}${window.location.pathname}?config=${encoded}#storage-calculator`;
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);

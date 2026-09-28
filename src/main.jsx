@@ -58,7 +58,7 @@ if (isFramed()) {
   root.render(
     <p className="framed-notice">
       RDM Toolkit cannot be displayed inside another website. Open{' '}
-      <a href={window.location.href} target="_top">rdmtoolkit.ca</a> directly.
+      <a href={window.location.href} target="_top">{window.location.host}</a> directly.
     </p>,
   );
 } else {
