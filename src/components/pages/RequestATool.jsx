@@ -12,7 +12,7 @@ const CONSIDERED_TOOLS = [
     name: 'OCR (Scanned PDF to Searchable PDF)',
     icon: Cpu,
     reason: 'Optical character recognition requires large machine learning models and significant processing power. The accuracy is not yet reliable enough for research documents where precision matters.',
-    workaround: 'Adobe Acrobat Pro (available through most university site licences) can perform OCR via Tools \u2192 Scan & OCR \u2192 Recognize Text. Free alternatives include NAPS2 (Windows) or the built-in Preview OCR on macOS Ventura and later.',
+    workaround: 'NAPS2 (free, open source, Windows/Mac/Linux) runs OCR offline and saves a searchable PDF; OCRmyPDF does the same for batches from the command line. If you already have an Acrobat Pro licence, use Scan & OCR \u2192 Recognize Text. On macOS, Live Text lets you select and copy text from a scanned page in Preview, but it does not make the PDF searchable.',
   },
   {
     name: 'Audio & Video Conversion',
@@ -24,7 +24,7 @@ const CONSIDERED_TOOLS = [
     name: 'Excel to PDF / PDF to Excel',
     icon: FileText,
     reason: 'Spreadsheet rendering with accurate cell widths, merged cells, charts, and conditional formatting requires a full spreadsheet engine that cannot run in a browser.',
-    workaround: 'In Microsoft Excel, go to File \u2192 Save As and select PDF. For PDF to Excel, Adobe Acrobat Pro can export PDFs as spreadsheets via File \u2192 Export To \u2192 Spreadsheet. Google Sheets can also export to PDF via File \u2192 Download \u2192 PDF Document.',
+    workaround: 'In Microsoft Excel, go to File \u2192 Save As and select PDF. For PDF to Excel, Microsoft 365 Excel on Windows can pull tables straight from a PDF via Data \u2192 Get Data \u2192 From File \u2192 From PDF; Adobe Acrobat Pro (paid) can also export PDFs as spreadsheets. Google Sheets can also export to PDF via File \u2192 Download \u2192 PDF Document.',
   },
   {
     name: 'PowerPoint to PDF',

@@ -12540,9 +12540,9 @@ input:focus, textarea:focus, select:focus {
 }
 
 .aa-cost-paid {
-  color: var(--accent-red);
+  color: #F87171; /* lighter than --accent-red: AA contrast on the tinted badge */
   text-decoration: line-through;
-  text-decoration-color: rgba(239, 68, 68, 0.5);
+  text-decoration-color: rgba(248, 113, 113, 0.5);
   font-size: 1rem;
 }
 
@@ -12848,8 +12848,20 @@ input:focus, textarea:focus, select:focus {
   gap: var(--space-md);
 }
 
+/* RDM Toolkit leads the stack: full width, covers split into two columns */
+.aa-stack-card--wide {
+  grid-column: 1 / -1;
+}
+
+.aa-stack-card--wide .aa-stack-card-covers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--space-lg);
+}
+
 @media (max-width: 640px) {
-  .aa-stack-grid {
+  .aa-stack-grid,
+  .aa-stack-card--wide .aa-stack-card-covers {
     grid-template-columns: 1fr;
   }
 }
@@ -12937,6 +12949,21 @@ input:focus, textarea:focus, select:focus {
 
 /* ── Task Coverage Table ──────────────────────────────────────────────────── */
 
+.aa-table-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs) var(--space-lg);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin: calc(-1 * var(--space-sm)) 0 var(--space-md);
+}
+
+.aa-table-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .aa-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--border);
@@ -13018,7 +13045,6 @@ input:focus, textarea:focus, select:focus {
 
 .aa-table-coverage {
   padding: 9px var(--space-md);
-  white-space: nowrap;
 }
 
 .aa-badge {
@@ -13061,7 +13087,18 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: var(--space-sm);
 }
 
+.aa-honest-rule {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  border-left: 2px solid rgba(245, 158, 11, 0.4);
+  padding-left: var(--space-md);
+  margin-top: calc(-1 * var(--space-sm));
+}
+
 .aa-honest-cards {
+  list-style: none;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
@@ -13093,16 +13130,68 @@ input:focus, textarea:focus, select:focus {
 }
 
 .aa-honest-card-title {
+  font-family: var(--font-sans);
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--text-primary);
+  margin: 0 0 var(--space-sm);
+}
+
+.aa-honest-free-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent-green);
   margin-bottom: var(--space-xs);
 }
 
-.aa-honest-card-desc {
+.aa-honest-free {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.aa-honest-free li {
   font-size: 0.875rem;
   color: var(--text-secondary);
   line-height: 1.6;
+}
+
+.aa-honest-free a {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(255, 255, 255, 0.35);
+}
+
+.aa-honest-free a:hover {
+  color: var(--accent-primary);
+  text-decoration-color: currentColor;
+}
+
+.aa-honest-free strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.aa-honest-prowins {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.aa-honest-prowins strong {
+  color: var(--accent-amber);
+  font-weight: 600;
 }
 
 /* ── Beyond Acrobat callout ───────────────────────────────────────────────── */
