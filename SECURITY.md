@@ -45,9 +45,11 @@ Out of scope:
 
 ## Supported versions
 
-The site deploys continuously from `master`; only the currently deployed
-version at <https://rdmtoolkit.ca> is supported. There are no versioned
-releases to backport to.
+The site deploys continuously from `master`; the currently deployed version at
+<https://rdmtoolkit.ca>, and copies Lakehead University builds from current
+`master` for its own subdomain, are supported. There are no versioned releases
+to backport to. Hosting teams: see `docs/DEPLOYMENT.md` and
+`docs/security/LAKEHEAD-IT-ASSESSMENT.md`.
 
 ## Security model
 

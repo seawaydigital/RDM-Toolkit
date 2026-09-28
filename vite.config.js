@@ -13,6 +13,8 @@ const SECURITY_HEADERS = {
   'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=()',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Resource-Policy': 'same-origin',
 };
 
 const previewSecurityHeaders = () => ({
@@ -106,6 +108,34 @@ const distSubresourceIntegrity = () => ({
   },
 });
 
+// A service worker takes its CSP from the response that served sw.js. Hosts
+// that send public/_headers (or the docs/hosting/ configs) therefore enforce
+// require-trusted-types-for 'script' inside the worker too, and Workbox's
+// importScripts() calls — its runtime and public/sw-reload.js — are string
+// script-URL sinks. Without a policy they throw: the worker registers but
+// never caches or controls a page, so offline support silently disappears.
+// This prepends a `default` policy to the generated sw.js that vouches for
+// same-origin URLs only (script-src 'self' already limits imports to those).
+// Runs after vite-plugin-pwa writes sw.js; fails the build if it cannot.
+const SW_TRUSTED_TYPES_POLICY =
+  "if(self.trustedTypes&&self.trustedTypes.createPolicy){self.trustedTypes.createPolicy('default',{createScriptURL(u){if(new URL(u,self.location.href).origin===self.location.origin)return u;throw new TypeError('Blocked cross-origin script URL: '+u)}})}\n";
+
+const serviceWorkerTrustedTypes = () => ({
+  name: 'sw-trusted-types',
+  apply: 'build',
+  enforce: 'post',
+  closeBundle: {
+    sequential: true,
+    order: 'post',
+    handler() {
+      const swPath = resolve(distDir, 'sw.js');
+      const sw = readFileSync(swPath, 'utf8');
+      if (sw.startsWith(SW_TRUSTED_TYPES_POLICY)) return;
+      writeFileSync(swPath, SW_TRUSTED_TYPES_POLICY + sw);
+    },
+  },
+});
+
 export default defineConfig({
   base: '/',
   plugins: [
@@ -153,6 +183,7 @@ export default defineConfig({
         ],
       },
     }),
+    serviceWorkerTrustedTypes(),
     distSubresourceIntegrity(),
   ],
   optimizeDeps: {

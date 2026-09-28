@@ -10,6 +10,36 @@ A single-page app that does all its work in the visitor's browser. No file a
 researcher opens is ever transmitted anywhere; that guarantee is the product,
 and the CSP in step 4 is part of how it is enforced.
 
+A security assessment written for this handoff is in
+[`docs/security/LAKEHEAD-IT-ASSESSMENT.md`](security/LAKEHEAD-IT-ASSESSMENT.md).
+
+## 0. Hostname — a dedicated subdomain, served from its root
+
+Serve the site from the root of its own hostname, for example
+`https://rdmtoolkit.lakeheadu.ca/`. Do not put it in a sub-path of a host that
+serves anything else (such as `https://www.lakeheadu.ca/rdm/`):
+
+- **The build assumes `/`.** Asset URLs, the service-worker scope and the PWA
+  manifest are all rooted at `/` (`base: '/'` in `vite.config.js`). Under a
+  sub-path the site will not load.
+- **The privacy guarantee is scoped to the origin.** The CSP's
+  `connect-src 'self'` stops any code on the page from contacting another
+  origin. On a shared origin, "self" would include every other application on
+  that host, and those applications would share this site's `localStorage`
+  and service-worker scope.
+- **Parent-domain cookies.** Browsers send cookies set for `.lakeheadu.ca` to
+  every subdomain, including this one. The app never reads cookies (CI rejects
+  any use of `document.cookie`), and the CSP plus Trusted Types leave no script
+  injection path to steal them. Session cookies elsewhere in Lakehead should
+  still be `HttpOnly`, as they should be for any subdomain.
+
+**Do not inject anything into the pages.** Analytics tags, university banners,
+chat widgets, accessibility overlays, bot-challenge or "optimisation" scripts
+that a proxy, CDN or WAF adds to HTML responses are blocked by the CSP and
+will log errors. Worse, loosening the CSP to allow them would break the
+promise that research data never leaves the browser. The server's only job is
+to return the files in `dist/` unchanged.
+
 ## 1. Build
 
 Requires **Node 24** (see `.nvmrc`).
@@ -22,7 +52,7 @@ npm run build:handoff
 `--ignore-scripts` is deliberate — `.npmrc` sets `ignore-scripts=true` to block
 install hooks as a supply-chain precaution. Do not remove it.
 
-Output lands in `dist/`. That folder is the entire website (162 precache
+Output lands in `dist/`. That folder is the entire website (163 precache
 entries at last build, ~4.6 MB before gzip — this includes every lazily
 loaded tool chunk, fonts, and icons, all pre-cached by the service worker).
 
@@ -37,7 +67,8 @@ result. That second step:
   `rdmtoolkit.lakeheadu.ca` (RFC 9116 says a security.txt whose `Canonical`
   doesn't match its own URL should not be trusted);
 - rewrites every `https://rdmtoolkit.ca` occurrence in `dist/index.html`
-  (social-meta `og:` tags and the canonical link) to the new origin.
+  (social-meta `og:` tags and the canonical link), `dist/robots.txt` and
+  `dist/sitemap.xml` to the new origin.
 
 It refuses to run if `dist/` is missing, or if `dist/index.html` or
 `dist/.well-known/security.txt` weren't produced by the build — that's a
@@ -86,8 +117,17 @@ cannot deliver everything:
 - **`frame-ancestors 'none'`** is ignored in a `<meta>` tag per the CSP spec.
   Without the header, the site can be framed and is open to clickjacking.
 - **`Strict-Transport-Security`, `X-Content-Type-Options`, `X-Frame-Options`,
-  `Permissions-Policy` and `Referrer-Policy`** are HTTP headers that browsers
-  do not honour from meta tags at all.
+  `Permissions-Policy`, `Cross-Origin-Opener-Policy` and
+  `Cross-Origin-Resource-Policy`** are HTTP headers that browsers do not
+  honour from meta tags at all. The last two stop other sites keeping a handle
+  on this site's window or embedding its files.
+- **Workers.** The PDF worker and the service worker take their CSP from their
+  own responses, not from the page. Without the header they run with no CSP at
+  all, including no `connect-src` restriction.
+
+`Strict-Transport-Security` is sent without `includeSubDomains` or `preload`.
+That is deliberate for a subdomain: it covers this hostname only. Leave it that
+way unless Lakehead sets HSTS for the whole domain on purpose.
 
 So the meta CSP is a genuine fallback, not a substitute. Serve these headers
 and the site keeps the security posture it was built with.
@@ -98,10 +138,17 @@ sets its own `add_header` (e.g. the `/sw.js` and `/assets/` cache-control
 blocks), so each of those blocks repeats the full six-header set rather than
 relying on inheritance. Follow the same pattern for any new block you add.
 
+Do not remove the two Trusted Types directives (`trusted-types`,
+`require-trusted-types-for`) from the CSP to make something work. They also
+apply inside the service worker, and the build already handles that (it adds a
+same-origin-only Trusted Types policy to `sw.js`). If offline mode is not
+working, see the check in step 7.
+
 `public/_headers` in the repo is Cloudflare/Netlify syntax and is ignored by
 Apache, nginx, and IIS. It is the source of truth for the header *values*
 (all three `docs/hosting/` configs were generated from it), not a config file
-you can drop in directly on those servers.
+you can drop in directly on those servers. `npm run security:audit` fails if
+any header value in the three configs differs from `public/_headers`.
 
 ### MIME types
 
@@ -146,10 +193,17 @@ load, no manual cache-busting needed.
 ## 7. Verifying the deploy
 
 ```bash
-curl -sI https://rdmtoolkit.lakeheadu.ca/ | grep -i -E 'content-security-policy|strict-transport|x-frame-options|x-content-type|referrer-policy|permissions-policy'
+curl -sI https://rdmtoolkit.lakeheadu.ca/ | grep -i -E 'content-security-policy|strict-transport|x-frame-options|x-content-type|referrer-policy|permissions-policy|cross-origin'
 ```
 
-Expected: all six headers present.
+Expected: all eight headers present. Check an asset too, since some servers
+apply headers to HTML only:
+
+```bash
+curl -sI https://rdmtoolkit.lakeheadu.ca/sw.js | grep -i -c -E 'content-security-policy|cross-origin-resource-policy'
+```
+
+Expected: `2`.
 
 Then in a browser:
 
@@ -157,7 +211,12 @@ Then in a browser:
 2. DevTools → Network, then use any tool with a file. The request list must
    show **no outbound request carrying file data**. This is the core privacy
    claim and it is worth confirming yourself.
-3. Turn off Wi-Fi, reload, and confirm the site still loads and tools work.
+3. DevTools → Application → Service workers must show `sw.js` as
+   *activated and is running*, and Cache storage must hold about 160 entries.
+   Then turn off Wi-Fi, reload, open a tool (PDF Redaction, say) and confirm it
+   loads. If the worker is registered but the cache is empty, the CSP on
+   `/sw.js` is blocking its imports: check that the published `sw.js` begins
+   with `if(self.trustedTypes`.
 4. `https://rdmtoolkit.lakeheadu.ca/.well-known/security.txt` resolves and
    its `Canonical:` line reads `https://rdmtoolkit.lakeheadu.ca/.well-known/security.txt`
    (this is what `build:handoff` rewrote — if it still says
