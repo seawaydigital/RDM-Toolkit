@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import { sanitizeStorageConfig, decodeStorageConfig } from '../src/utils/storageConfig.js';
 
 const FILES = {
-  'audio-recordings': { formats: [{ label: 'WAV 16-bit' }, { label: 'FLAC' }] },
-  'spreadsheets': {},
+  'audio-recordings': { id: 'audio-recordings', formats: [{ label: 'WAV 16-bit' }, { label: 'FLAC' }] },
+  'spreadsheets': { id: 'spreadsheets' },
 };
 const findFileById = (id) => (Object.hasOwn(FILES, id) ? { file: FILES[id] } : null);
 const encode = (value) => btoa(JSON.stringify(value));

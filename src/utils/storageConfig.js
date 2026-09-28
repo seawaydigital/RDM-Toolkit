@@ -29,7 +29,7 @@ function isPlainObject(value) {
 
 /**
  * @param {unknown} raw  Parsed JSON from the ?config= parameter.
- * @param {(id: string) => ({ file: { formats?: { label: string }[] } } | null)} findFileById
+ * @param {(id: string) => ({ file: { id: string, formats?: { label: string }[] } } | null)} findFileById
  * @returns {object} Only the fields that passed validation.
  */
 export function sanitizeStorageConfig(raw, findFileById) {
@@ -42,7 +42,9 @@ export function sanitizeStorageConfig(raw, findFileById) {
       const found = findFileById(id);
       if (!found) continue;
       const clean = check(entry, found.file);
-      if (clean !== undefined) result[id] = clean;
+      // Key by the registry's own id, never the link's string, so no property
+      // name written here can come from the link.
+      if (clean !== undefined) result[found.file.id] = clean;
     }
     return result;
   };
