@@ -579,7 +579,8 @@ export default function HowThisWorks() {
             <summary>Who built this?</summary>
             <p>
               RDM Toolkit was developed as a Research Data Management resource by the
-              Office of Research Services at Lakehead University.
+              Research Security and Data Management Specialist in the Office of
+              Research Services at Lakehead University.
             </p>
           </details>
         </div>
