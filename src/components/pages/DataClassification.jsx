@@ -734,7 +734,7 @@ export default function DataClassification() {
       <div className="dc-card" key={currentIndex}>
         <div className="dc-card-header">
           <span className="dc-step-badge">{question.stepLabel}</span>
-          <h2 className="dc-question-title" ref={titleRef} tabIndex={-1}>
+          <h2 className="dc-question-title" id="dc-question-title" ref={titleRef} tabIndex={-1}>
             {question.title}
           </h2>
           <p className="dc-question-desc">{question.description}</p>

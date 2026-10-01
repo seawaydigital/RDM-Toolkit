@@ -9,7 +9,7 @@ const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(na
 
 // Bento tool tiles — hand-written homepage copy, not registry descriptions
 const BENTO_TOOLS = [
-  { id: 'merge-pdfs', emoji: '📑', blurb: 'Combine documents in seconds — the most-used tool here.' },
+  { id: 'merge-pdfs', emoji: '📑', blurb: 'Combine documents in seconds — pick pages and fix rotation as you go.' },
   { id: 'compress-pdf', emoji: '🗜️', blurb: 'Smart presets sized for email.' },
   { id: 'data-anonymizer', emoji: '🕵️', blurb: 'TCPS 2-aligned coding, pseudonyms & key files.' },
   { id: 'strip-image-metadata', emoji: '🖼️', blurb: 'Remove GPS & EXIF before sharing.' },
@@ -22,7 +22,7 @@ const RESEARCH_PAGES = [
     hash: 'data-classification',
     title: 'Classify Your Data',
     icon: Shield,
-    description: 'Identify your data classification level (Public → Highly Confidential) and understand what security controls apply.',
+    description: 'Find your data’s classification under Lakehead’s standard (Public, Internal or Confidential) and the security controls that apply.',
   },
   {
     hash: 'storage-calculator',
@@ -194,7 +194,7 @@ export default function HomePage({ onNavigate }) {
             <ol className="homepage-proof-rows">
               <li className="homepage-proof-row">
                 <span className="homepage-proof-no" aria-hidden="true">№01</span>
-                Open DevTools → Network. Process a file. Zero requests.
+                Open DevTools → Network. Process a file. Your file is never sent.
               </li>
               <li className="homepage-proof-row">
                 <span className="homepage-proof-no" aria-hidden="true">№02</span>
@@ -203,11 +203,10 @@ export default function HomePage({ onNavigate }) {
               </li>
               <li className="homepage-proof-row">
                 <span className="homepage-proof-no" aria-hidden="true">№03</span>
-                Meets{' '}
-                <a href="https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/" target="_blank" rel="noopener noreferrer">PIPEDA</a>,{' '}
-                <a href="https://www.ontario.ca/laws/statute/04p03" target="_blank" rel="noopener noreferrer">PHIPA</a> &amp;{' '}
-                <a href="https://gdpr.eu" target="_blank" rel="noopener noreferrer">GDPR</a>{' '}
-                data-handling rules.
+                No upload means no third-party disclosure to justify under{' '}
+                <a href="https://www.ontario.ca/laws/statute/04p03" target="_blank" rel="noopener noreferrer">PHIPA</a>,{' '}
+                <a href="https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/" target="_blank" rel="noopener noreferrer">PIPEDA</a> or{' '}
+                <a href="https://gdpr.eu" target="_blank" rel="noopener noreferrer">GDPR</a>.
               </li>
             </ol>
           </div>
@@ -216,8 +215,9 @@ export default function HomePage({ onNavigate }) {
             <span className="homepage-tile-emoji" aria-hidden="true">⚖️</span>
             <h3 className="homepage-tile-name">Built for research compliance</h3>
             <p className="homepage-tile-blurb">
-              Because files never leave your device, OCAP®, PHIPA and REB constraints that
-              forbid cloud uploads don't apply here.{' '}
+              Files never leave your device, so using these tools doesn't put data on
+              someone else's server — the step OCAP® agreements, PHIPA and many REB
+              protocols restrict.{' '}
               <a href="#data-classification">Classify your data</a> → pick the right tool.
             </p>
           </div>
@@ -239,7 +239,7 @@ export default function HomePage({ onNavigate }) {
           <div className="homepage-step">
             <span className="homepage-step-n" aria-hidden="true">2</span>
             <h3>Your browser does the work</h3>
-            <p>Modern browsers ship the same engines desktop apps use — PDF engines, AES-256 encryption, image processing.</p>
+            <p>The tool's code runs on your own computer — open-source PDF libraries, the browser's built-in AES-256 encryption, image processing.</p>
           </div>
           <div className="homepage-step">
             <span className="homepage-step-n" aria-hidden="true">3</span>

@@ -56,7 +56,7 @@ const ROLES = [
     obligations: [
       { required: true,  text: 'Include RDM best practices in all grant proposals' },
       { required: true,  text: 'Submit a Data Management Plan (DMP) when required by the funding call' },
-      { required: true,  text: 'Deposit data, metadata, and code supporting journal publications into a repository by time of publication' },
+      { required: true,  text: 'Deposit data, metadata, and code supporting journal publications into a repository by time of publication (this requirement is still being phased in — check your award terms)' },
       { required: false, text: 'Share data where ethical, legal and commercial constraints allow (sharing is encouraged, not mandatory)' },
       { required: false, text: 'Link deposited data to publications using a persistent identifier (e.g., DOI)' },
     ],
@@ -66,9 +66,9 @@ const ROLES = [
     label: 'Graduate Student / Postdoc',
     icon: BookOpen,
     obligations: [
-      { required: true,  text: 'Follow your supervisor\'s DMP — your data is covered by it' },
-      { required: true,  text: 'Document your data collection, formats, and processing steps clearly' },
-      { required: true,  text: 'Hand over data and documentation if you leave the research team (succession planning)' },
+      { required: false, text: 'Follow your supervisor\'s DMP — your data is covered by it' },
+      { required: false, text: 'Document your data collection, formats, and processing steps clearly' },
+      { required: false, text: 'Hand over data and documentation if you leave the research team (succession planning)' },
       { required: false, text: 'Ask your supervisor or the RDM office about repository options before graduating' },
       { required: false, text: 'Store working copies in a backed-up, secure location (not just your laptop)' },
     ],
@@ -107,7 +107,7 @@ const DMP_ITEMS = [
     'Is encryption required? (Yes for identifiable or confidential data)',
   ]},
   { section: 'Ethics & Legal', items: [
-    'Does the data contain personal or health information (PHIPA/PIPEDA applies)?',
+    'Does the data contain personal or health information (FIPPA, PHIPA or PIPEDA may apply)?',
     'Is there an ethics protocol number (REB approval)?',
     'Are there commercial confidentiality or NDA constraints?',
     'Is any data subject to Indigenous data sovereignty (OCAP®/FNIGC principles)?',
@@ -116,7 +116,7 @@ const DMP_ITEMS = [
   { section: 'Sharing & Deposit', items: [
     'Will data be shared? If not, explain the constraint',
     'Which repository will be used for deposit (institutional, disciplinary, or general)?',
-    'When will data be deposited (by time of publication is required)?',
+    'When will data be deposited (the policy expects deposit by time of publication)?',
     'What licence will govern reuse (Creative Commons, Open Government, etc.)?',
   ]},
   { section: 'Roles & Succession', items: [
@@ -138,13 +138,13 @@ const TIMELINE = [
     date: 'Spring 2022 → ongoing',
     status: 'active',
     title: 'Data Management Plans',
-    body: 'DMPs required for an initial set of funding opportunities identified in 2022, with the requirement steadily expanding through 2024–2025 across Alliance, Insight, Discovery, and CIHR calls. Check the specific funding opportunity for whether a DMP is required.',
+    body: 'DMPs are required for a growing list of specific funding opportunities, starting with CIHR in 2022. By 2025 the list included NSERC Subatomic Physics Discovery Grants and Alliance Society, SSHRC Partnership Grants (Stage 2) and Policy Innovation Partnership Grants, and many CIHR team and operating grants. Check the specific funding opportunity for whether a DMP is required.',
   },
   {
     date: 'Phasing in',
     status: 'pending',
     title: 'Data Deposit (general)',
-    body: 'Agencies will phase in the full data deposit requirement after reviewing institutional strategies and assessing readiness of the Canadian research community.',
+    body: 'No compliance date has been set. After community engagement in 2023–2025, the agencies say they expect to finalize and release the implementation approach in late 2026.',
   },
   {
     date: 'Since Jan 1, 2008',
@@ -162,7 +162,7 @@ const FAQS = [
   },
   {
     q: 'What counts as a "repository"?',
-    a: <>Any digital repository that provides safe storage, preservation, and curation. This could be a disciplinary repository (e.g., <a href="https://www.icpsr.umich.edu" target="_blank" rel="noopener noreferrer">ICPSR</a> for social sciences, <a href="https://www.ncbi.nlm.nih.gov/genbank/" target="_blank" rel="noopener noreferrer">GenBank</a> for genomics), an institutional repository, or a general-purpose platform like <a href="https://borealisdata.ca" target="_blank" rel="noopener noreferrer">Borealis</a> (formerly Dataverse Canada) or <a href="https://zenodo.org" target="_blank" rel="noopener noreferrer">Zenodo</a>. The choice should reflect disciplinary norms.</>,
+    a: <>Any digital repository that provides safe storage, preservation, and curation. This could be a disciplinary repository (e.g., <a href="https://www.icpsr.umich.edu" target="_blank" rel="noopener noreferrer">ICPSR</a> for social sciences, <a href="https://www.ncbi.nlm.nih.gov/genbank/" target="_blank" rel="noopener noreferrer">GenBank</a> for genomics), an institutional repository, or a general-purpose platform like <a href="https://borealisdata.ca" target="_blank" rel="noopener noreferrer">Borealis</a> (formerly Scholars Portal Dataverse) or <a href="https://zenodo.org" target="_blank" rel="noopener noreferrer">Zenodo</a>. The choice should reflect disciplinary norms.</>,
   },
   {
     q: 'When does the DMP have to be submitted?',
@@ -170,7 +170,7 @@ const FAQS = [
   },
   {
     q: 'Do DMPs have to follow a specific template?',
-    a: <>No fixed format is mandated, but agencies recommend using the <a href="https://dmp-pgd.ca/" target="_blank" rel="noopener noreferrer">DMP Assistant tool (dmp-pgd.ca)</a> which offers Canadian and agency-specific templates. The key is that your DMP addresses the required elements outlined in section 3.2.</>,
+    a: <>No fixed format is mandated. Most Canadian researchers use the <a href="https://dmp-pgd.ca/" target="_blank" rel="noopener noreferrer">DMP Assistant tool (dmp-pgd.ca)</a>, which offers Canadian and agency-specific templates. The key is that your DMP addresses the required elements outlined in section 3.2.</>,
   },
   {
     q: 'What if my research involves First Nations, Métis, or Inuit communities?',
@@ -297,14 +297,14 @@ export default function TriAgencyPolicy() {
                 <AlertCircle size={14} className="tap-matrix-icon tap-matrix-icon--active" />
                 <div>
                   <strong>Pillar 2 — DMPs</strong>
-                  <p>Required for a growing set of competitions since 2023. CIHR no longer publishes a consolidated list of DMP-required opportunities — check the specific call on ResearchNet.</p>
+                  <p>Required for a growing set of competitions since 2022. CIHR no longer publishes a consolidated list of DMP-required opportunities — check the specific call on ResearchNet.</p>
                 </div>
               </li>
               <li>
                 <CheckCircle size={14} className="tap-matrix-icon tap-matrix-icon--done" />
                 <div>
                   <strong>Pillar 3 — Deposit</strong>
-                  <p>Bioinformatics, atomic, and molecular coordinate data: required since 2008. General deposit requirement phasing in.</p>
+                  <p>Bioinformatics, atomic, and molecular coordinate data: required since 2008. The general deposit requirement is not yet in force.</p>
                 </div>
               </li>
             </ul>
@@ -327,14 +327,14 @@ export default function TriAgencyPolicy() {
                 <AlertCircle size={14} className="tap-matrix-icon tap-matrix-icon--active" />
                 <div>
                   <strong>Pillar 2 — DMPs</strong>
-                  <p>Required in select competitions including Alliance and certain Discovery streams. The call for proposals identifies whether a DMP is required.</p>
+                  <p>Required in select competitions, such as Subatomic Physics Discovery Grants and Alliance Society. The call for proposals identifies whether a DMP is required.</p>
                 </div>
               </li>
               <li>
                 <Clock size={14} className="tap-matrix-icon tap-matrix-icon--pending" />
                 <div>
                   <strong>Pillar 3 — Deposit</strong>
-                  <p>Phasing in. The Tri-Agency's 2025 engagement report targeted grants awarded after January 1, 2026 for the full deposit requirement; specific implementation dates are still being confirmed on the authoritative policy page. Data supporting published findings should be deposited wherever disciplinary norms allow.</p>
+                  <p>Not yet in force. The agencies expect to release the implementation approach in late 2026; no compliance date has been set. Depositing data that supports published findings is already good practice wherever disciplinary norms allow.</p>
                 </div>
               </li>
             </ul>
@@ -357,14 +357,14 @@ export default function TriAgencyPolicy() {
                 <AlertCircle size={14} className="tap-matrix-icon tap-matrix-icon--active" />
                 <div>
                   <strong>Pillar 2 — DMPs</strong>
-                  <p>Required in select competitions including Insight and Insight Development. Qualitative data management (e.g., interview confidentiality) should be addressed explicitly.</p>
+                  <p>Required in select competitions, such as Partnership Grants (Stage 2) and Policy Innovation Partnership Grants. Qualitative data management (e.g., interview confidentiality) should be addressed explicitly.</p>
                 </div>
               </li>
               <li>
                 <Clock size={14} className="tap-matrix-icon tap-matrix-icon--pending" />
                 <div>
                   <strong>Pillar 3 — Deposit</strong>
-                  <p>Phasing in. The Tri-Agency's 2025 engagement report targeted grants awarded after January 1, 2026, with specific implementation dates still being confirmed. Subject to disciplinary norms — qualitative data with confidentiality constraints is rarely deposited openly, and restricted deposit is usually appropriate.</p>
+                  <p>Not yet in force. The agencies expect to release the implementation approach in late 2026; no compliance date has been set. Subject to disciplinary norms — qualitative data with confidentiality constraints is rarely deposited openly, and restricted deposit is usually appropriate.</p>
                 </div>
               </li>
             </ul>
@@ -425,7 +425,7 @@ export default function TriAgencyPolicy() {
       {/* Who does this apply to? */}
       <section className="tap-section">
         <h2 className="tap-section-title">What Are My Obligations?</h2>
-        <p className="tap-section-intro">Select your role to see what the policy requires of you.</p>
+        <p className="tap-section-intro">Select your role to see what the policy requires and what good practice looks like.</p>
         <div className="tap-role-tabs">
           {ROLES.map(r => {
             const Icon = r.icon;
@@ -508,7 +508,8 @@ export default function TriAgencyPolicy() {
         <p className="tap-section-intro">
           Follow the arrows from top to bottom. Each diamond is a yes/no question — your path
           ends at a coloured outcome box. "Deposit" means uploading to a repository, not
-          necessarily making data public.
+          necessarily making data public. The general deposit requirement is not yet in
+          force (see the timeline below), so this shows how it is written to apply.
         </p>
 
         {/* SVG flowchart — SVG text/tspan throughout, no foreignObject overflow */}
@@ -604,9 +605,9 @@ export default function TriAgencyPolicy() {
           <rect x="36" y="620" width="208" height="88" rx="8" fill="rgba(168,85,247,0.08)" stroke="rgba(168,85,247,0.4)" strokeWidth="1.5" />
           <text fontFamily="system-ui,sans-serif">
             <tspan x="48" y="641" fill="#F1F5F9" fontSize="12" fontWeight="700">🔒 Restricted deposit</tspan>
-            <tspan x="48" dy="16" fill="#94A3B8" fontSize="10">Choose a repository with</tspan>
-            <tspan x="48" dy="13" fill="#94A3B8" fontSize="10">access controls. You are</tspan>
-            <tspan x="48" dy="13" fill="#94A3B8" fontSize="10">not required to share openly.</tspan>
+            <tspan x="48" dy="16" fill="#94A3B8" fontSize="10">De-identify first, then use</tspan>
+            <tspan x="48" dy="13" fill="#94A3B8" fontSize="10">restricted access or embargo.</tspan>
+            <tspan x="48" dy="13" fill="#94A3B8" fontSize="10">Open sharing is not required.</tspan>
           </text>
 
           {/* Open deposit box — bottom center x=420 */}
@@ -627,8 +628,8 @@ export default function TriAgencyPolicy() {
           <rect x="58" y="778" width="444" height="72" rx="8" fill="rgba(16,185,129,0.08)" stroke="#10B981" strokeWidth="2" />
           <text textAnchor="middle" fontFamily="system-ui,sans-serif">
             <tspan x="280" y="802" fill="#F1F5F9" fontSize="13" fontWeight="700">✅ Deposit your data</tspan>
-            <tspan x="280" dy="18" fill="#94A3B8" fontSize="10.5">Upload to Borealis or FRDR by time of publication.</tspan>
-            <tspan x="280" dy="14" fill="#94A3B8" fontSize="10.5">Link your dataset to the paper with a DOI.</tspan>
+            <tspan x="280" dy="18" fill="#94A3B8" fontSize="10.5">Deposit by time of publication; link it to the paper with a DOI.</tspan>
+            <tspan x="280" dy="14" fill="#94A3B8" fontSize="10.5">Borealis and FRDR only accept de-identified data.</tspan>
           </text>
         </svg>
         </div>
@@ -643,7 +644,7 @@ export default function TriAgencyPolicy() {
                 <span className="tap-repo-type">General / Institutional</span>
                 <span className="tap-repo-badge--featured">Recommended for Lakehead</span>
               </div>
-              <p>Canada's national Dataverse-based repository. Lakehead has its own institutional collection — deposit here for free, get a DOI, and satisfy Tri-Agency requirements. Supports restricted access.</p>
+              <p>Canada's national Dataverse-based repository. Lakehead has its own institutional collection — deposit here for free and get a DOI. Supports restricted access and embargoes, but data must be de-identified first: Borealis does not accept identifiable data, even behind restricted access.</p>
             </div>
             <div className="tap-repo-card">
               <a href="https://www.icpsr.umich.edu" target="_blank" rel="noopener noreferrer"><strong>ICPSR</strong></a>
@@ -658,7 +659,7 @@ export default function TriAgencyPolicy() {
             <div className="tap-repo-card">
               <a href="https://www.frdr-dfdr.ca" target="_blank" rel="noopener noreferrer"><strong>Federated Research Data Repository (FRDR)</strong></a>
               <span className="tap-repo-type">General / Canadian</span>
-              <p>Canadian platform for discovering and sharing research data. Suitable for large datasets.</p>
+              <p>National, staff-curated repository suited to large datasets. Open access only (temporary embargoes allowed), so data must be shareable publicly.</p>
             </div>
           </div>
         </div>
@@ -687,7 +688,7 @@ export default function TriAgencyPolicy() {
               <p>
                 <strong>O</strong>wnership, <strong>C</strong>ontrol, <strong>A</strong>ccess, and <strong>P</strong>ossession.
                 The established standard for data collected from First Nations communities in Canada.
-                OCAP® certification is offered by the{' '}
+                Training in OCAP® is offered by the{' '}
                 <a href="https://fnigc.ca/ocap-training/" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
                   First Nations Information Governance Centre (FNIGC) <ExternalLink size={11} />
                 </a>.
@@ -701,7 +702,7 @@ export default function TriAgencyPolicy() {
                 <a href="https://www.gida-global.org/careprinciples" target="_blank" rel="noopener noreferrer" className="tap-inline-link">
                   Global Indigenous Data Alliance (GIDA) <ExternalLink size={11} />
                 </a>
-                {' '}in 2020. CARE complements the FAIR principles by adding people- and purpose-oriented considerations.
+                {' '}in 2019. CARE complements the FAIR principles by adding people- and purpose-oriented considerations.
               </p>
             </div>
             <div className="tap-indigenous-card">

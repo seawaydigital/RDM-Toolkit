@@ -6,7 +6,7 @@ const CONSIDERED_TOOLS = [
     name: 'DOCX to PDF / PDF to DOCX',
     icon: FileText,
     reason: 'Browser-based DOCX-to-PDF conversion cannot replicate the full rendering engine of Microsoft Word. Fonts, tables, headers, footers, and complex layouts do not convert reliably without a server-side rendering engine.',
-    workaround: 'Open your file in Microsoft Word, then go to File \u2192 Save As (or Export) and select PDF as the format. On Mac, you can also use File \u2192 Print \u2192 Save as PDF. Google Docs can also export to PDF via File \u2192 Download \u2192 PDF Document.',
+    workaround: 'Open your file in Microsoft Word, then go to File \u2192 Save As (or Export) and select PDF as the format. On Mac, you can also use File \u2192 Print \u2192 Save as PDF. Google Docs can also export to PDF via File \u2192 Download \u2192 PDF Document. For PDF to DOCX, open the PDF in Microsoft Word (File \u2192 Open), which converts it to an editable document; complex layouts may need tidying.',
   },
   {
     name: 'OCR (Scanned PDF to Searchable PDF)',
@@ -48,7 +48,7 @@ const CONSIDERED_TOOLS = [
     name: 'Remove Background',
     icon: Image,
     reason: 'Background removal is not relevant to research data management workflows. While technically feasible in-browser using neural network models, it is an image editing feature rather than a research data tool, and including it would broaden the scope of RDM Toolkit beyond its intended purpose.',
-    workaround: 'Free online tools such as remove.bg or Canva can remove image backgrounds. Both GIMP (free, desktop) and Adobe Photoshop offer background removal using selection or AI tools.',
+    workaround: 'GIMP (free, desktop) and Adobe Photoshop remove backgrounds on your own computer. Online services such as remove.bg and Canva also do it, but they upload your image, so don’t use them for research photos of people or anything confidential.',
   },
   {
     name: 'JWT Decoder',

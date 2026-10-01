@@ -228,14 +228,15 @@ export default function HowThisWorks() {
             </div>
             <div className="htw-timeline-content">
               <span className="htw-timeline-year">~2017</span>
-              <h4 className="htw-timeline-title">Real PDF editing inside the browser</h4>
+              <h4 className="htw-timeline-title">Desktop-grade code inside the browser</h4>
               <p className="htw-timeline-body">
-                A new standard called WebAssembly lets desktop-grade code run
-                inside a browser tab at near-native speed. That's why the PDF
-                tools on this site can open, split, merge, redact, and rebuild
-                files much as Acrobat Pro does — without ever touching a server.
+                JavaScript engines had become fast enough to parse and rebuild
+                whole documents, and a new standard called WebAssembly let
+                compiled code run inside a tab at near-native speed. That's why
+                the PDF tools on this site can open, split, merge, redact, and
+                compress files without ever touching a server.
               </p>
-              <span className="htw-timeline-tech">WebAssembly</span>
+              <span className="htw-timeline-tech">Fast JavaScript engines · WebAssembly</span>
             </div>
           </li>
           <li className="htw-timeline-item">
@@ -315,8 +316,8 @@ export default function HowThisWorks() {
             </div>
             <h3>Turn Off Your Internet</h3>
             <p>
-              Disconnect from Wi-Fi, then try any tool. It will still work perfectly —
-              because the tool never needed the internet to process your file.
+              Once the page has loaded, disconnect from Wi-Fi and try any tool. It will
+              still work — because the tool never needed the internet to process your file.
             </p>
           </div>
           <div className="htw-verify-card">
@@ -355,11 +356,13 @@ export default function HowThisWorks() {
           <div className="htw-compliance-card">
             <Lock size={20} />
             <div>
-              <h3><a href="https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/" target="_blank" rel="noopener noreferrer">PIPEDA</a> &amp; <a href="https://www.ontario.ca/laws/statute/04p03" target="_blank" rel="noopener noreferrer">PHIPA</a></h3>
+              <h3><a href="https://www.ontario.ca/laws/statute/90f31" target="_blank" rel="noopener noreferrer">FIPPA</a>, <a href="https://www.ontario.ca/laws/statute/04p03" target="_blank" rel="noopener noreferrer">PHIPA</a> &amp; <a href="https://www.priv.gc.ca/en/privacy-topics/privacy-laws-in-canada/the-personal-information-protection-and-electronic-documents-act-pipeda/" target="_blank" rel="noopener noreferrer">PIPEDA</a></h3>
               <p>
-                Canadian privacy legislation requires that personal information be
-                protected from unauthorised access. Uploading files to third-party
-                servers creates a disclosure that may not be authorised.
+                Ontario universities fall under FIPPA, personal health information
+                under PHIPA, and private-sector partners under PIPEDA. All three
+                require personal information to be protected from unauthorised
+                access. Uploading files to a third-party server is a disclosure
+                that may not be authorised.
               </p>
             </div>
           </div>
@@ -369,8 +372,8 @@ export default function HowThisWorks() {
               <h3><a href="https://gdpr.eu" target="_blank" rel="noopener noreferrer">GDPR</a></h3>
               <p>
                 The EU's data protection regulation requires a legal basis for
-                processing personal data. Free conversion sites typically don't
-                meet these requirements.
+                processing personal data, and a contract with any service that
+                processes it for you. Free conversion sites rarely offer one.
               </p>
             </div>
           </div>
@@ -534,17 +537,24 @@ export default function HowThisWorks() {
           <details className="htw-faq-item">
             <summary>Is anything stored after I close the tab?</summary>
             <p>
-              No. RDM Toolkit does not use cookies, local storage, or any form of data
-              persistence. When you close the browser tab, everything you were working
-              on is gone. If you need a file, download it before closing.
+              None of your files or their contents. When you close the browser tab,
+              everything you were working on is gone, so download any result before
+              closing. RDM Toolkit uses no cookies. It does keep a few small settings
+              in this browser's local storage: your recently used tools, whether
+              you've seen the welcome tour, and the usage log if you opted into it.
+              Your browser also caches the site's own code so it works offline. The
+              "Shared computers" card above has a button that wipes the settings.
             </p>
           </details>
           <details className="htw-faq-item">
             <summary>Does RDM Toolkit track what I do?</summary>
             <p>
-              No. There are no analytics, no tracking pixels, no usage monitoring,
-              and no telemetry of any kind. RDM Toolkit does not know who you are,
-              what files you process, or how often you visit.
+              No. There are no analytics, no tracking pixels, and no telemetry of any
+              kind. RDM Toolkit does not know who you are, what files you process, or
+              how often you visit. If you opt into the tester usage log, it records
+              which tools and pages you open and any errors, in this browser only. It never records file names
+              or contents, and nothing is sent unless you attach it to a feedback email
+              yourself.
             </p>
           </details>
           <details className="htw-faq-item">
