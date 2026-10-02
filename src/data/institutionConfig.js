@@ -30,6 +30,14 @@ export const INSTITUTION = {
   // Indigenous Research Support Office — referenced on Tri-Agency Policy page.
   indigenousResearchOffice: "Lakehead's Indigenous Research Support Office",
 
+  // The standard the Data Classification wizard implements. Use this title
+  // verbatim everywhere it is cited — it is the document's own cover title.
+  dataClassificationStandard: {
+    title: 'Research Data Guidelines and Classification Standard',
+    date: 'March 2024',
+    url: 'https://www.lakeheadu.ca/sites/default/files/profile-data/swright/Lakehead%20University%20-%20Research%20Data%20Classification%20Guidelines%20and%20Standard%20-%20Final%20(27.03.2024).pdf',
+  },
+
   // Research Ethics Board — used by Grants & Identifiers page.
   rebContactUrl: 'https://www.lakeheadu.ca/research-and-innovation/ethics/human-subjects',
 };
