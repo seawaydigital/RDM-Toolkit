@@ -153,7 +153,7 @@ const TASK_GROUPS = [
   {
     group: 'Compliance, Redaction & Accessibility',
     tasks: [
-      { task: 'PHIPA/PIPEDA-compliant redaction',      badge: 'rdm', label: 'RDM Toolkit', toolId: 'pdf-redaction' },
+      { task: 'Redact so the hidden text is removed, not just covered', badge: 'rdm', label: 'RDM Toolkit', toolId: 'pdf-redaction' },
       { task: 'Search-and-redact every occurrence of a term', badge: 'gap', label: 'Stirling-PDF Auto Redact (free, open source, offline) — RDM redaction is drawn page by page' },
       { task: 'OCR (make scanned documents searchable)', badge: 'gap', label: 'NAPS2 (free, offline) — or Google Docs for short, non-sensitive scans' },
       { task: 'Accessibility check & tagging (AODA)',  badge: 'gap', label: 'Check: PAC or veraPDF (free). Fix: in the source file, or Acrobat Pro' },
@@ -261,9 +261,8 @@ export default function AcrobatAlternative() {
           Before your next renewal, it's worth taking stock of what you actually use
           Acrobat Pro for. For most research workflows at Lakehead, the features you
           rely on are already available through free tools, most of them provided
-          through Lakehead —
-          a quiet way to reclaim a few hundred dollars a year from a subscription
-          that may be quietly auto-renewing.
+          through Lakehead — a simple way to reclaim a few hundred dollars a year
+          from a subscription that may be quietly auto-renewing.
         </p>
         <div className="aa-cost-badge">
           <span className="aa-cost-free">$0&thinsp;/&thinsp;year</span>
@@ -596,7 +595,8 @@ export default function AcrobatAlternative() {
             <div className="aa-privacy-note-title">A note on sensitive research data</div>
             <p className="aa-privacy-note-body">
               For data governed by <strong>OCAP® principles</strong> or <strong>PHIPA</strong> —
-              where files cannot be uploaded to any cloud service — RDM Toolkit, LibreOffice,
+              where community agreements, REB protocols or privacy rules often bar cloud
+              uploads — RDM Toolkit, LibreOffice,
               NAPS2 (for OCR) and the other offline tools listed above work entirely on your
               device. No file leaves your computer. Google Docs (even via Lakehead's
               institutional tenant) and cloud e-signature services are not appropriate for

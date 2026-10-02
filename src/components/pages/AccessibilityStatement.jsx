@@ -5,7 +5,7 @@ const CONFORMANCE = [
   {
     icon: CheckCircle,
     title: 'Automated testing',
-    body: 'Every release is scanned with axe-core against WCAG 2.0 A, 2.0 AA, 2.1 AA and 2.2 AA rule sets across ten representative routes — the home page, the eight research-resource pages, and a cross-section of tools. The current build reports zero violations.',
+    body: 'The whole site — the home page, every research-resource page and all 46 tools — was scanned with axe-core against the WCAG 2.0 A, 2.0 AA, 2.1 AA and 2.2 AA rule sets in September 2026, with zero violations. Every proposed change is also run through Lighthouse’s automated accessibility audit on four key pages before it can be merged.',
   },
   {
     icon: CheckCircle,
@@ -80,8 +80,9 @@ export default function AccessibilityStatement() {
           >
             Web Content Accessibility Guidelines (WCAG) 2.1
           </a>{' '}
-          at Level AA, the standard referenced by the AODA Information and
-          Communications Standard. We test against WCAG 2.2 AA as well, and
+          at Level AA. That goes beyond the WCAG 2.0 Level AA required by the
+          AODA Information and Communications Standard, since every 2.0
+          criterion is also part of 2.1. We test against WCAG 2.2 AA as well, and
           consider the site <strong>partially conformant</strong>: most of the
           standard is met, and the exceptions are listed below rather than
           left for you to discover.

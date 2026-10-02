@@ -60,17 +60,28 @@ jobs:
             const prIntegrity = JSON.parse(fs.readFileSync('/tmp/pr-integrity.json', 'utf8'));
             const baseIntegrity = JSON.parse(fs.readFileSync('/tmp/base-integrity.json', 'utf8'));
 
-            const baseFiles = new Map(baseIntegrity.files.map(file => [file.logicalName, file]));
-            const newChunks = prIntegrity.files
-              .filter(file => !baseFiles.has(file.logicalName))
-              .map(file => file.logicalName);
-            const largeGrowth = prIntegrity.files
-              .map(file => {
-                const oldFile = baseFiles.get(file.logicalName);
-                if (!oldFile || oldFile.bytes === 0) return null;
-                const pct = ((file.bytes - oldFile.bytes) / oldFile.bytes) * 100;
-                return pct > 10 && file.bytes - oldFile.bytes > 10 * 1024
-                  ? `${file.logicalName} +${pct.toFixed(1)}%`
+            // Several chunks can share a logical name (the app entry and React's
+            // own index.js both become "index.js"), so sum each name's bytes
+            // before comparing — the same grouping compareBundles() uses in
+            // scripts/bundle-integrity.mjs. Keying a Map on the name alone kept
+            // whichever chunk came last and reported nonsense growth.
+            const groupBytes = (files) => {
+              const groups = new Map();
+              for (const file of files) {
+                groups.set(file.logicalName, (groups.get(file.logicalName) ?? 0) + file.bytes);
+              }
+              return groups;
+            };
+            const baseGroups = groupBytes(baseIntegrity.files);
+            const prGroups = groupBytes(prIntegrity.files);
+            const newChunks = [...prGroups.keys()].filter(name => !baseGroups.has(name));
+            const largeGrowth = [...prGroups]
+              .map(([name, bytes]) => {
+                const oldBytes = baseGroups.get(name);
+                if (!oldBytes) return null;
+                const pct = ((bytes - oldBytes) / oldBytes) * 100;
+                return pct > 10 && bytes - oldBytes > 10 * 1024
+                  ? `${name} +${pct.toFixed(1)}%`
                   : null;
               })
               .filter(Boolean);

@@ -10,12 +10,12 @@ const BENEFITS = [
   {
     icon: Link,
     title: 'Permanent DOI',
-    desc: 'Every dataset gets a citable DOI the moment you save — even before publishing. Share it in papers, grant applications, and CVs.',
+    desc: 'A DOI is reserved the moment you save a draft, so it can go into your paper before the data is public. It becomes resolvable when you publish.',
   },
   {
     icon: Shield,
     title: 'Secure Canadian Servers',
-    desc: 'All files are stored on Canadian infrastructure. Your data never leaves the country, satisfying sovereignty requirements for sensitive research.',
+    desc: 'Borealis stores files on Canadian infrastructure. Note that it does not accept identifiable data, even with restricted access — de-identify before you deposit.',
   },
   {
     icon: Lock,
@@ -25,7 +25,7 @@ const BENEFITS = [
   {
     icon: CheckCircle,
     title: 'Tri-Agency & Journal Compliant',
-    desc: 'Meets the data deposit requirements of CIHR, NSERC, and SSHRC, plus policies from most major journals.',
+    desc: 'A digital repository of the kind the Tri-Agency RDM Policy calls for, and accepted by most journal data-availability policies.',
   },
   {
     icon: GitBranch,
@@ -42,10 +42,10 @@ const BENEFITS = [
 /* ── Repository picker data ──────────────────────────────────── */
 const PICKER_ROWS = [
   { label: 'Best for',           lu: 'Most Lakehead datasets — any size, any discipline',   frdr: 'Very large datasets (TB-scale) needing curation',         zenodo: 'Code, preprints, datasets with no disciplinary home' },
-  { label: 'File size',          lu: 'Up to 2.5 GB per file',                               frdr: 'Unlimited (Globus required for large files)',             zenodo: 'Up to 50 GB per dataset' },
+  { label: 'File size',          lu: 'Up to 5 GB per file in the browser (larger via API)',                               frdr: 'Large datasets; 1 TB default per depositor (Globus recommended)',             zenodo: 'Up to 50 GB per dataset' },
   { label: 'Curation support',   lu: 'Self-service (library can help on request)',           frdr: 'Staff-curated before publication',                        zenodo: 'Self-service' },
-  { label: 'Access controls',    lu: 'Open, restricted, embargoed',                          frdr: 'Open or restricted',                                      zenodo: 'Open or restricted' },
-  { label: 'Who can deposit',    lu: 'All LU researchers — no extra registration',           frdr: 'DRAC/Alliance account required',                          zenodo: 'Anyone with a free account' },
+  { label: 'Access controls',    lu: 'Open, restricted, embargoed (de-identified data only)',                          frdr: 'Open only (temporary embargo allowed)',                                      zenodo: 'Open or restricted' },
+  { label: 'Who can deposit',    lu: 'LU faculty, students and staff',           frdr: 'PIs (or designates they sponsor); FRDR account required',                          zenodo: 'Anyone with a free account' },
   { label: 'Tri-Agency compliant', lu: 'Yes',                                               frdr: 'Yes',                                                     zenodo: 'Generally accepted' },
   { label: 'Canadian servers',   lu: 'Yes',                                                  frdr: 'Yes',                                                     zenodo: 'No (CERN, Switzerland)' },
 ];
@@ -54,7 +54,7 @@ const PICKER_ROWS = [
 const STEPS = [
   {
     title: 'Create or log into your Borealis account',
-    body: 'Go to borealisdata.ca and sign in with institutional credentials via the Alliance/DRAC login. First time? Create a free account — faculty register directly; students and staff need a faculty sponsor.',
+    body: 'Go to borealisdata.ca and click Log In. If Lakehead appears in the institution list, sign in with your Lakehead credentials; otherwise create a free standard Borealis account.',
     link: { href: 'https://borealisdata.ca', label: 'Log in to Borealis →' },
   },
   {
@@ -110,7 +110,7 @@ const FAQS = [
   },
   {
     q: 'My dataset contains sensitive or identifiable data — can I still deposit it?',
-    a: 'Yes. Use restricted access to control who can download the files. The metadata (title, description, keywords) becomes public, but the actual files stay protected behind your access controls.',
+    a: 'Only once it is de-identified. Borealis\'s terms do not allow data that could directly or indirectly identify a participant, even in restricted or embargoed files, unless participants consented to its release or it poses no privacy risk. You also need REB approval for the deposit. After de-identifying, you can still use restricted access: the metadata (title, description, keywords) is public, but the files stay behind your access controls. Talk to the library before depositing anything sensitive.',
   },
   {
     q: 'How do I get a DOI?',
@@ -118,7 +118,7 @@ const FAQS = [
   },
   {
     q: 'Does depositing here satisfy my funder or journal\'s data sharing requirement?',
-    a: 'In most cases, yes. The Lakehead Dataverse meets Tri-Agency RDM policy requirements and is accepted by most major journal data sharing policies. If your funder specifies a disciplinary repository, check their guidelines — but for general deposit, this works.',
+    a: 'In most cases, yes. The Lakehead Dataverse is the kind of repository the Tri-Agency RDM Policy calls for, and most journal data-sharing policies accept it. If your funder or journal names a disciplinary repository, use that instead.',
   },
   {
     q: 'What if I need help with metadata or don\'t know where to start?',
@@ -141,7 +141,7 @@ export default function LakeheadDataverse() {
         <h1>Your research deserves a permanent home.</h1>
         <p className="lud-hero-sub">
           Lakehead University's Dataverse is a free, secure repository for all LU researchers.
-          Deposit your data, get a citable DOI, satisfy Tri-Agency and journal requirements —
+          Deposit your data, get a citable DOI, and meet Tri-Agency and journal expectations —
           in under 30 minutes.
         </p>
         <div className="lud-hero-actions">
@@ -158,7 +158,7 @@ export default function LakeheadDataverse() {
           </a>
         </div>
         <div className="lud-trust-strip">
-          {['Free for all LU researchers', 'Canadian servers', 'Tri-Agency compliant', 'Open or restricted access'].map(label => (
+          {['Free for all LU researchers', 'Canadian servers', 'Citable DOIs', 'Open or restricted access'].map(label => (
             <span key={label} className="lud-trust-badge">{label}</span>
           ))}
         </div>

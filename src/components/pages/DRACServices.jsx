@@ -18,8 +18,8 @@ const RDM_TOOLS = [
     tagline: 'Build your Data Management Plan',
     url: 'https://dmp-pgd.ca',
     description: 'A free, bilingual, online tool that walks you through creating a Data Management Plan (DMP) step by step. Includes templates aligned with CIHR, NSERC, and SSHRC requirements.',
-    stats: '16,000+ DMPs created',
-    tags: ['Required for Tri-Agency grants', 'Bilingual', 'Free'],
+    stats: 'Free · bilingual',
+    tags: ['Agency-aligned templates', 'Bilingual', 'Free'],
     useCases: [
       'Writing a DMP for a grant application',
       'Updating a DMP as your project evolves',
@@ -34,12 +34,12 @@ const RDM_TOOLS = [
     color: '#3B82F6',
     tagline: 'Deposit large research datasets',
     url: 'https://www.frdr-dfdr.ca',
-    description: 'The Federated Research Data Repository (FRDR) is a national, bilingual repository purpose-built for large datasets. Data is curated by staff, preserved long-term, and gets a citable DOI.',
-    stats: '334+ TB deposited',
+    description: 'The Federated Research Data Repository (FRDR) is a national, bilingual repository purpose-built for large datasets. Data is curated by staff, preserved long-term, and gets a citable DOI. Deposits are open access (temporary embargoes allowed), so data must be de-identified and publicly shareable.',
+    stats: 'Curated · large data',
     tags: ['Large datasets', 'Curation support', 'DOI assignment'],
     useCases: [
       'Depositing a large dataset supporting a publication',
-      'Sharing data with collaborators or the public',
+      'Sharing data publicly',
       'Long-term preservation of research outputs',
     ],
     bestFor: 'Researchers with large or complex datasets needing curation support',
@@ -51,12 +51,12 @@ const RDM_TOOLS = [
     color: '#10B981',
     tagline: 'Lakehead\'s institutional data repository',
     url: 'https://borealisdata.ca/dataverse/lakehead',
-    description: 'Canada\'s national Dataverse-based repository. Lakehead University has its own institutional collection on Borealis — the recommended starting point for most LU researchers. Self-service deposit, DOI assignment, restricted access, and version control. Free for all LU researchers.',
-    stats: '25,000+ datasets',
+    description: 'Canada\'s national Dataverse-based repository. Lakehead University has its own institutional collection on Borealis — the recommended starting point for most LU researchers. Self-service deposit, DOI assignment, restricted access, and version control. Free for all LU researchers. Data must be de-identified: Borealis does not accept identifiable data, even behind restricted access.',
+    stats: 'LU collection',
     tags: ['Self-service', 'Institutional', 'Restricted access supported'],
     useCases: [
       'Depositing datasets linked to journal publications',
-      'Sharing data within your research group or publicly',
+      'Sharing de-identified data publicly or on request',
       'Lakehead researchers depositing under the LU collection',
     ],
     bestFor: 'Researchers wanting quick self-service deposit with institutional branding',
@@ -69,7 +69,7 @@ const RDM_TOOLS = [
     tagline: 'Discover Canadian research data',
     url: 'https://www.lunaris.ca',
     description: 'Canada\'s national data discovery portal. Search across 150+ academic, government, and research repositories by keyword or map location to find datasets relevant to your work.',
-    stats: '108,000+ discoverable datasets',
+    stats: '150+ repositories',
     tags: ['Discovery only', 'Map-based search', 'Cross-repository'],
     useCases: [
       'Finding existing datasets before collecting new data',
@@ -85,13 +85,13 @@ const RDM_TOOLS = [
     color: '#0082C9',
     tagline: 'Secure cloud storage & collaboration',
     url: 'https://nextcloud.alliancecan.ca',
-    description: 'A national Nextcloud instance hosted by the Alliance — secure, Canadian-sovereign cloud storage for researchers. Sync files across devices, share with collaborators, and work on documents in real time without data leaving Canada.',
-    stats: '100 GB default per user',
-    tags: ['Canadian data sovereignty', 'File sync & share', 'No institutional VPN needed'],
+    description: 'A national Nextcloud instance hosted by the Alliance — cloud storage on Canadian infrastructure for researchers with an Alliance (CCDB) account. Sync files across devices and share with collaborators. Check your data\'s classification before storing confidential or identifiable data here.',
+    stats: '100 GB per user',
+    tags: ['Canadian infrastructure', 'File sync & share', 'No institutional VPN needed'],
     useCases: [
       'Storing and sharing active research files during a project',
       'Collaborating with team members at other institutions',
-      'Keeping sensitive data within Canadian jurisdiction',
+      'Keeping project files on Canadian infrastructure',
     ],
     bestFor: 'Researchers needing secure, collaborative file storage that stays in Canada',
   },
@@ -102,9 +102,9 @@ const RDM_TOOLS = [
     color: '#EF4444',
     tagline: 'High-speed large data transfer',
     url: 'https://globus.alliancecan.ca',
-    description: 'Globus enables fast, reliable, automated file transfers between HPC systems, campus clusters, lab servers, and laptops — all through a browser interface. Required for uploading large datasets to FRDR.',
-    stats: 'TB-scale transfers in minutes',
-    tags: ['Required for FRDR uploads', 'Automated & resumable', 'Cross-institution'],
+    description: 'Globus enables fast, reliable, automated file transfers between HPC systems, campus clusters, lab servers, and laptops — all through a browser interface. The recommended way to upload large datasets to FRDR.',
+    stats: 'TB-scale transfers',
+    tags: ['Recommended for large FRDR uploads', 'Automated & resumable', 'Cross-institution'],
     useCases: [
       'Uploading large datasets to FRDR for deposit',
       'Transferring data between national clusters and your workstation',
@@ -127,15 +127,15 @@ function Upload(props) {
 const ARC_SYSTEMS = [
   {
     name: 'Nibi',
-    operator: 'Compute Ontario / University of Waterloo',
+    operator: 'SHARCNET · University of Waterloo',
     type: 'HPC + AI',
     status: 'new',
     specs: '134,400 CPU cores · 288 NVIDIA H100 GPUs · Immersion-cooled',
-    note: 'Canada\'s first immersion-cooled supercomputer. Optimized for AI and machine learning workloads.',
+    note: 'Replaces Graham. Canada\'s first large-scale immersion-cooled supercomputer; its 8-GPU nodes suit large AI models.',
   },
   {
     name: 'Rorqual',
-    operator: 'Calcul Québec / ETS Montréal',
+    operator: 'Calcul Québec · École de technologie supérieure, Montréal',
     type: 'HPC',
     status: 'new',
     specs: '137,000 CPU cores · 587 TB RAM · 69 PB disk · 324 GPUs',
@@ -143,19 +143,19 @@ const ARC_SYSTEMS = [
   },
   {
     name: 'Fir',
-    operator: 'BC DRI Group',
+    operator: 'Simon Fraser University · BC DRI Group',
     type: 'HPC',
-    status: 'active',
-    specs: 'Heterogeneous cluster — wide range of node types',
-    note: 'Versatile system suited to diverse scientific workloads across disciplines.',
+    status: 'new',
+    specs: '~165,000 CPU cores · 640 NVIDIA H100 GPUs · ~50 PB storage',
+    note: 'Replaces Cedar. The most powerful academic supercomputer in Canada at launch in 2025.',
   },
   {
     name: 'Trillium',
-    operator: 'Compute Ontario',
+    operator: 'SciNet · University of Toronto',
     type: 'HPC',
-    status: 'active',
-    specs: 'Part of the national ARC fleet',
-    note: 'General-purpose cluster supporting Ontario-region researchers.',
+    status: 'new',
+    specs: '235,008 CPU cores · 252 NVIDIA H100 GPUs · 29 PB storage',
+    note: 'Replaces Niagara and Mist. Built for large parallel jobs; available to all researchers with an Alliance account.',
   },
   {
     name: 'Arbutus',
@@ -187,7 +187,7 @@ const ARC_SYSTEMS = [
     type: 'Quantum',
     status: 'active',
     specs: '24-qubit superconducting quantum processor · Integrated with HPC cluster',
-    note: 'Canada\'s national quantum computer, available to researchers through the Alliance. Seamlessly blends quantum and classical HPC workflows.',
+    note: 'Built by Anyon Systems. Available free to researchers with an active CCDB account, alongside classical HPC resources.',
   },
 ];
 
@@ -242,10 +242,10 @@ const SOFTWARE_AREAS = [
   },
   {
     icon: Star,
-    title: '$18M Inaugural Funding Opportunity',
-    desc: 'New 2025–2026 funding program to support research software capacity across Canada. Applications open to eligible institutions.',
-    link: 'https://alliancecan.ca/en/funding-opportunities/inaugural-funding-opportunity',
-    linkText: 'View opportunity',
+    title: 'National Research Software Strategy',
+    desc: 'The Alliance\'s 2025–2030 plan for research software in Canada, including a new funding program for research software and the teams that sustain it.',
+    link: 'https://www.alliancecan.ca/en/latest/news/alliances-new-strategy-research-software-canada',
+    linkText: 'Read the strategy',
     highlight: true,
   },
 ];
@@ -253,15 +253,15 @@ const SOFTWARE_AREAS = [
 const GETTING_STARTED = [
   {
     step: 1,
-    title: 'Access the national platforms',
-    detail: 'All DRAC national platforms — CCDB (HPC), FRDR (large datasets), DMP Assistant, Borealis, and Nextcloud — are accessed from one login page. New users can create a free account there. Faculty can register directly; students and staff must be sponsored by a faculty supervisor.',
+    title: 'Create a CCDB account',
+    detail: 'CCDB is the Alliance\'s account system. One CCDB account gives you the national clusters, cloud and Nextcloud. Faculty can register directly; students and staff must be sponsored by a faculty supervisor. DMP Assistant, Borealis and FRDR use their own sign-in.',
     link: 'https://ccdb.alliancecan.ca/',
-    linkText: 'Log in to national platforms',
+    linkText: 'Register at CCDB',
   },
   {
     step: 2,
     title: 'Request access to clusters',
-    detail: 'Once your account is approved, log in to CCDB and use the "Access Systems" page to request access to the clusters you need: Narval, Nibi, Rorqual, Fir, Trillium, or Arbutus (cloud). Access is usually granted within a few minutes.',
+    detail: 'Once your account is approved, most national clusters (Fir, Nibi, Narval, Rorqual, Trillium) are reachable with your CCDB username. A few systems, such as cloud projects on Arbutus, need a separate request — each system\'s page in the technical documentation explains how.',
     link: 'https://ccdb.alliancecan.ca',
     linkText: 'Log in to CCDB',
   },
@@ -323,13 +323,13 @@ export default function DRACServices() {
           eligible Canadian researchers. Funded by the Government of Canada.
         </p>
         <div className="drac-stats">
-          <div className="drac-stat"><strong>334+ TB</strong><span>data in FRDR</span></div>
+          <div className="drac-stat"><strong>Free</strong><span>for eligible researchers</span></div>
           <div className="drac-stat-div" />
-          <div className="drac-stat"><strong>16,000+</strong><span>DMPs created</span></div>
+          <div className="drac-stat"><strong>150+</strong><span>repositories in Lunaris</span></div>
           <div className="drac-stat-div" />
           <div className="drac-stat"><strong>200+</strong><span>campus experts</span></div>
           <div className="drac-stat-div" />
-          <div className="drac-stat"><strong>38</strong><span>campuses served</span></div>
+          <div className="drac-stat"><strong>38</strong><span>partner institutions</span></div>
         </div>
         <a
           href="https://alliancecan.ca/en"
@@ -433,7 +433,7 @@ export default function DRACServices() {
             <div className="drac-lifecycle-flow">
               {[
                 { stage: 'Plan', tool: 'DMP Assistant', color: '#FFC20E' },
-                { stage: 'Collect & Manage', tool: 'Nextcloud + Borealis', color: '#0082C9' },
+                { stage: 'Collect & Manage', tool: 'Nextcloud', color: '#0082C9' },
                 { stage: 'Deposit', tool: 'FRDR or Borealis', color: '#3B82F6' },
                 { stage: 'Discover', tool: 'Lunaris', color: '#8B5CF6' },
               ].map((item, i, arr) => (
@@ -542,7 +542,7 @@ export default function DRACServices() {
               <h4>SLURM Job Scheduler</h4>
               <p>All compute work runs through SLURM — you submit a job script and the scheduler allocates resources. You cannot run jobs directly on the login node.</p>
               <code className="drac-concept-code">sbatch my_job.sh &nbsp;# submit a job<br/>squeue -u $USER &nbsp;# check your jobs</code>
-              <p style={{marginTop:'8px', fontSize:'12px', color:'var(--text-muted)'}}>Every job script must include <code>#SBATCH --time=HH:MM:SS</code></p>
+              <p style={{marginTop:'8px', fontSize:'12px', color:'var(--text-muted)'}}>Always set <code>#SBATCH --time=HH:MM:SS</code> — the scheduler uses it to place your job</p>
             </div>
             <div className="drac-concept-card">
               <div className="drac-concept-icon"><Layers size={18} /></div>

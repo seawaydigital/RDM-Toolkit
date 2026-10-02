@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { ShieldCheck, ShieldAlert, ShieldX, Info, ChevronLeft, ChevronRight, Printer, Copy, RotateCcw, Check, ChevronDown } from 'lucide-react';
 import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
 
+const STANDARD = INSTITUTION.dataClassificationStandard;
+
 /* ============================================================
    CONSTANTS
    ============================================================ */
@@ -167,7 +169,7 @@ const QUESTIONS = [
     stepLabel: 'Identifiers',
     title: 'Does the data contain any direct identifiers?',
     description: 'Direct identifiers are data elements that can be used on their own to identify a specific individual. Select all that apply.',
-    tooltip: 'Even a single direct identifier means the data could be linked to a specific person. Under PIPEDA and PHIPA, this data requires the highest level of protection.',
+    tooltip: `Even a single direct identifier means the data could be linked to a specific person. Lakehead's ${STANDARD.title} treats this as personal information (it uses PIPEDA's definition). For Lakehead research, Ontario's FIPPA — and PHIPA for health information — set the legal rules, and the standard classifies identifiable participant data as Confidential.`,
     type: 'checkbox',
     options: DIRECT_IDENTIFIERS.map(d => ({ value: d, label: d })),
   },
@@ -219,7 +221,7 @@ const QUESTIONS = [
     stepLabel: 'Third-Party',
     title: 'Does your dataset include data from or shared with a third party?',
     description: 'Third-party data includes datasets received from external organizations, government agencies, industry partners, or other institutions, as well as data you plan to share externally.',
-    tooltip: 'Under the Lakehead Data Classification Standard (s. 4.2.4), third-party data sharing requires a formal Data Sharing Agreement. Confidential data additionally requires a Non-Disclosure Agreement (NDA).',
+    tooltip: `Under Lakehead's ${STANDARD.title} (s. 4.2.4), Confidential data shared with a third party needs a data sharing agreement, plus a Non-Disclosure Agreement (NDA) and PI approval. For other data an agreement is recommended.`,
     type: 'radio',
     options: [
       { value: 'yes', label: 'Yes — data is from or will be shared with a third party' },
@@ -231,7 +233,7 @@ const QUESTIONS = [
     stepLabel: 'Indigenous',
     title: 'Does your research involve Indigenous communities, peoples, or data?',
     description: 'This includes research conducted with or about First Nations, Inuit, or Métis communities, or data that relates to Indigenous knowledge, culture, or governance.',
-    tooltip: 'The First Nations principles of OCAP® (Ownership, Control, Access, and Possession) apply to research involving First Nations data. Divergences from OCAP® must be resolved with the Office of Research Services before project commencement (s. 2.0 of the Lakehead Data Classification Standard).',
+    tooltip: `The First Nations principles of OCAP® (Ownership, Control, Access, and Possession) apply to research involving First Nations data. Divergences from OCAP® must be resolved with the Office of Research Services before project commencement (s. 2.0 of Lakehead's ${STANDARD.title}).`,
     type: 'radio',
     options: [
       { value: 'yes', label: 'Yes — involves Indigenous communities or data' },
@@ -296,7 +298,9 @@ function computeClassification(answers) {
       tier = 'internal';
       warnings.push('Classification was elevated from Public to Internal because third-party data is involved.');
     }
-    warnings.push('A formal Data Sharing Agreement is required (s. 4.2.4 of the Data Classification Standard).');
+    warnings.push(tier === 'confidential'
+      ? `A data sharing agreement is required for sharing Confidential data with third parties (s. 4.2.4 of the ${STANDARD.title}).`
+      : 'A data sharing agreement is recommended for any data shared with or received from a third party.');
     warnings.push('Retain one copy of shared data for a minimum of 7 years (s. 5.2 Data Retention).');
     if (tier === 'confidential') {
       warnings.push('A Non-Disclosure Agreement (NDA) is required for sharing Confidential data with third parties.');
@@ -401,7 +405,7 @@ function ControlsTable({ tier }) {
     <div className="dc-controls">
       <h3 className="dc-section-title">Required Security Controls</h3>
       <p className="dc-section-desc">
-        Based on the Lakehead University Research Data Classification Standard, the following controls apply to <strong>{TIERS[tier].label}</strong> data:
+        Based on Lakehead University's <a href={STANDARD.url} target="_blank" rel="noopener noreferrer">{STANDARD.title}</a>, the following controls apply to <strong>{TIERS[tier].label}</strong> data:
       </p>
       {CONTROL_CATEGORIES.map(cat => (
         <div key={cat.heading} className="dc-controls-group">
@@ -598,7 +602,7 @@ export default function DataClassification() {
     }
 
     text += `\n---\nGenerated by RDM Toolkit — Lakehead University\n`;
-    text += `Based on the Lakehead University Research Data Classification Guidelines and Standard\n`;
+    text += `Based on the Lakehead University ${STANDARD.title} (${STANDARD.date})\n`;
 
     try {
       await navigator.clipboard.writeText(text);
@@ -713,7 +717,8 @@ export default function DataClassification() {
 
         <div className="dc-disclaimer">
           <p>
-            This classification is based on the <em>Lakehead University Research Data Guidelines and Classification Standard</em> (March 2024).
+            This classification is based on Lakehead University's{' '}
+            <a href={STANDARD.url} target="_blank" rel="noopener noreferrer"><em>{STANDARD.title}</em></a> ({STANDARD.date}).
             For complex cases or questions, contact the {INSTITUTION.researchOffice} at{' '}
             <a href={MAILTO.rdm}>{INSTITUTION.rdmEmail}</a>.
           </p>
@@ -734,7 +739,7 @@ export default function DataClassification() {
       <div className="dc-card" key={currentIndex}>
         <div className="dc-card-header">
           <span className="dc-step-badge">{question.stepLabel}</span>
-          <h2 className="dc-question-title" ref={titleRef} tabIndex={-1}>
+          <h2 className="dc-question-title" id="dc-question-title" ref={titleRef} tabIndex={-1}>
             {question.title}
           </h2>
           <p className="dc-question-desc">{question.description}</p>

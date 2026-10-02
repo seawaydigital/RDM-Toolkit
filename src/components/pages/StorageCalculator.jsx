@@ -518,7 +518,7 @@ const WHAT_IF_TEMPLATES = [
 const FORMAT_RECOMMENDATIONS = {
   'audio-recordings': { current: 'WAV (uncompressed)', recommended: 'FLAC or MP3', savings: '50-75%', note: 'FLAC is lossless; MP3 is lossy but much smaller.' },
   'video-recordings': { current: '4K / Uncompressed', recommended: '1080p H.264/H.265', savings: '60-80%', note: 'H.265 offers better compression than H.264.' },
-  'research-photos': { current: 'RAW / TIFF', recommended: 'JPEG High-res (archival)', savings: '60-90%', note: 'Keep RAW for active analysis; archive as JPEG.' },
+  'research-photos': { current: 'RAW / TIFF', recommended: 'JPEG High-res working copies', savings: '60-90%', note: 'JPEG is lossy: keep RAW or TIFF originals as the archival copy and work from JPEGs.' },
   'microscopy': { current: 'High-res / Z-stack', recommended: 'Standard resolution', savings: '75-90%', note: 'Downsample completed analyses; keep originals as needed.' },
   'genome-sequences': { current: 'Whole Genome FASTQ', recommended: 'Compressed BAM/CRAM', savings: '30-60%', note: 'CRAM format offers best compression for aligned reads.' },
   'site-photographs': { current: 'RAW', recommended: 'JPEG High-quality', savings: '85%', note: 'Archive RAW originals; work with JPEG copies.' },
@@ -534,6 +534,12 @@ const CLASSIFICATION_TRIGGERS = {
   confidential: ['eeg-psychophysiology', 'eye-tracking', 'student-assessment', 'glance-eye-tracking', 'toxicology-assay'],
   internal: ['survey-responses', 'interview-transcripts', 'questionnaire-data', 'behavioural-coding', 'cognitive-task', 'driving-simulator', 'learning-analytics', 'fish-population'],
   public: ['csv', 'plain-text', 'shapefiles', 'gps-tracks', 'weather-station', 'hpc-job-logs'],
+};
+
+const CLASSIFICATION_LEVELS = {
+  confidential: { label: 'Likely Confidential / Sensitive', color: '#F87171' },
+  internal: { label: 'At least Internal / Private', color: '#F59E0B' },
+  undetermined: { label: 'Depends on whether it is published', color: '#94A3B8' },
 };
 
 /* ============================================================
@@ -624,7 +630,7 @@ function DoughnutChart({ contributions, totalLabel }) {
     ctx.fillText(totalLabel, cx, cy - 6);
     ctx.font = '10px system-ui, sans-serif';
     ctx.fillStyle = '#94a3b8';
-    ctx.fillText('Total Active', cx, cy + 10);
+    ctx.fillText('Base data', cx, cy + 10);
   }, [contributions, totalLabel]);
 
   return (
@@ -823,53 +829,45 @@ export default function StorageCalculator() {
     const activeGB = baseGB * multiplier;
     const archivalGB = baseGB * 2;
 
-    // Classification
-    let level = 'Public';
-    let reqs = [];
+    // Indicative classification, using the three tiers of Lakehead's Data
+    // Classification Standard (the same tiers as the #data-classification
+    // wizard). File types alone cannot settle it — unpublished research data
+    // is Confidential under the standard whatever its format — so the badge
+    // only ever suggests a floor and points people to the wizard.
+    let level;
+    let reqs;
 
     const activeArr = Array.from(activeTypes);
-    const hasHighlyConf = activeArr.some(id => CLASSIFICATION_TRIGGERS.highly_confidential.includes(id));
-    const hasConf = activeArr.some(id => CLASSIFICATION_TRIGGERS.confidential.includes(id));
-    const hasInternal = activeArr.some(id => CLASSIFICATION_TRIGGERS.internal.includes(id));
-
-    if (hasHighlyConf) {
-      level = 'Highly Confidential';
-      reqs = [
-        'Encrypted storage required',
-        'Access restricted to authorized personnel only',
-        'Audit logging mandatory',
-        'Ethics board approval required',
-        'Data sharing agreement needed for any transfer',
-      ];
-    } else if (hasConf) {
-      level = 'Confidential';
-      reqs = [
-        'Encrypted storage recommended',
-        'Access controlled by PI',
-        'Regular access review required',
-      ];
-    } else if (hasInternal) {
-      level = 'Internal';
-      reqs = [
-        'University-provided storage systems',
-        'Standard access controls',
-      ];
-    } else {
-      reqs = ['No special requirements'];
-    }
-
-    // Check for sensitive categories
     const hasSensitiveCat = FILE_CATEGORIES.some(cat =>
       cat.sensitive && cat.files.some(f => activeTypes.has(f.id))
     );
-    if (hasSensitiveCat && level !== 'Highly Confidential') {
-      level = 'Highly Confidential';
+    const hasConf = hasSensitiveCat || activeArr.some(id =>
+      CLASSIFICATION_TRIGGERS.highly_confidential.includes(id) ||
+      CLASSIFICATION_TRIGGERS.confidential.includes(id)
+    );
+    const hasInternal = activeArr.some(id => CLASSIFICATION_TRIGGERS.internal.includes(id));
+
+    if (hasConf) {
+      level = CLASSIFICATION_LEVELS.confidential;
       reqs = [
-        'Encrypted storage required',
-        'Access restricted to authorized personnel only',
-        'Audit logging mandatory',
-        'Ethics board approval required',
-        'Data sharing agreement needed for any transfer',
+        'University-provided systems or authorized SaaS only; encrypt removable media',
+        'Need-to-know access with PI approval; review access quarterly',
+        'Encrypted, password-protected backups; audit logs required',
+        'REB approval required for human-participant data',
+        'Data sharing agreement (and NDA) for any third-party transfer',
+      ];
+    } else if (hasInternal) {
+      level = CLASSIFICATION_LEVELS.internal;
+      reqs = [
+        'University-provided systems or authorized SaaS',
+        'Share with named recipients only, through IT-approved systems',
+        'Confidential instead if it identifies participants or is unpublished research data',
+      ];
+    } else {
+      level = CLASSIFICATION_LEVELS.undetermined;
+      reqs = [
+        'Unpublished research data is Confidential under Lakehead’s standard',
+        'Published or open data is Public',
       ];
     }
 
@@ -952,7 +950,8 @@ export default function StorageCalculator() {
     text += `- Active Duration: ${activeDuration} years\n`;
     text += `- Archival Duration: ${archivalDuration} years\n`;
     text += `  (LUFA Collective Agreement mandates minimum 7-year retention after research completion)\n\n`;
-    text += `## Data Classification: ${classificationLevel}\n`;
+    text += `## Data Classification (indicative): ${classificationLevel.label}\n`;
+    text += `Confirm with the Lakehead University Data Classification Standard.\n`;
     classificationRequirements.forEach(r => { text += `- ${r}\n`; });
     text += `\n## Data Types\n`;
 
@@ -1196,10 +1195,7 @@ export default function StorageCalculator() {
   };
 
   // --- Classification badge color ---
-  const classColor = classificationLevel === 'Highly Confidential' ? '#EF4444'
-    : classificationLevel === 'Confidential' ? '#F59E0B'
-    : classificationLevel === 'Internal' ? '#3B82F6'
-    : '#10B981';
+  const classColor = classificationLevel.color;
 
   /* ============================================================
      RENDER
@@ -1427,21 +1423,22 @@ export default function StorageCalculator() {
 
             {/* Doughnut Chart */}
             {contributions.length > 0 && (
-              <DoughnutChart contributions={contributions} totalLabel={formatSize(totalActiveGB)} />
+              <DoughnutChart contributions={contributions} totalLabel={formatSize(totalBaseMB / 1024)} />
             )}
 
             {/* Classification Badge */}
-            <div className="sc-classification" style={{ borderColor: classColor }}>
+            {hasAnyData && (<div className="sc-classification" style={{ borderColor: classColor }}>
               <Shield size={20} style={{ color: classColor }} />
               <div>
-                <div className="sc-classification-level" style={{ color: classColor }}>{classificationLevel}</div>
+                <div className="sc-classification-level" style={{ color: classColor }}>{classificationLevel.label}</div>
                 <ul className="sc-classification-reqs">
                   {classificationRequirements.map((r, i) => (
                     <li key={i}>{r.includes('OCAP') ? <><a href="https://fnigc.ca/ocap-training/" target="_blank" rel="noopener noreferrer">OCAP®</a> principles apply (Ownership, Control, Access, Possession)</> : r}</li>
                   ))}
+                  <li>Based on file types only — <a href="#data-classification">confirm with the Data Classification tool</a></li>
                 </ul>
               </div>
-            </div>
+            </div>)}
 
             {/* Warnings */}
             {warnings.length > 0 && (
