@@ -352,11 +352,15 @@ export default function AcrobatAlternative() {
                   max="500"
                   value={usersText}
                   onChange={(e) => {
-                    setUsersText(e.target.value);
-                    const n = parseInt(e.target.value, 10);
+                    const v = e.target.value;
+                    setUsersText(v);
+                    const n = v === '' ? NaN : Number(v);
                     if (Number.isFinite(n)) setUsers(n);
                   }}
-                  onBlur={() => setUsersText(String(safeUsers))}
+                  onBlur={() => {
+                    setUsers(safeUsers);
+                    setUsersText(String(safeUsers));
+                  }}
                   className="aa-calc-number"
                   aria-label="Number of users (exact)"
                 />
@@ -367,11 +371,11 @@ export default function AcrobatAlternative() {
             </div>
 
             <div className="aa-calc-field">
-              <span className="aa-calc-label">
+              <span className="aa-calc-label" id="aa-calc-tier-label">
                 <CircleDollarSign size={14} aria-hidden="true" />
                 Acrobat Pro plan (per user, per year)
               </span>
-              <div className="aa-calc-tiers" role="group" aria-label="Acrobat Pro plan tier">
+              <div className="aa-calc-tiers" role="group" aria-labelledby="aa-calc-tier-label">
                 {PRICE_TIERS.map((t) => {
                   const active = t.id === tierId;
                   return (
