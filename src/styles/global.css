@@ -12484,7 +12484,7 @@ input:focus, textarea:focus, select:focus {
 
 .aa-hero {
   text-align: center;
-  padding: var(--space-2xl) 0 var(--space-xl);
+  padding: var(--space-xl) 0;
 }
 
 .aa-hero-title {
@@ -12544,12 +12544,9 @@ input:focus, textarea:focus, select:focus {
 
 /* ── Savings Calculator ───────────────────────────────────────────────────── */
 
-.aa-calc-section .aa-section-title {
-  align-items: center;
-}
-
 .aa-calc-section .aa-section-title svg {
   color: var(--accent-primary);
+  align-self: center;
 }
 
 .aa-calc {
@@ -12827,7 +12824,7 @@ input:focus, textarea:focus, select:focus {
   font-variation-settings: "opsz" 36, "SOFT" 40;
   letter-spacing: -0.01em;
   color: var(--text-parchment);
-  margin-bottom: var(--space-sm);
+  margin-bottom: 14px;
 }
 
 .aa-section-title::after {
