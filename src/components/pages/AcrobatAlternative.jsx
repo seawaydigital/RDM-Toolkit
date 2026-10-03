@@ -5,6 +5,7 @@ import {
   AlertCircle, Shield, WifiOff, ChevronRight,
   Lock, Sparkles, Users, Calculator
 } from 'lucide-react';
+import { ALL_TOOLS, getToolById } from '../../data/toolRegistry';
 
 /* ─── Pricing tiers (used by the savings calculator) ─────────────────────── */
 
@@ -233,6 +234,21 @@ const HONEST_CASES = [
     ],
     proWins: 'you must certify a document as its author, locking it against later changes — Reader can sign but not certify.',
   },
+];
+
+/* Research tools shown in the "Beyond Acrobat" card. Names come from the
+   registry so the chip always matches the tool page it opens. */
+const BEYOND_TOOL_IDS = [
+  'data-anonymizer',
+  'sha256-hasher',
+  'bibtex-formatter',
+  'csv-json-converter',
+  'encrypt-decrypt-text',
+  'to-markdown',
+  'password-generator',
+  'checksum-verifier',
+  'csv-diff',
+  'encoding-detector',
 ];
 
 /* ─── Component ─────────────────────────────────────────────────────────── */
@@ -560,25 +576,14 @@ export default function AcrobatAlternative() {
             account, no subscription, and no files ever leaving your device.
           </p>
           <div className="aa-beyond-chips">
-            {[
-              { label: 'De-identify Research Data', toolId: 'data-anonymizer' },
-              { label: 'SHA-256 File Hasher',    toolId: 'sha256-hasher' },
-              { label: 'BibTeX Formatter',       toolId: 'bibtex-formatter' },
-              { label: 'CSV \u2194 JSON Converter',   toolId: 'csv-json-converter' },
-              { label: 'AES-256 Text Encryption',toolId: 'encrypt-decrypt-text' },
-              { label: 'File to Markdown',       toolId: 'to-markdown' },
-              { label: 'Password Generator',     toolId: 'password-generator' },
-              { label: 'Checksum Verifier',      toolId: 'checksum-verifier' },
-              { label: 'CSV Diff',               toolId: 'csv-diff' },
-              { label: 'Encoding Detector',      toolId: 'encoding-detector' },
-            ].map(({ label, toolId }) => (
-              <a key={toolId} href={`#${toolId}`} className="aa-beyond-chip">
-                {label}
+            {BEYOND_TOOL_IDS.map((id) => getToolById(id)).filter(Boolean).map((tool) => (
+              <a key={tool.id} href={`#${tool.id}`} className="aa-beyond-chip">
+                {tool.name}
               </a>
             ))}
           </div>
-          <a href="" className="aa-beyond-all" onClick={(e) => { e.preventDefault(); window.location.hash = ''; }}>
-            Explore all 46 tools →
+          <a href="#" className="aa-beyond-all" onClick={(e) => { e.preventDefault(); window.location.hash = ''; }}>
+            Explore all {ALL_TOOLS.length} tools →
           </a>
         </div>
       </section>
