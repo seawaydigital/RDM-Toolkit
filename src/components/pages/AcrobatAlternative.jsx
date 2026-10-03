@@ -276,6 +276,7 @@ const BEYOND_TOOL_IDS = [
 
 export default function AcrobatAlternative() {
   const [users, setUsers] = useState(1);
+  const [usersText, setUsersText] = useState('1');
   const [tierId, setTierId] = useState('low');
   const tier = PRICE_TIERS.find((t) => t.id === tierId) ?? PRICE_TIERS[0];
 
@@ -337,7 +338,11 @@ export default function AcrobatAlternative() {
                   max="50"
                   step="1"
                   value={Math.min(safeUsers, 50)}
-                  onChange={(e) => setUsers(parseInt(e.target.value, 10))}
+                  onChange={(e) => {
+                    const n = parseInt(e.target.value, 10);
+                    setUsers(n);
+                    setUsersText(String(n));
+                  }}
                   className="aa-calc-slider"
                   aria-label="Number of users (slider, 1 to 50)"
                 />
@@ -345,8 +350,13 @@ export default function AcrobatAlternative() {
                   type="number"
                   min="1"
                   max="500"
-                  value={safeUsers}
-                  onChange={(e) => setUsers(parseInt(e.target.value, 10) || 1)}
+                  value={usersText}
+                  onChange={(e) => {
+                    setUsersText(e.target.value);
+                    const n = parseInt(e.target.value, 10);
+                    if (Number.isFinite(n)) setUsers(n);
+                  }}
+                  onBlur={() => setUsersText(String(safeUsers))}
                   className="aa-calc-number"
                   aria-label="Number of users (exact)"
                 />
@@ -361,15 +371,14 @@ export default function AcrobatAlternative() {
                 <CircleDollarSign size={14} aria-hidden="true" />
                 Acrobat Pro plan (per user, per year)
               </span>
-              <div className="aa-calc-tiers" role="radiogroup" aria-label="Acrobat Pro plan tier">
+              <div className="aa-calc-tiers" role="group" aria-label="Acrobat Pro plan tier">
                 {PRICE_TIERS.map((t) => {
                   const active = t.id === tierId;
                   return (
                     <button
                       key={t.id}
                       type="button"
-                      role="radio"
-                      aria-checked={active}
+                      aria-pressed={active}
                       onClick={() => setTierId(t.id)}
                       className={`aa-calc-tier${active ? ' aa-calc-tier--active' : ''}`}
                     >
