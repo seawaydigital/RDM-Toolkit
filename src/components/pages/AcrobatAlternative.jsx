@@ -5,12 +5,32 @@ import {
   AlertCircle, Shield, WifiOff, ChevronRight,
   Lock, Sparkles, Users, Calculator
 } from 'lucide-react';
+import { ALL_TOOLS, getToolById } from '../../data/toolRegistry';
 
-/* ─── Pricing tiers (used by the savings calculator) ─────────────────────── */
+/* ─── Pricing ───────────────────────────────────────────────────────────── */
+
+/* Adobe's Canadian retail prices, read from adobe.com/ca/acrobat/plans.html
+   (Individuals → Annual, prepaid) on 2026-10-02. Both exclude tax. Re-check
+   before each academic year. The Lakehead rate comes from the owner, not a
+   public page. */
+const ADOBE_CA = {
+  checked: 'October 2026',
+  proAnnual: 311.88,
+  standardAnnual: 239.88,
+};
+const ONTARIO_HST = 0.13;
+
+/* Adobe prices are shown to the cent, e.g. 311.8 → "311.80". */
+const cad = (amount) => amount.toFixed(2);
 
 const PRICE_TIERS = [
   { id: 'low',  amount: 177, label: 'Lakehead internal', hint: 'Lakehead enterprise licensing, paid up-front for the full year' },
-  { id: 'high', amount: 352, label: 'Retail (with HST)', hint: 'Adobe individual annual plan at retail, including 13% Ontario HST' },
+  {
+    id: 'high',
+    amount: Math.round(ADOBE_CA.proAnnual * (1 + ONTARIO_HST)),
+    label: 'Retail (with HST)',
+    hint: `Adobe’s Canadian price for an individual annual prepaid plan (C$${cad(ADOBE_CA.proAnnual)}, ${ADOBE_CA.checked}) plus 13% Ontario HST`,
+  },
 ];
 
 /* ─── Data ──────────────────────────────────────────────────────────────── */
@@ -89,8 +109,8 @@ const STACK = [
     covers: [
       'Small in-place text fixes in a PDF (opens in Draw)',
       'Export Writer & Calc files to PDF',
-      'Appropriate for OCAP® & PHIPA-governed data',
-      'Nothing leaves your device — ever',
+      'Sign PDFs with a certificate (File → Digital Signatures)',
+      'Open source, for Windows, Mac and Linux',
     ],
     link: 'https://www.libreoffice.org',
     linkLabel: 'Download free',
@@ -137,7 +157,7 @@ const TASK_GROUPS = [
     tasks: [
       { task: 'PDF → Word',                          badge: 'microsoft', label: 'Microsoft Word (File → Open)' },
       { task: 'PDF tables → Excel',                  badge: 'microsoft', label: 'Microsoft Excel on Windows (Data → Get Data → From File → From PDF)' },
-      { task: 'PDF → Word (complex layouts)',        badge: 'gap',       label: 'No reliable free option — Acrobat Pro or another paid converter' },
+      { task: 'PDF → Word (complex layouts)',        badge: 'gap',       label: 'No reliable free option — Acrobat Standard or Pro (paid), or another paid converter' },
       { task: 'PDF → images (PNG / JPG)',            badge: 'rdm',       label: 'RDM Toolkit', toolId: 'pdf-to-images' },
       { task: 'Images → PDF',                        badge: 'rdm',       label: 'RDM Toolkit', toolId: 'image-to-pdf' },
       { task: 'Extract images from PDF',             badge: 'rdm',       label: 'RDM Toolkit', toolId: 'extract-images-from-pdf' },
@@ -146,8 +166,8 @@ const TASK_GROUPS = [
   {
     group: 'Editing & Review',
     tasks: [
-      { task: 'Edit existing text or images in a PDF', badge: 'gap',       label: 'Small fixes: LibreOffice Draw. Otherwise edit the source file and re-export' },
-      { task: 'Compare two versions of a document',    badge: 'microsoft', label: 'Microsoft Word (Review → Compare)' },
+      { task: 'Edit existing text or images in a PDF', badge: 'gap',       label: 'Small fixes: LibreOffice Draw. Otherwise edit the source file and re-export, or use Acrobat Standard (paid)' },
+      { task: 'Compare two versions of a document',    badge: 'microsoft', label: 'Microsoft Word (Review → Compare) — for two PDFs, convert each to a Word file first (File → Open, then save as .docx)' },
     ],
   },
   {
@@ -185,6 +205,7 @@ const HONEST_CASES = [
       { name: 'LibreOffice Draw', url: 'https://www.libreoffice.org', note: 'open source, all platforms; opens each text block as editable. Best for short fixes, and there is a learning curve.' },
     ],
     proWins: 'you edit PDFs often, or need paragraphs to reflow cleanly after an edit.',
+    standardCovers: true,
   },
   {
     title: 'Making scanned documents searchable (OCR)',
@@ -200,6 +221,7 @@ const HONEST_CASES = [
       { name: 'Microsoft Word', url: null, note: 'File → Open converts text-heavy PDFs well. Pages that are mostly charts or graphics may come through as images, and we found no free offline tool that reliably does better.' },
     ],
     proWins: 'tables and multi-column layouts must come through faithfully.',
+    standardCovers: true,
   },
   {
     title: 'Accessibility checking and tagging (AODA)',
@@ -220,7 +242,7 @@ const HONEST_CASES = [
   {
     title: 'Sending documents out for signature',
     free: [
-      { name: 'Your unit’s e-signature service', url: null, note: 'ask your department or the Research Office what is already licensed.' },
+      { name: 'Your unit’s e-signature service', url: null, note: 'ask your department what is already licensed.' },
       { name: 'OpenSign', url: 'https://www.opensignlabs.com/', note: 'open source, free cloud or self-hosted. The cloud version uploads your file, so it is not for PHIPA or OCAP® documents.' },
     ],
     proWins: 'you send high volumes and need templates and audit trails at scale.',
@@ -235,10 +257,26 @@ const HONEST_CASES = [
   },
 ];
 
+/* Research tools shown in the "Beyond Acrobat" card. Names come from the
+   registry so the chip always matches the tool page it opens. */
+const BEYOND_TOOL_IDS = [
+  'data-anonymizer',
+  'sha256-hasher',
+  'bibtex-formatter',
+  'csv-json-converter',
+  'encrypt-decrypt-text',
+  'to-markdown',
+  'password-generator',
+  'checksum-verifier',
+  'csv-diff',
+  'encoding-detector',
+];
+
 /* ─── Component ─────────────────────────────────────────────────────────── */
 
 export default function AcrobatAlternative() {
   const [users, setUsers] = useState(1);
+  const [usersText, setUsersText] = useState('1');
   const [tierId, setTierId] = useState('low');
   const tier = PRICE_TIERS.find((t) => t.id === tierId) ?? PRICE_TIERS[0];
 
@@ -252,22 +290,19 @@ export default function AcrobatAlternative() {
 
       {/* ── Hero ───────────────────────────────────────────────────────── */}
       <div className="aa-hero">
-        <div className="aa-hero-eyebrow">
-          <CircleDollarSign size={15} />
-          Subscription review for Lakehead researchers
-        </div>
+        <div className="htw-kicker">Subscription review</div>
         <h1 className="aa-hero-title">Do you still need Adobe Acrobat Pro?</h1>
         <p className="aa-hero-subtitle">
           Before your next renewal, it's worth taking stock of what you actually use
-          Acrobat Pro for. For most research workflows at Lakehead, the features you
-          rely on are already available through free tools, most of them provided
-          through Lakehead — a simple way to reclaim a few hundred dollars a year
-          from a subscription that may be quietly auto-renewing.
+          Acrobat Pro for. For most research workflows at Lakehead, those features are
+          already covered by free tools — two of them included with your Lakehead
+          account — so you may be able to drop a subscription that could be quietly
+          auto-renewing.
         </p>
         <div className="aa-cost-badge">
           <span className="aa-cost-free">$0&thinsp;/&thinsp;year</span>
           <span className="aa-cost-divider">vs</span>
-          <span className="aa-cost-paid">$177–$352&thinsp;/&thinsp;year</span>
+          <span className="aa-cost-paid">${PRICE_TIERS[0].amount}–${PRICE_TIERS[1].amount}&thinsp;/&thinsp;year</span>
           <span className="aa-cost-label">Acrobat Pro subscription</span>
         </div>
       </div>
@@ -300,7 +335,11 @@ export default function AcrobatAlternative() {
                   max="50"
                   step="1"
                   value={Math.min(safeUsers, 50)}
-                  onChange={(e) => setUsers(parseInt(e.target.value, 10))}
+                  onChange={(e) => {
+                    const n = parseInt(e.target.value, 10);
+                    setUsers(n);
+                    setUsersText(String(n));
+                  }}
                   className="aa-calc-slider"
                   aria-label="Number of users (slider, 1 to 50)"
                 />
@@ -308,8 +347,17 @@ export default function AcrobatAlternative() {
                   type="number"
                   min="1"
                   max="500"
-                  value={safeUsers}
-                  onChange={(e) => setUsers(parseInt(e.target.value, 10) || 1)}
+                  value={usersText}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setUsersText(v);
+                    const n = v === '' ? NaN : Number(v);
+                    if (Number.isFinite(n)) setUsers(n);
+                  }}
+                  onBlur={() => {
+                    setUsers(safeUsers);
+                    setUsersText(String(safeUsers));
+                  }}
                   className="aa-calc-number"
                   aria-label="Number of users (exact)"
                 />
@@ -320,19 +368,18 @@ export default function AcrobatAlternative() {
             </div>
 
             <div className="aa-calc-field">
-              <span className="aa-calc-label">
+              <span className="aa-calc-label" id="aa-calc-plan-heading">
                 <CircleDollarSign size={14} aria-hidden="true" />
                 Acrobat Pro plan (per user, per year)
               </span>
-              <div className="aa-calc-tiers" role="radiogroup" aria-label="Acrobat Pro plan tier">
+              <div className="aa-calc-tiers" role="group" aria-labelledby="aa-calc-plan-heading">
                 {PRICE_TIERS.map((t) => {
                   const active = t.id === tierId;
                   return (
                     <button
                       key={t.id}
                       type="button"
-                      role="radio"
-                      aria-checked={active}
+                      aria-pressed={active}
                       onClick={() => setTierId(t.id)}
                       className={`aa-calc-tier${active ? ' aa-calc-tier--active' : ''}`}
                     >
@@ -503,11 +550,12 @@ export default function AcrobatAlternative() {
       <section className="aa-section aa-honest-section">
         <div className="aa-honest-header">
           <AlertCircle size={18} style={{ color: 'var(--accent-amber)', flexShrink: 0 }} />
-          <h2 className="aa-section-title" style={{ margin: 0 }}>When Acrobat Pro still earns its keep</h2>
+          <h2 className="aa-section-title" style={{ margin: 0 }}>When paid Acrobat still earns its keep</h2>
         </div>
         <p className="aa-section-intro">
           Seven jobs RDM Toolkit can't do. Most have a free answer; each card says when
-          Acrobat Pro is still worth paying for. If none of these match your workflow,
+          paying for Acrobat is still worth it, and two of them don't need Pro at all —
+          the cheaper Acrobat Standard does them. If none of these match your workflow,
           the toolkit above will likely serve you just as well.
         </p>
         <p className="aa-honest-rule">
@@ -538,8 +586,16 @@ export default function AcrobatAlternative() {
                   ))}
                 </ul>
                 <p className="aa-honest-prowins">
-                  <strong>Pro still wins when</strong> {c.proWins}
+                  <strong>{c.standardCovers ? 'Paid Acrobat still wins when' : 'Pro still wins when'}</strong> {c.proWins}
                 </p>
+                {c.standardCovers && (
+                  <p className="aa-honest-standard">
+                    You don’t need Pro for this: Acrobat Standard does it too. At Adobe’s retail
+                    prices, Standard is C${cad(ADOBE_CA.standardAnnual)} a year before tax, against
+                    C${cad(ADOBE_CA.proAnnual)} for Pro. If you buy through Lakehead, ask whether
+                    Standard is offered.
+                  </p>
+                )}
               </div>
             </li>
           ))}
@@ -560,25 +616,14 @@ export default function AcrobatAlternative() {
             account, no subscription, and no files ever leaving your device.
           </p>
           <div className="aa-beyond-chips">
-            {[
-              { label: 'De-identify Research Data', toolId: 'data-anonymizer' },
-              { label: 'SHA-256 File Hasher',    toolId: 'sha256-hasher' },
-              { label: 'BibTeX Formatter',       toolId: 'bibtex-formatter' },
-              { label: 'CSV \u2194 JSON Converter',   toolId: 'csv-json-converter' },
-              { label: 'AES-256 Text Encryption',toolId: 'encrypt-decrypt-text' },
-              { label: 'File to Markdown',       toolId: 'to-markdown' },
-              { label: 'Password Generator',     toolId: 'password-generator' },
-              { label: 'Checksum Verifier',      toolId: 'checksum-verifier' },
-              { label: 'CSV Diff',               toolId: 'csv-diff' },
-              { label: 'Encoding Detector',      toolId: 'encoding-detector' },
-            ].map(({ label, toolId }) => (
-              <a key={toolId} href={`#${toolId}`} className="aa-beyond-chip">
-                {label}
+            {BEYOND_TOOL_IDS.map((id) => getToolById(id)).filter(Boolean).map((tool) => (
+              <a key={tool.id} href={`#${tool.id}`} className="aa-beyond-chip">
+                {tool.name}
               </a>
             ))}
           </div>
-          <a href="" className="aa-beyond-all" onClick={(e) => { e.preventDefault(); window.location.hash = ''; }}>
-            Explore all 46 tools →
+          <a href="#" className="aa-beyond-all" onClick={(e) => { e.preventDefault(); window.location.hash = ''; }}>
+            Explore all {ALL_TOOLS.length} tools →
           </a>
         </div>
       </section>

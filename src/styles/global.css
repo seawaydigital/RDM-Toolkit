@@ -12484,27 +12484,17 @@ input:focus, textarea:focus, select:focus {
 
 .aa-hero {
   text-align: center;
-  padding: var(--space-2xl) 0 var(--space-xl);
-}
-
-.aa-hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: var(--space-md);
+  padding: var(--space-xl) 0;
 }
 
 .aa-hero-title {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.1;
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 72, "SOFT" 40;
   letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--text-parchment);
   margin-bottom: var(--space-md);
 }
 
@@ -12554,14 +12544,9 @@ input:focus, textarea:focus, select:focus {
 
 /* ── Savings Calculator ───────────────────────────────────────────────────── */
 
-.aa-calc-section .aa-section-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .aa-calc-section .aa-section-title svg {
   color: var(--accent-primary);
+  align-self: center;
 }
 
 .aa-calc {
@@ -12818,6 +12803,9 @@ input:focus, textarea:focus, select:focus {
   .aa-calc-result-amount {
     font-size: 2rem;
   }
+  .aa-hero-title {
+    font-size: 32px;
+  }
 }
 
 /* ── Sections ─────────────────────────────────────────────────────────────── */
@@ -12827,10 +12815,23 @@ input:focus, textarea:focus, select:focus {
 }
 
 .aa-section-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: var(--space-sm);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 36, "SOFT" 40;
+  letter-spacing: -0.01em;
+  color: var(--text-parchment);
+  margin-bottom: 14px;
+}
+
+.aa-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-hairline) 0%, transparent 100%);
 }
 
 .aa-section-intro {
@@ -13087,6 +13088,10 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: var(--space-sm);
 }
 
+.aa-honest-header .aa-section-title {
+  flex: 1;
+}
+
 .aa-honest-rule {
   font-size: 0.8125rem;
   color: var(--text-secondary);
@@ -13192,6 +13197,13 @@ input:focus, textarea:focus, select:focus {
 .aa-honest-prowins strong {
   color: var(--accent-amber);
   font-weight: 600;
+}
+
+.aa-honest-standard {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: var(--space-xs) 0 0;
 }
 
 /* ── Beyond Acrobat callout ───────────────────────────────────────────────── */
