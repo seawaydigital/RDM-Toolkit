@@ -20,13 +20,16 @@ const ADOBE_CA = {
 };
 const ONTARIO_HST = 0.13;
 
+/* Adobe prices are shown to the cent, e.g. 311.8 → "311.80". */
+const cad = (amount) => amount.toFixed(2);
+
 const PRICE_TIERS = [
   { id: 'low',  amount: 177, label: 'Lakehead internal', hint: 'Lakehead enterprise licensing, paid up-front for the full year' },
   {
     id: 'high',
     amount: Math.round(ADOBE_CA.proAnnual * (1 + ONTARIO_HST)),
     label: 'Retail (with HST)',
-    hint: `Adobe’s Canadian price for an individual annual plan (C$${ADOBE_CA.proAnnual}, ${ADOBE_CA.checked}) plus 13% Ontario HST`,
+    hint: `Adobe’s Canadian price for an individual annual prepaid plan (C$${cad(ADOBE_CA.proAnnual)}, ${ADOBE_CA.checked}) plus 13% Ontario HST`,
   },
 ];
 
@@ -154,7 +157,7 @@ const TASK_GROUPS = [
     tasks: [
       { task: 'PDF → Word',                          badge: 'microsoft', label: 'Microsoft Word (File → Open)' },
       { task: 'PDF tables → Excel',                  badge: 'microsoft', label: 'Microsoft Excel on Windows (Data → Get Data → From File → From PDF)' },
-      { task: 'PDF → Word (complex layouts)',        badge: 'gap',       label: 'No reliable free option — a paid Acrobat plan (Standard is enough) or another paid converter' },
+      { task: 'PDF → Word (complex layouts)',        badge: 'gap',       label: 'No reliable free option — Acrobat Standard or Pro (paid), or another paid converter' },
       { task: 'PDF → images (PNG / JPG)',            badge: 'rdm',       label: 'RDM Toolkit', toolId: 'pdf-to-images' },
       { task: 'Images → PDF',                        badge: 'rdm',       label: 'RDM Toolkit', toolId: 'image-to-pdf' },
       { task: 'Extract images from PDF',             badge: 'rdm',       label: 'RDM Toolkit', toolId: 'extract-images-from-pdf' },
@@ -163,7 +166,7 @@ const TASK_GROUPS = [
   {
     group: 'Editing & Review',
     tasks: [
-      { task: 'Edit existing text or images in a PDF', badge: 'gap',       label: 'Small fixes: LibreOffice Draw. Otherwise edit the source file and re-export' },
+      { task: 'Edit existing text or images in a PDF', badge: 'gap',       label: 'Small fixes: LibreOffice Draw. Otherwise edit the source file and re-export, or use Acrobat Standard (paid)' },
       { task: 'Compare two versions of a document',    badge: 'microsoft', label: 'Microsoft Word (Review → Compare)' },
     ],
   },
@@ -243,7 +246,6 @@ const HONEST_CASES = [
       { name: 'OpenSign', url: 'https://www.opensignlabs.com/', note: 'open source, free cloud or self-hosted. The cloud version uploads your file, so it is not for PHIPA or OCAP® documents.' },
     ],
     proWins: 'you send high volumes and need templates and audit trails at scale.',
-    standardCovers: true,
   },
   {
     title: 'Certificate-based (PKI) digital signatures',
@@ -538,11 +540,11 @@ export default function AcrobatAlternative() {
       <section className="aa-section aa-honest-section">
         <div className="aa-honest-header">
           <AlertCircle size={18} style={{ color: 'var(--accent-amber)', flexShrink: 0 }} />
-          <h2 className="aa-section-title" style={{ margin: 0 }}>When Acrobat Pro still earns its keep</h2>
+          <h2 className="aa-section-title" style={{ margin: 0 }}>When paid Acrobat still earns its keep</h2>
         </div>
         <p className="aa-section-intro">
           Seven jobs RDM Toolkit can't do. Most have a free answer; each card says when
-          paying for Acrobat is still worth it, and three of them don't need Pro at all —
+          paying for Acrobat is still worth it, and two of them don't need Pro at all —
           the cheaper Acrobat Standard does them. If none of these match your workflow,
           the toolkit above will likely serve you just as well.
         </p>
@@ -578,8 +580,10 @@ export default function AcrobatAlternative() {
                 </p>
                 {c.standardCovers && (
                   <p className="aa-honest-standard">
-                    You don’t need Pro for this: Acrobat Standard does it too, for
-                    C${ADOBE_CA.standardAnnual} a year before tax instead of C${ADOBE_CA.proAnnual}.
+                    You don’t need Pro for this: Acrobat Standard does it too. At Adobe’s retail
+                    prices, Standard is C${cad(ADOBE_CA.standardAnnual)} a year before tax, against
+                    C${cad(ADOBE_CA.proAnnual)} for Pro. If you buy through Lakehead, ask whether
+                    Standard is offered.
                   </p>
                 )}
               </div>
