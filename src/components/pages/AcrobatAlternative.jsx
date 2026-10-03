@@ -7,11 +7,27 @@ import {
 } from 'lucide-react';
 import { ALL_TOOLS, getToolById } from '../../data/toolRegistry';
 
-/* ─── Pricing tiers (used by the savings calculator) ─────────────────────── */
+/* ─── Pricing ───────────────────────────────────────────────────────────── */
+
+/* Adobe's Canadian retail prices, read from adobe.com/ca/acrobat/plans.html
+   (Individuals → Annual, prepaid) on 2026-10-02. Both exclude tax. Re-check
+   before each academic year. The Lakehead rate comes from the owner, not a
+   public page. */
+const ADOBE_CA = {
+  checked: 'October 2026',
+  proAnnual: 311.88,
+  standardAnnual: 239.88,
+};
+const ONTARIO_HST = 0.13;
 
 const PRICE_TIERS = [
   { id: 'low',  amount: 177, label: 'Lakehead internal', hint: 'Lakehead enterprise licensing, paid up-front for the full year' },
-  { id: 'high', amount: 352, label: 'Retail (with HST)', hint: 'Adobe individual annual plan at retail, including 13% Ontario HST' },
+  {
+    id: 'high',
+    amount: Math.round(ADOBE_CA.proAnnual * (1 + ONTARIO_HST)),
+    label: 'Retail (with HST)',
+    hint: `Adobe’s Canadian price for an individual annual plan (C$${ADOBE_CA.proAnnual}, ${ADOBE_CA.checked}) plus 13% Ontario HST`,
+  },
 ];
 
 /* ─── Data ──────────────────────────────────────────────────────────────── */
@@ -138,7 +154,7 @@ const TASK_GROUPS = [
     tasks: [
       { task: 'PDF → Word',                          badge: 'microsoft', label: 'Microsoft Word (File → Open)' },
       { task: 'PDF tables → Excel',                  badge: 'microsoft', label: 'Microsoft Excel on Windows (Data → Get Data → From File → From PDF)' },
-      { task: 'PDF → Word (complex layouts)',        badge: 'gap',       label: 'No reliable free option — Acrobat Pro or another paid converter' },
+      { task: 'PDF → Word (complex layouts)',        badge: 'gap',       label: 'No reliable free option — a paid Acrobat plan (Standard is enough) or another paid converter' },
       { task: 'PDF → images (PNG / JPG)',            badge: 'rdm',       label: 'RDM Toolkit', toolId: 'pdf-to-images' },
       { task: 'Images → PDF',                        badge: 'rdm',       label: 'RDM Toolkit', toolId: 'image-to-pdf' },
       { task: 'Extract images from PDF',             badge: 'rdm',       label: 'RDM Toolkit', toolId: 'extract-images-from-pdf' },
@@ -186,6 +202,7 @@ const HONEST_CASES = [
       { name: 'LibreOffice Draw', url: 'https://www.libreoffice.org', note: 'open source, all platforms; opens each text block as editable. Best for short fixes, and there is a learning curve.' },
     ],
     proWins: 'you edit PDFs often, or need paragraphs to reflow cleanly after an edit.',
+    standardCovers: true,
   },
   {
     title: 'Making scanned documents searchable (OCR)',
@@ -201,6 +218,7 @@ const HONEST_CASES = [
       { name: 'Microsoft Word', url: null, note: 'File → Open converts text-heavy PDFs well. Pages that are mostly charts or graphics may come through as images, and we found no free offline tool that reliably does better.' },
     ],
     proWins: 'tables and multi-column layouts must come through faithfully.',
+    standardCovers: true,
   },
   {
     title: 'Accessibility checking and tagging (AODA)',
@@ -225,6 +243,7 @@ const HONEST_CASES = [
       { name: 'OpenSign', url: 'https://www.opensignlabs.com/', note: 'open source, free cloud or self-hosted. The cloud version uploads your file, so it is not for PHIPA or OCAP® documents.' },
     ],
     proWins: 'you send high volumes and need templates and audit trails at scale.',
+    standardCovers: true,
   },
   {
     title: 'Certificate-based (PKI) digital signatures',
@@ -283,7 +302,7 @@ export default function AcrobatAlternative() {
         <div className="aa-cost-badge">
           <span className="aa-cost-free">$0&thinsp;/&thinsp;year</span>
           <span className="aa-cost-divider">vs</span>
-          <span className="aa-cost-paid">$177–$352&thinsp;/&thinsp;year</span>
+          <span className="aa-cost-paid">${PRICE_TIERS[0].amount}–${PRICE_TIERS[1].amount}&thinsp;/&thinsp;year</span>
           <span className="aa-cost-label">Acrobat Pro subscription</span>
         </div>
       </div>
@@ -523,7 +542,8 @@ export default function AcrobatAlternative() {
         </div>
         <p className="aa-section-intro">
           Seven jobs RDM Toolkit can't do. Most have a free answer; each card says when
-          Acrobat Pro is still worth paying for. If none of these match your workflow,
+          paying for Acrobat is still worth it, and three of them don't need Pro at all —
+          the cheaper Acrobat Standard does them. If none of these match your workflow,
           the toolkit above will likely serve you just as well.
         </p>
         <p className="aa-honest-rule">
@@ -554,8 +574,14 @@ export default function AcrobatAlternative() {
                   ))}
                 </ul>
                 <p className="aa-honest-prowins">
-                  <strong>Pro still wins when</strong> {c.proWins}
+                  <strong>{c.standardCovers ? 'Paid Acrobat still wins when' : 'Pro still wins when'}</strong> {c.proWins}
                 </p>
+                {c.standardCovers && (
+                  <p className="aa-honest-standard">
+                    You don’t need Pro for this: Acrobat Standard does it too, for
+                    C${ADOBE_CA.standardAnnual} a year before tax instead of C${ADOBE_CA.proAnnual}.
+                  </p>
+                )}
               </div>
             </li>
           ))}

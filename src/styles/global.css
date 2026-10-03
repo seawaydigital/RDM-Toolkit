@@ -13194,6 +13194,13 @@ input:focus, textarea:focus, select:focus {
   font-weight: 600;
 }
 
+.aa-honest-standard {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: var(--space-xs) 0 0;
+}
+
 /* ── Beyond Acrobat callout ───────────────────────────────────────────────── */
 
 .aa-beyond-card {
