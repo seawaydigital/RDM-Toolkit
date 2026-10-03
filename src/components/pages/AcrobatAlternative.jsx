@@ -109,7 +109,7 @@ const STACK = [
     covers: [
       'Small in-place text fixes in a PDF (opens in Draw)',
       'Export Writer & Calc files to PDF',
-      'Works fully offline, so files never need to be uploaded',
+      'Sign PDFs with a certificate (File → Digital Signatures)',
       'Free and open source, for Windows, Mac and Linux',
     ],
     link: 'https://www.libreoffice.org',
@@ -167,7 +167,7 @@ const TASK_GROUPS = [
     group: 'Editing & Review',
     tasks: [
       { task: 'Edit existing text or images in a PDF', badge: 'gap',       label: 'Small fixes: LibreOffice Draw. Otherwise edit the source file and re-export, or use Acrobat Standard (paid)' },
-      { task: 'Compare two versions of a document',    badge: 'microsoft', label: 'Microsoft Word (Review → Compare) — for two PDFs, open each in Word first' },
+      { task: 'Compare two versions of a document',    badge: 'microsoft', label: 'Microsoft Word (Review → Compare) — for two PDFs, convert each to a Word file first (File → Open, then save as .docx)' },
     ],
   },
   {
@@ -297,8 +297,9 @@ export default function AcrobatAlternative() {
         <p className="aa-hero-subtitle">
           Before your next renewal, it's worth taking stock of what you actually use
           Acrobat Pro for. For most research workflows at Lakehead, those features are
-          already covered by free tools — two of them provided through Lakehead — so you
-          may be able to stop paying for a subscription that is quietly auto-renewing.
+          already covered by free tools — two of them included with your Lakehead
+          account — so you may be able to drop a subscription that could be quietly
+          auto-renewing.
         </p>
         <div className="aa-cost-badge">
           <span className="aa-cost-free">$0&thinsp;/&thinsp;year</span>
