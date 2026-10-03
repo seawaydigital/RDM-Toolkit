@@ -290,10 +290,7 @@ export default function AcrobatAlternative() {
 
       {/* ── Hero ───────────────────────────────────────────────────────── */}
       <div className="aa-hero">
-        <div className="aa-hero-eyebrow">
-          <CircleDollarSign size={15} />
-          Subscription review for Lakehead researchers
-        </div>
+        <div className="htw-kicker">Subscription review</div>
         <h1 className="aa-hero-title">Do you still need Adobe Acrobat Pro?</h1>
         <p className="aa-hero-subtitle">
           Before your next renewal, it's worth taking stock of what you actually use
@@ -371,11 +368,11 @@ export default function AcrobatAlternative() {
             </div>
 
             <div className="aa-calc-field">
-              <span className="aa-calc-label" id="aa-calc-tier-label">
+              <span className="aa-calc-label" id="aa-calc-plan-heading">
                 <CircleDollarSign size={14} aria-hidden="true" />
                 Acrobat Pro plan (per user, per year)
               </span>
-              <div className="aa-calc-tiers" role="group" aria-labelledby="aa-calc-tier-label">
+              <div className="aa-calc-tiers" role="group" aria-labelledby="aa-calc-plan-heading">
                 {PRICE_TIERS.map((t) => {
                   const active = t.id === tierId;
                   return (
