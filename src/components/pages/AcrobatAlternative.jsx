@@ -110,7 +110,7 @@ const STACK = [
       'Small in-place text fixes in a PDF (opens in Draw)',
       'Export Writer & Calc files to PDF',
       'Sign PDFs with a certificate (File → Digital Signatures)',
-      'Free and open source, for Windows, Mac and Linux',
+      'Open source, for Windows, Mac and Linux',
     ],
     link: 'https://www.libreoffice.org',
     linkLabel: 'Download free',

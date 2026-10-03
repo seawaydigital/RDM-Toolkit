@@ -4,6 +4,8 @@
 
 **Goal:** Make the Adobe Acrobat Alternative page (`#acrobat-alternative`) accurate as of October 2026 and consistent with the rest of RDM Toolkit in data sourcing, wording and visual style.
 
+> **Superseded in review:** only two honest cards set `standardCovers` (edit PDF text, complex PDF→Word). The signature card was excluded because Adobe lists bulk send and reusable e-sign templates as Pro-only. The section heading became "When paid Acrobat still earns its keep", and other review fixes are recorded in CLAUDE.md's 2026-10-03 Recent Changes row.
+
 **Architecture:** All changes are in one page component, `src/components/pages/AcrobatAlternative.jsx`, plus its `.aa-*` rules in `src/styles/global.css`. Tool names and the tool count come from `src/data/toolRegistry.js` (the way `HomePage.jsx` already does it). Adobe prices sit in one constant with their source and check date. A new `node --test` file guards the registry links. The page itself is JSX, which `node --test` cannot import, so the test reads the source text (the same approach `scripts/security-audit.mjs` takes).
 
 **Tech Stack:** React 18, Vite 8, plain CSS in `global.css`, Node built-in test runner.
