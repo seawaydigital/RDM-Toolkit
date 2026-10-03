@@ -109,8 +109,8 @@ const STACK = [
     covers: [
       'Small in-place text fixes in a PDF (opens in Draw)',
       'Export Writer & Calc files to PDF',
-      'Appropriate for OCAP® & PHIPA-governed data',
-      'Nothing leaves your device — ever',
+      'Works fully offline, so files never need to be uploaded',
+      'Free and open source, for Windows, Mac and Linux',
     ],
     link: 'https://www.libreoffice.org',
     linkLabel: 'Download free',
@@ -167,7 +167,7 @@ const TASK_GROUPS = [
     group: 'Editing & Review',
     tasks: [
       { task: 'Edit existing text or images in a PDF', badge: 'gap',       label: 'Small fixes: LibreOffice Draw. Otherwise edit the source file and re-export, or use Acrobat Standard (paid)' },
-      { task: 'Compare two versions of a document',    badge: 'microsoft', label: 'Microsoft Word (Review → Compare)' },
+      { task: 'Compare two versions of a document',    badge: 'microsoft', label: 'Microsoft Word (Review → Compare) — for two PDFs, open each in Word first' },
     ],
   },
   {
@@ -242,7 +242,7 @@ const HONEST_CASES = [
   {
     title: 'Sending documents out for signature',
     free: [
-      { name: 'Your unit’s e-signature service', url: null, note: 'ask your department or the Research Office what is already licensed.' },
+      { name: 'Your unit’s e-signature service', url: null, note: 'ask your department what is already licensed.' },
       { name: 'OpenSign', url: 'https://www.opensignlabs.com/', note: 'open source, free cloud or self-hosted. The cloud version uploads your file, so it is not for PHIPA or OCAP® documents.' },
     ],
     proWins: 'you send high volumes and need templates and audit trails at scale.',
@@ -296,10 +296,9 @@ export default function AcrobatAlternative() {
         <h1 className="aa-hero-title">Do you still need Adobe Acrobat Pro?</h1>
         <p className="aa-hero-subtitle">
           Before your next renewal, it's worth taking stock of what you actually use
-          Acrobat Pro for. For most research workflows at Lakehead, the features you
-          rely on are already available through free tools, most of them provided
-          through Lakehead — a simple way to reclaim a few hundred dollars a year
-          from a subscription that may be quietly auto-renewing.
+          Acrobat Pro for. For most research workflows at Lakehead, those features are
+          already covered by free tools — two of them provided through Lakehead — so you
+          may be able to stop paying for a subscription that is quietly auto-renewing.
         </p>
         <div className="aa-cost-badge">
           <span className="aa-cost-free">$0&thinsp;/&thinsp;year</span>
