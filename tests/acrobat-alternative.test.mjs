@@ -15,6 +15,7 @@ test('every tool the page links to exists in the registry', () => {
   const tableIds = [...SOURCE.matchAll(/toolId: '([^']+)'/g)].map((m) => m[1]);
   const chipBlock = SOURCE.match(/const BEYOND_TOOL_IDS = \[([^\]]*)\]/);
   assert.ok(chipBlock, 'chips should be listed by id in BEYOND_TOOL_IDS');
+  assert.match(SOURCE, /BEYOND_TOOL_IDS\.map\(/, 'chips should render from BEYOND_TOOL_IDS');
   const chipIds = [...chipBlock[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
 
   assert.ok(tableIds.length >= 19, 'coverage table should link its RDM rows');
