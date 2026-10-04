@@ -963,7 +963,7 @@ const EXPLAINERS = {
   },
 
   'convert-image-format': {
-    whatItDoes: 'Converts an image to JPG, PNG or WebP, with a quality setting for JPG and WebP.',
+    whatItDoes: 'Converts an image to JPG, PNG, WebP or BMP, with a quality setting for JPG and WebP.',
     howItWorks: [
       'Your browser decodes the image, draws it onto a canvas at full size and encodes it in the format you choose. Transparent areas become white in formats that can’t store transparency.',
     ],
@@ -971,7 +971,8 @@ const EXPLAINERS = {
       library: 'Canvas API (built into the browser) — no image library.',
       flow: [
         'Decoded in an <code>&lt;img&gt;</code> element, drawn at natural size with <code>ctx.drawImage()</code>.',
-        'Encoded with <code>canvas.toBlob(type, quality)</code>.',
+        'JPG, PNG and WebP are encoded with <code>canvas.toBlob(type, quality)</code>.',
+        'BMP is written by the tool itself (<code>src/utils/bmpEncoder.js</code>, 24-bit, uncompressed) from <code>ctx.getImageData()</code>, because browsers can’t encode BMP.',
       ],
       sourceFile: 'src/tools/images/ConvertImageFormat.jsx',
     },
@@ -980,8 +981,8 @@ const EXPLAINERS = {
       'The converted copy does not carry the original’s EXIF metadata (GPS location, camera details).',
     ],
     limitations: [
-      'Browsers can only write JPG, PNG and WebP. Choosing BMP currently saves a PNG-encoded file with a .bmp name; use PNG instead.',
-      'Only browsers that can display a format can convert from it. TIFF files open in Safari but not in Chrome, Edge or Firefox.',
+      'Only browsers that can display a format can convert from it. TIFF files open in Safari but not in Chrome, Edge or Firefox; the tool tells you if your browser can’t read the file.',
+      'BMP output has no transparency: transparent areas become white.',
       'Converting to JPG or WebP loses some quality; converting a JPG to PNG makes the file bigger without improving it.',
     ],
     verify: { quick: DEFAULT_QUICK_VERIFY },
@@ -1039,15 +1040,15 @@ const EXPLAINERS = {
   'csv-encoding-fixer': {
     whatItDoes: 'Detects how a CSV file’s text is encoded and saves a UTF-8 copy, so accented and special characters display correctly in other software.',
     howItWorks: [
-      'The file’s bytes are checked for a byte-order mark, then for valid UTF-8. If the file is neither, it is treated as Windows-1252 (the usual encoding of older Windows and Excel exports) and its characters are mapped to Unicode.',
+      'The file’s bytes are checked for a byte-order mark, then for the pattern of zero bytes UTF-16 leaves, then for valid UTF-8. If none fits, it is treated as Windows-1252 (the usual encoding of older Windows and Excel exports) and its characters are mapped to Unicode.',
       'You see a preview of the first rows before and after, then download the UTF-8 copy.',
     ],
     technicalDetails: {
-      library: 'Browser <code>TextDecoder</code> / <code>TextEncoder</code>, plus a built-in Windows-1252 character map.',
+      library: 'Browser <code>TextDecoder</code> / <code>TextEncoder</code>, plus a built-in Windows-1252 character map (<code>src/utils/csvEncoding.js</code>, unit-tested).',
       flow: [
-        'Byte-order marks checked for UTF-8, UTF-16 LE and UTF-16 BE.',
+        'Byte-order marks checked for UTF-8, UTF-16 LE and UTF-16 BE; UTF-16 without a mark recognised from its zero bytes.',
         'Otherwise: valid UTF-8 → unchanged; not valid UTF-8 → decoded as Windows-1252 (or Latin-1).',
-        'Output written with <code>TextEncoder</code> as UTF-8 without a byte-order mark.',
+        'Output written with <code>TextEncoder</code> as UTF-8, with a byte-order mark only if you tick the Excel option.',
       ],
       sourceFile: 'src/tools/text/CSVEncodingFixer.jsx',
     },
@@ -1055,8 +1056,7 @@ const EXPLAINERS = {
       'The file is read and re-encoded in this browser tab. Nothing is uploaded.',
     ],
     limitations: [
-      'The output has no byte-order mark, so Excel on Windows may still show garbled accents when you double-click it. Open it with Data → From Text/CSV and choose UTF-8 instead.',
-      'UTF-16 files (Excel’s “Unicode Text”) are recognised but not yet converted correctly. Re-save them from Excel as “CSV UTF-8” instead.',
+      'By default the output has no byte-order mark, which most software prefers. Excel on Windows needs one to recognise UTF-8 when you double-click a file, so tick the Excel option if that is how the file will be opened.',
       'Encoding detection is a best guess. Files in other encodings, such as Shift-JIS, are not supported. Check the preview before downloading.',
     ],
     verify: { quick: DEFAULT_QUICK_VERIFY },
