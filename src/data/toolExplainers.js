@@ -831,3 +831,65 @@ export const TOOL_CAVEATS = {
 export function getCaveats(toolId) {
   return TOOL_CAVEATS[toolId] || null;
 }
+
+/**
+ * "Not quite right?" pointers between tools people mix up. Rendered under the
+ * tool header by ToolDisambiguation (src/components/ui/ToolCaveats.jsx), with a
+ * link to `other`. Every pair is defined in both directions
+ * (tests/explainers.test.mjs). Plain strings only; the text should say when the
+ * other tool is the better choice, not repeat this tool's description.
+ */
+export const TOOL_DISAMBIGUATION = {
+  'strip-file-metadata': {
+    other: 'strip-image-metadata',
+    text: 'Only working with photos? Strip Image Metadata lists every EXIF field (GPS location, camera, timestamps) before removing them.',
+  },
+  'strip-image-metadata': {
+    other: 'strip-file-metadata',
+    text: 'Have PDFs as well? Strip File Metadata clears author names and hidden document data from PDFs, not just images.',
+  },
+  'split-pdf': {
+    other: 'pdf-page-delete',
+    text: 'Just want to drop a few pages and keep one file? Delete PDF Pages is quicker.',
+  },
+  'pdf-page-delete': {
+    other: 'split-pdf',
+    text: 'Want the pages you are removing as a separate file, or the document split into several files? Use Split PDF.',
+  },
+  'extract-images-from-pdf': {
+    other: 'pdf-to-images',
+    text: 'Want a picture of each whole page, text and all? PDF to Images exports every page as an image.',
+  },
+  'pdf-to-images': {
+    other: 'extract-images-from-pdf',
+    text: 'Only want the photos and figures inside the PDF, at their embedded resolution? Use Extract Images from PDF.',
+  },
+  'sha256-hasher': {
+    other: 'checksum-verifier',
+    text: 'Checking many files at once, or need a SHA256SUMS list to send with them? Use Checksum Batch Verifier.',
+  },
+  'checksum-verifier': {
+    other: 'sha256-hasher',
+    text: 'Need one quick hash, a hash of some text, or SHA-1, SHA-384 or SHA-512 instead of SHA-256? Use the SHA-256 Hash Generator.',
+  },
+  'encrypt-decrypt-text': {
+    other: 'password-protect-pdf',
+    text: 'Protecting a whole PDF? Password Protect PDF locks the file itself, so it asks for a password when opened.',
+  },
+  'password-protect-pdf': {
+    other: 'encrypt-decrypt-text',
+    text: 'Need to protect a short piece of text, such as notes you will paste into an email? Use Encrypt / Decrypt Text.',
+  },
+  'pdf-redaction': {
+    other: 'data-anonymizer',
+    text: 'Is the sensitive information in a spreadsheet or plain text rather than a PDF? De-identify Research Data replaces names, emails and IDs throughout.',
+  },
+  'data-anonymizer': {
+    other: 'pdf-redaction',
+    text: 'Is the information in a PDF, such as a scanned form or a report? Use PDF Redaction to black it out permanently.',
+  },
+};
+
+export function getDisambiguation(toolId) {
+  return TOOL_DISAMBIGUATION[toolId] || null;
+}
