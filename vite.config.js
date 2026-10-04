@@ -205,6 +205,10 @@ export default defineConfig({
           // rejects new chunk names).
           if (normalized.includes('/src/utils/pdfEncrypt.js')) return 'pdf-lib';
           if (normalized.includes('/src/utils/pdfMetadata.js')) return 'pdf-lib';
+          // Sample-file generators shared by three lazy tools (De-identify,
+          // PDF Redaction, Strip Image Metadata). Small, so they ride in the
+          // entry chunk rather than becoming a new shared chunk.
+          if (normalized.includes('/src/utils/sampleFiles.js')) return 'index';
           if (normalized.includes('node_modules/pdfjs-dist/')) return 'pdfjs';
           if (normalized.includes('node_modules/jszip/')) return 'jszip';
           if (normalized.includes('node_modules/zxcvbn/')) return 'zxcvbn';

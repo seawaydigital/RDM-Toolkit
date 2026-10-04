@@ -16553,3 +16553,30 @@ select:focus-visible,
   text-underline-offset: 3px;
   white-space: nowrap;
 }
+
+/* DropZone "No file handy? Try a sample" (src/utils/sampleFiles.js) */
+.dropzone-sample {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.dropzone-sample-btn {
+  min-height: 32px;
+  padding: 4px 2px;
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--accent-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.dropzone-sample-btn:hover:not(:disabled) {
+  color: var(--text-parchment);
+}
+
+.dropzone-sample-btn:disabled {
+  color: var(--text-secondary);
+  cursor: progress;
+}
