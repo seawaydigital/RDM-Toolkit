@@ -1,7 +1,19 @@
-import { Shield, WifiOff, Wifi, Eye, FileCheck, Lock, Globe, MonitorSmartphone, ArrowRight, ArrowDown, CheckCircle, XCircle, Laptop, ExternalLink, Clock, FileText, Image as ImageIcon, Cpu, Puzzle, HardDrive, Users, FolderDown } from 'lucide-react';
+import { Shield, WifiOff, Wifi, Eye, FileCheck, Lock, Globe, MonitorSmartphone, ArrowRight, ArrowDown, CheckCircle, XCircle, Laptop, ExternalLink, Clock, FileText, Image as ImageIcon, Cpu, Puzzle, HardDrive, Users, FolderDown, Bot } from 'lucide-react';
 import NetworkSilence from '../ui/NetworkSilence';
 import ClearLocalData from '../ui/ClearLocalData';
-import { PROJECT } from '../../data/institutionConfig';
+import { PROJECT, INSTITUTION, MAILTO } from '../../data/institutionConfig';
+import { scrollToId } from '../../utils/scrollToId';
+
+const ON_THIS_PAGE = [
+  { id: 'htw-what-happens', label: 'What happens when you use a tool' },
+  { id: 'htw-different', label: 'What makes this different' },
+  { id: 'htw-in-browser', label: 'What “runs in your browser” means' },
+  { id: 'htw-history', label: 'Why this is possible now' },
+  { id: 'htw-verify', label: 'Check it yourself' },
+  { id: 'htw-compliance', label: 'Data compliance' },
+  { id: 'htw-limits', label: 'Where this model ends (incl. AI tools)' },
+  { id: 'htw-faq', label: 'Common questions' },
+];
 
 export default function HowThisWorks() {
   return (
@@ -13,6 +25,22 @@ export default function HowThisWorks() {
           A plain-language explanation of why your files are safe here.
         </p>
       </div>
+
+      <nav className="htw-toc" aria-label="On this page">
+        <p className="htw-toc-title">On this page</p>
+        <ul className="htw-toc-list">
+          {ON_THIS_PAGE.map(item => (
+            <li key={item.id}>
+              <button type="button" className="htw-toc-btn" onClick={() => scrollToId(item.id)}>
+                {item.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <p className="htw-toc-glossary">
+          Unfamiliar term? The <a href="#glossary">glossary</a> explains them.
+        </p>
+      </nav>
 
       {/* The Core Promise */}
       <section className="htw-section">
@@ -32,7 +60,7 @@ export default function HowThisWorks() {
 
       {/* Visual step-by-step */}
       <section className="htw-section">
-        <h2 className="htw-section-title">What Happens When You Use a Tool</h2>
+        <h2 className="htw-section-title" id="htw-what-happens" tabIndex={-1}>What Happens When You Use a Tool</h2>
         <p className="htw-section-intro">
           Here is exactly what happens, step by step, when you process a file with RDM Toolkit:
         </p>
@@ -73,7 +101,7 @@ export default function HowThisWorks() {
 
       {/* How typical sites work vs RDM Toolkit */}
       <section className="htw-section">
-        <h2 className="htw-section-title">What Makes This Different</h2>
+        <h2 className="htw-section-title" id="htw-different" tabIndex={-1}>What Makes This Different</h2>
         <p className="htw-section-intro">
           Most file conversion websites work by uploading your file to their servers,
           processing it there, and sending the result back. That means a copy of your
@@ -123,7 +151,7 @@ export default function HowThisWorks() {
 
       {/* What "runs in your browser" means */}
       <section className="htw-section">
-        <h2 className="htw-section-title">What "Runs in Your Browser" Actually Means</h2>
+        <h2 className="htw-section-title" id="htw-in-browser" tabIndex={-1}>What "Runs in Your Browser" Actually Means</h2>
         <p className="htw-section-intro">
           You might be wondering: if nothing is uploaded, how does the tool actually work?
         </p>
@@ -153,7 +181,7 @@ export default function HowThisWorks() {
 
       {/* Why this wasn't possible ten years ago */}
       <section className="htw-section">
-        <h2 className="htw-section-title">Why This Wasn't Possible Ten Years Ago</h2>
+        <h2 className="htw-section-title" id="htw-history" tabIndex={-1}>Why This Wasn't Possible Ten Years Ago</h2>
         <div className="htw-promise">
           <Clock size={32} />
           <div>
@@ -305,7 +333,7 @@ export default function HowThisWorks() {
 
       {/* How to verify */}
       <section className="htw-section">
-        <h2 className="htw-section-title">You Don't Have to Take Our Word for It</h2>
+        <h2 className="htw-section-title" id="htw-verify" tabIndex={-1}>You Don't Have to Take Our Word for It</h2>
         <p className="htw-section-intro">
           You can verify this yourself. Here are three simple ways:
         </p>
@@ -346,7 +374,7 @@ export default function HowThisWorks() {
 
       {/* What this means for compliance */}
       <section className="htw-section">
-        <h2 className="htw-section-title">What This Means for Data Compliance</h2>
+        <h2 className="htw-section-title" id="htw-compliance" tabIndex={-1}>What This Means for Data Compliance</h2>
         <p className="htw-section-intro">
           If you work with sensitive data — research files, health records, grant
           documents, student information, or anything containing personal details —
@@ -404,7 +432,7 @@ export default function HowThisWorks() {
 
       {/* ── Honest limits of the browser model ── */}
       <section className="htw-section">
-        <h2 className="htw-section-title">Where This Model Ends — and What Covers the Rest</h2>
+        <h2 className="htw-section-title" id="htw-limits" tabIndex={-1}>Where This Model Ends — and What Covers the Rest</h2>
         <p className="htw-section-intro">
           "Your files never leave your browser" is a guarantee about <em>this site</em>.
           It is not a guarantee about your browser, your device, or the computer you're
@@ -458,6 +486,38 @@ export default function HowThisWorks() {
                 On a lab, library, or clinic computer, wipe that before you walk away:
               </p>
               <ClearLocalData />
+            </div>
+          </div>
+          <div className="htw-compliance-card htw-compliance-card--wide" id="htw-ai-tools">
+            <Bot size={20} />
+            <div>
+              <h3>Pasting into an AI tool sends your text away</h3>
+              <p>
+                Chatbots and AI assistants on the web run on their providers' servers. Text
+                you paste or upload into one leaves your device, which is the opposite of how
+                this site works. That includes Markdown produced by File to Markdown.
+              </p>
+              <ul className="htw-ai-list">
+                <li>
+                  <strong>Check the classification first.</strong> Use the{' '}
+                  <a href="#data-classification">Data Classification tool</a> to find out
+                  whether the data is Public, Internal or Confidential.
+                </li>
+                <li>
+                  <strong>Keep Confidential and identifiable data out</strong> unless your REB
+                  approval and the {INSTITUTION.researchOffice} have
+                  confirmed that the specific tool is allowed for it.
+                </li>
+                <li>
+                  <strong>De-identify first where you can.</strong>{' '}
+                  <a href="#data-anonymizer">De-identify Research Data</a> replaces names,
+                  emails and IDs before anything is shared.
+                </li>
+                <li>
+                  <strong>Not sure? Ask.</strong> Email{' '}
+                  <a href={MAILTO.rdm}>{INSTITUTION.rdmEmail}</a> before you paste.
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -525,7 +585,7 @@ export default function HowThisWorks() {
 
       {/* Common questions */}
       <section className="htw-section">
-        <h2 className="htw-section-title">Common Questions</h2>
+        <h2 className="htw-section-title" id="htw-faq" tabIndex={-1}>Common Questions</h2>
         <div className="htw-faq">
           <details className="htw-faq-item">
             <summary>Do I need to create an account?</summary>
@@ -540,8 +600,9 @@ export default function HowThisWorks() {
               None of your files or their contents. When you close the browser tab,
               everything you were working on is gone, so download any result before
               closing. RDM Toolkit uses no cookies. It does keep a few small settings
-              in this browser's local storage: your recently used tools, whether
-              you've seen the welcome tour, and the usage log if you opted into it.
+              in this browser's local storage: your recently used tools, whether the
+              sidebar lists tools by file type or by task, whether you've seen the
+              welcome tour, and the usage log if you opted into it.
               Your browser also caches the site's own code so it works offline. The
               "Shared computers" card above has a button that wipes the settings.
             </p>
@@ -564,6 +625,20 @@ export default function HowThisWorks() {
               any website visit), but they cannot see the contents of the files you
               process because those files never leave your browser. The processing
               happens entirely in memory on your own device.
+            </p>
+          </details>
+          <details className="htw-faq-item">
+            <summary>Can I put research data into ChatGPT, Copilot or another AI tool?</summary>
+            <p>
+              Not without checking first. Web-based AI tools process what you give them on
+              their own servers, so the data leaves your device. Find your data's
+              classification with the <a href="#data-classification">Data Classification
+              tool</a>, keep Confidential or identifiable participant data out unless your
+              REB approval and the {INSTITUTION.researchOffice}
+              confirm that the specific tool is permitted, and de-identify what you can
+              first. {INSTITUTION.shortName} has not published a list of AI tools approved
+              for research data that we could find, so ask{' '}
+              <a href={MAILTO.rdm}>{INSTITUTION.rdmEmail}</a> if you are unsure.
             </p>
           </details>
           <details className="htw-faq-item">

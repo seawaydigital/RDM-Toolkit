@@ -4,7 +4,8 @@ import { useRecentTools } from '../../hooks/useRecentTools';
 import { PROJECT } from '../../data/institutionConfig';
 import { WORKFLOWS, STAGES, stepHash } from '../../data/workflows';
 import HeroDiagram from './HeroDiagram';
-import { ChevronDown, ChevronRight, Shield, HardDrive, BookOpen, Globe } from 'lucide-react';
+import { scrollToId } from '../../utils/scrollToId';
+import { ChevronDown, ChevronRight, Shield, HardDrive, BookOpen, Globe, BadgeCheck, Database, GraduationCap, CircleDollarSign, BookA } from 'lucide-react';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
 
@@ -38,10 +39,40 @@ const RESEARCH_PAGES = [
     description: 'Understand federal data deposit requirements, review deposit flowcharts, and plan compliance for your grant.',
   },
   {
+    hash: 'grants-identifiers',
+    title: 'Grants & Identifiers',
+    icon: BadgeCheck,
+    description: 'Set up ORCID, the tri-agency CV and DOIs, and find the REB and DMP resources for your application.',
+  },
+  {
+    hash: 'lakehead-dataverse',
+    title: 'Lakehead Dataverse',
+    icon: Database,
+    description: 'Deposit your data in Lakehead’s collection on Borealis, choose the right repository, and get a citable DOI.',
+  },
+  {
+    hash: 'thesis',
+    title: 'Thesis & Dissertation',
+    icon: GraduationCap,
+    description: 'FGS requirements for your final PDF (PDF/A, unlocked, unsigned), the licence and embargo forms, and your thesis data.',
+  },
+  {
     hash: 'drac-services',
     title: 'DRAC Services Guide',
     icon: Globe,
     description: 'Explore national compute clusters, cloud, Borealis, FRDR, Globus, and other research infrastructure.',
+  },
+  {
+    hash: 'acrobat-alternative',
+    title: 'Adobe Acrobat Alternative',
+    icon: CircleDollarSign,
+    description: 'Free ways to do what Acrobat Pro does, and the cases where Pro is still the better choice.',
+  },
+  {
+    hash: 'glossary',
+    title: 'Glossary',
+    icon: BookA,
+    description: 'Plain-language definitions, from TCPS 2 and OCAP® to coded data, checksums and PDF/A.',
   },
 ];
 
@@ -59,17 +90,6 @@ const ALL_TOOLS_MAP = {};
 CATEGORIES.forEach(cat => {
   cat.tools.forEach(tool => { ALL_TOOLS_MAP[tool.id] = tool; });
 });
-
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-function scrollToSection(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
-  el.focus({ preventScroll: true });
-}
 
 export default function HomePage({ onNavigate }) {
   const [expandedCat, setExpandedCat] = useState(null);
@@ -105,11 +125,11 @@ export default function HomePage({ onNavigate }) {
             And you can verify it.
           </p>
           <div className="homepage-hero-ctas">
-            <button className="homepage-hero-cta" onClick={() => scrollToSection('homepage-bento')}>
+            <button className="homepage-hero-cta" onClick={() => scrollToId('homepage-bento')}>
               Browse the tools
             </button>
             {!isReturning && (
-              <button className="homepage-hero-cta2" onClick={() => scrollToSection('homepage-how')}>
+              <button className="homepage-hero-cta2" onClick={() => scrollToId('homepage-how')}>
                 How is that possible? ↓
               </button>
             )}

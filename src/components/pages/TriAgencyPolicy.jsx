@@ -7,6 +7,67 @@ import {
 } from 'lucide-react';
 import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
 
+// DMP Assistant default-template sections → where this site helps answer them.
+const DMP_CROSSWALK = [
+  {
+    section: 'Data Collection',
+    explain: 'What data you will create or collect, in which formats, and roughly how much.',
+    links: [
+      { label: 'Research Storage Calculator', hash: 'storage-calculator' },
+      { label: 'Common tasks for handling data', hash: 'tasks' },
+    ],
+  },
+  {
+    section: 'Documentation and Metadata',
+    explain: 'How you will describe the data (README, codebook, metadata) so others can understand it.',
+    links: [
+      { label: 'Describing data at deposit', hash: 'lakehead-dataverse' },
+      { label: 'Glossary: metadata', hash: 'glossary?term=metadata' },
+    ],
+  },
+  {
+    section: 'Storage and Backup',
+    explain: 'Where the data will live during the project, how it is backed up, and how it is kept secure.',
+    links: [
+      { label: 'Classify your data', hash: 'data-classification' },
+      { label: 'Research Storage Calculator (DMP wording)', hash: 'storage-calculator' },
+    ],
+  },
+  {
+    section: 'Preservation',
+    explain: 'Which data you will keep long-term, where, and in what formats.',
+    links: [
+      { label: 'Lakehead Dataverse', hash: 'lakehead-dataverse' },
+      { label: 'Checksum Batch Verifier', hash: 'checksum-verifier' },
+    ],
+  },
+  {
+    section: 'Sharing and Reuse',
+    explain: 'What you will share, when, under what licence, and any restrictions.',
+    links: [
+      { label: 'Choosing a repository', hash: 'lakehead-dataverse' },
+      { label: 'De-identify Research Data', hash: 'data-anonymizer' },
+    ],
+  },
+  {
+    section: 'Responsibilities and Resources',
+    explain: 'Who manages the data at each stage, and what storage, computing or staff time it needs.',
+    links: [
+      { label: 'DRAC services', hash: 'drac-services' },
+      { label: 'Research Storage Calculator', hash: 'storage-calculator' },
+    ],
+  },
+  {
+    section: 'Ethics and Legal Compliance',
+    explain: 'Consent, REB approval, privacy law, Indigenous data governance and any agreements that limit use.',
+    links: [
+      { label: 'Classify your data', hash: 'data-classification' },
+      { label: 'Ethics & DMP resources', hash: 'grants-identifiers' },
+      { label: 'Glossary: OCAP®', hash: 'glossary?term=ocap' },
+    ],
+  },
+];
+
 // ── FAIR card data ─────────────────────────────────────────────────────────
 const FAIR = [
   {
@@ -499,6 +560,42 @@ export default function TriAgencyPolicy() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* DMP crosswalk — where on this site each DMP section gets answered */}
+      <section className="tap-section">
+        <h2 className="tap-section-title">Writing Your DMP: Where to Find Each Answer</h2>
+        <p className="tap-section-intro">
+          DMP Assistant’s default template asks about the seven topics below. Some funder
+          templates use different headings, but they cover the same ground. Each row points to
+          the part of this site that helps you answer it.
+        </p>
+        <div className="lud-picker-wrap" tabIndex={0} role="region" aria-label="DMP sections and where to find help">
+          <table className="lud-picker-table tap-crosswalk">
+            <thead>
+              <tr>
+                <th scope="col">DMP section</th>
+                <th scope="col">What to explain</th>
+                <th scope="col">Where to start here</th>
+              </tr>
+            </thead>
+            <tbody>
+              {DMP_CROSSWALK.map(row => (
+                <tr key={row.section}>
+                  <th scope="row">{row.section}</th>
+                  <td>{row.explain}</td>
+                  <td>
+                    <ul className="tap-crosswalk-links">
+                      {row.links.map(link => (
+                        <li key={link.hash}><a href={`#${link.hash}`}>{link.label}</a></li>
+                      ))}
+                    </ul>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 

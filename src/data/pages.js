@@ -36,6 +36,12 @@ export const PAGE_META = [
     keywords: ['orcid', 'ccv', 'doi', 'cv', 'reb', 'grant'],
   },
   {
+    hash: 'thesis',
+    title: 'Thesis & Dissertation',
+    description: 'FGS requirements for your final PDF (PDF/A, unlocked, unsigned), licence and embargo forms, and the data behind your thesis.',
+    keywords: ['thesis', 'dissertation', 'graduate', 'fgs', 'pdf/a', 'pdfa', 'embargo', 'knowledge commons', 'masters', 'phd'],
+  },
+  {
     hash: 'data-classification',
     title: 'Data Classification Tool',
     description: 'Find your data’s classification under Lakehead’s standard (Public, Internal or Confidential) and the controls that apply.',
@@ -64,6 +70,12 @@ export const PAGE_META = [
     title: 'Adobe Acrobat Alternative',
     description: 'Free ways to do what Acrobat Pro does, and where Pro is still the better choice.',
     keywords: ['adobe', 'acrobat', 'pdf editor', 'ocr', 'free'],
+  },
+  {
+    hash: 'glossary',
+    title: 'Glossary',
+    description: 'Plain-language definitions of research data terms, from TCPS 2 and OCAP® to checksums and PDF/A.',
+    keywords: ['definition', 'meaning', 'what is', 'terms', 'acronym'],
   },
   {
     hash: 'request-a-tool',

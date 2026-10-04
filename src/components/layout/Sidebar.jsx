@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronRight, HelpCircle, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, CircleDollarSign, Database, ArrowUpRight, BadgeCheck, Accessibility, ListChecks } from 'lucide-react';
+import { ChevronDown, ChevronRight, HelpCircle, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, CircleDollarSign, Database, ArrowUpRight, BadgeCheck, Accessibility, ListChecks, GraduationCap, BookA } from 'lucide-react';
 import { PRIMARY_CATEGORIES, MORE_CATEGORIES, CATEGORIES } from '../../data/toolRegistry';
 import { STAGES, WORKFLOWS, stepHash } from '../../data/workflows';
 import { PROJECT } from '../../data/institutionConfig';
@@ -224,6 +224,14 @@ export default function Sidebar({
             Grants &amp; Identifiers
           </a>
           <a
+            href="#thesis"
+            className={`sidebar-htw-link ${currentPage === 'thesis' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <GraduationCap size={16} />
+            Thesis &amp; Dissertation
+          </a>
+          <a
             href="#data-classification"
             className={`sidebar-htw-link ${currentPage === 'data-classification' ? 'sidebar-htw-link--active' : ''}`}
             onClick={onClose}
@@ -262,6 +270,14 @@ export default function Sidebar({
           >
             <CircleDollarSign size={16} />
             Adobe Acrobat Alternative
+          </a>
+          <a
+            href="#glossary"
+            className={`sidebar-htw-link ${currentPage === 'glossary' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <BookA size={16} />
+            Glossary
           </a>
           <a
             href="#accessibility"

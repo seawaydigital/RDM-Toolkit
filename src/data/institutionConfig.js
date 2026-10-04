@@ -38,6 +38,22 @@ export const INSTITUTION = {
     url: 'https://www.lakeheadu.ca/sites/default/files/profile-data/swright/Lakehead%20University%20-%20Research%20Data%20Classification%20Guidelines%20and%20Standard%20-%20Final%20(27.03.2024).pdf',
   },
 
+  // Faculty of Graduate Studies — thesis/dissertation submission. Used by the
+  // Thesis & Dissertation page. Requirements quoted there come from the two
+  // process pages and the Embargo Procedure (10 November 2023).
+  graduateStudies: {
+    name: 'Faculty of Graduate Studies',
+    homeUrl: 'https://www.lakeheadu.ca/programs/graduate',
+    thesisProcessUrl: 'https://www.lakeheadu.ca/programs/graduate/academic-information/degree-completion/thesis',
+    dissertationProcessUrl: 'https://www.lakeheadu.ca/programs/graduate/academic-information/degree-completion/dissertation',
+    licenceFormUrl: 'https://www.lakeheadu.ca/sites/default/files/uploads/56/Thesis-Licence-Library-LU-March%2019-15-rev-%281%29.pdf',
+    embargoFormUrl: 'https://www.lakeheadu.ca/sites/default/files/profile-data/tmlaught/Thesis%20Embargo%20Form%20%28Optional%29.pdf',
+    embargoProcedureUrl: 'https://www.lakeheadu.ca/sites/default/files/profile-data/tmlaught/Embargo%20Procedure.pdf',
+  },
+
+  // Lakehead's institutional repository; holds theses and dissertations from 2009 on.
+  knowledgeCommonsUrl: 'https://knowledgecommons.lakeheadu.ca/',
+
   // Research Ethics Board — used by Grants & Identifiers page.
   rebContactUrl: 'https://www.lakeheadu.ca/research-and-innovation/ethics/human-subjects',
 };
