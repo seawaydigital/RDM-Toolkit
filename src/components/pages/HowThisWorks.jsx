@@ -1,7 +1,7 @@
-import { Shield, WifiOff, Wifi, Eye, FileCheck, Lock, Globe, MonitorSmartphone, ArrowRight, ArrowDown, CheckCircle, XCircle, Laptop, ExternalLink, Clock, FileText, Image as ImageIcon, Cpu, Puzzle, HardDrive, Users, FolderDown } from 'lucide-react';
+import { Shield, WifiOff, Wifi, Eye, FileCheck, Lock, Globe, MonitorSmartphone, ArrowRight, ArrowDown, CheckCircle, XCircle, Laptop, ExternalLink, Clock, FileText, Image as ImageIcon, Cpu, Puzzle, HardDrive, Users, FolderDown, Bot } from 'lucide-react';
 import NetworkSilence from '../ui/NetworkSilence';
 import ClearLocalData from '../ui/ClearLocalData';
-import { PROJECT } from '../../data/institutionConfig';
+import { PROJECT, INSTITUTION, MAILTO } from '../../data/institutionConfig';
 
 export default function HowThisWorks() {
   return (
@@ -460,6 +460,38 @@ export default function HowThisWorks() {
               <ClearLocalData />
             </div>
           </div>
+          <div className="htw-compliance-card htw-compliance-card--wide" id="htw-ai-tools">
+            <Bot size={20} />
+            <div>
+              <h3>Pasting into an AI tool sends your text away</h3>
+              <p>
+                Chatbots and AI assistants on the web run on their providers' servers. Text
+                you paste or upload into one leaves your device, which is the opposite of how
+                this site works. That includes Markdown produced by File to Markdown.
+              </p>
+              <ul className="htw-ai-list">
+                <li>
+                  <strong>Check the classification first.</strong> Use the{' '}
+                  <a href="#data-classification">Data Classification tool</a> to find out
+                  whether the data is Public, Internal or Confidential.
+                </li>
+                <li>
+                  <strong>Keep Confidential and identifiable data out</strong> unless your REB
+                  approval and the {INSTITUTION.researchOffice} have
+                  confirmed that the specific tool is allowed for it.
+                </li>
+                <li>
+                  <strong>De-identify first where you can.</strong>{' '}
+                  <a href="#data-anonymizer">De-identify Research Data</a> replaces names,
+                  emails and IDs before anything is shared.
+                </li>
+                <li>
+                  <strong>Not sure? Ask.</strong> Email{' '}
+                  <a href={MAILTO.rdm}>{INSTITUTION.rdmEmail}</a> before you paste.
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -540,8 +572,9 @@ export default function HowThisWorks() {
               None of your files or their contents. When you close the browser tab,
               everything you were working on is gone, so download any result before
               closing. RDM Toolkit uses no cookies. It does keep a few small settings
-              in this browser's local storage: your recently used tools, whether
-              you've seen the welcome tour, and the usage log if you opted into it.
+              in this browser's local storage: your recently used tools, whether the
+              sidebar lists tools by file type or by task, whether you've seen the
+              welcome tour, and the usage log if you opted into it.
               Your browser also caches the site's own code so it works offline. The
               "Shared computers" card above has a button that wipes the settings.
             </p>
@@ -564,6 +597,20 @@ export default function HowThisWorks() {
               any website visit), but they cannot see the contents of the files you
               process because those files never leave your browser. The processing
               happens entirely in memory on your own device.
+            </p>
+          </details>
+          <details className="htw-faq-item">
+            <summary>Can I put research data into ChatGPT, Copilot or another AI tool?</summary>
+            <p>
+              Not without checking first. Web-based AI tools process what you give them on
+              their own servers, so the data leaves your device. Find your data's
+              classification with the <a href="#data-classification">Data Classification
+              tool</a>, keep Confidential or identifiable participant data out unless your
+              REB approval and the {INSTITUTION.researchOffice}
+              confirm that the specific tool is permitted, and de-identify what you can
+              first. {INSTITUTION.shortName} has not published a list of AI tools approved
+              for research data that we could find, so ask{' '}
+              <a href={MAILTO.rdm}>{INSTITUTION.rdmEmail}</a> if you are unsure.
             </p>
           </details>
           <details className="htw-faq-item">

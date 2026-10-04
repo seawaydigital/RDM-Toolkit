@@ -16175,3 +16175,26 @@ select:focus-visible,
     min-height: 40px;
   }
 }
+
+/* How This Works — AI-tools card spans the honest-limits grid */
+.htw-compliance-card--wide {
+  grid-column: 1 / -1;
+}
+
+.htw-ai-list {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.htw-ai-list li {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.htw-ai-list strong {
+  color: var(--text-primary);
+}

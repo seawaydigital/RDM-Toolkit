@@ -704,7 +704,7 @@ const EXPLAINERS = {
   },
 
   'to-markdown': {
-    whatItDoes: 'Converts safer text-shaped documents (PDF, HTML, CSV, TXT, Markdown, RTF, JSON) into clean Markdown text — useful for feeding documents to AI tools or for clean archival.',
+    whatItDoes: 'Converts safer text-shaped documents (PDF, HTML, CSV, TXT, Markdown, RTF, JSON) into clean Markdown text — useful for notes, documentation, archiving, or as input to other tools. If you plan to paste the result into an AI tool, check your data’s classification first: the AI tool, unlike this one, sends the text to its provider.',
     howItWorks: [
       'Depending on the file type, browser-local parsing extracts text: PDF text comes from pdfjs, HTML is converted through Turndown, and text-shaped formats use native parsers. Two output modes: "AI-friendly" (flattened, no complex formatting) or "Preserve formatting" (full Markdown structure with tables and lists).',
     ],
@@ -757,6 +757,9 @@ export const EXPLAINER_TOOL_IDS = Object.keys(EXPLAINERS);
  * Plain strings only (no HTML). Max 2 per tool.
  */
 export const TOOL_CAVEATS = {
+  'to-markdown': [
+    'Converting runs in your browser, but pasting the Markdown into a web AI tool (ChatGPT, Copilot, Gemini and others) sends it to that provider. Check your data’s classification first, and keep Confidential or identifiable participant data out unless your REB approval and the Office of Research Services allow that specific tool.',
+  ],
   'merge-pdfs': [
     'Merging removes fillable form fields and signature boxes — they will not work in the combined PDF. If a document needs to be signed (for example through Adobe Acrobat), collect the signature first, then merge.',
     'Existing digital signatures are invalidated by any merge — that’s how PDF signing works, not a flaw in this tool.',
