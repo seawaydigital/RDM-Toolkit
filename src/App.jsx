@@ -18,7 +18,7 @@ import ThesisAndDissertation from './components/pages/ThesisAndDissertation';
 import Glossary from './components/pages/Glossary';
 import RelatedTools from './components/ui/RelatedTools';
 import HowItWorks from './components/ui/HowItWorks';
-import ToolCaveats from './components/ui/ToolCaveats';
+import ToolCaveats, { ToolDisambiguation } from './components/ui/ToolCaveats';
 import WorkflowBar from './components/ui/WorkflowBar';
 import ContentReviewed, { OPEN_FEEDBACK_EVENT } from './components/ui/ContentReviewed';
 import ToolSkeleton from './components/ui/ToolSkeleton';
@@ -546,6 +546,7 @@ export default function App() {
                       <p className="tool-header-lede">{currentTool.description}</p>
                     )}
                   </header>
+                  <ToolDisambiguation toolId={currentToolId} />
                   <ToolCaveats toolId={currentToolId} />
                   <ToolComponent
                     key={toolInstanceKey}

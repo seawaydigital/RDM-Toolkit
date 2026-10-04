@@ -1,5 +1,6 @@
-import { AlertTriangle } from 'lucide-react';
-import { getCaveats } from '../../data/toolExplainers';
+import { AlertTriangle, ArrowRight } from 'lucide-react';
+import { getCaveats, getDisambiguation } from '../../data/toolExplainers';
+import { ALL_TOOLS } from '../../data/toolRegistry';
 
 /**
  * Pre-use advisory UI: the always-visible ToolCaveats strip (default
@@ -39,6 +40,27 @@ export function FormFieldsNotice({ action, filenames }) {
         no longer needed, flatten it first (File &rarr; Print &rarr; Save as PDF).
       </p>
     </div>
+  );
+}
+
+/**
+ * One-line pointer to the tool people often confuse with this one
+ * (TOOL_DISAMBIGUATION). Named export for the same no-new-chunk reason as
+ * FormFieldsNotice. Renders nothing for tools without an entry.
+ */
+export function ToolDisambiguation({ toolId }) {
+  const entry = getDisambiguation(toolId);
+  const other = entry && ALL_TOOLS.find(t => t.id === entry.other);
+  if (!other) return null;
+
+  return (
+    <p className="tool-disambig">
+      <span>{entry.text}</span>{' '}
+      <a href={`#${other.id}`} className="tool-disambig-link">
+        Open {other.name}
+        <ArrowRight size={12} aria-hidden="true" />
+      </a>
+    </p>
   );
 }
 

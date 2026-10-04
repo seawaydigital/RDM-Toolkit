@@ -16535,3 +16535,21 @@ select:focus-visible,
   border-radius: var(--radius-sm);
   overflow-wrap: anywhere;
 }
+
+/* "Not quite right?" pointer to a commonly confused tool (ToolDisambiguation) */
+.tool-disambig {
+  margin: 0 0 var(--space-md);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.tool-disambig-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
