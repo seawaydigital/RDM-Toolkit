@@ -4,6 +4,7 @@ import { useRecentTools } from '../../hooks/useRecentTools';
 import { PROJECT } from '../../data/institutionConfig';
 import { WORKFLOWS, STAGES, stepHash } from '../../data/workflows';
 import HeroDiagram from './HeroDiagram';
+import { scrollToId } from '../../utils/scrollToId';
 import { ChevronDown, ChevronRight, Shield, HardDrive, BookOpen, Globe } from 'lucide-react';
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
@@ -60,17 +61,6 @@ CATEGORIES.forEach(cat => {
   cat.tools.forEach(tool => { ALL_TOOLS_MAP[tool.id] = tool; });
 });
 
-const prefersReducedMotion = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-function scrollToSection(id) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
-  el.focus({ preventScroll: true });
-}
-
 export default function HomePage({ onNavigate }) {
   const [expandedCat, setExpandedCat] = useState(null);
   const { recentTools } = useRecentTools();
@@ -105,11 +95,11 @@ export default function HomePage({ onNavigate }) {
             And you can verify it.
           </p>
           <div className="homepage-hero-ctas">
-            <button className="homepage-hero-cta" onClick={() => scrollToSection('homepage-bento')}>
+            <button className="homepage-hero-cta" onClick={() => scrollToId('homepage-bento')}>
               Browse the tools
             </button>
             {!isReturning && (
-              <button className="homepage-hero-cta2" onClick={() => scrollToSection('homepage-how')}>
+              <button className="homepage-hero-cta2" onClick={() => scrollToId('homepage-how')}>
                 How is that possible? ↓
               </button>
             )}

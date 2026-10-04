@@ -1,20 +1,23 @@
 /**
- * Site search across tools, common tasks and informational pages. Pure data —
+ * Site search across tools, common tasks, informational pages and glossary
+ * terms. Pure data —
  * SearchBar.jsx renders the results; tests/searchIndex.test.mjs covers ranking.
  *
- * Result: { kind: 'tool' | 'task' | 'page', id, title, description, hash, emoji }
+ * Result: { kind: 'tool' | 'task' | 'page' | 'term', id, title, description, hash, emoji }
  */
 import { ALL_TOOLS } from './toolRegistry.js';
 import { WORKFLOWS, stepHash } from './workflows.js';
 import { PAGE_META } from './pages.js';
+import { GLOSSARY } from './glossary.js';
+import { buildHash } from '../utils/route.js';
 
 export const MAX_RESULTS = 10;
 
 // Slots each kind is guaranteed when it has matches, so a broad query such as
 // "pdf" (17 tools) still surfaces the matching tasks and guides. Unused slots
 // are handed back in kind order.
-const KIND_ORDER = ['tool', 'task', 'page'];
-const QUOTA = { tool: 6, task: 2, page: 2 };
+const KIND_ORDER = ['tool', 'task', 'page', 'term'];
+const QUOTA = { tool: 6, task: 2, page: 2, term: 2 };
 
 const INDEX = [
   ...ALL_TOOLS.map(tool => ({
@@ -43,6 +46,15 @@ const INDEX = [
     hash: p.hash,
     emoji: '📖',
     haystack: [p.title, p.description, ...(p.keywords || [])],
+  })),
+  ...GLOSSARY.map(t => ({
+    kind: 'term',
+    id: t.id,
+    title: t.term,
+    description: t.definition,
+    hash: buildHash('glossary', { term: t.id }),
+    emoji: '🔤',
+    haystack: [t.term, ...(t.aka || [])],
   })),
 ].map(entry => ({ ...entry, haystack: entry.haystack.filter(Boolean).join(' \u0000 ').toLowerCase() }));
 

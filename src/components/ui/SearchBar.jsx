@@ -3,7 +3,7 @@ import { Search, X } from 'lucide-react';
 import { ALL_TOOLS } from '../../data/toolRegistry';
 import { searchAll } from '../../data/searchIndex';
 
-const KIND_LABEL = { task: 'Task', page: 'Guide' };
+const KIND_LABEL = { task: 'Task', page: 'Guide', term: 'Glossary' };
 const MAX_RECENT = 5;
 const STORAGE_KEY = 'rdm_recent_tools';
 

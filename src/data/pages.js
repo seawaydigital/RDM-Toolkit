@@ -72,6 +72,12 @@ export const PAGE_META = [
     keywords: ['adobe', 'acrobat', 'pdf editor', 'ocr', 'free'],
   },
   {
+    hash: 'glossary',
+    title: 'Glossary',
+    description: 'Plain-language definitions of research data terms, from TCPS 2 and OCAP® to checksums and PDF/A.',
+    keywords: ['definition', 'meaning', 'what is', 'terms', 'acronym'],
+  },
+  {
     hash: 'request-a-tool',
     title: 'Request a Tool',
     description: 'Suggest a tool, and see why some tools cannot work in a browser.',

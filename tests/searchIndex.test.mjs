@@ -34,6 +34,12 @@ test('each kind keeps at least one slot when it has a match', () => {
   assert.ok(kinds.has('task'));
 });
 
+test('glossary terms are found by term and alias and open on the entry', () => {
+  const ocap = searchAll('ocap').find(r => r.kind === 'term');
+  assert.equal(ocap.hash, 'glossary?term=ocap');
+  assert.ok(searchAll('quasi-identifier').some(r => r.kind === 'term' && r.id === 'indirect-identifier'));
+});
+
 test('blank query returns nothing', () => {
   assert.deepEqual(searchAll('   '), []);
   assert.deepEqual(searchAll(''), []);

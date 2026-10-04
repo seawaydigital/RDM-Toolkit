@@ -15,10 +15,12 @@ import GrantsAndIdentifiers from './components/pages/GrantsAndIdentifiers';
 import AccessibilityStatement from './components/pages/AccessibilityStatement';
 import Tasks from './components/pages/Tasks';
 import ThesisAndDissertation from './components/pages/ThesisAndDissertation';
+import Glossary from './components/pages/Glossary';
 import RelatedTools from './components/ui/RelatedTools';
 import HowItWorks from './components/ui/HowItWorks';
 import ToolCaveats from './components/ui/ToolCaveats';
 import WorkflowBar from './components/ui/WorkflowBar';
+import ContentReviewed, { OPEN_FEEDBACK_EVENT } from './components/ui/ContentReviewed';
 import ToolSkeleton from './components/ui/ToolSkeleton';
 import FeedbackModal from './components/ui/FeedbackModal';
 import WelcomeTour, { hasDismissedTour } from './components/ui/WelcomeTour';
@@ -276,6 +278,13 @@ export default function App() {
 
   const closeFeedback = useCallback(() => setFeedbackContext(null), []);
 
+  // "Tell us" on a page's content-review line opens the feedback dialog.
+  useEffect(() => {
+    function onOpenFeedback() { openFeedback(null); }
+    window.addEventListener(OPEN_FEEDBACK_EVENT, onOpenFeedback);
+    return () => window.removeEventListener(OPEN_FEEDBACK_EVENT, onOpenFeedback);
+  }, [openFeedback]);
+
   const handleToolError = useCallback((error) => {
     logEvent('tool_error', {
       toolId: currentToolId,
@@ -495,6 +504,7 @@ export default function App() {
           {!currentToolId && !currentPage && <HomePage onNavigate={navigateTo} />}
           {currentPage === 'tasks' && <Tasks onNavigate={navigateTo} />}
           {currentPage === 'thesis' && <ThesisAndDissertation onNavigate={navigateTo} />}
+          {currentPage === 'glossary' && <Glossary term={route.params.term} />}
           {currentPage === 'how-this-works' && <HowThisWorks />}
           {currentPage === 'request-a-tool' && <RequestATool />}
           {currentPage === 'data-classification' && <DataClassification />}
@@ -505,6 +515,11 @@ export default function App() {
           {currentPage === 'lakehead-dataverse' && <LakeheadDataverse />}
           {currentPage === 'grants-identifiers' && <GrantsAndIdentifiers />}
           {currentPage === 'accessibility' && <AccessibilityStatement />}
+          {currentPage && (
+            <div className="content-reviewed-wrap">
+              <ContentReviewed page={currentPage} />
+            </div>
+          )}
           {currentToolId && ToolComponent && (
             <ErrorBoundary
               resetKey={errorResetKey}
