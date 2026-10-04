@@ -8,6 +8,7 @@ import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { IMAGE_VALIDATION, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { stripImageMetadata as stripViaCanvas } from '../../utils/imageUtils';
+import { createSamplePhotoFile } from '../../utils/sampleFiles';
 import exifr from 'exifr';
 
 const METADATA_FIELDS = [
@@ -273,6 +274,7 @@ export default function StripImageMetadata({ tool }) {
           validationConfig={IMAGE_VALIDATION}
           onFilesSelected={handleFileSelected}
           label="Drop an image here or click to browse"
+          sample={{ label: 'Try a sample photo with a GPS location (fictional)', create: createSamplePhotoFile }}
         />
       )}
 

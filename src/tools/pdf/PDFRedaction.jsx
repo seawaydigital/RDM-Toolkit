@@ -10,6 +10,7 @@ import { X, ZoomIn, ZoomOut, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, destroyPdfDocument } from '../../utils/pdfThumbnails';
+import { createSamplePdfFile } from '../../utils/sampleFiles';
 
 const REDACTION_DPI = 200;
 const REDACTION_JPEG_QUALITY = 0.88;
@@ -494,6 +495,7 @@ export default function PDFRedaction({ tool, navigateTo }) {
           validationConfig={PDF_VALIDATION}
           onFilesSelected={handleFileSelected}
           label="Drop a PDF file here or click to browse"
+          sample={{ label: 'Try sample interview notes (fictional)', create: createSamplePdfFile }}
         />
       )}
 

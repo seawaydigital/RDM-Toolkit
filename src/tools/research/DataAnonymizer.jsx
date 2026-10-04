@@ -7,6 +7,7 @@ import ErrorCard from '../../components/ui/ErrorCard';
 import { X, Download, Copy, Check, KeyRound, AlertTriangle } from 'lucide-react';
 import { formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
+import { createSampleCsvFile } from '../../utils/sampleFiles';
 
 const CSV_VALIDATION = {
   allowedMimes: ['text/csv', 'application/vnd.ms-excel', 'text/plain'],
@@ -408,6 +409,7 @@ function CSVMode() {
           validationConfig={CSV_VALIDATION}
           onFilesSelected={handleFileSelected}
           label="Drop a CSV file here or click to browse"
+          sample={{ label: 'Try a sample participant list (fictional)', create: createSampleCsvFile }}
         />
       )}
 

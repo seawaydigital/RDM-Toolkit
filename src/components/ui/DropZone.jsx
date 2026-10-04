@@ -22,10 +22,12 @@ export default function DropZone({
   onFilesSelected,
   label,
   sublabel,
+  sample,
 }) {
   const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState(null);
   const [warning, setWarning] = useState(null);
+  const [loadingSample, setLoadingSample] = useState(false);
   const inputRef = useRef(null);
 
   const processFiles = useCallback((fileList) => {
@@ -112,6 +114,22 @@ export default function DropZone({
     e.target.value = '';
   }
 
+  // Optional "Try a sample" — `sample` is { label, create: () => Promise<File> }
+  // from src/utils/sampleFiles.js. The generated file goes through the same
+  // validation as a real one.
+  async function handleSample() {
+    setError(null);
+    setLoadingSample(true);
+    try {
+      const file = await sample.create();
+      processFiles([file]);
+    } catch {
+      setError('Could not create the sample file. Please try again, or use one of your own.');
+    } finally {
+      setLoadingSample(false);
+    }
+  }
+
   const formattedTypes = formatAcceptLabel(accept);
 
   // Derive max size in MB from validationConfig if available
@@ -166,6 +184,19 @@ export default function DropZone({
           tabIndex={-1}
         />
       </div>
+      {sample && (
+        <p className="dropzone-sample">
+          No file handy?{' '}
+          <button
+            type="button"
+            className="dropzone-sample-btn"
+            onClick={handleSample}
+            disabled={loadingSample}
+          >
+            {loadingSample ? 'Creating sample…' : sample.label}
+          </button>
+        </p>
+      )}
       {error && <p className="dropzone-error" role="alert">{error}</p>}
       {warning && <p className="dropzone-warning" role="status">{warning}</p>}
     </div>
