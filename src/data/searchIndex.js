@@ -1,7 +1,7 @@
 /**
  * Site search across tools, common tasks, informational pages and glossary
- * terms. Pure data —
- * SearchBar.jsx renders the results; tests/searchIndex.test.mjs covers ranking.
+ * terms. Pure data — SearchBar.jsx renders the results;
+ * tests/searchIndex.test.mjs covers ranking.
  *
  * Result: { kind: 'tool' | 'task' | 'page' | 'term', id, title, description, hash, emoji }
  */

@@ -16413,3 +16413,10 @@ select:focus-visible,
   font-size: 13px;
   color: var(--text-secondary);
 }
+
+/* Nine research guides: three columns where there is room */
+@media (min-width: 1280px) {
+  .homepage-resources-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
