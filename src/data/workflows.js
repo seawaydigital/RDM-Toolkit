@@ -65,7 +65,11 @@ export const WORKFLOWS = [
     summary: 'Fix garbled accented characters in a CSV, then confirm nothing else changed before you analyse it.',
     keywords: ['csv', 'excel', 'encoding', 'accents', 'garbled', 'utf-8'],
     steps: [
-      { tool: 'csv-encoding-fixer', why: 'Convert the file to UTF-8 so characters such as é stop showing up as Ã©.' },
+      {
+        tool: 'csv-encoding-fixer',
+        why: 'Convert an older Windows or Excel export to UTF-8, so accented characters stop turning into ? or � in other software.',
+        caveat: 'If Excel itself shows é as Ã©, the file is probably already UTF-8. Open it in Excel with Data → From Text/CSV and choose UTF-8.',
+      },
       { tool: 'csv-diff', why: 'Compare the original and the fixed file cell by cell to confirm only the characters changed.' },
       { tool: 'csv-json-converter', why: 'Optional: convert to JSON if your analysis code expects it.' },
     ],

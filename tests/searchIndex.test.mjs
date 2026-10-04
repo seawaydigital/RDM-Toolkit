@@ -44,3 +44,24 @@ test('blank query returns nothing', () => {
   assert.deepEqual(searchAll('   '), []);
   assert.deepEqual(searchAll(''), []);
 });
+
+test('everyday words find the right tool', () => {
+  const finds = (q, id) => assert.ok(searchAll(q).some(r => r.kind === 'tool' && r.id === id), `"${q}" should find ${id}`);
+  finds('shrink', 'compress-pdf');
+  finds('shrink', 'compress-image');
+  finds('combine', 'merge-pdfs');
+  finds('gps', 'strip-image-metadata');
+  finds('location', 'strip-image-metadata');
+  finds('anonymise', 'data-anonymizer');
+  finds('pseudonym', 'data-anonymizer');
+  finds('black out', 'pdf-redaction');
+  finds('lock', 'password-protect-pdf');
+  finds('unlock', 'remove-pdf-password');
+  finds('signature', 'sign-pdf');
+  finds('screenshot', 'pdf-to-images');
+  finds('zip', 'create-zip');
+  finds('excel', 'csv-encoding-fixer');
+  finds('fingerprint', 'sha256-hasher');
+  finds('reference', 'bibtex-formatter');
+  finds('compare', 'text-diff');
+});
