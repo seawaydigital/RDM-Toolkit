@@ -7,6 +7,12 @@ import ErrorCard from '../../components/ui/ErrorCard';
 import { X, ZoomIn, ZoomOut } from 'lucide-react';
 import { IMAGE_VALIDATION, formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
+import { encodeBmp } from '../../utils/bmpEncoder';
+
+// Chromium and Firefox cannot decode TIFF; only Safari can.
+const isTiff = file => file.type === 'image/tiff' || /\.tiff?$/i.test(file.name);
+const TIFF_UNSUPPORTED =
+  'This browser can’t open TIFF images (only Safari can). Open the file in Safari, or save it as PNG first with Paint (Windows) or Preview (Mac).';
 
 const OUTPUT_FORMATS = [
   { value: 'image/jpeg', ext: 'jpg', label: 'JPG', desc: 'Best for photos. Lossy compression, small file size.', hasQuality: true },
@@ -43,7 +49,9 @@ export default function ConvertImageFormat({ tool }) {
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
-      setError('Failed to load the image. Please try a different file.');
+      setError(isTiff(selectedFile)
+        ? TIFF_UNSUPPORTED
+        : 'Failed to load the image. Please try a different file.');
     };
     img.src = url;
   }, []);
@@ -172,10 +180,11 @@ export default function ConvertImageFormat({ tool }) {
             gap: 'var(--space-md)',
           }}>
             <div>
-              <label style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-xs)' }}>
+              <label htmlFor="convert-output-format" style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-xs)' }}>
                 Output Format
               </label>
               <select
+                id="convert-output-format"
                 value={outputFormat}
                 onChange={e => setOutputFormat(e.target.value)}
                 style={{
@@ -201,10 +210,11 @@ export default function ConvertImageFormat({ tool }) {
 
             {selectedFormat?.hasQuality && (
               <div>
-                <label style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-xs)' }}>
+                <label htmlFor="convert-quality" style={{ display: 'block', fontSize: 13, color: 'var(--text-secondary)', marginBottom: 'var(--space-xs)' }}>
                   Quality: {quality}%
                 </label>
                 <input
+                  id="convert-quality"
                   type="range"
                   min={1}
                   max={100}
@@ -245,6 +255,20 @@ function convertImage(file, outputMime, quality) {
 
       ctx.drawImage(img, 0, 0);
       URL.revokeObjectURL(url);
+
+      // Browsers can't encode BMP (toBlob would quietly return a PNG), so
+      // build the file from the pixel data instead.
+      if (outputMime === 'image/bmp') {
+        try {
+          const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const bmp = encodeBmp(data, canvas.width, canvas.height);
+          canvas.remove();
+          resolve(new Blob([bmp], { type: 'image/bmp' }));
+        } catch (err) {
+          reject(err);
+        }
+        return;
+      }
 
       const qualityArg = (outputMime === 'image/jpeg' || outputMime === 'image/webp')
         ? quality / 100

@@ -4,96 +4,12 @@ import InfoCard from '../../components/ui/InfoCard';
 import DropZone from '../../components/ui/DropZone';
 import ErrorCard from '../../components/ui/ErrorCard';
 import { buildOutputFilename } from '../../utils/filename';
+import { detectEncoding, decodeBytes, encodeUtf8 } from '../../utils/csvEncoding';
 
-function detectEncoding(bytes) {
-  // Check for UTF-8 BOM
-  if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
-    return { encoding: 'UTF-8 (with BOM)', hasBOM: true, bomLength: 3 };
-  }
-  // Check for UTF-16 LE BOM
-  if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) {
-    return { encoding: 'UTF-16 LE', hasBOM: true, bomLength: 2 };
-  }
-  // Check for UTF-16 BE BOM
-  if (bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF) {
-    return { encoding: 'UTF-16 BE', hasBOM: true, bomLength: 2 };
-  }
-
-  // Look for Windows-1252 / Latin-1 indicators
-  // Bytes in 0x80-0x9F range are control chars in Latin-1 but printable in Windows-1252
-  let latin1Indicators = 0;
-  let highByteCount = 0;
-  const sampleSize = Math.min(bytes.length, 4096);
-
-  for (let i = 0; i < sampleSize; i++) {
-    const b = bytes[i];
-    if (b >= 0x80 && b <= 0x9F) {
-      latin1Indicators++;
-    }
-    if (b >= 0x80) {
-      highByteCount++;
-    }
-  }
-
-  // Check if valid UTF-8
-  let isValidUTF8 = true;
-  for (let i = 0; i < sampleSize; i++) {
-    const b = bytes[i];
-    if (b < 0x80) continue;
-    let seqLen = 0;
-    if ((b & 0xE0) === 0xC0) seqLen = 1;
-    else if ((b & 0xF0) === 0xE0) seqLen = 2;
-    else if ((b & 0xF8) === 0xF0) seqLen = 3;
-    else { isValidUTF8 = false; break; }
-    for (let j = 0; j < seqLen; j++) {
-      i++;
-      if (i >= sampleSize || (bytes[i] & 0xC0) !== 0x80) {
-        isValidUTF8 = false;
-        break;
-      }
-    }
-    if (!isValidUTF8) break;
-  }
-
-  if (highByteCount === 0) {
-    return { encoding: 'ASCII / UTF-8', hasBOM: false, bomLength: 0 };
-  }
-
-  if (isValidUTF8) {
-    return { encoding: 'UTF-8 (no BOM)', hasBOM: false, bomLength: 0 };
-  }
-
-  if (latin1Indicators > 0) {
-    return { encoding: 'Windows-1252 (likely)', hasBOM: false, bomLength: 0, needsFix: true };
-  }
-
-  return { encoding: 'ISO-8859-1 / Latin-1 (likely)', hasBOM: false, bomLength: 0, needsFix: true };
-}
-
-function decodeWindows1252(bytes) {
-  // Windows-1252 to Unicode mapping for 0x80-0x9F range
-  const cp1252Map = {
-    0x80: 0x20AC, 0x82: 0x201A, 0x83: 0x0192, 0x84: 0x201E, 0x85: 0x2026,
-    0x86: 0x2020, 0x87: 0x2021, 0x88: 0x02C6, 0x89: 0x2030, 0x8A: 0x0160,
-    0x8B: 0x2039, 0x8C: 0x0152, 0x8E: 0x017D, 0x91: 0x2018, 0x92: 0x2019,
-    0x93: 0x201C, 0x94: 0x201D, 0x95: 0x2022, 0x96: 0x2013, 0x97: 0x2014,
-    0x98: 0x02DC, 0x99: 0x2122, 0x9A: 0x0161, 0x9B: 0x203A, 0x9C: 0x0153,
-    0x9E: 0x017E, 0x9F: 0x0178,
-  };
-
-  let result = '';
-  for (let i = 0; i < bytes.length; i++) {
-    const b = bytes[i];
-    if (b < 0x80) {
-      result += String.fromCharCode(b);
-    } else if (cp1252Map[b] !== undefined) {
-      result += String.fromCharCode(cp1252Map[b]);
-    } else {
-      result += String.fromCharCode(b);
-    }
-  }
-  return result;
-}
+const outputExtension = name => {
+  const ext = name.split('.').pop().toLowerCase();
+  return ['csv', 'tsv', 'txt'].includes(ext) ? ext : 'csv';
+};
 
 export default function CSVEncodingFixer({ tool }) {
   const [file, setFile] = useState(null);
@@ -103,6 +19,7 @@ export default function CSVEncodingFixer({ tool }) {
   const [fixedText, setFixedText] = useState(null);
   const [fixedPreview, setFixedPreview] = useState(null);
   const [error, setError] = useState(null);
+  const [addBom, setAddBom] = useState(false);
 
   const handleFileSelected = useCallback(async ([selectedFile]) => {
     setError(null);
@@ -118,17 +35,12 @@ export default function CSVEncodingFixer({ tool }) {
       setRawBytes(bytes);
       setDetectedEncoding(encoding);
 
-      // Preview first few rows using raw decoding
-      let rawText;
-      if (encoding.needsFix) {
-        rawText = decodeWindows1252(bytes);
-      } else {
-        const decoder = new TextDecoder('utf-8', { fatal: false });
-        rawText = decoder.decode(encoding.hasBOM ? bytes.slice(encoding.bomLength) : bytes);
-      }
-
-      const lines = rawText.split('\n').slice(0, 6);
-      setPreview(lines);
+      // "Before" preview: for a file that needs fixing, show it the way
+      // software expecting UTF-8 reads it, so the problem is visible.
+      const rawText = encoding.needsFix
+        ? new TextDecoder('utf-8', { fatal: false }).decode(bytes).replace(/\0/g, '')
+        : decodeBytes(bytes, encoding);
+      setPreview(rawText.split('\n').slice(0, 6));
     } catch {
       setError('Something went wrong while reading the file. Please try a different file.');
     }
@@ -138,16 +50,7 @@ export default function CSVEncodingFixer({ tool }) {
     if (!rawBytes) return;
     setError(null);
     try {
-      let text;
-      if (detectedEncoding.needsFix) {
-        text = decodeWindows1252(rawBytes);
-      } else if (detectedEncoding.hasBOM) {
-        const decoder = new TextDecoder('utf-8');
-        text = decoder.decode(rawBytes.slice(detectedEncoding.bomLength));
-      } else {
-        const decoder = new TextDecoder('utf-8');
-        text = decoder.decode(rawBytes);
-      }
+      const text = decodeBytes(rawBytes, detectedEncoding);
 
       setFixedText(text);
       const lines = text.split('\n').slice(0, 6);
@@ -159,18 +62,17 @@ export default function CSVEncodingFixer({ tool }) {
 
   const handleDownload = useCallback(() => {
     if (!fixedText || !file) return;
-    const encoder = new TextEncoder();
-    const utf8Bytes = encoder.encode(fixedText);
+    const utf8Bytes = encodeUtf8(fixedText, { bom: addBom });
     const blob = new Blob([utf8Bytes], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = buildOutputFilename(file.name, 'utf8-fixed', 'csv');
+    a.download = buildOutputFilename(file.name, 'utf8-fixed', outputExtension(file.name));
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  }, [fixedText, file]);
+  }, [fixedText, file, addBom]);
 
   const handleRemoveFile = useCallback(() => {
     setFile(null);
@@ -188,6 +90,7 @@ export default function CSVEncodingFixer({ tool }) {
     setFixedText(null);
     setFixedPreview(null);
     setError(null);
+    setAddBom(false);
   }, []);
 
   return (
@@ -220,7 +123,14 @@ export default function CSVEncodingFixer({ tool }) {
                 {detectedEncoding.encoding}
               </span>
             </div>
-            {detectedEncoding.needsFix && (
+            {detectedEncoding.decoder.startsWith('utf-16') && (
+              <p className="csv-encoding-explanation">
+                This file is UTF-16, which is what Excel’s “Unicode Text” export produces. Most
+                analysis software expects UTF-8 and shows a UTF-16 file as gibberish or with gaps
+                between letters. Re-encoding converts it to UTF-8 without changing the text.
+              </p>
+            )}
+            {detectedEncoding.decoder === 'windows-1252' && (
               <p className="csv-encoding-explanation">
                 This file appears to use Windows-1252 encoding, which can cause garbled characters
                 (such as accented letters, curly quotes, and special symbols) when opened in programs
@@ -237,7 +147,9 @@ export default function CSVEncodingFixer({ tool }) {
 
           {preview && (
             <div className="csv-encoding-preview" tabIndex={0} role="region" aria-label="Original preview">
-              <h4 className="csv-encoding-preview-title">Preview (first rows)</h4>
+              <h4 className="csv-encoding-preview-title">
+                {detectedEncoding.needsFix ? 'How UTF-8 software reads it now (first rows)' : 'Preview (first rows)'}
+              </h4>
               <div className="csv-encoding-preview-table">
                 {preview.map((line, i) => (
                   <div key={i} className="csv-encoding-preview-row">
@@ -269,6 +181,16 @@ export default function CSVEncodingFixer({ tool }) {
                 ))}
               </div>
             </div>
+          )}
+
+          {fixedText && (
+            <label className="csv-encoding-bom">
+              <input type="checkbox" checked={addBom} onChange={e => setAddBom(e.target.checked)} />
+              <span>
+                Add a byte-order mark so Excel opens it correctly when double-clicked. Leave this
+                off for R, Python and most other software.
+              </span>
+            </label>
           )}
 
           {fixedText && (
