@@ -151,6 +151,7 @@ export const WORKFLOWS = [
     steps: [
       { tool: 'pdf-page-inspector', why: 'Check that every page is the same size. Chapters from different sources often mix Letter and A4.' },
       { tool: 'merge-pdfs', why: 'Only if your chapters are separate PDFs: combine them in order.' },
+      { page: 'thesis', why: 'Convert to PDF/A, and check the licence, embargo and other Faculty of Graduate Studies requirements before you submit.' },
     ],
   },
 ];

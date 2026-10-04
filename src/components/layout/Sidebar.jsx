@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronRight, HelpCircle, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, CircleDollarSign, Database, ArrowUpRight, BadgeCheck, Accessibility, ListChecks } from 'lucide-react';
+import { ChevronDown, ChevronRight, HelpCircle, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, CircleDollarSign, Database, ArrowUpRight, BadgeCheck, Accessibility, ListChecks, GraduationCap } from 'lucide-react';
 import { PRIMARY_CATEGORIES, MORE_CATEGORIES, CATEGORIES } from '../../data/toolRegistry';
 import { STAGES, WORKFLOWS, stepHash } from '../../data/workflows';
 import { PROJECT } from '../../data/institutionConfig';
@@ -222,6 +222,14 @@ export default function Sidebar({
           >
             <BadgeCheck size={16} />
             Grants &amp; Identifiers
+          </a>
+          <a
+            href="#thesis"
+            className={`sidebar-htw-link ${currentPage === 'thesis' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <GraduationCap size={16} />
+            Thesis &amp; Dissertation
           </a>
           <a
             href="#data-classification"

@@ -14,6 +14,7 @@ import LakeheadDataverse from './components/pages/LakeheadDataverse';
 import GrantsAndIdentifiers from './components/pages/GrantsAndIdentifiers';
 import AccessibilityStatement from './components/pages/AccessibilityStatement';
 import Tasks from './components/pages/Tasks';
+import ThesisAndDissertation from './components/pages/ThesisAndDissertation';
 import RelatedTools from './components/ui/RelatedTools';
 import HowItWorks from './components/ui/HowItWorks';
 import ToolCaveats from './components/ui/ToolCaveats';
@@ -493,6 +494,7 @@ export default function App() {
           )}
           {!currentToolId && !currentPage && <HomePage onNavigate={navigateTo} />}
           {currentPage === 'tasks' && <Tasks onNavigate={navigateTo} />}
+          {currentPage === 'thesis' && <ThesisAndDissertation onNavigate={navigateTo} />}
           {currentPage === 'how-this-works' && <HowThisWorks />}
           {currentPage === 'request-a-tool' && <RequestATool />}
           {currentPage === 'data-classification' && <DataClassification />}

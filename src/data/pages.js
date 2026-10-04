@@ -36,6 +36,12 @@ export const PAGE_META = [
     keywords: ['orcid', 'ccv', 'doi', 'cv', 'reb', 'grant'],
   },
   {
+    hash: 'thesis',
+    title: 'Thesis & Dissertation',
+    description: 'FGS requirements for your final PDF (PDF/A, unlocked, unsigned), licence and embargo forms, and the data behind your thesis.',
+    keywords: ['thesis', 'dissertation', 'graduate', 'fgs', 'pdf/a', 'pdfa', 'embargo', 'knowledge commons', 'masters', 'phd'],
+  },
+  {
     hash: 'data-classification',
     title: 'Data Classification Tool',
     description: 'Find your data’s classification under Lakehead’s standard (Public, Internal or Confidential) and the controls that apply.',
