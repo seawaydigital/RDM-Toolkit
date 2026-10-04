@@ -2,6 +2,18 @@ import { Shield, WifiOff, Wifi, Eye, FileCheck, Lock, Globe, MonitorSmartphone, 
 import NetworkSilence from '../ui/NetworkSilence';
 import ClearLocalData from '../ui/ClearLocalData';
 import { PROJECT, INSTITUTION, MAILTO } from '../../data/institutionConfig';
+import { scrollToId } from '../../utils/scrollToId';
+
+const ON_THIS_PAGE = [
+  { id: 'htw-what-happens', label: 'What happens when you use a tool' },
+  { id: 'htw-different', label: 'What makes this different' },
+  { id: 'htw-in-browser', label: 'What “runs in your browser” means' },
+  { id: 'htw-history', label: 'Why this is possible now' },
+  { id: 'htw-verify', label: 'Check it yourself' },
+  { id: 'htw-compliance', label: 'Data compliance' },
+  { id: 'htw-limits', label: 'Where this model ends (incl. AI tools)' },
+  { id: 'htw-faq', label: 'Common questions' },
+];
 
 export default function HowThisWorks() {
   return (
@@ -13,6 +25,22 @@ export default function HowThisWorks() {
           A plain-language explanation of why your files are safe here.
         </p>
       </div>
+
+      <nav className="htw-toc" aria-label="On this page">
+        <p className="htw-toc-title">On this page</p>
+        <ul className="htw-toc-list">
+          {ON_THIS_PAGE.map(item => (
+            <li key={item.id}>
+              <button type="button" className="htw-toc-btn" onClick={() => scrollToId(item.id)}>
+                {item.label}
+              </button>
+            </li>
+          ))}
+        </ul>
+        <p className="htw-toc-glossary">
+          Unfamiliar term? The <a href="#glossary">glossary</a> explains them.
+        </p>
+      </nav>
 
       {/* The Core Promise */}
       <section className="htw-section">
@@ -32,7 +60,7 @@ export default function HowThisWorks() {
 
       {/* Visual step-by-step */}
       <section className="htw-section">
-        <h2 className="htw-section-title">What Happens When You Use a Tool</h2>
+        <h2 className="htw-section-title" id="htw-what-happens" tabIndex={-1}>What Happens When You Use a Tool</h2>
         <p className="htw-section-intro">
           Here is exactly what happens, step by step, when you process a file with RDM Toolkit:
         </p>
@@ -73,7 +101,7 @@ export default function HowThisWorks() {
 
       {/* How typical sites work vs RDM Toolkit */}
       <section className="htw-section">
-        <h2 className="htw-section-title">What Makes This Different</h2>
+        <h2 className="htw-section-title" id="htw-different" tabIndex={-1}>What Makes This Different</h2>
         <p className="htw-section-intro">
           Most file conversion websites work by uploading your file to their servers,
           processing it there, and sending the result back. That means a copy of your
@@ -123,7 +151,7 @@ export default function HowThisWorks() {
 
       {/* What "runs in your browser" means */}
       <section className="htw-section">
-        <h2 className="htw-section-title">What "Runs in Your Browser" Actually Means</h2>
+        <h2 className="htw-section-title" id="htw-in-browser" tabIndex={-1}>What "Runs in Your Browser" Actually Means</h2>
         <p className="htw-section-intro">
           You might be wondering: if nothing is uploaded, how does the tool actually work?
         </p>
@@ -153,7 +181,7 @@ export default function HowThisWorks() {
 
       {/* Why this wasn't possible ten years ago */}
       <section className="htw-section">
-        <h2 className="htw-section-title">Why This Wasn't Possible Ten Years Ago</h2>
+        <h2 className="htw-section-title" id="htw-history" tabIndex={-1}>Why This Wasn't Possible Ten Years Ago</h2>
         <div className="htw-promise">
           <Clock size={32} />
           <div>
@@ -305,7 +333,7 @@ export default function HowThisWorks() {
 
       {/* How to verify */}
       <section className="htw-section">
-        <h2 className="htw-section-title">You Don't Have to Take Our Word for It</h2>
+        <h2 className="htw-section-title" id="htw-verify" tabIndex={-1}>You Don't Have to Take Our Word for It</h2>
         <p className="htw-section-intro">
           You can verify this yourself. Here are three simple ways:
         </p>
@@ -346,7 +374,7 @@ export default function HowThisWorks() {
 
       {/* What this means for compliance */}
       <section className="htw-section">
-        <h2 className="htw-section-title">What This Means for Data Compliance</h2>
+        <h2 className="htw-section-title" id="htw-compliance" tabIndex={-1}>What This Means for Data Compliance</h2>
         <p className="htw-section-intro">
           If you work with sensitive data — research files, health records, grant
           documents, student information, or anything containing personal details —
@@ -404,7 +432,7 @@ export default function HowThisWorks() {
 
       {/* ── Honest limits of the browser model ── */}
       <section className="htw-section">
-        <h2 className="htw-section-title">Where This Model Ends — and What Covers the Rest</h2>
+        <h2 className="htw-section-title" id="htw-limits" tabIndex={-1}>Where This Model Ends — and What Covers the Rest</h2>
         <p className="htw-section-intro">
           "Your files never leave your browser" is a guarantee about <em>this site</em>.
           It is not a guarantee about your browser, your device, or the computer you're
@@ -557,7 +585,7 @@ export default function HowThisWorks() {
 
       {/* Common questions */}
       <section className="htw-section">
-        <h2 className="htw-section-title">Common Questions</h2>
+        <h2 className="htw-section-title" id="htw-faq" tabIndex={-1}>Common Questions</h2>
         <div className="htw-faq">
           <details className="htw-faq-item">
             <summary>Do I need to create an account?</summary>
