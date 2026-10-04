@@ -34,3 +34,28 @@ test('the six confusable pairs are covered', () => {
   }
   assert.equal(getDisambiguation('word-counter'), null);
 });
+
+import { getExplainer, EXPLAINER_TOOL_IDS } from '../src/data/toolExplainers.js';
+
+const FILE_TOOLS_ADDED_2026_10 = [
+  'split-pdf', 'reorder-pages', 'rotate-pages', 'pdf-page-inspector', 'add-cover-page',
+  'add-page-numbers', 'pdf-watermark', 'resize-image', 'image-cropper', 'convert-image-format',
+  'create-zip', 'csv-json-converter', 'csv-encoding-fixer', 'csv-diff', 'encoding-detector',
+];
+
+test('the 15 file-processing tools have complete explainers', () => {
+  for (const id of FILE_TOOLS_ADDED_2026_10) {
+    const e = getExplainer(id);
+    assert.ok(e, `${id} has no explainer`);
+    assert.ok(e.whatItDoes?.length > 20, `${id}: whatItDoes`);
+    assert.ok(e.howItWorks?.length > 0, `${id}: howItWorks`);
+    assert.ok(Array.isArray(e.privacy) && e.privacy.length > 0, `${id}: privacy`);
+    assert.ok(Array.isArray(e.limitations) && e.limitations.length > 0, `${id}: limitations`);
+    assert.ok(e.verify?.quick, `${id}: verify.quick`);
+    assert.ok(e.technicalDetails?.sourceFile?.startsWith('src/tools/'), `${id}: sourceFile`);
+  }
+});
+
+test('every explainer belongs to a registered tool', () => {
+  for (const id of EXPLAINER_TOOL_IDS) assert.ok(toolIds.has(id), `${id} is not a tool`);
+});
