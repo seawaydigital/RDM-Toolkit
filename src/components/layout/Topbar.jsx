@@ -36,8 +36,8 @@ export default function Topbar({ onMenuToggle, showMenuButton, onLogoClick, curr
           <button
             className="topbar-search-btn"
             onClick={() => setSearchOpen(true)}
-            aria-label={`Search tools (${isMac ? '⌘' : 'Ctrl'}+K)`}
-            title={`Search tools (${isMac ? '⌘' : 'Ctrl'}+K)`}
+            aria-label={`Search tools, tasks and guides (${isMac ? '⌘' : 'Ctrl'}+K)`}
+            title={`Search tools, tasks and guides (${isMac ? '⌘' : 'Ctrl'}+K)`}
           >
             <Search size={16} />
             <span className="topbar-search-label">Search</span>

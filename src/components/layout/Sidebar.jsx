@@ -1,9 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronRight, HelpCircle, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, CircleDollarSign, Database, ArrowUpRight, BadgeCheck, Accessibility } from 'lucide-react';
+import { ChevronDown, ChevronRight, HelpCircle, ShieldCheck, HardDrive, MoreHorizontal, BookOpen, Globe, CircleDollarSign, Database, ArrowUpRight, BadgeCheck, Accessibility, ListChecks } from 'lucide-react';
 import { PRIMARY_CATEGORIES, MORE_CATEGORIES, CATEGORIES } from '../../data/toolRegistry';
+import { STAGES, WORKFLOWS, stepHash } from '../../data/workflows';
 import { PROJECT } from '../../data/institutionConfig';
 
-export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen, onClose }) {
+const BROWSE_MODES = [
+  { id: 'type', label: 'By file type' },
+  { id: 'task', label: 'By task' },
+];
+
+const TASK_STAGES = STAGES
+  .map(stage => ({ ...stage, workflows: WORKFLOWS.filter(w => w.stage === stage.id) }))
+  .filter(stage => stage.workflows.length > 0);
+
+export default function Sidebar({
+  currentToolId, currentPage, activeTask, browseMode = 'type', onBrowseModeChange,
+  onNavigate, isOpen, onClose,
+}) {
   const [expanded, setExpanded] = useState(new Set());
   const [showMore, setShowMore] = useState(false);
   const navRef = useRef(null);
@@ -51,6 +64,49 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
     if (onClose) onClose();
   }
 
+  function handleTaskClick(workflow) {
+    onNavigate(stepHash(workflow, 1));
+    if (onClose) onClose();
+  }
+
+  // Arrow keys move between the two modes, as in a native radio group.
+  function handleModeKeyDown(e) {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+    e.preventDefault();
+    const next = browseMode === 'type' ? 'task' : 'type';
+    onBrowseModeChange?.(next);
+    e.currentTarget.parentElement.querySelector(`[data-mode="${next}"]`)?.focus();
+  }
+
+  function renderTaskMode() {
+    return (
+      <div className="sidebar-tasks">
+        {TASK_STAGES.map(stage => (
+          <div key={stage.id} className="sidebar-task-stage">
+            <p className="sidebar-task-stage-label">{stage.label}</p>
+            <ul className="sidebar-tool-list">
+              {stage.workflows.map(w => (
+                <li key={w.id}>
+                  <button
+                    type="button"
+                    className={`sidebar-tool-item ${activeTask?.id === w.id ? 'sidebar-tool-item--active' : ''}`}
+                    aria-current={activeTask?.id === w.id ? 'true' : undefined}
+                    onClick={() => handleTaskClick(w)}
+                  >
+                    {w.title}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+        <a href="#tasks" className="sidebar-tasks-all" onClick={onClose}>
+          See every task explained
+        </a>
+      </div>
+    );
+  }
+
   function renderCategory(cat) {
     const isExpanded = expanded.has(cat.id);
     return (
@@ -88,27 +144,61 @@ export default function Sidebar({ currentToolId, currentPage, onNavigate, isOpen
       {isOpen && <div className="sidebar-backdrop" onClick={onClose} />}
       <nav className={`sidebar ${isOpen ? 'sidebar--open' : ''}`} aria-label="Tool navigation" ref={navRef}>
         <div className="sidebar-scroll">
-          {/* Primary categories */}
-          {PRIMARY_CATEGORIES.map(renderCategory)}
+          {/* Browse mode — tools grouped by file type, or common tasks */}
+          <div className="sidebar-mode" role="radiogroup" aria-label="Browse tools">
+            {BROWSE_MODES.map(mode => {
+              const checked = browseMode === mode.id;
+              return (
+                <button
+                  key={mode.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={checked}
+                  tabIndex={checked ? 0 : -1}
+                  data-mode={mode.id}
+                  className={`sidebar-mode-btn ${checked ? 'sidebar-mode-btn--active' : ''}`}
+                  onClick={() => onBrowseModeChange?.(mode.id)}
+                  onKeyDown={handleModeKeyDown}
+                >
+                  {mode.label}
+                </button>
+              );
+            })}
+          </div>
 
-          {/* More Tools divider */}
-          <button
-            className="sidebar-more-toggle"
-            onClick={() => setShowMore(!showMore)}
-          >
-            <MoreHorizontal size={16} />
-            <span>{showMore ? 'Less Tools' : 'More Tools'}</span>
-            <span className="sidebar-category-count">
-              {MORE_CATEGORIES.reduce((sum, c) => sum + c.tools.length, 0)}
-            </span>
-            {showMore ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-          </button>
+          {browseMode === 'task' ? renderTaskMode() : (
+            <>
+              {/* Primary categories */}
+              {PRIMARY_CATEGORIES.map(renderCategory)}
 
-          {showMore && MORE_CATEGORIES.map(renderCategory)}
+              {/* More Tools divider */}
+              <button
+                className="sidebar-more-toggle"
+                onClick={() => setShowMore(!showMore)}
+              >
+                <MoreHorizontal size={16} />
+                <span>{showMore ? 'Less Tools' : 'More Tools'}</span>
+                <span className="sidebar-category-count">
+                  {MORE_CATEGORIES.reduce((sum, c) => sum + c.tools.length, 0)}
+                </span>
+                {showMore ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+              </button>
+
+              {showMore && MORE_CATEGORIES.map(renderCategory)}
+            </>
+          )}
 
           {/* Special pages */}
           <div className="sidebar-divider" />
           <div className="sidebar-section-label">Research Resources</div>
+          <a
+            href="#tasks"
+            className={`sidebar-htw-link ${currentPage === 'tasks' ? 'sidebar-htw-link--active' : ''}`}
+            onClick={onClose}
+          >
+            <ListChecks size={16} />
+            Common Tasks
+          </a>
           <a
             href="#how-this-works"
             className={`sidebar-htw-link ${currentPage === 'how-this-works' ? 'sidebar-htw-link--active' : ''}`}

@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, X } from 'lucide-react';
 import { ALL_TOOLS } from '../../data/toolRegistry';
+import { searchAll } from '../../data/searchIndex';
 
-const MAX_RESULTS = 8;
+const KIND_LABEL = { task: 'Task', page: 'Guide' };
 const MAX_RECENT = 5;
 const STORAGE_KEY = 'rdm_recent_tools';
 
@@ -17,21 +18,19 @@ function readRecentIds() {
   }
 }
 
-function filterTools(query) {
-  const q = query.toLowerCase().trim();
-  if (!q) return [];
-  return ALL_TOOLS.filter(tool => {
-    if (tool.name.toLowerCase().includes(q)) return true;
-    if (tool.description.toLowerCase().includes(q)) return true;
-    if (tool.categoryLabel?.toLowerCase().includes(q)) return true;
-    if (tool.tags?.some(tag => tag.toLowerCase().includes(q))) return true;
-    return false;
-  }).slice(0, MAX_RESULTS);
-}
-
 function getRecentTools() {
   const ids = readRecentIds().slice(0, MAX_RECENT);
-  return ids.map(id => ALL_TOOLS.find(t => t.id === id)).filter(Boolean);
+  return ids
+    .map(id => ALL_TOOLS.find(t => t.id === id))
+    .filter(Boolean)
+    .map(tool => ({
+      kind: 'tool',
+      id: tool.id,
+      title: tool.name,
+      description: tool.description,
+      hash: tool.id,
+      emoji: tool.categoryEmoji,
+    }));
 }
 
 export default function SearchBar({ isOpen, onClose, onNavigate }) {
@@ -40,7 +39,7 @@ export default function SearchBar({ isOpen, onClose, onNavigate }) {
   const inputRef = useRef(null);
   const listRef = useRef(null);
 
-  const results = query.trim() ? filterTools(query) : getRecentTools();
+  const results = query.trim() ? searchAll(query) : getRecentTools();
   const isShowingRecent = !query.trim();
 
   // Focus input when opened
@@ -58,8 +57,8 @@ export default function SearchBar({ isOpen, onClose, onNavigate }) {
     setActiveIndex(0);
   }, [query]);
 
-  const handleSelect = useCallback((toolId) => {
-    onNavigate(toolId);
+  const handleSelect = useCallback((hash) => {
+    onNavigate(hash);
     onClose();
   }, [onNavigate, onClose]);
 
@@ -85,7 +84,7 @@ export default function SearchBar({ isOpen, onClose, onNavigate }) {
       if (e.key === 'Enter') {
         e.preventDefault();
         if (results[activeIndex]) {
-          handleSelect(results[activeIndex].id);
+          handleSelect(results[activeIndex].hash);
         }
       }
     }
@@ -104,7 +103,7 @@ export default function SearchBar({ isOpen, onClose, onNavigate }) {
   if (!isOpen) return null;
 
   return (
-    <div className="search-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Search tools">
+    <div className="search-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Search the site">
       <div className="search-modal" onClick={e => e.stopPropagation()}>
         <div className="search-input-row">
           <Search size={18} className="search-input-icon" aria-hidden="true" />
@@ -112,15 +111,15 @@ export default function SearchBar({ isOpen, onClose, onNavigate }) {
             ref={inputRef}
             className="search-input"
             type="text"
-            placeholder="Search tools…"
+            placeholder="Search tools, tasks and guides…"
             value={query}
             onChange={e => setQuery(e.target.value)}
             autoComplete="off"
             spellCheck={false}
-            aria-label="Search tools"
+            aria-label="Search tools, tasks and guides"
             aria-autocomplete="list"
             aria-controls="search-results-list"
-            aria-activedescendant={results[activeIndex] ? `search-result-${results[activeIndex].id}` : undefined}
+            aria-activedescendant={results[activeIndex] ? `search-result-${results[activeIndex].kind}-${results[activeIndex].id}` : undefined}
           />
           <button className="search-close-btn" onClick={onClose} aria-label="Close search">
             <X size={16} />
@@ -139,20 +138,25 @@ export default function SearchBar({ isOpen, onClose, onNavigate }) {
                 className="search-results-list"
                 role="listbox"
               >
-                {results.map((tool, idx) => (
+                {results.map((result, idx) => (
                   <li
-                    key={tool.id}
-                    id={`search-result-${tool.id}`}
+                    key={`${result.kind}-${result.id}`}
+                    id={`search-result-${result.kind}-${result.id}`}
                     role="option"
                     aria-selected={idx === activeIndex}
                     className={`search-result${idx === activeIndex ? ' search-result--active' : ''}`}
                     onMouseEnter={() => setActiveIndex(idx)}
-                    onClick={() => handleSelect(tool.id)}
+                    onClick={() => handleSelect(result.hash)}
                   >
-                    <span className="search-result-emoji" aria-hidden="true">{tool.categoryEmoji}</span>
+                    <span className="search-result-emoji" aria-hidden="true">{result.emoji}</span>
                     <span className="search-result-body">
-                      <span className="search-result-name">{tool.name}</span>
-                      <span className="search-result-desc">{tool.description}</span>
+                      <span className="search-result-name">
+                        {result.title}
+                        {KIND_LABEL[result.kind] && (
+                          <span className="search-result-kind">{KIND_LABEL[result.kind]}</span>
+                        )}
+                      </span>
+                      <span className="search-result-desc">{result.description}</span>
                     </span>
                   </li>
                 ))}
@@ -162,7 +166,7 @@ export default function SearchBar({ isOpen, onClose, onNavigate }) {
 
           {query.trim() && results.length === 0 && (
             <div className="search-empty">
-              No tools found for <strong>"{query}"</strong>
+              Nothing found for <strong>"{query}"</strong>
             </div>
           )}
 

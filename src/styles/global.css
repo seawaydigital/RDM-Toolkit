@@ -15726,3 +15726,452 @@ select:focus-visible,
     justify-content: center;
   }
 }
+
+/* ========================================
+   COMMON TASKS — task data in src/data/workflows.js
+   (Tasks page, sidebar "By task" mode, homepage section, WorkflowBar)
+   ======================================== */
+
+/* Sidebar browse-mode switch */
+.sidebar-mode {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin: 10px var(--space-md) 8px;
+  padding: 3px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+}
+
+.sidebar-mode-btn {
+  padding: 6px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sidebar-mode-btn:hover {
+  color: var(--text-parchment);
+}
+
+.sidebar-mode-btn--active {
+  background: var(--accent-primary-soft);
+  color: var(--accent-primary);
+}
+
+.sidebar-tasks .sidebar-tool-item {
+  padding: 6px var(--space-md) 6px 28px;
+  line-height: 1.4;
+}
+
+.sidebar-tasks .sidebar-tool-item::before {
+  left: 14px;
+}
+
+.sidebar-task-stage-label {
+  padding: 10px var(--space-md) 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.sidebar-tasks-all {
+  display: block;
+  margin: 8px var(--space-md) 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sidebar-tasks-all:hover {
+  color: var(--text-parchment);
+}
+
+/* Step-by-step bar above the current tool or page */
+.workflow-bar-wrap {
+  max-width: 960px;
+  margin: 0 auto var(--space-lg);
+}
+
+.workflow-bar {
+  padding: 14px 18px 16px;
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 194, 14, 0.25);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.workflow-bar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.workflow-bar-kicker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-primary);
+}
+
+.workflow-bar-exit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.workflow-bar-exit:hover {
+  color: var(--text-parchment);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.workflow-bar-title {
+  margin: 2px 0 10px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text-parchment);
+}
+
+.workflow-bar-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.workflow-bar-title a:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.workflow-bar-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 10px;
+  padding: 0;
+  list-style: none;
+}
+
+.workflow-bar-step-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 4px 10px 4px 5px;
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-hairline);
+  border-radius: 999px;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.workflow-bar-step-btn:hover {
+  color: var(--text-parchment);
+  border-color: rgba(255, 194, 14, 0.35);
+}
+
+.workflow-bar-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+}
+
+.workflow-bar-step--current .workflow-bar-step-btn {
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-soft);
+}
+
+.workflow-bar-step--current .workflow-bar-step-num {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
+.workflow-bar-step--done .workflow-bar-step-num {
+  background: rgba(16, 185, 129, 0.18);
+  color: var(--accent-green);
+}
+
+.workflow-bar-why {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.workflow-bar-caveat {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-primary);
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: var(--radius-md);
+}
+
+.workflow-bar-caveat svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--accent-amber);
+}
+
+.workflow-bar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.workflow-bar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.workflow-bar-btn:hover {
+  border-color: rgba(255, 194, 14, 0.35);
+}
+
+.workflow-bar-btn--primary {
+  color: var(--bg-primary);
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.workflow-bar-btn--primary:hover {
+  background: #FFD24D;
+}
+
+/* Tasks page */
+.tasks-stage-blurb {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  order: 2;
+}
+
+.tasks-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tasks-card {
+  display: flex;
+  flex-direction: column;
+  padding: 18px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+}
+
+.tasks-card-title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-parchment);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.tasks-card-summary {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.tasks-card-steps {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tasks-card-steps li {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.tasks-card-steps li::marker {
+  color: var(--accent-primary);
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.tasks-card-steps strong {
+  display: block;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.tasks-card-note {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md);
+}
+
+.tasks-card-note svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--accent-primary);
+}
+
+.tasks-card-start {
+  align-self: flex-start;
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bg-primary);
+  background: var(--accent-primary);
+  border-radius: var(--radius-md);
+  transition: background 0.15s, transform 0.15s;
+}
+
+.tasks-card-start:hover {
+  background: #FFD24D;
+  transform: translateY(-1px);
+}
+
+/* Homepage "Start from a task" */
+.homepage-tasks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.homepage-task {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  text-align: left;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+}
+
+.homepage-task:hover {
+  border-color: rgba(255, 194, 14, 0.3);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card);
+}
+
+.homepage-task-stage {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-primary);
+}
+
+.homepage-task-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-parchment);
+  line-height: 1.3;
+}
+
+.homepage-task-summary {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.homepage-tasks-more {
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+/* Search result kind label (Task / Guide) */
+.search-result-kind {
+  margin-left: 8px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-hairline);
+  border-radius: 4px;
+  vertical-align: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .homepage-task:hover,
+  .tasks-card-start:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .tasks-grid,
+  .homepage-tasks {
+    grid-template-columns: 1fr;
+  }
+
+  .workflow-bar {
+    padding: 12px 14px 14px;
+  }
+
+  .workflow-bar-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-height: 44px;
+  }
+
+  .sidebar-mode-btn {
+    min-height: 40px;
+  }
+}

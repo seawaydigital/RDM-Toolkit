@@ -13,14 +13,20 @@ import AcrobatAlternative from './components/pages/AcrobatAlternative';
 import LakeheadDataverse from './components/pages/LakeheadDataverse';
 import GrantsAndIdentifiers from './components/pages/GrantsAndIdentifiers';
 import AccessibilityStatement from './components/pages/AccessibilityStatement';
+import Tasks from './components/pages/Tasks';
 import RelatedTools from './components/ui/RelatedTools';
 import HowItWorks from './components/ui/HowItWorks';
 import ToolCaveats from './components/ui/ToolCaveats';
+import WorkflowBar from './components/ui/WorkflowBar';
 import ToolSkeleton from './components/ui/ToolSkeleton';
 import FeedbackModal from './components/ui/FeedbackModal';
 import WelcomeTour, { hasDismissedTour } from './components/ui/WelcomeTour';
 import { ALL_TOOLS } from './data/toolRegistry';
+import { PAGE_IDS, getPageMeta } from './data/pages';
+import { getTaskFromParams } from './data/workflows';
+import { parseHash } from './utils/route';
 import { useRecentTools } from './hooks/useRecentTools';
+import { usePreferences } from './hooks/usePreferences';
 import { useUsageLog } from './hooks/useUsageLog';
 import { setDroppedFiles, hasPendingDroppedFiles, DROPPED_FILES_EVENT } from './utils/droppedFile';
 
@@ -100,30 +106,13 @@ const toolComponents = {
   'encoding-detector': lazy(() => import('./tools/privacy/EncodingDetector.jsx')),
 };
 
-const PAGES = new Set(['how-this-works', 'request-a-tool', 'data-classification', 'storage-calculator', 'tri-agency-policy', 'drac-services', 'acrobat-alternative', 'lakehead-dataverse', 'grants-identifiers', 'accessibility']);
+const TOOL_IDS = new Set(ALL_TOOLS.map(t => t.id));
 
-// Human-readable titles for non-tool routes — used for document.title + the
-// screen-reader route announcer (hash navigation never triggers a page load,
-// so assistive tech needs an explicit announcement).
-const PAGE_TITLES = {
-  'how-this-works': 'How This Works',
-  'request-a-tool': 'Request a Tool',
-  'data-classification': 'Data Classification Tool',
-  'storage-calculator': 'Research Storage Calculator',
-  'tri-agency-policy': 'Tri-Agency RDM Policy',
-  'drac-services': 'DRAC Services',
-  'acrobat-alternative': 'Adobe Acrobat Alternative',
-  'lakehead-dataverse': 'Lakehead Dataverse',
-  'grants-identifiers': 'Grants & Identifiers',
-  'accessibility': 'Accessibility Statement',
-};
-
+// Parses "#<tool or page>?<params>". Task progress (?task=…&step=…) is
+// validated here so components can trust route.task.
 function getRouteFromHash() {
-  const hash = window.location.hash.slice(1);
-  if (!hash) return { page: null, toolId: null };
-  if (PAGES.has(hash)) return { page: hash, toolId: null };
-  const tool = ALL_TOOLS.find(t => t.id === hash);
-  return { page: null, toolId: tool ? tool.id : null };
+  const route = parseHash(window.location.hash, { pages: PAGE_IDS, toolIds: TOOL_IDS });
+  return { ...route, task: getTaskFromParams(route.params) };
 }
 
 class ErrorBoundary extends Component {
@@ -264,6 +253,7 @@ export default function App() {
   const dragCounterRef = useRef(0);
   const { addRecentTool } = useRecentTools();
   const { logEvent, grantConsent, exportLog } = useUsageLog();
+  const [prefs, setPref] = usePreferences();
 
   const currentToolId = route.toolId;
   const currentPage = route.page;
@@ -316,7 +306,7 @@ export default function App() {
   // to screen readers via the polite live region rendered below the skip link.
   useEffect(() => {
     const tool = route.toolId ? ALL_TOOLS.find(t => t.id === route.toolId) : null;
-    const title = tool ? tool.name : (route.page ? PAGE_TITLES[route.page] : null);
+    const title = tool ? tool.name : (route.page ? getPageMeta(route.page)?.title : null);
     document.title = title
       ? `${title} — RDM Toolkit`
       : 'RDM Toolkit — Research Data Management Tools';
@@ -449,11 +439,13 @@ export default function App() {
     };
   }, [currentToolId]);
 
-  const navigateTo = useCallback((toolId) => {
-    window.location.hash = toolId;
+  // Accepts a tool id, a page hash, or either with params
+  // ('merge-pdfs?task=reb-package&step=1').
+  const navigateTo = useCallback((target) => {
+    window.location.hash = target;
     // Track recently used tools (pages like 'how-this-works' are not tool IDs)
-    const isTool = ALL_TOOLS.some(t => t.id === toolId);
-    if (isTool) addRecentTool(toolId);
+    const path = target.split('?')[0];
+    if (TOOL_IDS.has(path)) addRecentTool(path);
   }, [addRecentTool]);
 
   const goHome = useCallback(() => {
@@ -482,12 +474,25 @@ export default function App() {
         <Sidebar
           currentToolId={currentToolId}
           currentPage={currentPage}
+          activeTask={route.task}
+          browseMode={prefs.browseMode}
+          onBrowseModeChange={mode => setPref('browseMode', mode)}
           onNavigate={navigateTo}
           isOpen={isMobile ? sidebarOpen : true}
           onClose={() => setSidebarOpen(false)}
         />
         <MainContent>
+          {route.task && (
+            <div className="workflow-bar-wrap">
+              <WorkflowBar
+                task={route.task}
+                currentPath={currentToolId || currentPage}
+                onNavigate={navigateTo}
+              />
+            </div>
+          )}
           {!currentToolId && !currentPage && <HomePage onNavigate={navigateTo} />}
+          {currentPage === 'tasks' && <Tasks onNavigate={navigateTo} />}
           {currentPage === 'how-this-works' && <HowThisWorks />}
           {currentPage === 'request-a-tool' && <RequestATool />}
           {currentPage === 'data-classification' && <DataClassification />}

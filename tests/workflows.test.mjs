@@ -2,13 +2,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { STAGES, WORKFLOWS, getWorkflow, getTaskFromParams, stepHash } from '../src/data/workflows.js';
 import { ALL_TOOLS } from '../src/data/toolRegistry.js';
+import { PAGE_IDS } from '../src/data/pages.js';
 
 const toolIds = new Set(ALL_TOOLS.map(t => t.id));
-// Pages a task step may point at. Keep in step with PAGES in src/App.jsx.
-const pageIds = new Set([
-  'data-classification', 'storage-calculator', 'tri-agency-policy', 'lakehead-dataverse',
-  'grants-identifiers', 'thesis',
-]);
+const pageIds = PAGE_IDS;
 const stageIds = new Set(STAGES.map(s => s.id));
 
 test('ids are unique, kebab-case, and stages are valid', () => {

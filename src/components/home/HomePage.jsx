@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CATEGORIES, PRIMARY_CATEGORIES, MORE_CATEGORIES } from '../../data/toolRegistry';
 import { useRecentTools } from '../../hooks/useRecentTools';
 import { PROJECT } from '../../data/institutionConfig';
+import { WORKFLOWS, STAGES, stepHash } from '../../data/workflows';
 import HeroDiagram from './HeroDiagram';
 import { ChevronDown, ChevronRight, Shield, HardDrive, BookOpen, Globe } from 'lucide-react';
 
@@ -43,6 +44,9 @@ const RESEARCH_PAGES = [
     description: 'Explore national compute clusters, cloud, Borealis, FRDR, Globus, and other research infrastructure.',
   },
 ];
+
+const FEATURED_TASKS = WORKFLOWS.filter(w => w.featured);
+const STAGE_LABEL = Object.fromEntries(STAGES.map(s => [s.id, s.label]));
 
 // Build a lookup of tool id → category emoji for recent tools display
 const TOOL_EMOJI = {};
@@ -222,6 +226,33 @@ export default function HomePage({ onNavigate }) {
             </p>
           </div>
         </div>
+      </section>
+
+      {/* ── Start from a task ──────────────────────────────────────────────── */}
+      <section className="homepage-section" aria-labelledby="homepage-tasks-title">
+        <h2 className="homepage-section-title" id="homepage-tasks-title">
+          Start from a task
+          <span className="homepage-section-title-count">tools in the right order</span>
+        </h2>
+        <div className="homepage-tasks">
+          {FEATURED_TASKS.map(w => (
+            <button
+              key={w.id}
+              type="button"
+              className="homepage-task"
+              onClick={() => onNavigate(stepHash(w, 1))}
+            >
+              <span className="homepage-task-stage">
+                {STAGE_LABEL[w.stage]} · {w.steps.length} steps
+              </span>
+              <span className="homepage-task-title">{w.title}</span>
+              <span className="homepage-task-summary">{w.summary}</span>
+            </button>
+          ))}
+        </div>
+        <p className="homepage-tasks-more">
+          <a href="#tasks">See all {WORKFLOWS.length} tasks →</a>
+        </p>
       </section>
 
       {/* ── How it works ───────────────────────────────────────────────────── */}
