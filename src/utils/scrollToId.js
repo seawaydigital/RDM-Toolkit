@@ -6,10 +6,12 @@ const prefersReducedMotion = () =>
   typeof window !== 'undefined' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-export function scrollToId(id) {
+// Pass { smooth: false } when arriving from a link: jump straight there.
+export function scrollToId(id, { smooth = true } = {}) {
   const el = document.getElementById(id);
   if (!el) return false;
-  el.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
+  const animate = smooth && !prefersReducedMotion();
+  el.scrollIntoView({ behavior: animate ? 'smooth' : 'auto', block: 'start' });
   el.focus({ preventScroll: true });
   return true;
 }

@@ -20,9 +20,10 @@ const LETTERS = GLOSSARY.reduce((acc, t) => {
 export default function Glossary({ term }) {
   useEffect(() => {
     if (!term || !getTerm(term)) return;
-    // Wait a frame so the entries are laid out before scrolling.
-    const frame = requestAnimationFrame(() => scrollToId(termAnchor(term)));
-    return () => cancelAnimationFrame(frame);
+    // Let the entries lay out before scrolling (a timer rather than
+    // requestAnimationFrame, which never fires in a background tab).
+    const timer = setTimeout(() => scrollToId(termAnchor(term), { smooth: false }), 50);
+    return () => clearTimeout(timer);
   }, [term]);
 
   return (

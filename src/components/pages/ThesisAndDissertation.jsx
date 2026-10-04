@@ -18,7 +18,8 @@ const PDFA_ROUTES = [
   },
   {
     title: 'An existing PDF',
-    body: 'If you only have a PDF (for example, chapters you combined), the free command-line tool OCRmyPDF can convert it: ocrmypdf --output-type pdfa --skip-text in.pdf out.pdf. It runs on your own computer.',
+    body: 'If you only have a PDF (for example, chapters you combined), the free command-line tool OCRmyPDF can convert it on your own computer:',
+    code: 'ocrmypdf --output-type pdfa --skip-text in.pdf out.pdf',
     href: 'https://ocrmypdf.readthedocs.io/',
     linkLabel: 'OCRmyPDF documentation',
   },
@@ -57,7 +58,10 @@ export default function ThesisAndDissertation({ onNavigate }) {
               signatures (written or digital) and should be PDF/A compliant.” In practice:
             </p>
             <ul className="thesis-list">
-              <li><strong>PDF/A.</strong> An archival version of PDF with every font embedded, so the file looks the same in decades.</li>
+              <li>
+                <strong><a href="#glossary?term=pdf-a">PDF/A</a>.</strong> An archival version of PDF
+                with every font embedded, so the file looks the same in decades.
+              </li>
               <li><strong>No password or restrictions.</strong> Don’t run your final copy through Password Protect PDF.</li>
               <li><strong>No signatures.</strong> Leave out signed approval pages, and don’t add a signature with Sign PDF.</li>
             </ul>
@@ -93,6 +97,7 @@ export default function ThesisAndDissertation({ onNavigate }) {
             <div key={route.title} className="gai-ethics-card">
               <strong>{route.title}</strong>
               <p>{route.body}</p>
+              {route.code && <code className="thesis-code">{route.code}</code>}
               {route.href && (
                 <a href={route.href} target="_blank" rel="noopener noreferrer">
                   {route.linkLabel} <ExternalLink size={11} />

@@ -16485,3 +16485,53 @@ select:focus-visible,
     grid-template-columns: 1fr;
   }
 }
+
+/* Tri-Agency — DMP crosswalk table (reuses .lud-picker-*) */
+.tap-crosswalk th[scope="row"] {
+  padding: var(--space-sm) var(--space-md);
+  font-weight: 600;
+  text-align: left;
+  vertical-align: top;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.tap-crosswalk tr:last-child th[scope="row"] {
+  border-bottom: none;
+}
+
+.tap-crosswalk-links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tap-crosswalk-links a {
+  white-space: nowrap;
+}
+
+.htw-toc-glossary a,
+.thesis-list a,
+.content-reviewed a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.thesis-code {
+  display: block;
+  margin: 6px 0 8px;
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: var(--bg-inset);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-sm);
+  overflow-wrap: anywhere;
+}
