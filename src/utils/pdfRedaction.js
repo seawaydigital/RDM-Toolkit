@@ -1,4 +1,5 @@
 import { PDFDocument, PDFName, PDFDict } from '@cantoo/pdf-lib';
+import { isolatePageResources } from './pdfPageIsolation.js';
 
 // Strip every catalog-level deadweight dict that could carry PII or
 // side-channel data after a redaction. Source-doc metadata is already absent
@@ -114,6 +115,7 @@ export async function assembleRedactedPdf(sourceDoc, { redactedPageNums, addRast
       // No redactions on this page — copy it so text stays selectable, but
       // only after removing everything it does not need to render.
       scrubPageForCopy(sourceDoc.getPage(pageNum - 1), scrubbed);
+      isolatePageResources(sourceDoc, pageNum - 1);
       const [copiedPage] = await newDoc.copyPages(sourceDoc, [pageNum - 1]);
       newDoc.addPage(copiedPage);
     }

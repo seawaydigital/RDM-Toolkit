@@ -10,6 +10,7 @@ import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/f
 import { X, ZoomIn, ZoomOut, Download, Plus, Trash2, RotateCcw } from 'lucide-react';
 import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
+import { isolatePageResources } from '../../utils/pdfPageIsolation';
 
 function parsePageRanges(rangeStr, totalPages) {
   if (!rangeStr.trim()) return { pages: [], error: null };
@@ -165,6 +166,10 @@ export default function SplitPDF({ tool, navigateTo }) {
       const baseName = file.name.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().replace(/\s+/g, '-');
       const zip = new JSZip();
       const outputFiles = [];
+
+      // Give every page its own /Resources so a part cannot carry XObjects that
+      // only pages outside it draw (pages may share one resource dictionary).
+      for (let p = 0; p < srcDoc.getPageCount(); p++) isolatePageResources(srcDoc, p);
 
       for (let i = 0; i < parsedSplits.length; i++) {
         const split = parsedSplits[i];

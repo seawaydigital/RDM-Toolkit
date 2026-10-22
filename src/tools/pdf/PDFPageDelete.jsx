@@ -11,6 +11,7 @@ import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
+import { isolatePageResources } from '../../utils/pdfPageIsolation';
 
 export default function PDFPageDelete({ tool, navigateTo }) {
   const [file, setFile] = useState(null);
@@ -111,6 +112,9 @@ export default function PDFPageDelete({ tool, navigateTo }) {
         }
       }
 
+      // Give each kept page its own /Resources so XObjects that only deleted
+      // pages draw cannot travel with it (pages may share one dictionary).
+      for (const i of indicesToKeep) isolatePageResources(srcDoc, i);
       const copiedPages = await newDoc.copyPages(srcDoc, indicesToKeep);
       for (const page of copiedPages) {
         newDoc.addPage(page);

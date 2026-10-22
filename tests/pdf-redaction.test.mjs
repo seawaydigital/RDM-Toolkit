@@ -105,6 +105,33 @@ test('findPagesOutsidePageTree flags an orphaned page object and passes a clean 
   assert.deepEqual(await findPagesOutsidePageTree(bytes), []);
 });
 
+// Pages sharing one /Resources dictionary: the redacted page's text lives in
+// a form XObject that only it draws, but the kept page's copy would carry the
+// whole shared dictionary into the output.
+async function sharedResourcesSourcePdf() {
+  const doc = await PDFDocument.create();
+  const ctx = doc.context;
+  const kept = doc.addPage([612, 792]);
+  const redacted = doc.addPage([612, 792]);
+  const form = (text) => ctx.register(ctx.flateStream(`BT /F1 12 Tf 72 700 Td (${text}) Tj ET`, { Type: 'XObject', Subtype: 'Form', BBox: [0, 0, 612, 792] }));
+  const shared = ctx.register(ctx.obj({
+    Font: { F1: ctx.register(ctx.obj({ Type: 'Font', Subtype: 'Type1', BaseFont: 'Helvetica' })) },
+    XObject: { Fm1: form(KEPT_TEXT), Fm2: form(SECRET) },
+  }));
+  for (const [page, name] of [[kept, 'Fm1'], [redacted, 'Fm2']]) {
+    page.node.set(PDFName.of('Resources'), shared);
+    page.node.set(PDFName.of('Contents'), ctx.register(ctx.flateStream(`q /${name} Do Q`)));
+  }
+  return doc.save();
+}
+
+test('a redacted page drawn through a shared /Resources dictionary does not travel with a kept page', async () => {
+  const { bytes } = await redact(await sharedResourcesSourcePdf(), [2]);
+  const text = await recoverableText(bytes);
+  assert.equal(contains(text, SECRET), false, 'redacted page form text survived via shared /Resources');
+  assert.equal(contains(text, KEPT_TEXT), true, 'kept page form text lost');
+});
+
 test('kept pages keep their text and the document keeps every page', async () => {
   const { bytes } = await redact(await linkedSourcePdf(), [2]);
   const doc = await PDFDocument.load(bytes);

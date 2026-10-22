@@ -201,7 +201,7 @@ const EXPLAINERS = {
         'Source PDF loaded via <code>PDFDocument.load()</code> (pdf-lib) and <code>pdfjs.getDocument()</code>.',
         'A fresh <code>PDFDocument.create()</code> holds the output — none of the source document\u2019s catalog (metadata, outlines, AcroForm, attachments, JavaScript, OpenActions) is carried over.',
         'For each page with redactions: pdfjs renders the page to an HTML <code>&lt;canvas&gt;</code> at 200 DPI → <code>ctx.fillRect()</code> paints the redaction rectangles in pure black → <code>canvas.toBlob(\'image/jpeg\', 0.88)</code> produces a flat image → <code>newDoc.embedJpg()</code> and <code>newPage.drawImage()</code> writes it into the output at the original page dimensions.',
-        'Pages without redactions are copied via <code>newDoc.copyPages(sourceDoc, [idx])</code>, preserving vector text and searchability. Before the copy, every page key not needed for rendering — <code>/Annots</code> (form widgets, links, file-attachment annotations), <code>/Thumb</code>, <code>/PieceInfo</code>, <code>/AA</code> and the rest — is removed from the source page, because pdf-lib copies every object a page references (a table-of-contents link would otherwise pull in a redacted page’s original content) and writes every object it holds.',
+        'Pages without redactions are copied via <code>newDoc.copyPages(sourceDoc, [idx])</code>, preserving vector text and searchability. Before the copy, every page key not needed for rendering — <code>/Annots</code> (form widgets, links, file-attachment annotations), <code>/Thumb</code>, <code>/PieceInfo</code>, <code>/AA</code> and the rest — is removed from the source page, because pdf-lib copies every object a page references (a table-of-contents link would otherwise pull in a redacted page’s original content) and writes every object it holds. The page also gets its own resource dictionary holding only what its content names, so a dictionary shared with a redacted page cannot carry that page’s images or text along.',
         'Before save: the document info dict (title/author/subject/keywords/producer/creator) is cleared.',
         'After save: pdfjs re-opens the result, calls <code>getTextContent()</code> on every redacted page, and asserts zero non-empty text items. pdf-lib then confirms the file holds no page objects outside its page tree (hidden copies of source pages). If either check fails, an error is thrown and the download is blocked.',
       ],
@@ -483,7 +483,7 @@ const EXPLAINERS = {
       library: '<code>@cantoo/pdf-lib</code>.',
       flow: [
         '<code>PDFDocument.load()</code> parses the source PDF.',
-        'A new <code>PDFDocument.create()</code> target is built; <code>copyPages()</code> copies only the indexes you chose to keep.',
+        'A new <code>PDFDocument.create()</code> target is built; <code>copyPages()</code> copies only the indexes you chose to keep. First, each kept page gets its own resource dictionary holding only the fonts, images and forms its content names, so pages that shared one dictionary do not carry the deleted pages’ images or text along.',
         'The output PDF is saved and downloaded — the removed pages\u2019 object trees are not included.',
       ],
       sourceFile: 'src/tools/pdf/PDFPageDelete.jsx',
@@ -751,6 +751,7 @@ const EXPLAINERS = {
       library: '<code>@cantoo/pdf-lib</code> for copying pages; <code>pdfjs-dist</code> for thumbnails; <code>jszip</code> for the ZIP.',
       flow: [
         'Source PDF loaded with <code>PDFDocument.load()</code>.',
+        'First, every page gets its own resource dictionary holding only the fonts, images and forms its content names, so a part cannot carry images or text that only pages outside it draw.',
         'For each output: <code>PDFDocument.create()</code>, then <code>copyPages(source, indices)</code> and <code>addPage()</code>.',
         'Each output is saved with <code>save()</code>; all of them are also added to a ZIP with <code>JSZip.generateAsync()</code>.',
       ],
