@@ -477,14 +477,15 @@ const EXPLAINERS = {
   'pdf-page-delete': {
     whatItDoes: 'Permanently removes specific pages from a PDF.',
     howItWorks: [
-      'You drop in the PDF and pick which pages to delete. A PDF library in your browser rebuilds the document with only the pages you kept — the deleted pages are not just hidden; they are absent from the output file entirely.',
+      'You drop in the PDF and pick which pages to delete. A PDF library in your browser rebuilds the document with only the pages you kept. Links, comments and form fields on kept pages that pointed at a deleted page are cut loose, so they cannot drag the deleted page back in. Before the download is offered, the new file is checked for any leftover copy of a deleted page; if one is found, nothing is downloaded.',
     ],
     technicalDetails: {
       library: '<code>@cantoo/pdf-lib</code>.',
       flow: [
         '<code>PDFDocument.load()</code> parses the source PDF.',
         'A new <code>PDFDocument.create()</code> target is built; <code>copyPages()</code> copies only the indexes you chose to keep. First, each kept page gets its own resource dictionary holding only the fonts, images and forms its content names, so pages that shared one dictionary do not carry the deleted pages’ images or text along.',
-        'The output PDF is saved and downloaded — the removed pages\u2019 object trees are not included.',
+        'Before saving, every reference from a kept page to a deleted page — a link destination, a GoTo action, an annotation’s <code>/P</code>, an article bead, a form field’s widget on a deleted page — is removed, and every object no longer reachable is deleted. This matters because <code>copyPages()</code> follows every reference and pdf-lib writes every object it holds, referenced or not.',
+        'After saving, the output is re-opened and checked for page objects outside its page list. If any are found, the download is blocked.',
       ],
       sourceFile: 'src/tools/pdf/PDFPageDelete.jsx',
     },
@@ -495,6 +496,7 @@ const EXPLAINERS = {
     limitations: [
       'Deleted pages are gone from the output — but we recommend keeping a backup of the original. There is no undo within the tool.',
       'Bookmarks and internal links that pointed to deleted pages will be broken in the output. Page content and remaining links are preserved.',
+      'If a kept page’s content uses a compression method the tool cannot read, that page keeps its original resource dictionary, which in a file whose pages share one dictionary may still hold images or text that only deleted pages use. This is rare; check the output before sharing it if the source came from unusual software.',
       'Digital signatures on the source are invalidated by any edit, including page deletion.',
     ],
     verify: {
@@ -752,7 +754,7 @@ const EXPLAINERS = {
       flow: [
         'Source PDF loaded with <code>PDFDocument.load()</code>.',
         'First, every page gets its own resource dictionary holding only the fonts, images and forms its content names, so a part cannot carry images or text that only pages outside it draw.',
-        'For each output: <code>PDFDocument.create()</code>, then <code>copyPages(source, indices)</code> and <code>addPage()</code>.',
+        'For each output: <code>PDFDocument.create()</code>, then <code>copyPages(source, indices)</code> and <code>addPage()</code>. Then every reference to a page outside the part (link destinations, GoTo actions, an annotation’s <code>/P</code>, article beads, form-field widgets) is removed and unreachable objects are deleted, and the saved part is checked for page objects outside its page list. If any are found, nothing is downloaded.',
         'Each output is saved with <code>save()</code>; all of them are also added to a ZIP with <code>JSZip.generateAsync()</code>.',
       ],
       sourceFile: 'src/tools/pdf/SplitPDF.jsx',

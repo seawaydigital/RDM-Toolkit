@@ -2,7 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { inflateSync } from 'node:zlib';
 import { PDFDocument, PDFName, PDFRawStream, PDFDict } from '@cantoo/pdf-lib';
-import { assembleRedactedPdf, findPagesOutsidePageTree } from '../src/utils/pdfRedaction.js';
+import { assembleRedactedPdf } from '../src/utils/pdfRedaction.js';
+import { findPagesOutsidePageTree } from '../src/utils/pdfPageIsolation.js';
 
 const SECRET = 'REDACTEDSECRETPAGE2';
 const KEPT_TEXT = 'KEPTPAGETEXT';

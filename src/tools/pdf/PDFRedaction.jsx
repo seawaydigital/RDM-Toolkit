@@ -11,7 +11,8 @@ import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { createSamplePdfFile } from '../../utils/sampleFiles';
-import { assembleRedactedPdf, findPagesOutsidePageTree } from '../../utils/pdfRedaction';
+import { assembleRedactedPdf } from '../../utils/pdfRedaction';
+import { findPagesOutsidePageTree } from '../../utils/pdfPageIsolation';
 
 const REDACTION_DPI = 200;
 const REDACTION_JPEG_QUALITY = 0.88;

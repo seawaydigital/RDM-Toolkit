@@ -11,7 +11,7 @@ import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
-import { isolatePageResources } from '../../utils/pdfPageIsolation';
+import { isolatePageResources, pruneToPageTree, findPagesOutsidePageTree } from '../../utils/pdfPageIsolation';
 
 export default function PDFPageDelete({ tool, navigateTo }) {
   const [file, setFile] = useState(null);
@@ -119,8 +119,14 @@ export default function PDFPageDelete({ tool, navigateTo }) {
       for (const page of copiedPages) {
         newDoc.addPage(page);
       }
+      // Links, /P entries and form fields on kept pages can pull deleted pages
+      // into the copy; cut those references and sweep what they reached.
+      pruneToPageTree(newDoc);
 
       const resultBytes = await newDoc.save();
+      if ((await findPagesOutsidePageTree(resultBytes)).length > 0) {
+        throw new Error('Verification failed — the output still contains hidden copies of deleted pages. The file has NOT been downloaded. Please report this.');
+      }
       const blob = new Blob([resultBytes], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       const filename = buildOutputFilename(file.name, 'pages-deleted', 'pdf');
@@ -135,6 +141,8 @@ export default function PDFPageDelete({ tool, navigateTo }) {
       console.error('[PDFPageDelete]', e);
       if (e.message && (e.message.includes('encrypted') || e.message.includes('password'))) {
         setError('__encrypted__');
+      } else if (e.message?.startsWith('Verification failed')) {
+        setError(e.message);
       } else {
         setError('Something went wrong while deleting pages. Please try again.');
       }

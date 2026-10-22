@@ -84,18 +84,6 @@ function describeScrubbedPageKeys(counts) {
   return out;
 }
 
-// Post-save check: every /Type /Page object in the saved bytes must belong to
-// the page tree. An orphaned page is a copy of source content that no viewer
-// shows but anyone can extract, so the caller refuses the download if this
-// returns anything. Returns the orphaned object refs as strings.
-export async function findPagesOutsidePageTree(pdfBytes) {
-  const doc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true, updateMetadata: false });
-  const inTree = new Set(doc.getPages().map((p) => p.ref.toString()));
-  return doc.context.enumerateIndirectObjects()
-    .filter(([ref, obj]) => obj instanceof PDFDict && obj.get(PDFName.of('Type')) === PDFName.of('Page') && !inTree.has(ref.toString()))
-    .map(([ref]) => ref.toString());
-}
-
 // Build the redacted document: pages in `redactedPageNums` (1-based) are
 // added by `addRasterPage(newDoc, pageNum)` — the caller rasterizes them, so
 // their original content never enters newDoc — and every other page is copied

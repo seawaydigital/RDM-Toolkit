@@ -1,4 +1,4 @@
-import { PDFName, PDFDict, PDFArray, PDFStream, PDFRawStream, decodePDFRawStream } from '@cantoo/pdf-lib';
+import { PDFDocument, PDFName, PDFDict, PDFArray, PDFRef, PDFStream, PDFRawStream, decodePDFRawStream } from '@cantoo/pdf-lib';
 
 // Page-subset tools (Delete Pages, Split PDF, PDF Redaction) copy kept pages
 // with copyPages(), which copies a page's whole /Resources dictionary. When
@@ -36,6 +36,99 @@ function pageContentStreams(page, ctx) {
   const resolved = ctx.lookup(contents);
   if (resolved instanceof PDFArray) return resolved.asArray().map((r) => ctx.lookup(r));
   return [resolved];
+}
+
+const isPageDict = (o) => o instanceof PDFDict && o.get(PDFName.of('Type')) === PDFName.of('Page');
+
+// copyPages() follows every reference on a copied page, so an annotation that
+// points at a page the user removed (a link /Dest, a GoTo action, /P, an
+// article bead's /N, a form field whose /Kids include that page's widget)
+// pulls the removed page — content stream and all — into the output as an
+// object no viewer shows but anyone can extract. Call this on the output
+// document after addPage() and before save(): it drops every reference to a
+// page outside the page tree (and to annotations that belong to such a page),
+// so links to removed pages go dead, then deletes everything no longer
+// reachable from the trailer. Returns how many objects it deleted.
+export function pruneToPageTree(pdfDoc) {
+  const ctx = pdfDoc.context;
+  const pages = pdfDoc.getPages();
+  const inTree = new Set(pages.map((p) => p.ref.tag));
+  const objects = ctx.enumerateIndirectObjects();
+  const dead = new Set(objects.filter(([ref, obj]) => isPageDict(obj) && !inTree.has(ref.tag)).map(([ref]) => ref.tag));
+  if (dead.size === 0) return 0;
+  const isDead = (v) => v instanceof PDFRef && dead.has(v.tag);
+
+  // An annotation shown on a kept page belongs to that page, whatever its /P says.
+  for (const page of pages) {
+    const annots = page.node.lookup(PDFName.of('Annots'));
+    if (!(annots instanceof PDFArray)) continue;
+    for (const entry of annots.asArray()) {
+      const annot = ctx.lookup(entry);
+      if (annot instanceof PDFDict && isDead(annot.get(PDFName.of('P')))) annot.set(PDFName.of('P'), page.ref);
+    }
+  }
+  // Annotations and beads whose /P is a removed page belong to that page.
+  for (const [ref, obj] of objects) {
+    if (obj instanceof PDFDict && !isPageDict(obj) && isDead(obj.get(PDFName.of('P')))) dead.add(ref.tag);
+  }
+
+  // A destination array names its page first: [page /XYZ left top zoom].
+  const isDeadDest = (v) => v instanceof PDFArray && v.size() > 0 && isDead(v.get(0));
+  const cleanArray = (arr) => {
+    for (let i = arr.size() - 1; i >= 0; i--) {
+      const el = arr.get(i);
+      if (isDead(el)) arr.remove(i);
+      else if (el instanceof PDFDict) cleanDict(el);
+    }
+  };
+  const cleanDict = (dict) => {
+    for (const [key, value] of dict.entries()) {
+      if (isDead(value) || isDeadDest(value)) { dict.delete(key); continue; }
+      if (value instanceof PDFArray) cleanArray(value);
+      else if (value instanceof PDFDict) {
+        cleanDict(value);
+        // A GoTo action whose destination was removed does nothing; drop it.
+        if (value.get(PDFName.of('S')) === PDFName.of('GoTo') && !value.has(PDFName.of('D'))) dict.delete(key);
+      }
+    }
+  };
+  for (const [ref, obj] of objects) {
+    if (dead.has(ref.tag)) continue;
+    if (obj instanceof PDFStream) cleanDict(obj.dict);
+    else if (obj instanceof PDFDict) cleanDict(obj);
+    else if (obj instanceof PDFArray) cleanArray(obj);
+  }
+
+  // Sweep: delete every object no longer reachable from the trailer.
+  const reached = new Set();
+  const visit = (v) => {
+    if (v instanceof PDFRef) {
+      if (reached.has(v.tag)) return;
+      reached.add(v.tag);
+      const target = ctx.lookup(v);
+      if (target !== undefined) visit(target);
+    } else if (v instanceof PDFStream) visit(v.dict);
+    else if (v instanceof PDFDict) for (const [, e] of v.entries()) visit(e);
+    else if (v instanceof PDFArray) for (const e of v.asArray()) visit(e);
+  };
+  for (const key of ['Root', 'Info', 'Encrypt']) if (ctx.trailerInfo[key]) visit(ctx.trailerInfo[key]);
+  let deleted = 0;
+  for (const [ref] of ctx.enumerateIndirectObjects()) {
+    if (!reached.has(ref.tag)) { ctx.delete(ref); deleted++; }
+  }
+  return deleted;
+}
+
+// Post-save check: every /Type /Page object in the saved bytes must belong to
+// the page tree. An orphaned page is a copy of source content that no viewer
+// shows but anyone can extract, so the caller refuses the download if this
+// returns anything. Returns the orphaned object refs as strings.
+export async function findPagesOutsidePageTree(pdfBytes) {
+  const doc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true, updateMetadata: false });
+  const inTree = new Set(doc.getPages().map((p) => p.ref.toString()));
+  return doc.context.enumerateIndirectObjects()
+    .filter(([ref, obj]) => obj instanceof PDFDict && obj.get(PDFName.of('Type')) === PDFName.of('Page') && !inTree.has(ref.toString()))
+    .map(([ref]) => ref.toString());
 }
 
 // Returns true when the page now has its own pruned /Resources, false when it
