@@ -85,9 +85,10 @@ test('kept pages keep their text, their own notes, web links and their form widg
   const text = await recoverableText(bytes);
   assert.equal(contains(text, KEPT_TEXT), true, 'kept page text lost');
   assert.equal(contains(text, KEPT_NOTE), true, 'kept sticky note lost');
-  assert.match(text, /https:\/\/example\.org\//, 'web link lost');
   const annots = doc.getPage(0).node.lookup(PDFName.of('Annots'), PDFArray).asArray().map((r) => doc.context.lookup(r, PDFDict));
   const subtypes = annots.map((a) => a.get(PDFName.of('Subtype')).asString());
+  const uris = annots.map((a) => a.lookupMaybe(PDFName.of('A'), PDFDict)?.lookupMaybe(PDFName.of('URI'), PDFString)?.decodeText());
+  assert.ok(uris.includes('https://example.org/'), `web link lost: ${JSON.stringify(uris)}`);
   assert.ok(subtypes.includes('/Widget'), `kept widget lost: ${subtypes.join(' ')}`);
   assert.ok(subtypes.includes('/Text'), `kept note lost: ${subtypes.join(' ')}`);
   // Shown on page 1 but with /P naming the deleted page: kept, and re-pointed.
