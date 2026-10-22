@@ -10,6 +10,7 @@ import { PDF_VALIDATION, validatePDFHeader, formatFileSize } from '../../utils/f
 import { X, ZoomIn, ZoomOut, Download, Plus, Trash2, RotateCcw } from 'lucide-react';
 import { renderAllThumbnails, loadPdfDocument, loadPdfLibDocument, pdfHasFormFields, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { FormFieldsNotice } from '../../components/ui/ToolCaveats';
+import { isolatePageResources, pruneToPageTree, findPagesOutsidePageTree } from '../../utils/pdfPageIsolation';
 
 function parsePageRanges(rangeStr, totalPages) {
   if (!rangeStr.trim()) return { pages: [], error: null };
@@ -166,6 +167,10 @@ export default function SplitPDF({ tool, navigateTo }) {
       const zip = new JSZip();
       const outputFiles = [];
 
+      // Give every page its own /Resources so a part cannot carry XObjects that
+      // only pages outside it draw (pages may share one resource dictionary).
+      for (let p = 0; p < srcDoc.getPageCount(); p++) isolatePageResources(srcDoc, p);
+
       for (let i = 0; i < parsedSplits.length; i++) {
         const split = parsedSplits[i];
         if (split.parsed.pages.length === 0) continue;
@@ -176,7 +181,13 @@ export default function SplitPDF({ tool, navigateTo }) {
         for (const page of copiedPages) {
           newDoc.addPage(page);
         }
+        // Links, /P entries and form fields can pull pages outside this part
+        // into the copy; cut those references and sweep what they reached.
+        pruneToPageTree(newDoc);
         const pdfBytes = await newDoc.save();
+        if ((await findPagesOutsidePageTree(pdfBytes)).length > 0) {
+          throw new Error('Verification failed — a split file still contains hidden copies of pages outside its range. Nothing has been downloaded. Please report this.');
+        }
         const rangeLabel = split.rangeStr.replace(/\s/g, '') || `part${i + 1}`;
         const filename = `${baseName}-${rangeLabel}.pdf`;
 
@@ -207,6 +218,8 @@ export default function SplitPDF({ tool, navigateTo }) {
       console.error('[SplitPDF]', e);
       if (e.message && (e.message.includes('encrypted') || e.message.includes('password'))) {
         setError('__encrypted__');
+      } else if (e.message?.startsWith('Verification failed')) {
+        setError(e.message);
       } else {
         setError('Something went wrong while splitting the PDF. Please try again.');
       }

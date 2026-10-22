@@ -201,9 +201,9 @@ const EXPLAINERS = {
         'Source PDF loaded via <code>PDFDocument.load()</code> (pdf-lib) and <code>pdfjs.getDocument()</code>.',
         'A fresh <code>PDFDocument.create()</code> holds the output — none of the source document\u2019s catalog (metadata, outlines, AcroForm, attachments, JavaScript, OpenActions) is carried over.',
         'For each page with redactions: pdfjs renders the page to an HTML <code>&lt;canvas&gt;</code> at 200 DPI → <code>ctx.fillRect()</code> paints the redaction rectangles in pure black → <code>canvas.toBlob(\'image/jpeg\', 0.88)</code> produces a flat image → <code>newDoc.embedJpg()</code> and <code>newPage.drawImage()</code> writes it into the output at the original page dimensions.',
-        'Pages without redactions are copied intact via <code>newDoc.copyPages(sourceDoc, [idx])</code>, preserving vector text and searchability.',
-        'Before save: per-page <code>/Thumb</code>, <code>/PieceInfo</code>, <code>/AA</code>, and <code>/Annots</code> (form widgets, links, file-attachment annotations) are deleted. Document info dict (title/author/subject/keywords/producer/creator) is cleared.',
-        'After save: pdfjs re-opens the result, calls <code>getTextContent()</code> on every redacted page, and asserts zero non-empty text items. If the check fails, an error is thrown and the download is blocked.',
+        'Pages without redactions are copied via <code>newDoc.copyPages(sourceDoc, [idx])</code>, preserving vector text and searchability. Before the copy, every page key not needed for rendering — <code>/Annots</code> (form widgets, links, file-attachment annotations), <code>/Thumb</code>, <code>/PieceInfo</code>, <code>/AA</code> and the rest — is removed from the source page, because pdf-lib copies every object a page references (a table-of-contents link would otherwise pull in a redacted page’s original content) and writes every object it holds. The page also gets its own resource dictionary holding only what its content names, so a dictionary shared with a redacted page cannot carry that page’s images or text along.',
+        'Before save: the document info dict (title/author/subject/keywords/producer/creator) is cleared.',
+        'After save: pdfjs re-opens the result, calls <code>getTextContent()</code> on every redacted page, and asserts zero non-empty text items. pdf-lib then confirms the file holds no page objects outside its page tree (hidden copies of source pages). If either check fails, an error is thrown and the download is blocked.',
       ],
       sourceFile: 'src/tools/pdf/PDFRedaction.jsx',
     },
@@ -477,14 +477,15 @@ const EXPLAINERS = {
   'pdf-page-delete': {
     whatItDoes: 'Permanently removes specific pages from a PDF.',
     howItWorks: [
-      'You drop in the PDF and pick which pages to delete. A PDF library in your browser rebuilds the document with only the pages you kept — the deleted pages are not just hidden; they are absent from the output file entirely.',
+      'You drop in the PDF and pick which pages to delete. A PDF library in your browser rebuilds the document with only the pages you kept. Links, comments and form fields on kept pages that pointed at a deleted page are cut loose, so they cannot drag the deleted page back in. Before the download is offered, the new file is checked for any leftover copy of a deleted page; if one is found, nothing is downloaded.',
     ],
     technicalDetails: {
       library: '<code>@cantoo/pdf-lib</code>.',
       flow: [
         '<code>PDFDocument.load()</code> parses the source PDF.',
-        'A new <code>PDFDocument.create()</code> target is built; <code>copyPages()</code> copies only the indexes you chose to keep.',
-        'The output PDF is saved and downloaded — the removed pages\u2019 object trees are not included.',
+        'A new <code>PDFDocument.create()</code> target is built; <code>copyPages()</code> copies only the indexes you chose to keep. First, each kept page gets its own resource dictionary holding only the fonts, images and forms its content names, so pages that shared one dictionary do not carry the deleted pages’ images or text along.',
+        'Before saving, every reference from a kept page to a deleted page — a link destination, a GoTo action, an annotation’s <code>/P</code>, an article bead, a form field’s widget on a deleted page — is removed, and every object no longer reachable is deleted. This matters because <code>copyPages()</code> follows every reference and pdf-lib writes every object it holds, referenced or not.',
+        'After saving, the output is re-opened and checked for page objects outside its page list. If any are found, the download is blocked.',
       ],
       sourceFile: 'src/tools/pdf/PDFPageDelete.jsx',
     },
@@ -495,6 +496,7 @@ const EXPLAINERS = {
     limitations: [
       'Deleted pages are gone from the output — but we recommend keeping a backup of the original. There is no undo within the tool.',
       'Bookmarks and internal links that pointed to deleted pages will be broken in the output. Page content and remaining links are preserved.',
+      'If a kept page’s content uses a compression method the tool cannot read, that page keeps its original resource dictionary, which in a file whose pages share one dictionary may still hold images or text that only deleted pages use. This is rare; check the output before sharing it if the source came from unusual software.',
       'Digital signatures on the source are invalidated by any edit, including page deletion.',
     ],
     verify: {
@@ -751,7 +753,8 @@ const EXPLAINERS = {
       library: '<code>@cantoo/pdf-lib</code> for copying pages; <code>pdfjs-dist</code> for thumbnails; <code>jszip</code> for the ZIP.',
       flow: [
         'Source PDF loaded with <code>PDFDocument.load()</code>.',
-        'For each output: <code>PDFDocument.create()</code>, then <code>copyPages(source, indices)</code> and <code>addPage()</code>.',
+        'First, every page gets its own resource dictionary holding only the fonts, images and forms its content names, so a part cannot carry images or text that only pages outside it draw.',
+        'For each output: <code>PDFDocument.create()</code>, then <code>copyPages(source, indices)</code> and <code>addPage()</code>. Then every reference to a page outside the part (link destinations, GoTo actions, an annotation’s <code>/P</code>, article beads, form-field widgets) is removed and unreachable objects are deleted, and the saved part is checked for page objects outside its page list. If any are found, nothing is downloaded.',
         'Each output is saved with <code>save()</code>; all of them are also added to a ZIP with <code>JSZip.generateAsync()</code>.',
       ],
       sourceFile: 'src/tools/pdf/SplitPDF.jsx',

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { PDFDocument, PDFName, PDFDict } from '@cantoo/pdf-lib';
+import { PDFDocument } from '@cantoo/pdf-lib';
 import InfoCard from '../../components/ui/InfoCard';
 import DropZone from '../../components/ui/DropZone';
 import ActionButton from '../../components/ui/ActionButton';
@@ -11,81 +11,11 @@ import { PDF_VALIDATION, validatePDFHeader } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { renderPageThumbnail, loadPdfDocument, loadPdfLibDocument, destroyPdfDocument } from '../../utils/pdfThumbnails';
 import { createSamplePdfFile } from '../../utils/sampleFiles';
+import { assembleRedactedPdf } from '../../utils/pdfRedaction';
+import { findPagesOutsidePageTree } from '../../utils/pdfPageIsolation';
 
 const REDACTION_DPI = 200;
 const REDACTION_JPEG_QUALITY = 0.88;
-
-// Strip every catalog-level and page-level deadweight dict that could carry
-// PII or side-channel data after a redaction. Source-doc metadata is already
-// absent because we build a fresh PDFDocument — but copyPages() brings over
-// per-page /Thumb, /PieceInfo, /AA, and /Annots, so wipe those. Wiping
-// /Annots also removes form widgets (which carry the raw field values) and
-// file-attachment annotations.
-function stripRedactionDeadweight(pdfDoc) {
-  const stats = { stripped: [] };
-  const catalog = pdfDoc.catalog;
-
-  const tryDeleteCatalog = (key, label) => {
-    try {
-      if (catalog.has(PDFName.of(key))) {
-        catalog.delete(PDFName.of(key));
-        stats.stripped.push(label);
-      }
-    } catch { /* defensive */ }
-  };
-
-  tryDeleteCatalog('Metadata',   'XMP metadata');
-  tryDeleteCatalog('OpenAction', 'open-document action');
-  tryDeleteCatalog('AA',         'document action triggers');
-  tryDeleteCatalog('PieceInfo',  'application piece info');
-  tryDeleteCatalog('Outlines',   'bookmarks / outline');
-  tryDeleteCatalog('AcroForm',   'form-field definitions');
-
-  try {
-    const namesEntry = catalog.lookupMaybe(PDFName.of('Names'), PDFDict);
-    if (namesEntry) {
-      if (namesEntry.has(PDFName.of('EmbeddedFiles'))) {
-        namesEntry.delete(PDFName.of('EmbeddedFiles'));
-        stats.stripped.push('embedded file attachments');
-      }
-      if (namesEntry.has(PDFName.of('JavaScript'))) {
-        namesEntry.delete(PDFName.of('JavaScript'));
-        stats.stripped.push('JavaScript');
-      }
-    }
-  } catch { /* ignore */ }
-
-  let thumbsRemoved = 0;
-  let piecesRemoved = 0;
-  let pageAAsRemoved = 0;
-  let annotsRemoved = 0;
-  for (const page of pdfDoc.getPages()) {
-    const node = page.node;
-    try {
-      if (node.has(PDFName.of('Thumb')))     { node.delete(PDFName.of('Thumb')); thumbsRemoved++; }
-      if (node.has(PDFName.of('PieceInfo'))) { node.delete(PDFName.of('PieceInfo')); piecesRemoved++; }
-      if (node.has(PDFName.of('AA')))        { node.delete(PDFName.of('AA')); pageAAsRemoved++; }
-      if (node.has(PDFName.of('Annots')))    { node.delete(PDFName.of('Annots')); annotsRemoved++; }
-    } catch { /* skip this page */ }
-  }
-  if (thumbsRemoved)  stats.stripped.push(`${thumbsRemoved} page thumbnail${thumbsRemoved === 1 ? '' : 's'}`);
-  if (piecesRemoved)  stats.stripped.push(`${piecesRemoved} page piece-info blob${piecesRemoved === 1 ? '' : 's'}`);
-  if (pageAAsRemoved) stats.stripped.push(`${pageAAsRemoved} page action trigger${pageAAsRemoved === 1 ? '' : 's'}`);
-  if (annotsRemoved)  stats.stripped.push(`annotations on ${annotsRemoved} page${annotsRemoved === 1 ? '' : 's'} (form widgets, links, file attachments)`);
-
-  // Clear document info dict (title/author/subject/keywords/producer/creator)
-  try {
-    pdfDoc.setTitle('');
-    pdfDoc.setAuthor('');
-    pdfDoc.setSubject('');
-    pdfDoc.setKeywords([]);
-    pdfDoc.setProducer('');
-    pdfDoc.setCreator('');
-    stats.stripped.push('document info dictionary');
-  } catch { /* ignore */ }
-
-  return stats;
-}
 
 // After saving, re-open the output with pdfjs and confirm that every page we
 // rasterized has zero extractable text. This is a belt-and-braces check — if
@@ -285,8 +215,6 @@ export default function PDFRedaction({ tool, navigateTo }) {
         pdfJsDocRef.current = pdfJsDoc;
       }
 
-      const newDoc = await PDFDocument.create();
-      const totalPages = sourceDoc.getPageCount();
       const redactedPageNums = new Set(
         Object.entries(redactions)
           .filter(([, rects]) => rects.length > 0)
@@ -294,57 +222,49 @@ export default function PDFRedaction({ tool, navigateTo }) {
       );
       const scale = REDACTION_DPI / 72;
 
-      for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-        setLoadingStep(`Processing page ${pageNum} of ${totalPages}…`);
+      // Rasterize: render page → paint black rects on canvas → embed as JPEG.
+      // Underlying text/vectors are discarded; only pixels remain.
+      const addRasterPage = async (newDoc, pageNum) => {
+        const page = await pdfJsDoc.getPage(pageNum);
+        const baseVp = page.getViewport({ scale: 1 });
+        const vp = page.getViewport({ scale });
 
-        if (redactedPageNums.has(pageNum)) {
-          // Rasterize: render page → paint black rects on canvas → embed as JPEG.
-          // Underlying text/vectors are discarded; only pixels remain.
-          const page = await pdfJsDoc.getPage(pageNum);
-          const baseVp = page.getViewport({ scale: 1 });
-          const vp = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.floor(vp.width));
+        canvas.height = Math.max(1, Math.floor(vp.height));
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        await page.render({ canvasContext: ctx, viewport: vp }).promise;
 
-          const canvas = document.createElement('canvas');
-          canvas.width = Math.max(1, Math.floor(vp.width));
-          canvas.height = Math.max(1, Math.floor(vp.height));
-          const ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          await page.render({ canvasContext: ctx, viewport: vp }).promise;
-
-          ctx.fillStyle = '#000000';
-          for (const rect of redactions[pageNum]) {
-            ctx.fillRect(
-              rect.x * canvas.width,
-              rect.y * canvas.height,
-              rect.w * canvas.width,
-              rect.h * canvas.height
-            );
-          }
-
-          const blob = await new Promise(resolve =>
-            canvas.toBlob(resolve, 'image/jpeg', REDACTION_JPEG_QUALITY)
+        ctx.fillStyle = '#000000';
+        for (const rect of redactions[pageNum]) {
+          ctx.fillRect(
+            rect.x * canvas.width,
+            rect.y * canvas.height,
+            rect.w * canvas.width,
+            rect.h * canvas.height
           );
-          canvas.remove();
-          page.cleanup();
-
-          if (!blob) throw new Error(`Failed to encode page ${pageNum} as image.`);
-          const arrBuf = await blob.arrayBuffer();
-          const jpg = await newDoc.embedJpg(arrBuf);
-          const newPage = newDoc.addPage([baseVp.width, baseVp.height]);
-          newPage.drawImage(jpg, { x: 0, y: 0, width: baseVp.width, height: baseVp.height });
-        } else {
-          // No redactions on this page — copy it intact so text stays selectable.
-          const [copiedPage] = await newDoc.copyPages(sourceDoc, [pageNum - 1]);
-          newDoc.addPage(copiedPage);
         }
-      }
 
-      setLoadingStep('Stripping metadata & attachments…');
-      const stripStats = stripRedactionDeadweight(newDoc);
+        const blob = await new Promise(resolve =>
+          canvas.toBlob(resolve, 'image/jpeg', REDACTION_JPEG_QUALITY)
+        );
+        canvas.remove();
+        page.cleanup();
 
-      setLoadingStep('Saving…');
-      const resultBytes = await newDoc.save({ useObjectStreams: false });
+        if (!blob) throw new Error(`Failed to encode page ${pageNum} as image.`);
+        const arrBuf = await blob.arrayBuffer();
+        const jpg = await newDoc.embedJpg(arrBuf);
+        const newPage = newDoc.addPage([baseVp.width, baseVp.height]);
+        newPage.drawImage(jpg, { x: 0, y: 0, width: baseVp.width, height: baseVp.height });
+      };
+
+      const { bytes: resultBytes, stripStats } = await assembleRedactedPdf(sourceDoc, {
+        redactedPageNums,
+        addRasterPage,
+        onProgress: (pageNum, totalPages) => setLoadingStep(`Processing page ${pageNum} of ${totalPages}…`),
+      });
 
       setLoadingStep('Verifying text is gone…');
       const verifyStats = await verifyRedactedPagesAreImages(
@@ -355,6 +275,12 @@ export default function PDFRedaction({ tool, navigateTo }) {
         const pages = verifyStats.leakedPages.map(p => p.pageNum).join(', ');
         throw new Error(
           `Verification failed — text was still extractable on page${verifyStats.leakedPages.length === 1 ? '' : 's'} ${pages}. The file has NOT been downloaded. Please report this.`
+        );
+      }
+      const orphanPages = await findPagesOutsidePageTree(resultBytes);
+      if (orphanPages.length > 0) {
+        throw new Error(
+          'Verification failed — the output still contains hidden copies of source pages. The file has NOT been downloaded. Please report this.'
         );
       }
 
