@@ -105,7 +105,7 @@ const EXPLAINERS = {
       flow: [
         'PDF is parsed via <code>PDFDocument.load()</code> into an object tree in memory.',
         'A direct trailer <code>/Info</code> dictionary is first promoted to an indirect object (the trailer is never encrypted), and a blank owner password is replaced with 48 random hex characters from <code>crypto.getRandomValues</code>. Then <code>encrypt({ userPassword, ownerPassword, permissions })</code> is called, then <code>save()</code>. The output is re-opened without a password and with an empty password (both must be refused) and with your password (must succeed) before the download button appears.',
-        'The file is written with object streams on purpose: the library encrypts streams but not bare strings, so a plain cross-reference save would leave the title, author and form values readable.',
+        'The library encrypts streams but not bare strings. Most objects are therefore packed into object streams, which are encrypted. The library always writes some objects outside them (the catalog, pages, signature dictionaries, stream dictionaries and objects with a non-zero generation number), so the tool encrypts the strings in those itself: page labels, comments and their authors, signer names. A PDF with an object the library could not parse is refused, because any text inside it would be written back unencrypted.',
         'The output is downloaded as a <code>Blob</code> via a local <code>URL.createObjectURL()</code>; the URL is revoked on reset.',
         'Your password lives in memory for the duration of the save, then is garbage-collected.',
       ],
@@ -292,8 +292,9 @@ const EXPLAINERS = {
       'Everything runs inside your browser. If you pick the coded strategy, the key file is generated as a second download — and per TCPS 2 guidance, you should store it <strong>separately</strong> from the coded data so the two can\u2019t be joined without explicit access.',
     ],
     technicalDetails: {
-      library: 'WebCrypto <code>crypto.subtle.digest(\'SHA-256\')</code>; regex patterns for PII detection in text mode.',
+      library: 'Plain JavaScript, no libraries: a CSV parser in <code>src/utils/deidentifyCsv.js</code> and regex patterns for PII detection in text mode.',
       flow: [
+        'The CSV is read character by character, so quoted cells can hold commas, quotes and line breaks (common in survey exports). A file with an unclosed quote, or a row with more or fewer columns than the header, is refused with a message saying which row to fix: a misaligned row could move an identifier into a column you did not select.',
         '<strong>Coded:</strong> unique composite values (e.g. <code>First Name | Last Name</code>) are assigned incremental pseudonyms like <code>Person-1</code>, <code>Person-2</code>. The mapping is emitted as a separate CSV <em>key file</em>.',
         '<strong>Anonymized:</strong> values replaced with <code>[REDACTED]</code>.',
         'Free-text mode detects emails, phone numbers, SIN-like patterns, Canadian postal codes, IPs, URLs, and dates via regex and applies the chosen strategy to each match.',
@@ -303,7 +304,6 @@ const EXPLAINERS = {
     privacy: [
       'Your data (CSV or pasted text) is processed entirely inside this browser tab — never uploaded.',
       'The re-identification key file (coded mode only) is generated locally; we never see it.',
-      'Hashes are computed with your browser\u2019s native WebCrypto — no external hashing service.',
       'Close the tab and the data, the key file, and any intermediate state are gone.',
     ],
     limitations: [
