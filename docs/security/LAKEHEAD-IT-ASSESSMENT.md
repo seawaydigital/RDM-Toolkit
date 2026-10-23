@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Application | RDM Toolkit, source at `github.com/seawaydigital/RDM-Toolkit` |
-| Version this document describes | Commit `36c136b` on `master`, 23 October 2026. The live site at rdmtoolkit.ca was deployed from this commit. Earlier reviews ran on earlier commits, listed in section 1. |
+| Version this document describes | `master` once pull request #143 is merged (fixes for C8 and C9), 23 October 2026. Until that merge, the live site at rdmtoolkit.ca runs commit `36c136b`, where C8 and C9 are still open. Earlier reviews ran on earlier commits, listed in section 1. |
 | Document date | 23 October 2026 |
 | Prepared by | Andrew Austin, developer and maintainer of RDM Toolkit. He is responsible for this document. |
 | Type of assessment | Developer self-assessment. The reviews listed below were carried out by AI coding agents (Anthropic's Claude Code) under Andrew Austin's direction. He decided which findings to fix and merged the fixes. |
@@ -29,9 +29,10 @@ None sent traffic to the live site except where stated.
 | 2026-09-18 | Full-site security review: script injection, network surface, and whether each privacy tool does what it claims | `02d5a1c` | Claude Code reading the source and reproducing defects in Node. The live site's HTTP headers were read with `curl`. | 4 defects. **Password Protect PDF produced unencrypted files** while reporting success. Strip File Metadata left the XMP author stream. De-identify's "pseudonymized" mode was a reversible unsalted hash. Password Generator had modulo bias. Also: the live host sends no security headers, so the site could be framed. | `83b3bc6` (25 Sep) |
 | 2026-09-24 | Launch pass: accessibility scan and static analysis | branch later merged as `83b3bc6` | axe-core 4.12 on all 57 routes of the production build; CodeQL alerts; check of 71 external links | 6 accessibility violations, 1 high CodeQL alert (incomplete escaping in File to Markdown), 10 dead links | `83b3bc6` (25 Sep) |
 | 2026-09-28 | Hosting-readiness review for a Lakehead subdomain | `4de6247` | Claude Code. The production build was served with the production headers and tested in headless Chrome with a real service worker. | 7 findings, listed in section 6. The most serious: offline mode stopped working on any server that sends the security headers. | `ecbda63` (28 Sep) |
-| 2026-10-22 | Full automated security audit | `40ac3ac` | Cloudflare's open-source `security-audit` skill (commit `c1c8a8c`) run by Claude Code: 60 agent runs, each candidate checked by two further agents. Code ran only in an isolated sandbox with no network. No browser was available. | 11 confirmed (1 high, 8 medium, 2 low), 4 leads needing a browser to confirm, 48 hardening notes | C1, C3, C7 in `9b79071` (22 Oct). C5, C6 in `36c136b` (23 Oct). The rest are listed in section 2. |
+| 2026-10-22 | Full automated security audit | `40ac3ac` | Cloudflare's open-source `security-audit` skill (commit `c1c8a8c`) run by Claude Code: 60 agent runs, each candidate checked by two further agents. Code ran only in an isolated sandbox with no network. No browser was available. | 11 confirmed (1 high, 8 medium, 2 low), 4 leads needing a browser to confirm, 48 hardening notes | C1, C3, C7 in `9b79071` (22 Oct). C5, C6 in `36c136b` (23 Oct). C8, C9 in pull request #143 (23 Oct). The rest are listed in section 2. |
 | 2026-10-23 | Dependency advisories published after the October audit | `9b79071` | `npm audit` | DOMPurify 3.4.16 had three advisories (GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr, GHSA-c6gr-qvv4-5v3f; npm rates them critical). Each needs a DOMPurify option or hook (`SAFE_FOR_TEMPLATES`, `IN_PLACE` with a hook, or `PARSER_MEDIA_TYPE` set to XHTML) that this code does not use, checked by searching the source. | Upgraded to 3.4.17 in `36c136b` (23 Oct) |
-| 2026-10-23 | Recheck of the version this document describes | `36c136b` | Claude Code ran the test suite, the project guardrail script and `npm audit --omit=dev` | 127 of 127 tests pass, guardrails pass, 0 known vulnerabilities in production dependencies | — |
+| 2026-10-23 | Recheck after the C5/C6 fixes | `36c136b` | Claude Code ran the test suite, the project guardrail script and `npm audit --omit=dev` | 127 of 127 tests pass, guardrails pass, 0 known vulnerabilities in production dependencies | — |
+| 2026-10-23 | Fixes for C8 and C9, and recheck of the version this document describes | pull request #143 | Claude Code. Each fix started with a test built from the audit's reproduction, watched failing first. Both tools were then run in the dev server on the same inputs. | 136 of 136 tests pass, guardrails pass, production build unchanged (69 JS chunks). Password Protect PDF output on the C9 fixture: AES-256, none of the 10 test strings readable without the password; pdf.js reads them all back with it. De-identify on a CSV with a multi-line cell: every selected email replaced; a file with an unclosed quote or a misaligned row is refused. | — |
 
 The skill's authors say one run of it finds roughly half of what repeated
 runs find. The October audit was its first run on this code.
@@ -40,14 +41,12 @@ runs find. The October audit was its first run on this code.
 
 ## 2. Open findings at this version
 
-These are known and not yet fixed in `36c136b`. Severities are the October
-audit's. Each was reproduced on made-up data.
+These are known and not yet fixed in the version this document describes.
+Severities are the October audit's. Each was reproduced on made-up data.
 
 | # | Severity | Tool | What happens | Status |
 |---|---|---|---|---|
 | C4 | Medium | PDF Redaction, Delete Pages, Split PDF | A deliberately crafted PDF can make the page shown in the preview differ from the page the tool processes. The page the user redacted or removed can then ship unchanged, and the tool's check still passes. It needs a PDF built for the purpose by whoever supplied it. | Open |
-| C8 | Medium | De-identify Research Data | If a CSV cell contains a line break (common in survey exports), selected columns after it can be left in plain text. | Open |
-| C9 | Medium | Password Protect PDF | Page content is encrypted, but some text stored outside the page content stays readable without the password: comments and their authors, signer names, page labels and some titles. The tool's lock check still passes. | Open |
 | C2 | Medium | Strip Image Metadata | Reports "No metadata detected" for WebP photos with GPS, and for photos whose names or location are only in XMP, IPTC or the Artist field. | Open |
 | C10 | Low | Strip File Metadata | Author and title from earlier saved versions of the PDF stay in the output. | Open |
 | C11 | Low | Drag and drop | A dropped `.json` or `.md` file can wait unseen and be picked up by the next tool opened. | Open |
@@ -115,8 +114,11 @@ headers, so the live site at rdmtoolkit.ca runs on the fallback today.
   `@cantoo/pdf-lib` 2.11.1. Before the download is offered, the tool re-opens
   its own output and refuses to hand it over unless it is rejected without a
   password and opens with the chosen one. Owner password is random when left
-  blank, so permission flags are not void. **Limitation (C9):** some text
-  stored outside the page content is not encrypted by the library.
+  blank, so permission flags are not void. The library encrypts only stream
+  contents, and it writes some objects (catalog, pages, signature and stream
+  dictionaries) outside the encrypted object streams. The tool encrypts the
+  strings in those objects itself, and refuses a PDF with an object the
+  library could not parse (audit C9, fixed 23 October).
 - **Password Generator:** `crypto.getRandomValues()` with rejection sampling
   (no modulo bias).
 - **SHA-256 / checksums:** Web Crypto.
@@ -165,7 +167,7 @@ section 2, which this review did not.
   storage use, and header drift between `_headers` and the three server
   configs), `npm audit` at high severity, CodeQL, OpenSSF Scorecard, Lighthouse
   (fails on any CSP regression), a bundle-size and new-chunk gate, and the
-  unit tests (127 at this version).
+  unit tests (136 at this version).
 - `master` is protected: changes go through pull requests and must pass the
   required CI checks. There is a single maintainer, so no second person
   approves changes.
@@ -236,12 +238,12 @@ assigned; `rdmtoolkit.lakeheadu.ca` is used there as an example.
 
 ## 10. Evidence
 
-Reproducible from the repository at commit `36c136b`:
+Reproducible from the repository once pull request #143 is merged:
 
 ```bash
 npm ci --ignore-scripts
 npm run security:audit     # guardrails + header drift check
-npm test                   # 127 tests, incl. PDF encryption verified by pdf.js
+npm test                   # 136 tests, incl. PDF encryption verified by pdf.js
 npm audit --omit=dev       # 0 vulnerabilities on 23 October 2026
 npm audit signatures
 npm run build:handoff

@@ -8,6 +8,7 @@ import { X, Download, Copy, Check, KeyRound, AlertTriangle } from 'lucide-react'
 import { formatFileSize } from '../../utils/fileValidation';
 import { buildOutputFilename } from '../../utils/filename';
 import { createSampleCsvFile } from '../../utils/sampleFiles';
+import { parseCSV, rowToCSV } from '../../utils/deidentifyCsv';
 
 const CSV_VALIDATION = {
   allowedMimes: ['text/csv', 'application/vnd.ms-excel', 'text/plain'],
@@ -53,51 +54,6 @@ const DETECTION_PATTERNS = [
     regex: /\b\d{4}[-\/]\d{1,2}[-\/]\d{1,2}\b|\b\d{1,2}[-\/]\d{1,2}[-\/]\d{4}\b/g },
 ];
 
-
-function parseCSV(text) {
-  const lines = text.split(/\r?\n/);
-  const result = [];
-  for (const line of lines) {
-    if (line.trim() === '') continue;
-    const row = [];
-    let inQuotes = false;
-    let cell = '';
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (inQuotes) {
-        if (ch === '"' && line[i + 1] === '"') {
-          cell += '"';
-          i++;
-        } else if (ch === '"') {
-          inQuotes = false;
-        } else {
-          cell += ch;
-        }
-      } else {
-        if (ch === '"') {
-          inQuotes = true;
-        } else if (ch === ',') {
-          row.push(cell);
-          cell = '';
-        } else {
-          cell += ch;
-        }
-      }
-    }
-    row.push(cell);
-    result.push(row);
-  }
-  return result;
-}
-
-function rowToCSV(row) {
-  return row.map(cell => {
-    if (cell.includes(',') || cell.includes('"') || cell.includes('\n')) {
-      return '"' + cell.replace(/"/g, '""') + '"';
-    }
-    return cell;
-  }).join(',');
-}
 
 export default function DataAnonymizer({ tool }) {
   const [mode, setMode] = useState('csv'); // 'csv' | 'text'
@@ -195,8 +151,9 @@ function CSVMode() {
         setHeaders(parsed[0]);
         setCsvData(parsed);
         setFile(selectedFile);
-      } catch {
-        setError('Failed to parse the CSV file. Please check the format.');
+      } catch (err) {
+        // parseCSV refuses ambiguous input with a message that says what to fix.
+        setError(`Could not read this CSV safely, so nothing was de-identified. ${err?.message || 'Please check the format.'}`);
       }
     };
     reader.onerror = () => {

@@ -1,4 +1,75 @@
-import { PDFDocument, PDFDict, PDFName, PDFRef, PDFInvalidObject, EncryptedPDFError } from '@cantoo/pdf-lib';
+import {
+  PDFDocument, PDFDict, PDFArray, PDFName, PDFRef, PDFString, PDFHexString, PDFStream,
+  PDFCatalog, PDFPageTree, PDFPageLeaf, PDFInvalidObject, EncryptedPDFError,
+} from '@cantoo/pdf-lib';
+
+const toHex = (bytes) => Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+
+/**
+ * Mirrors the `shouldNotCompress` predicate in @cantoo/pdf-lib 2.11.1's
+ * PDFStreamWriter: these objects are written outside object streams, so
+ * nothing the writer does encrypts the strings they hold.
+ */
+function isWrittenOutsideObjectStreams(ref, obj) {
+  return obj instanceof PDFStream
+    || obj instanceof PDFInvalidObject
+    || obj instanceof PDFCatalog
+    || obj instanceof PDFPageTree
+    || obj instanceof PDFPageLeaf
+    || ref.generationNumber !== 0
+    || (obj instanceof PDFDict && obj.lookup(PDFName.of('Type')) === PDFName.of('Sig'));
+}
+
+// Replace every string in a dict/array tree (direct objects only) with its
+// encrypted form. A signature dictionary's /Contents is exempt (ISO 32000-2
+// 7.6.2); indirect references are left for their own object's pass.
+function encryptStringsIn(obj, encryptFn, isSig) {
+  const encryptValue = (value, key) => {
+    if (isSig && key === PDFName.of('Contents')) return null;
+    if (value instanceof PDFString || value instanceof PDFHexString) {
+      return PDFHexString.of(toHex(encryptFn(value.asBytes())));
+    }
+    encryptStringsIn(value, encryptFn, false);
+    return null;
+  };
+  if (obj instanceof PDFDict) {
+    for (const [key, value] of obj.entries()) {
+      const encrypted = encryptValue(value, key);
+      if (encrypted) obj.set(key, encrypted);
+    }
+  } else if (obj instanceof PDFArray) {
+    for (let i = 0; i < obj.size(); i++) {
+      const encrypted = encryptValue(obj.get(i), null);
+      if (encrypted) obj.set(i, encrypted);
+    }
+  }
+}
+
+/**
+ * @cantoo/pdf-lib 2.11.1 encrypts stream contents and object streams, but
+ * writes the Catalog, page tree, pages, signature dictionaries, objects with a
+ * non-zero generation and every stream dictionary outside object streams with
+ * their strings untouched: page labels, direct annotation comments and
+ * authors, signer names, a generation-1 Info dictionary. Encrypt those strings
+ * here, after encrypt() and before save(). Objects that go into an object
+ * stream are skipped, since the stream's own encryption covers them and a
+ * second pass would garble them. Security audit 2026-10-22, finding C9.
+ */
+function encryptStringsOutsideObjectStreams(pdfDoc) {
+  const ctx = pdfDoc.context;
+  const encryptRef = ctx.trailerInfo.Encrypt;
+  for (const [ref, obj] of ctx.enumerateIndirectObjects()) {
+    if (ref === encryptRef || !isWrittenOutsideObjectStreams(ref, obj)) continue;
+    // pdf-lib writes an object it could not parse back as raw bytes, so any
+    // text inside it cannot be encrypted.
+    if (obj instanceof PDFInvalidObject) {
+      throw new Error('VERIFY: the PDF contains damaged objects whose text could not be encrypted. Re-save it (for example File → Print → Save as PDF) and try again');
+    }
+    const isSig = obj instanceof PDFDict && obj.lookup(PDFName.of('Type')) === PDFName.of('Sig');
+    const encryptFn = ctx.security.getEncryptFn(ref.objectNumber, ref.generationNumber);
+    encryptStringsIn(obj instanceof PDFStream ? obj.dict : obj, encryptFn, isSig);
+  }
+}
 
 /** 48 hex chars from the CSPRNG — used when the caller leaves the owner password blank. */
 export function randomOwnerPassword() {
@@ -19,6 +90,8 @@ export function randomOwnerPassword() {
  * text and outline titles sit in the file unencrypted, while conformant
  * readers garble them on open. Inside an object stream those strings are
  * covered by the stream's encryption. Verified 2026-09-18 (see the leak test).
+ * Objects the writer keeps outside object streams get their strings encrypted
+ * by encryptStringsOutsideObjectStreams() (audit C9, 2026-10-23).
  *
  * A direct trailer /Info dictionary is promoted to an indirect object first,
  * because the trailer is never encrypted.
@@ -47,6 +120,7 @@ export async function encryptPdfBytes(bytes, { userPassword, ownerPassword, perm
     ownerPassword: ownerPassword || randomOwnerPassword(),
     permissions,
   });
+  encryptStringsOutsideObjectStreams(pdfDoc);
   return pdfDoc.save({ useObjectStreams: true });
 }
 

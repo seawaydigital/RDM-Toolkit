@@ -202,6 +202,93 @@ test('purgeStaleEncryptionArtifacts removes exactly the Encrypt dictionary and s
   assert.deepEqual(purgeStaleEncryptionArtifacts(doc), []);
 });
 
+// Builds a classic-xref PDF from numbered object bodies, with correct offsets.
+function buildPdf(objects, trailer) {
+  let body = '%PDF-1.7\n';
+  const offsets = [];
+  for (const [id, gen, text] of objects) {
+    offsets.push([id, gen, body.length]);
+    body += `${id} ${gen} obj\n${text}\nendobj\n`;
+  }
+  const size = Math.max(...objects.map(([id]) => id)) + 1;
+  const rows = Array.from({ length: size }, () => '0000000000 65535 f \n');
+  for (const [id, gen, off] of offsets) {
+    rows[id] = `${String(off).padStart(10, '0')} ${String(gen).padStart(5, '0')} n \n`;
+  }
+  const xref = `xref\n0 ${size}\n${rows.join('')}`;
+  return new TextEncoder().encode(
+    `${body}${xref}trailer << /Size ${size} ${trailer} >>\nstartxref\n${body.length}\n%%EOF`,
+  );
+}
+
+// @cantoo/pdf-lib 2.11.1 writes the Catalog, page tree, pages, /Type /Sig
+// dictionaries, objects with a non-zero generation and every stream dictionary
+// outside object streams, and encrypts only stream contents. Strings held in
+// those objects used to stay readable without the password (audit C9).
+const C9_SECRETS = [
+  'C9CATALOGLABEL', 'C9DIRECTANNOTCOMMENT', 'C9DIRECTANNOTAUTHOR',
+  'C9GEN1TITLE', 'C9GEN1AUTHOR', 'C9SIGNERNAME', 'C9SIGREASON',
+  'C9STREAMDICTSTRING', 'C9INDIRECTCONTROL', 'C9CONTENTTEXT',
+];
+
+function c9Fixture() {
+  const content = 'BT /F1 14 Tf 40 700 Td (C9CONTENTTEXT) Tj ET';
+  return buildPdf([
+    [1, 0, '<< /Type /Catalog /Pages 2 0 R /PageLabels << /Nums [0 << /S /D /P (C9CATALOGLABEL) >>] >> >>'],
+    [2, 0, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>'],
+    [3, 0, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R ' +
+      '/Resources << /Font << /F1 8 0 R >> >> ' +
+      '/Annots [<< /Type /Annot /Subtype /Text /Rect [40 600 60 620] /Contents (C9DIRECTANNOTCOMMENT) /T (C9DIRECTANNOTAUTHOR) >> 7 0 R] >>'],
+    [4, 0, `<< /Length ${content.length} >>\nstream\n${content}\nendstream`],
+    [5, 1, '<< /Title (C9GEN1TITLE) /Author (C9GEN1AUTHOR) >>'],
+    [6, 0, '<< /Type /Sig /Filter /Adobe.PPKLite /SubFilter /adbe.pkcs7.detached /Name (C9SIGNERNAME) /Reason (C9SIGREASON) /Contents <00000000> >>'],
+    [7, 0, '<< /Type /Annot /Subtype /Text /Rect [80 600 100 620] /Contents (C9INDIRECTCONTROL) >>'],
+    [8, 0, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>'],
+    [9, 0, '<< /Type /EmbeddedFile /Params << /ModDate (C9STREAMDICTSTRING) >> /Length 5 >>\nstream\nhello\nendstream'],
+  ], '/Root 1 0 R /Info 5 1 R');
+}
+
+test('strings in objects kept outside object streams are encrypted (audit C9)', async () => {
+  const out = await encryptPdfBytes(c9Fixture(), OPTS);
+  const text = new TextDecoder('latin1').decode(out);
+  for (const secret of C9_SECRETS) {
+    assert.ok(!text.includes(secret), `${secret} leaked as a literal string`);
+    assert.ok(!text.includes(utf16Hex(secret)), `${secret} leaked as UTF-16BE hex`);
+    assert.ok(!text.includes(asciiHex(secret)), `${secret} leaked as ASCII hex`);
+  }
+  assert.deepEqual(await verifyPdfIsLocked(out, { userPassword: OPTS.userPassword }), { locked: true, reason: null });
+});
+
+test('pdfjs reads the C9 strings back intact with the password', async () => {
+  const out = await encryptPdfBytes(c9Fixture(), OPTS);
+  const task = pdfjs.getDocument({ data: out.slice(), password: OPTS.userPassword, verbosity: 0 });
+  const pdf = await task.promise;
+  try {
+    const { info } = await pdf.getMetadata();
+    assert.equal(info.Title, 'C9GEN1TITLE');
+    assert.equal(info.Author, 'C9GEN1AUTHOR');
+    assert.deepEqual(await pdf.getPageLabels(), ['C9CATALOGLABEL1']);
+    const page = await pdf.getPage(1);
+    const notes = (await page.getAnnotations()).map((a) => a.contentsObj?.str).sort();
+    assert.deepEqual(notes, ['C9DIRECTANNOTCOMMENT', 'C9INDIRECTCONTROL']);
+    assert.equal((await page.getTextContent()).items.map((i) => i.str).join(''), 'C9CONTENTTEXT');
+  } finally {
+    await task.destroy();
+  }
+});
+
+// pdf-lib keeps an object it cannot parse as raw bytes and writes them back
+// verbatim, so any text inside it cannot be encrypted. Refuse instead.
+test('a PDF with a damaged object is refused rather than protected with readable text inside', async () => {
+  const source = buildPdf([
+    [1, 0, '<< /Type /Catalog /Pages 2 0 R >>'],
+    [2, 0, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>'],
+    [3, 0, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >>'],
+    [4, 0, '<< /A (C9INVALIDSECRET) /B ] >>'],
+  ], '/Root 1 0 R');
+  await assert.rejects(() => encryptPdfBytes(source, OPTS), /^Error: VERIFY: .*damaged/);
+});
+
 // A legal but unusual layout: the /Info dictionary written directly inside the
 // trailer. The trailer (cross-reference stream dictionary) is never encrypted,
 // so a direct Info dict would land there in cleartext unless promoted to an
