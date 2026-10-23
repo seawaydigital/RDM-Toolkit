@@ -65,8 +65,8 @@ async function readPDFMetadata(bytes) {
 
 async function stripPDFMetadata(bytes) {
   const pdfDoc = await PDFDocument.load(bytes);
-  stripPdfIdentityMetadata(pdfDoc);
-  return await pdfDoc.save();
+  const removed = stripPdfIdentityMetadata(pdfDoc);
+  return { bytes: await pdfDoc.save(), removed };
 }
 
 function MetadataTable({ label, metadata }) {
@@ -133,11 +133,13 @@ export default function StripFileMetadata({ tool, navigateTo }) {
     try {
       let blob;
       let ext;
+      let removed = null;
 
       if (isPDF(file)) {
         const bytes = await file.arrayBuffer();
-        const strippedBytes = await stripPDFMetadata(new Uint8Array(bytes));
-        blob = new Blob([strippedBytes], { type: 'application/pdf' });
+        const stripped = await stripPDFMetadata(new Uint8Array(bytes));
+        removed = stripped.removed;
+        blob = new Blob([stripped.bytes], { type: 'application/pdf' });
         ext = 'pdf';
       } else if (isImage(file)) {
         blob = await stripImageMetadata(file);
@@ -162,6 +164,7 @@ export default function StripFileMetadata({ tool, navigateTo }) {
         resultSize: blob.size,
         downloadUrl: url,
         afterMetadata,
+        removed,
       });
     } catch (e) {
       setError(e.message || 'Something went wrong while stripping metadata. Please try again.');
@@ -206,7 +209,10 @@ export default function StripFileMetadata({ tool, navigateTo }) {
           )}
           {!beforeMetadata?.note && (
             <div className="metadata-stripped-status">
-              <span className="metadata-stripped-badge metadata-stripped-badge--success">Info dictionary and XMP cleared</span>
+              <span className="metadata-stripped-badge metadata-stripped-badge--success">Metadata stripped</span>
+              {result.removed?.length > 0 && (
+                <p className="metadata-stripped-note">Removed: {result.removed.join(', ')}.</p>
+              )}
             </div>
           )}
         </div>

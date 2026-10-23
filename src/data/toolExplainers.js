@@ -226,13 +226,13 @@ const EXPLAINERS = {
   'strip-file-metadata': {
     whatItDoes: 'Removes hidden metadata (author, edit history, GPS coordinates, camera make, etc.) from PDFs and images.',
     howItWorks: [
-      'Your file is read into browser memory. For PDFs, the Info dictionary (title, author, subject, keywords, producer) is blanked and the XMP metadata stream, application PieceInfo, embedded attachments and page thumbnails are deleted — objects included, not just the references — before the file is re-saved. For images, the file is re-encoded through a canvas so EXIF/XMP blocks are left behind.',
+      'Your file is read into browser memory. For PDFs, the Info dictionary (title, author, subject, keywords, producer) is blanked and the XMP metadata stream, application PieceInfo, embedded attachments and page thumbnails are deleted — objects included, not just the references — before the file is re-saved. Photos inside the PDF are cleaned too: a JPEG is stored in a PDF byte for byte, so a phone photo keeps its EXIF (GPS position, camera serial, capture time), XMP and IPTC unless they are cut out. Those parts are removed without re-encoding the photo, and each image\u2019s own XMP stream is deleted. For images, the file is re-encoded through a canvas so EXIF/XMP blocks are left behind.',
       'The cleaned file downloads to your device. Nothing is uploaded — the entire scrubbing happens in this browser tab.',
     ],
     technicalDetails: {
       library: '<code>@cantoo/pdf-lib</code> for PDFs; <code>exifr</code> v7 + Canvas API for images.',
       flow: [
-        'PDFs: parsed with <code>PDFDocument.load()</code>; <code>stripPdfIdentityMetadata()</code> blanks the Info dictionary and deletes catalog <code>/Metadata</code> (XMP), <code>/PieceInfo</code>, <code>/Names/EmbeddedFiles</code> and per-page <code>/PieceInfo</code>/<code>/Thumb</code>, recursively removing the objects they point at (pdf-lib would otherwise re-serialise orphaned objects); document re-saved. The before/after table lists any hidden carriers found.',
+        'PDFs: parsed with <code>PDFDocument.load()</code>; <code>stripPdfIdentityMetadata()</code> blanks the Info dictionary and deletes catalog <code>/Metadata</code> (XMP), <code>/PieceInfo</code>, <code>/Names/EmbeddedFiles</code> and per-page <code>/PieceInfo</code>/<code>/Thumb</code>, recursively removing the objects they point at (pdf-lib would otherwise re-serialise orphaned objects). Every image XObject loses its <code>/Metadata</code> stream, and each plain <code>/DCTDecode</code> (JPEG) image is rewritten by <code>stripJpegMetadata()</code>, which walks the JPEG segments and drops APP1 (EXIF, XMP), APP13 (IPTC/Photoshop), other APP segments, comments and anything after the end-of-image marker (phones append a preview JPEG there with its own EXIF), keeping JFIF, the ICC profile, the Adobe colour transform, tables and scan data unchanged; document re-saved. The before/after table lists any hidden carriers found, and the result lists what was removed.',
         'Images: <code>exifr</code> parses the original metadata for a before-snapshot; the image is drawn onto a <code>&lt;canvas&gt;</code> and exported via <code>canvas.toBlob()</code>, which by specification does not emit EXIF/XMP.',
         'A second <code>exifr</code> pass on the output verifies the metadata is gone and shows you the before/after comparison.',
       ],
@@ -245,6 +245,7 @@ const EXPLAINERS = {
     ],
     limitations: [
       'For PDFs: text and images on the pages are untouched, so a name printed in a header, a signature, or a scanned letterhead is not metadata and will remain. Review-comment annotations and form-field values also stay. For sensitive documents, follow up with Adobe Acrobat\u2019s "Examine Document" or the PDF Redaction tool.',
+      'Inside PDFs, only plain JPEG photos are cleaned of EXIF/XMP. JPEG 2000 images and JPEGs wrapped in a second compression filter are left as they are (both are uncommon).',
       'For images, re-encoding through a canvas may slightly change pixel data. For archival originals, keep an untouched copy.',
       'GPS coordinates embedded directly in the image pixels (e.g. burned-in watermarks) cannot be removed by any metadata tool. Crop them out with Image Cropper.',
     ],
@@ -596,12 +597,13 @@ const EXPLAINERS = {
   'image-to-pdf': {
     whatItDoes: 'Wraps an image in a PDF wrapper — useful when you need to submit a photo or scan as a PDF for compatibility.',
     howItWorks: [
-      'Your browser reads the image, embeds it into a new one-page PDF using a PDF library, and hands you the resulting file. JPEGs are embedded directly without re-encoding; other formats are converted to PNG first via a canvas.',
+      'Your browser reads the image, embeds it into a new one-page PDF using a PDF library, and hands you the resulting file. JPEGs are embedded without re-encoding, but first their hidden metadata is cut out: a PDF stores a JPEG byte for byte, so a phone photo would otherwise carry its GPS position, camera serial number and capture time into the PDF. Other formats are converted to PNG first via a canvas, which keeps no metadata.',
     ],
     technicalDetails: {
       library: '<code>@cantoo/pdf-lib</code>.',
       flow: [
-        'For JPEG inputs: <code>pdfDoc.embedJpg(bytes)</code> embeds the image directly — no re-encoding, no quality loss.',
+        'For JPEG inputs: <code>stripJpegMetadata()</code> removes APP1 (EXIF, XMP), APP13 (IPTC), other APP segments, comments and data after the end-of-image marker, keeping JFIF, the ICC profile, the Adobe colour transform, tables and scan data; <code>pdfDoc.embedJpg()</code> then embeds the result. No re-encoding, no quality loss. A JPEG it cannot parse is re-encoded through the canvas path below instead.',
+        'PNG inputs go through <code>pdfDoc.embedPng()</code>, which decodes the file to pixels, so text and EXIF chunks are not carried over.',
         'For other formats: image is drawn onto a canvas, exported as PNG via <code>canvas.toBlob()</code>, then embedded via <code>pdfDoc.embedPng()</code>.',
         '<code>pdfDoc.addPage()</code> + <code>page.drawImage()</code> places the image on a page sized A4 or Letter.',
         'Document saved and downloaded as a local blob.',

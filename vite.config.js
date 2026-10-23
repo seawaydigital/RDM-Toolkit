@@ -206,6 +206,7 @@ export default defineConfig({
           if (normalized.includes('/src/utils/pdfEncrypt.js')) return 'pdf-lib';
           if (normalized.includes('/src/utils/pdfMetadata.js')) return 'pdf-lib';
           if (normalized.includes('/src/utils/pdfPageIsolation.js')) return 'pdf-lib';
+          if (normalized.includes('/src/utils/jpegMetadata.js')) return 'pdf-lib';
           // Sample-file generators shared by three lazy tools (De-identify,
           // PDF Redaction, Strip Image Metadata). Small, so they ride in the
           // entry chunk rather than becoming a new shared chunk.

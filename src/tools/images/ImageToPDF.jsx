@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { PDFDocument } from '@cantoo/pdf-lib';
+import { stripJpegMetadata } from '../../utils/jpegMetadata';
 import {
   DndContext,
   closestCenter,
@@ -178,14 +179,19 @@ export default function ImageToPDF({ tool }) {
 
       for (const item of images) {
         const bytes = await item.file.arrayBuffer();
+        const isJpeg = item.file.type === 'image/jpeg' || item.file.type === 'image/jpg';
+        const stripped = isJpeg ? stripJpegMetadata(bytes) : null;
         let embeddedImage;
 
         if (item.file.type === 'image/png') {
           embeddedImage = await pdfDoc.embedPng(bytes);
-        } else if (item.file.type === 'image/jpeg' || item.file.type === 'image/jpg') {
-          embeddedImage = await pdfDoc.embedJpg(bytes);
+        } else if (stripped) {
+          // embedJpg stores the JPEG byte for byte, so the camera's EXIF (GPS,
+          // serial number, capture time), XMP and IPTC would ride into the PDF.
+          embeddedImage = await pdfDoc.embedJpg(stripped.bytes);
         } else {
-          // For WebP and other formats, convert to PNG via canvas first
+          // WebP and other formats, and any JPEG that could not be parsed for
+          // stripping: re-encode to PNG via canvas, which keeps no metadata.
           const pngBlob = await convertToPngBlob(item.file);
           const pngBytes = await pngBlob.arrayBuffer();
           embeddedImage = await pdfDoc.embedPng(pngBytes);
