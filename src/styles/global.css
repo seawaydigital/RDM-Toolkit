@@ -9634,7 +9634,7 @@ input:focus, textarea:focus, select:focus {
 
 @media print {
   /* Hide navigation */
-  .topbar, .sidebar, .sidebar-backdrop {
+  .topbar, .sidebar, .sidebar-backdrop, .site-footer {
     display: none !important;
   }
   .app-layout {
@@ -16598,4 +16598,145 @@ select:focus-visible,
   width: 16px;
   height: 16px;
   accent-color: var(--accent-primary);
+}
+
+/* ---- Privacy statement and Terms of use pages ---- */
+.legal-section {
+  margin-bottom: var(--space-2xl);
+}
+
+.legal-section:last-child {
+  margin-bottom: 0;
+}
+
+.legal-lede {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 680px;
+  margin-bottom: var(--space-md);
+}
+
+.legal-lede--spaced {
+  margin-top: var(--space-lg);
+}
+
+/* Underlined: gold alone is too close to the body grey to mark a link
+   (axe link-in-text-block). Covers the accessibility statement too. */
+.legal-lede a,
+.acc-lede a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.legal-summary {
+  list-style: none;
+  margin: var(--space-md) 0 0;
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-width: 680px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-left: 2px solid var(--accent-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.legal-summary li {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.legal-summary li svg {
+  color: var(--accent-green);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.legal-stored {
+  list-style: none;
+  margin: var(--space-lg) 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-md);
+}
+
+.legal-stored li {
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.legal-stored strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-parchment);
+  margin-bottom: var(--space-sm);
+}
+
+.legal-stored p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.65;
+  margin: 0 0 var(--space-sm);
+}
+
+.legal-stored .legal-stored-why {
+  margin: 0;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-hairline);
+}
+
+.legal-checks {
+  max-width: 680px;
+}
+
+/* ---- Site footer (every route) ---- */
+.site-footer {
+  max-width: 960px;
+  margin: var(--space-2xl) auto 0;
+  padding: var(--space-lg) 0 var(--space-sm);
+  border-top: 1px solid var(--border-hairline);
+}
+
+.site-footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-xs) var(--space-lg);
+}
+
+.site-footer-links a {
+  display: inline-block;
+  min-height: 24px;
+  padding: 4px 2px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+}
+
+.site-footer-links a:hover {
+  color: var(--text-primary);
+  text-decoration-color: currentColor;
+}
+
+.site-footer-links a[aria-current='page'] {
+  color: var(--accent-primary);
+  text-decoration-color: currentColor;
 }
