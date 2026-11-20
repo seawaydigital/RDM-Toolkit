@@ -110,3 +110,21 @@ Content is the standard itself, kept verbatim at the owner's request. Check only
 | OCAP® is a registered trademark of FNIGC | [FNIGC](https://fnigc.ca/ocap-training/) |
 | Tri-Agency deposit requirement is phasing in | Same source as Tri-Agency above |
 | Lakehead's three classification tiers | Lakehead classification standard (above) |
+
+## Privacy statement (`#privacy`) and Terms of use (`#terms`) — last checked 2026-11-20
+
+These pages show their own "Last updated" date (`LEGAL_UPDATED` in `src/data/legal.js`), not a review line. The decisions behind their wording are in [LEGAL-PAGES.md](LEGAL-PAGES.md).
+
+| Claim | Source |
+|---|---|
+| GitHub Pages logs every visitor's IP address "for security purposes" | [What is GitHub Pages? → Data collection](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages) |
+| GitHub handles those logs under its General Privacy Statement | [GitHub General Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement) (effective 27 April 2026 when checked) |
+| What the browser stores, and why | `STORED_ITEMS` in `src/data/legal.js`, kept in step with the code by `tests/legal.test.mjs` |
+| What the feedback email draft contains | `buildIssueBody()` in `src/components/ui/FeedbackModal.jsx` |
+| The Storage Calculator share link holds only numbers, yes/no settings and its own labels | `src/utils/storageConfig.js` |
+| The source code is MIT-licensed | `LICENSE` |
+| OCAP® is a registered trademark of FNIGC | Same source as Glossary above |
+| The site is hosted on GitHub Pages, not on a Lakehead server | `curl -sI https://rdmtoolkit.ca/` shows `Server: GitHub.com`; the A records are GitHub's (185.199.108–111.153) |
+| The site sets no cookies and sends nothing to Lakehead | No `Set-Cookie` in the live response; the CSP check in `scripts/security-audit.mjs`; the network measurement recorded in LEGAL-PAGES.md |
+| Who develops and maintains the site, and the contact address | `PROJECT.maintainer` and `INSTITUTION.rdmEmail` in `src/data/institutionConfig.js`, as the maintainer gave them |
+| Each open-source project and its licence | `OPEN_SOURCE` in `src/data/legal.js`, checked against `package.json` and each package's own licence by `tests/legal.test.mjs` |

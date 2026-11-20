@@ -332,6 +332,44 @@ if (indexHtml.includes("'unsafe-eval'")) {
   fail("index.html CSP must not allow 'unsafe-eval'");
 }
 
+// The privacy statement promises that the page cannot connect to any other
+// server. That holds only while neither copy of the policy names an outside
+// origin: the meta tag in index.html is the only CSP GitHub Pages delivers,
+// and public/_headers is what header-capable hosts send.
+const cspSourcesOnOrigin = new Set(["'self'", "'none'", "'unsafe-inline'", "'wasm-unsafe-eval'", 'blob:', 'data:']);
+const cspDirectivesWithoutSources = new Set(['trusted-types', 'require-trusted-types-for', 'upgrade-insecure-requests']);
+
+function checkCspStaysOnOrigin(label, policy) {
+  const directives = new Map();
+  for (const part of policy.split(';')) {
+    const [name, ...sources] = part.trim().toLowerCase().split(/\s+/);
+    if (name) directives.set(name, sources);
+  }
+  for (const [name, sources] of directives) {
+    if (cspDirectivesWithoutSources.has(name)) continue;
+    for (const source of sources) {
+      if (!cspSourcesOnOrigin.has(source)) {
+        fail(`${label} CSP ${name} allows ${source}; no directive may name another origin`);
+      }
+    }
+  }
+  for (const name of ['default-src', 'connect-src', 'form-action']) {
+    if ((directives.get(name) || []).join(' ') !== "'self'") {
+      fail(`${label} CSP must set ${name} to 'self' and nothing else`);
+    }
+  }
+}
+
+const metaCsp = indexHtml.match(/http-equiv="content-security-policy"\s+content="([^"]*)"/);
+if (metaCsp) checkCspStaysOnOrigin('index.html', metaCsp[1]);
+else fail("index.html: could not read the meta CSP's content attribute");
+
+if (fs.existsSync(headersPath)) {
+  const headerCsp = readText(headersPath).match(/^\s*content-security-policy:\s*(.+)$/im);
+  if (headerCsp) checkCspStaysOnOrigin('public/_headers', headerCsp[1]);
+  else fail('public/_headers: could not read the Content-Security-Policy value');
+}
+
 const viteConfig = readText(fromRoot('vite.config.js'));
 if (!viteConfig.includes('distSubresourceIntegrity')) {
   fail('vite.config.js must inject SRI attributes into the production build');
