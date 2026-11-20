@@ -375,6 +375,18 @@ if (!viteConfig.includes('distSubresourceIntegrity')) {
   fail('vite.config.js must inject SRI attributes into the production build');
 }
 
+// Third-party licence notices. The minifier strips them from the bundles, so
+// the build writes them to third-party-licenses.txt, and a second plugin checks
+// that the generated service worker precaches that file and leaves plain files
+// (robots.txt, security.txt) to open as themselves. A build cannot notice that
+// one of its own plugins has been taken out of the list, so that is checked here.
+if (!viteConfig.includes('thirdPartyLicenses(),')) {
+  fail('vite.config.js must run thirdPartyLicenses() so every build ships third-party-licenses.txt');
+}
+if (!viteConfig.includes('verifyGeneratedServiceWorker(),')) {
+  fail('vite.config.js must run verifyGeneratedServiceWorker() to check the service worker it generates');
+}
+
 if (failures.length > 0) {
   console.error('Security audit failed:\n');
   for (const item of failures) console.error(`- ${item}`);

@@ -2,8 +2,16 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
+import {
+  LICENCES_FILE,
+  SERVED_BUILD_PACKAGES,
+  collectLicences,
+  packagePathsOfModules,
+  workboxPackagesIn,
+} from './scripts/third-party-licenses.mjs';
+import { NAVIGATE_FALLBACK_DENYLIST } from './scripts/sw-navigation.mjs';
 
 const SECURITY_HEADERS = {
   'Content-Security-Policy':
@@ -136,18 +144,130 @@ const serviceWorkerTrustedTypes = () => ({
   },
 });
 
+// The minifier strips licence comments, so the built JavaScript carries none of
+// the copyright and permission notices its third-party code is licensed under.
+// Every production build therefore writes them to one plain file at the site
+// root. scripts/third-party-licenses.mjs decides which packages ship and reads
+// their licence files. The build fails if a shipped package has no licence
+// text, or if the bundle holds code from a package the file does not list.
+const thirdPartyLicenses = () => ({
+  name: 'third-party-licenses',
+  // The dev server has no dist/. Serve the same text there, so a link to the
+  // file opens the file and not the app.
+  configureServer(server) {
+    server.middlewares.use(`/${LICENCES_FILE}`, (_req, res) => {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.end(collectLicences({ root: process.cwd() }).text);
+    });
+  },
+  generateBundle(_options, bundle) {
+    const { packages, text } = collectLicences({ root: process.cwd() });
+
+    // The list comes from package-lock.json. Check it against what was
+    // actually bundled: a dev-only or optional package that some module
+    // imports would otherwise ship without its notice.
+    const moduleIds = Object.values(bundle).flatMap((file) =>
+      file.type === 'chunk' ? file.moduleIds ?? Object.keys(file.modules ?? {}) : [],
+    );
+    const bundled = packagePathsOfModules(moduleIds, process.cwd());
+    if (bundled.size === 0) {
+      this.error(`${LICENCES_FILE}: could not read which packages the bundle contains, so the list cannot be checked.`);
+    }
+    const listed = new Set(packages.map((pkg) => pkg.path));
+    const unlisted = [...bundled].filter((path) => !listed.has(path));
+    if (unlisted.length > 0) {
+      this.error(
+        `The bundle contains code from packages that ${LICENCES_FILE} does not list: ${unlisted.join(', ')}. ` +
+          'They are dev-only or optional in package-lock.json. Add each to SERVED_BUILD_PACKAGES in ' +
+          'scripts/third-party-licenses.mjs, or make it a real dependency.',
+      );
+    }
+
+    this.emitFile({ type: 'asset', fileName: LICENCES_FILE, source: text });
+  },
+});
+
+// Checks the service worker that vite-plugin-pwa has just written. Each of
+// these is easy to break with an unrelated option change, and none shows up
+// until someone is offline or follows a link to a plain file:
+//   1. the licences file is precached, so it opens offline;
+//   2. the navigation fallback carries the denylist, so plain files such as
+//      /robots.txt open as themselves and not as the app
+//      (scripts/sw-navigation.mjs);
+//   3. every Workbox package inside the worker's runtime is in the licences
+//      file.
+function generatedServiceWorkerProblems() {
+  const problems = [];
+  const sw = readFileSync(resolve(distDir, 'sw.js'), 'utf8');
+
+  if (!sw.includes(`url:"${LICENCES_FILE}"`)) {
+    problems.push(`sw.js does not precache ${LICENCES_FILE} (workbox.globPatterns), so it would not open offline.`);
+  }
+  for (const pattern of NAVIGATE_FALLBACK_DENYLIST) {
+    if (!sw.includes(String(pattern))) {
+      problems.push(`sw.js is missing ${pattern} from its navigation denylist (workbox.navigateFallbackDenylist).`);
+    }
+  }
+
+  const runtimes = readdirSync(distDir).filter((name) => /^workbox-[\w-]+\.js$/.test(name));
+  if (runtimes.length === 0) problems.push('no workbox-*.js runtime was found next to sw.js.');
+  for (const runtime of runtimes) {
+    for (const name of workboxPackagesIn(readFileSync(resolve(distDir, runtime), 'utf8'))) {
+      if (!Object.hasOwn(SERVED_BUILD_PACKAGES, name)) {
+        problems.push(
+          `${runtime} contains ${name}, which ${LICENCES_FILE} does not list. Add it to SERVED_BUILD_PACKAGES in scripts/third-party-licenses.mjs.`,
+        );
+      }
+    }
+  }
+  return problems;
+}
+
+const verifyGeneratedServiceWorker = () => {
+  let written = false;
+  return {
+    name: 'verify-generated-service-worker',
+    apply: 'build',
+    enforce: 'post',
+    writeBundle() {
+      written = true;
+    },
+    closeBundle: {
+      sequential: true,
+      order: 'post',
+      handler(error) {
+        // closeBundle also runs after a failed build, and vite-plugin-pwa still
+        // writes a worker over whatever is left in dist/. Checking that would
+        // replace the real error with a misleading one about the worker.
+        if (error || !written) return;
+
+        const problems = generatedServiceWorkerProblems();
+        if (problems.length > 0) {
+          throw new Error(`The generated service worker is not what the site needs:\n${problems.map((p) => `  - ${p}`).join('\n')}`);
+        }
+      },
+    },
+  };
+};
+
 export default defineConfig({
   base: '/',
   plugins: [
     react(),
     previewSecurityHeaders(),
     buildCspTighten(),
+    thirdPartyLicenses(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,woff,woff2,ttf,ico,png,svg,webp}'],
+        // The licences file is the one plain file that is precached: the Terms
+        // of use page links to it, and it has to open offline like the rest.
+        globPatterns: ['**/*.{js,css,html,woff,woff2,ttf,ico,png,svg,webp}', LICENCES_FILE],
         maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB (covers pdfjs worker)
+        // Without this the worker answers /robots.txt, /sitemap.xml and
+        // /.well-known/security.txt with the app. See scripts/sw-navigation.mjs.
+        navigateFallbackDenylist: NAVIGATE_FALLBACK_DENYLIST,
         runtimeCaching: [],
         skipWaiting: true,   // activate new SW immediately on deploy
         clientsClaim: true,  // take control of all open tabs right away
@@ -184,6 +304,7 @@ export default defineConfig({
       },
     }),
     serviceWorkerTrustedTypes(),
+    verifyGeneratedServiceWorker(),
     distSubresourceIntegrity(),
   ],
   optimizeDeps: {

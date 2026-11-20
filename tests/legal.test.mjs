@@ -2,9 +2,17 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { STORED_ITEMS, LEGAL_UPDATED, POLICY_PAGES, OPEN_SOURCE, LICENCE_NAMES } from '../src/data/legal.js';
+import {
+  STORED_ITEMS,
+  LEGAL_UPDATED,
+  POLICY_PAGES,
+  OPEN_SOURCE,
+  LICENCE_NAMES,
+  THIRD_PARTY_LICENCES_FILE,
+} from '../src/data/legal.js';
 import { PAGE_IDS } from '../src/data/pages.js';
 import { PROJECT } from '../src/data/institutionConfig.js';
+import { LICENCES_FILE, collectLicences } from '../scripts/third-party-licenses.mjs';
 
 function sourceFiles(dir) {
   return readdirSync(dir).flatMap(name => {
@@ -92,4 +100,31 @@ test('each credit names a licence the package itself offers', () => {
 
 test('every credited licence has a name to show on the page', () => {
   for (const { name, licence } of OPEN_SOURCE) assert.ok(LICENCE_NAMES[licence], `${name}: no display name for ${licence}`);
+});
+
+// ---- The licence texts themselves (third-party-licenses.txt, written by the build) ----
+
+test('the Terms page links to the licences file the build writes, in a new tab', () => {
+  assert.equal(THIRD_PARTY_LICENCES_FILE, LICENCES_FILE, 'the page would link to a file the build does not write');
+  const page = readFileSync('src/components/pages/TermsOfUse.jsx', 'utf8');
+  assert.match(page, /const LICENCES_URL = .*THIRD_PARTY_LICENCES_FILE/, 'the link address is not built from THIRD_PARTY_LICENCES_FILE');
+  assert.match(
+    page,
+    /<a\s+href=\{LICENCES_URL\}\s+target="_blank"\s+rel="noopener noreferrer"\s*>/,
+    'TermsOfUse.jsx has no new-tab link to the licences file',
+  );
+});
+
+test('every credited project has its licence text in that file, under the licence it is credited with', () => {
+  const { packages } = collectLicences({ root: process.cwd() });
+  for (const { name, packages: packageNames, licence } of OPEN_SOURCE) {
+    for (const packageName of packageNames) {
+      const entry = packages.find((pkg) => pkg.name === packageName);
+      assert.ok(entry, `${name}: ${packageName} has no licence text in ${LICENCES_FILE}`);
+      assert.ok(
+        entry.license.split(/\s+OR\s+/).includes(licence),
+        `${name}: the file lists ${packageName} under ${entry.license}, the page credits it under ${licence}`,
+      );
+    }
+  }
 });
