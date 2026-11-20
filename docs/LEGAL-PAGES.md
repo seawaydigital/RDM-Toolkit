@@ -26,6 +26,7 @@ them.
 | D2 | Use of Lakehead's name and colours | They may be used. The pages say who develops the site and where he works. They do not call the site an official Lakehead service, because that was not part of the decision. | Both pages |
 | D3 | Warranty and liability wording | Keep the plain-language "No warranty" and "Limitation of liability" sections. The liability clause names the site's developer, Lakehead University and other contributors. That mirrors the code's MIT licence, which protects "the authors or copyright holders", and `LICENSE` names Lakehead University as the copyright holder. | Terms |
 | D5 | Feedback email and Lakehead | The site must collect nothing and send nothing to Lakehead's servers. That is how it works, apart from email people choose to send. See "What reaches Lakehead" below. | Privacy → "The short version", "What the web host records", "When you contact us" |
+| D7 | Whether the licences file should also list the helper code the build tools generate | Leave it as it is. The file covers the packages the site serves, not the build tools' generated helper code. See "Third-party licence texts" below. | `/third-party-licenses.txt`; `SERVED_BUILD_PACKAGES` in [scripts/third-party-licenses.mjs](../scripts/third-party-licenses.mjs) |
 
 ## Still open (none of these blocks publishing)
 
@@ -174,9 +175,11 @@ tools write into every build: Vite's preload helper, Rolldown's module
 runtime, the class-field helpers Rolldown inlines from `@oxc-project/runtime`
 (its licence file is Babel's MIT licence), vite-plugin-pwa's `registerSW.js`,
 and workbox-build's own lines in `sw.js`. All five tools are MIT-licensed.
-They are left out as generated tool output. Whether to list them too is the
-maintainer's decision: the comment on `SERVED_BUILD_PACKAGES` in
-`scripts/third-party-licenses.mjs` says how, and what it costs.
+They are left out as generated tool output, not a copy of a library. The
+maintainer was asked on 20 November 2026 whether to list them too, and decided
+to leave the file as it is (D7). The comment on `SERVED_BUILD_PACKAGES` in
+`scripts/third-party-licenses.mjs` says how to list them, and what it would
+cost, if that is ever revisited.
 
 **The service worker used to hide plain files.** With the worker running, a
 browser that opened `/robots.txt`, `/sitemap.xml` or

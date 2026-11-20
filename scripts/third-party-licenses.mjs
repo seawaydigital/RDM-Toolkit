@@ -40,7 +40,8 @@ export const LICENCES_FILE = 'third-party-licenses.txt';
  *     That package is compiled into Rolldown and not installed, so it cannot
  *     be listed from here: its licence text would have to be added by hand
  *     and re-checked whenever Rolldown changes.
- * Whether to list them is the maintainer's decision (docs/LEGAL-PAGES.md).
+ * The maintainer decided on 2026-11-20 to leave them out (docs/LEGAL-PAGES.md,
+ * decision D7).
  */
 export const SERVED_BUILD_PACKAGES = {
   'workbox-core': 'Build tool. Part of the service worker runtime the site serves (workbox-*.js).',
