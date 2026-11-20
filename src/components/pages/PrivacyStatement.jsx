@@ -1,12 +1,14 @@
 import { CheckCircle, ShieldCheck } from 'lucide-react';
-import { INSTITUTION, MAILTO } from '../../data/institutionConfig';
+import { INSTITUTION, MAILTO, PROJECT } from '../../data/institutionConfig';
 import { LEGAL_UPDATED, STORED_ITEMS } from '../../data/legal';
 import { formatReviewDate } from '../../data/contentReview';
 import ClearLocalData from '../ui/ClearLocalData';
 
-// Open decisions for this page (who is responsible for it, how Lakehead
-// handles feedback email) are listed in docs/LEGAL-PAGES.md. The hosting
-// section names GitHub Pages: rewrite it whenever the host changes.
+// The decisions behind this page's wording are recorded in docs/LEGAL-PAGES.md.
+// Two statements here depend on where the site is hosted, so rewrite them
+// before any host change: the hosting section names GitHub Pages, and "sends
+// nothing to Lakehead" stops being true for a copy served from a Lakehead
+// server, which would log every visit there.
 
 const GITHUB_PAGES_DOCS = 'https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages';
 const GITHUB_PRIVACY = 'https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement';
@@ -15,8 +17,8 @@ const SUMMARY = [
   'The files you process and the text you type stay on your device. They are never uploaded.',
   'There are no accounts, cookies, analytics, advertising or third-party scripts.',
   'The site keeps a few small settings in your browser, listed below, and you can delete them at any time.',
-  'The web host, GitHub, logs visitors’ IP addresses for security.',
-  'If you email us, we receive what you choose to send.',
+  'The site is hosted by GitHub, not by Lakehead University. GitHub logs visitors’ IP addresses for security.',
+  'The site sends nothing to Lakehead University. The university hears from you only if you choose to send an email.',
 ];
 
 export default function PrivacyStatement() {
@@ -49,9 +51,9 @@ export default function PrivacyStatement() {
         <p className="legal-lede">
           Every tool reads your file into your browser’s memory, works on it
           there, and offers the result as a download. The file, its name and its
-          contents are not sent over the network. The site’s content security policy also
-          tells your browser to refuse any connection the page tries to make to
-          another server.{' '}
+          contents are not sent over the network. The site’s content security
+          policy also tells your browser to refuse any connection the page tries
+          to make to another server.{' '}
           <a href="#how-this-works">How This Works</a> shows how to check this
           for yourself.
         </p>
@@ -63,7 +65,7 @@ export default function PrivacyStatement() {
       </section>
 
       <section className="legal-section">
-        <h2 className="htw-section-title">What is kept in your browser</h2>
+        <h2 className="htw-section-title">Cookies and what is kept in your browser</h2>
         <p className="legal-lede">
           The site sets no cookies. It keeps the items below in your browser’s
           local storage, on this device only. They are never sent to us, and we
@@ -94,7 +96,11 @@ export default function PrivacyStatement() {
       <section className="legal-section">
         <h2 className="htw-section-title">What the web host records</h2>
         <p className="legal-lede">
-          The site is hosted on GitHub Pages, run by GitHub, Inc. GitHub’s{' '}
+          The site is hosted on GitHub Pages, run by GitHub, Inc. It does not
+          run on {INSTITUTION.name}’s servers, and it sends nothing to them.
+        </p>
+        <p className="legal-lede">
+          GitHub’s{' '}
           <a href={GITHUB_PAGES_DOCS} target="_blank" rel="noopener noreferrer">
             documentation
           </a>{' '}
@@ -131,8 +137,6 @@ export default function PrivacyStatement() {
 
       <section className="legal-section">
         <h2 className="htw-section-title">When you contact us</h2>
-        {/* DECISION D5 (docs/LEGAL-PAGES.md): Lakehead to confirm how feedback
-            email is used and kept, and whether FIPPA needs a notice here. */}
         <p className="legal-lede">
           The Feedback button and the “Tell us” and “Report this problem” links
           open a message in your own email program, addressed to{' '}
@@ -143,10 +147,15 @@ export default function PrivacyStatement() {
           you tick the box for it. You can change or delete any of it before
           sending.
         </p>
+        {/* How long the mailbox keeps messages is not stated here: open,
+            optional (docs/LEGAL-PAGES.md D5). */}
         <p className="legal-lede">
-          Your message goes to the {INSTITUTION.researchOffice} at{' '}
-          {INSTITUTION.name}, along with your email address and anything you
-          attach. It is used to reply to you and to fix what you report.
+          Email is the only way anything from you reaches {INSTITUTION.name}.
+          Your message arrives in the {INSTITUTION.researchOffice}’ mailbox,
+          like any other email to the university, along with your email address
+          and anything you attach. It is used to reply to you and to fix what
+          you report. Please leave research data, and personal information
+          about other people, out of your message.
         </p>
       </section>
 
@@ -162,10 +171,13 @@ export default function PrivacyStatement() {
       </section>
 
       <section className="legal-section">
-        <h2 className="htw-section-title">Questions and changes</h2>
+        <h2 className="htw-section-title">Who runs this site, and questions</h2>
         <p className="legal-lede">
-          For questions about this statement or about your personal
-          information, email <a href={MAILTO.rdm}>{INSTITUTION.rdmEmail}</a>.
+          RDM Toolkit is developed and maintained by {PROJECT.maintainer.name},{' '}
+          {PROJECT.maintainer.title} in the {INSTITUTION.researchOffice} at{' '}
+          {INSTITUTION.name}. For questions about this statement or about your
+          personal information, email{' '}
+          <a href={MAILTO.rdm}>{INSTITUTION.rdmEmail}</a>.
         </p>
         <p className="legal-lede">
           If what the site keeps, or who hosts it, changes, this page is updated

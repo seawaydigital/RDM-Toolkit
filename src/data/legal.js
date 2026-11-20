@@ -1,11 +1,11 @@
 /**
  * Shared facts for the Privacy statement and Terms of use pages, and the
- * footer that links them. Open decisions about both pages (who provides the
- * site, legal review, content licence) are listed in docs/LEGAL-PAGES.md.
+ * footer that links them. The decisions behind both pages' wording are
+ * recorded in docs/LEGAL-PAGES.md.
  */
 
 /** Date both pages were last changed in substance. Shown on each page. */
-export const LEGAL_UPDATED = '2026-10-25';
+export const LEGAL_UPDATED = '2026-11-20';
 
 /**
  * Everything the app keeps in the browser's own storage. tests/legal.test.mjs
@@ -38,6 +38,37 @@ export const STORED_ITEMS = [
     why: 'So you can attach it to a feedback email when reporting a problem. It is never sent anywhere automatically.',
   },
 ];
+
+/**
+ * The open-source software the site ships, grouped as the Terms of use page
+ * credits it. `licence` is the SPDX id the software is used under; for a
+ * dual-licensed package it is the one chosen. tests/legal.test.mjs fails if a
+ * production dependency in package.json is missing here, if an entry names a
+ * package that is no longer a dependency, or if a licence does not match the
+ * package's own package.json.
+ */
+export const OPEN_SOURCE = [
+  { name: 'React', packages: ['react', 'react-dom'], licence: 'MIT' },
+  { name: 'pdf-lib', packages: ['@cantoo/pdf-lib', '@pdf-lib/fontkit'], licence: 'MIT' },
+  { name: 'JSZip', packages: ['jszip'], licence: 'MIT' },
+  { name: 'zxcvbn', packages: ['zxcvbn'], licence: 'MIT' },
+  { name: 'exifr', packages: ['exifr'], licence: 'MIT' },
+  { name: 'Turndown', packages: ['turndown', 'turndown-plugin-gfm'], licence: 'MIT' },
+  { name: 'dnd kit', packages: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'], licence: 'MIT' },
+  { name: 'PDF.js', packages: ['pdfjs-dist'], licence: 'Apache-2.0' },
+  { name: 'DOMPurify', packages: ['dompurify'], licence: 'Apache-2.0' },
+  { name: 'Lucide', packages: ['lucide-react'], licence: 'ISC' },
+  { name: 'IBM Plex typefaces', packages: ['@fontsource/ibm-plex-sans', '@fontsource/ibm-plex-mono'], licence: 'OFL-1.1' },
+  { name: 'Fraunces typeface', packages: ['@fontsource/fraunces'], licence: 'OFL-1.1' },
+];
+
+/** How each licence in OPEN_SOURCE is written on the page. */
+export const LICENCE_NAMES = {
+  'MIT': 'MIT licence',
+  'Apache-2.0': 'Apache Licence 2.0',
+  'ISC': 'ISC licence',
+  'OFL-1.1': 'SIL Open Font Licence 1.1',
+};
 
 /** Footer links to the site's policy pages. Each hash must be a route. */
 export const POLICY_PAGES = [

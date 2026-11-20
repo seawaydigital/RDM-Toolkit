@@ -111,9 +111,9 @@ Content is the standard itself, kept verbatim at the owner's request. Check only
 | Tri-Agency deposit requirement is phasing in | Same source as Tri-Agency above |
 | Lakehead's three classification tiers | Lakehead classification standard (above) |
 
-## Privacy statement (`#privacy`) and Terms of use (`#terms`) — drafted 2026-10-25
+## Privacy statement (`#privacy`) and Terms of use (`#terms`) — last checked 2026-11-20
 
-These pages show their own "Last updated" date (`LEGAL_UPDATED` in `src/data/legal.js`), not a review line. Open decisions are in [LEGAL-PAGES.md](LEGAL-PAGES.md).
+These pages show their own "Last updated" date (`LEGAL_UPDATED` in `src/data/legal.js`), not a review line. The decisions behind their wording are in [LEGAL-PAGES.md](LEGAL-PAGES.md).
 
 | Claim | Source |
 |---|---|
@@ -124,3 +124,7 @@ These pages show their own "Last updated" date (`LEGAL_UPDATED` in `src/data/leg
 | The Storage Calculator share link holds only numbers, yes/no settings and its own labels | `src/utils/storageConfig.js` |
 | The source code is MIT-licensed | `LICENSE` |
 | OCAP® is a registered trademark of FNIGC | Same source as Glossary above |
+| The site is hosted on GitHub Pages, not on a Lakehead server | `curl -sI https://rdmtoolkit.ca/` shows `Server: GitHub.com`; the A records are GitHub's (185.199.108–111.153) |
+| The site sets no cookies and sends nothing to Lakehead | No `Set-Cookie` in the live response; the CSP check in `scripts/security-audit.mjs`; the network measurement recorded in LEGAL-PAGES.md |
+| Who develops and maintains the site, and the contact address | `PROJECT.maintainer` and `INSTITUTION.rdmEmail` in `src/data/institutionConfig.js`, as the maintainer gave them |
+| Each open-source project and its licence | `OPEN_SOURCE` in `src/data/legal.js`, checked against `package.json` and each package's own licence by `tests/legal.test.mjs` |

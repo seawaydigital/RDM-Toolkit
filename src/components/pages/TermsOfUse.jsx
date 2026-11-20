@@ -1,12 +1,12 @@
 import { AlertCircle, FileText } from 'lucide-react';
 import { INSTITUTION, MAILTO, PROJECT } from '../../data/institutionConfig';
-import { LEGAL_UPDATED } from '../../data/legal';
+import { LEGAL_UPDATED, LICENCE_NAMES, OPEN_SOURCE } from '../../data/legal';
 import { formatReviewDate } from '../../data/contentReview';
 
-// Draft. Open decisions (who provides the site, Lakehead's approval of its
-// name, legal review of the warranty and liability wording, governing law,
-// content licence) are listed in docs/LEGAL-PAGES.md, keyed D1–D6. Do not
-// publish until they are settled.
+// The decisions behind this page's wording (who is named, the warranty and
+// liability sections, what is still optional) are recorded in
+// docs/LEGAL-PAGES.md. The wording is the maintainer's; no lawyer has
+// reviewed it.
 
 const CHECKS = [
   {
@@ -31,6 +31,14 @@ const CHECKS = [
   },
 ];
 
+// 'MIT licence' → ['React', 'pdf-lib', …], in the order OPEN_SOURCE lists them.
+const CREDITS_BY_LICENCE = Object.entries(LICENCE_NAMES)
+  .map(([spdx, label]) => ({
+    label,
+    names: OPEN_SOURCE.filter(entry => entry.licence === spdx).map(entry => entry.name),
+  }))
+  .filter(group => group.names.length > 0);
+
 export default function TermsOfUse() {
   return (
     <div className="htw">
@@ -46,13 +54,13 @@ export default function TermsOfUse() {
 
       <section className="legal-section">
         <h2 className="htw-section-title">What the site is</h2>
-        {/* DECISION D1 + D2 (docs/LEGAL-PAGES.md): name who provides the site,
-            and whether it may be described as a Lakehead University service. */}
         <p className="legal-lede">
           RDM Toolkit is a set of research data management tools that run in your
-          web browser, with guides to the policies around them. It was built for
-          researchers, students and staff at {INSTITUTION.name}, and anyone may
-          use it.
+          web browser, with guides to the policies around them. It is developed
+          and maintained by {PROJECT.maintainer.name},{' '}
+          {PROJECT.maintainer.title} in the {INSTITUTION.researchOffice} at{' '}
+          {INSTITUTION.name}. It was built for Lakehead researchers, students
+          and staff, and anyone may use it.
         </p>
       </section>
 
@@ -106,8 +114,6 @@ export default function TermsOfUse() {
 
       <section className="legal-section">
         <h2 className="htw-section-title">No warranty</h2>
-        {/* DECISION D3 (docs/LEGAL-PAGES.md): legal review of this section and
-            the next, and whether to add a governing-law clause. */}
         <p className="legal-lede">
           The site, its tools and its guides are provided “as is”, without
           warranty of any kind, express or implied. These are the same terms the
@@ -120,12 +126,14 @@ export default function TermsOfUse() {
 
       <section className="legal-section">
         <h2 className="htw-section-title">Limitation of liability</h2>
+        {/* Open, optional (docs/LEGAL-PAGES.md D3): a clause naming whose law
+            applies. Left out until the maintainer decides. */}
         <p className="legal-lede">
-          To the extent the law allows, the people and organisations that
-          provide RDM Toolkit are not liable for any loss or damage that comes
-          from using the site, its tools or its guides, or from relying on their
-          results. This includes loss of data and the disclosure of information
-          you meant to remove or protect.
+          To the extent the law allows, the site’s developer, {INSTITUTION.name}{' '}
+          and anyone else who contributes to RDM Toolkit are not liable for any
+          loss or damage that comes from using the site, its tools or its
+          guides, or from relying on their results. This includes loss of data
+          and the disclosure of information you meant to remove or protect.
         </p>
       </section>
 
@@ -144,8 +152,8 @@ export default function TermsOfUse() {
 
       <section className="legal-section">
         <h2 className="htw-section-title">Source code, content and trademarks</h2>
-        {/* DECISION D4 (docs/LEGAL-PAGES.md): whether to state a licence for
-            the guide text, separate from the code's MIT licence. */}
+        {/* Open, optional (docs/LEGAL-PAGES.md D4): a licence for the guide
+            text, separate from the code's MIT licence. */}
         <p className="legal-lede">
           The source code is published under the{' '}
           <a href={`${PROJECT.sourceBaseUrl}LICENSE`} target="_blank" rel="noopener noreferrer">
@@ -164,6 +172,28 @@ export default function TermsOfUse() {
       </section>
 
       <section className="legal-section">
+        <h2 className="htw-section-title">Open-source software</h2>
+        <p className="legal-lede">
+          The site is built with open-source software. Each project remains the
+          work of its authors and is used under its own licence:
+        </p>
+        <ul className="legal-credits">
+          {CREDITS_BY_LICENCE.map(({ label, names }) => (
+            <li key={label}>
+              <strong>{label}:</strong> {names.join(', ')}
+            </li>
+          ))}
+        </ul>
+        <p className="legal-lede">
+          Each package and its version is listed in the site’s{' '}
+          <a href={`${PROJECT.sourceBaseUrl}package.json`} target="_blank" rel="noopener noreferrer">
+            package.json
+          </a>
+          .
+        </p>
+      </section>
+
+      <section className="legal-section">
         <h2 className="htw-section-title">Other websites</h2>
         <p className="legal-lede">
           The guides link to many other sites. Their content and terms are their
@@ -176,7 +206,11 @@ export default function TermsOfUse() {
         <h2 className="htw-section-title">Changes and questions</h2>
         <p className="legal-lede">
           These terms may change. The date below shows the last change, and using
-          the site after a change means you accept the new terms. Questions go to{' '}
+          the site after a change means you accept the new terms.
+        </p>
+        <p className="legal-lede">
+          For questions about these terms, or to report something on the site
+          that is wrong or out of date, email{' '}
           <a href={MAILTO.rdm}>{INSTITUTION.rdmEmail}</a>.
         </p>
         <p className="acc-meta">

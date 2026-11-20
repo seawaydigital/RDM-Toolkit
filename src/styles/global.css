@@ -16702,6 +16702,25 @@ select:focus-visible,
   max-width: 680px;
 }
 
+/* Open-source credits on the Terms of use page: one line per licence. */
+.legal-credits {
+  list-style: none;
+  margin: 0 0 var(--space-md);
+  padding: 0;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.legal-credits strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
 /* ---- Site footer (every route) ---- */
 .site-footer {
   max-width: 960px;

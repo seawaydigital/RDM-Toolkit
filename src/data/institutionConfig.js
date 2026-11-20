@@ -76,6 +76,13 @@ export const MAILTO = {
 //     not necessarily control those domains — keeping them here makes that
 //     dependency obvious rather than buried in a component.
 export const PROJECT = {
+  // Who develops and maintains the site. Named on the Terms of use and
+  // Privacy statement pages at his own request (see docs/LEGAL-PAGES.md, D1).
+  // He works in INSTITUTION.researchOffice; the contact is INSTITUTION.rdmEmail.
+  maintainer: {
+    name: 'Andrew Austin',
+    title: 'Research Security and Data Management Specialist',
+  },
   repoUrl: 'https://github.com/seawaydigital/RDM-Toolkit',
   sourceBaseUrl: 'https://github.com/seawaydigital/RDM-Toolkit/blob/master/',
   rsToolkitUrl: 'https://rs.rdmtoolkit.ca',
