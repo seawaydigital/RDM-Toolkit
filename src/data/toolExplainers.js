@@ -353,7 +353,7 @@ const EXPLAINERS = {
       'Only the sanitized HTML is inserted into the preview. You can read the result side-by-side with your source, or download it as a standalone .html file.',
     ],
     technicalDetails: {
-      library: '<code>dompurify</code> v3.4.16 for sanitization; a custom lightweight Markdown parser.',
+      library: '<code>dompurify</code> v3.4.18 for sanitization; a custom lightweight Markdown parser.',
       flow: [
         '<code>parseMarkdown(text)</code> handles headings, bold/italic, inline/block code, blockquotes, bullet and numbered lists, and links.',
         '<code>DOMPurify.sanitize(html, { ALLOWED_TAGS, ALLOWED_ATTR: [\'href\', \'src\', \'alt\', \'target\', \'rel\'], ALLOWED_URI_REGEXP, RETURN_TRUSTED_TYPE: true })</code> — a strict allowlist of 20 formatting tags and 5 attributes (no <code>style</code>, no event handlers). Links may only use http(s), mailto, tel or relative URLs, so script-style and embedded-data URLs are removed. The result is a Trusted Types object, the only form the page’s Content Security Policy lets into the DOM.',
@@ -383,7 +383,7 @@ const EXPLAINERS = {
       'You see three preset sizes (Low / Medium / High compression) side by side before you commit to downloading — a sample-based estimate runs up front to project the output size within about ±15%. If a preset won\u2019t shrink your file enough to matter, it\u2019s hidden.',
     ],
     technicalDetails: {
-      library: '<code>@cantoo/pdf-lib</code>, <code>pdfjs-dist</code> v6.3.289, and Canvas API.',
+      library: '<code>@cantoo/pdf-lib</code>, <code>pdfjs-dist</code> v6.4.299, and Canvas API.',
       flow: [
         '<strong>Analysis:</strong> pdfjs <code>getOperatorList()</code> finds <code>paintImageXObject</code> operations; total image bytes vs. total file bytes routes to smart or text-only mode.',
         '<strong>Smart mode:</strong> <code>pdfDoc.context.enumerateIndirectObjects()</code> walks every JPEG XObject; each is decoded via <code>createImageBitmap()</code>, re-encoded with <code>OffscreenCanvas.convertToBlob(\'image/jpeg\', quality)</code>, and swapped back in via <code>PDFRawStream.of()</code>. Text and vectors are untouched.',
@@ -451,7 +451,7 @@ const EXPLAINERS = {
       'The tool opens your PDF inside your browser, walks through each page, and looks for image objects. When it finds one, it extracts the image bytes directly — not a re-rendered copy — so the original resolution and quality are preserved. All the images get bundled into a ZIP for you to download.',
     ],
     technicalDetails: {
-      library: '<code>pdfjs-dist</code> v6.3.289 for PDF parsing; <code>jszip</code> v3 for packaging.',
+      library: '<code>pdfjs-dist</code> v6.4.299 for PDF parsing; <code>jszip</code> v3 for packaging.',
       flow: [
         'For each page, <code>page.getOperatorList()</code> finds <code>OPS.paintImageXObject</code> and <code>OPS.paintJpegImageXObject</code> operations.',
         '<code>page.objs.get(imageRef)</code> returns the raw image data (bitmap or JPEG bytes).',
@@ -511,7 +511,7 @@ const EXPLAINERS = {
       'A PDF rendering engine runs inside your browser and paints each page onto a canvas at a scale you choose (1×, 2×, or 3× for higher resolution). Each canvas is then exported as an image. All the images are packaged as a ZIP you can download.',
     ],
     technicalDetails: {
-      library: '<code>pdfjs-dist</code> v6.3.289 + Canvas API + <code>jszip</code>.',
+      library: '<code>pdfjs-dist</code> v6.4.299 + Canvas API + <code>jszip</code>.',
       flow: [
         '<code>page.getViewport({ scale })</code> defines the render resolution.',
         '<code>page.render({ canvasContext, viewport })</code> paints the page onto an off-screen canvas.',
@@ -629,7 +629,7 @@ const EXPLAINERS = {
       'A ZIP library in your browser reads the archive\u2019s directory, lists every file inside, and lets you download them individually or as a whole. Before any file is extracted, the tool checks the declared uncompressed size — if the archive claims to decompress to more than 5 GB, it\u2019s refused as a potential "ZIP bomb" (a small archive crafted to fill your disk).',
     ],
     technicalDetails: {
-      library: '<code>jszip</code> v3.10.1.',
+      library: '<code>jszip</code> v3.10.2.',
       flow: [
         '<code>JSZip.loadAsync(bytes)</code> reads the archive\u2019s central directory.',
         '<strong>ZIP-bomb guard:</strong> before extraction, each entry\u2019s <code>_data.uncompressedSize</code> is summed; if total exceeds <strong>5 GB</strong>, extraction is refused.',
