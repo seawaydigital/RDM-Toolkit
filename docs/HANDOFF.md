@@ -22,13 +22,17 @@
 
 ## Open PRs (as of 2026-11-21)
 
+All five below pass their checks (#152 was still running when this was written). Merge in this order; none should conflict with another.
+
 | PR | What | Notes |
 |---|---|---|
-| #129 | Acrobat Alternative: Acrobat Standard, registry-driven chips, editorial styling (owner, opened 2026-10-03) | **Conflicts with master.** Touches `CLAUDE.md`, `global.css` and `AcrobatAlternative.jsx`, all changed since. Rebase it or close it |
-| #141 | npm-monthly group (9 updates, touches `package.json`; includes pdfjs-dist 6.4 and vite 8.3.5) | Fails `security` until the exact-version allowlist in `scripts/security-audit.mjs` is patched on the branch. Supersedes #140 |
-| #140 | vite 8.1.5 → 8.3.5 (dev) | Clears the 5 vite alerts; needs the allowlist patch. Close it if #141 merges first |
-| #147 | actions-monthly group (9 updates) | Actions PRs pass as-is; check codeql-action init/analyze move together |
-| #128, #127, #136, #146, #148 | axios, ip-address, source-map-js, fast-uri, follow-redirects (dev, lockfile only) | Clear the matching dev-only alerts |
+| #150 | Site review: Tri-Agency deposit date, PDF Redaction wording, DOMPurify 3.4.18, this handoff | |
+| #151 | Combined dependency update: pdfjs-dist 6.4.299, vite 8.3.8, dev-only advisories | Replaces Dependabot #127, #128, #136, #140, #141, #146 and #148, which Dependabot should close once it merges. Makes the same dompurify edits as #150 |
+| #152 | PDF Redaction: page previews render as soon as a file loads | Bug on the live site today |
+| #129 | Acrobat Alternative: Acrobat Standard, registry-driven chips, editorial styling | Rebased onto master 2026-11-21; one conflict in `CLAUDE.md`, both sides kept |
+| #147 | actions-monthly group (9 updates) | Passes as-is; codeql-action init and analyze move together. Use "Update branch" first |
+
+**The lockfile-only Dependabot PRs can never pass on their own.** `scripts/lockfile-diff-guard.mjs` fails any PR that changes `package-lock.json` without `package.json`. Fold transitive bumps into a PR that also changes a direct dependency, as #151 does.
 
 ## Next work, in rough priority order
 
@@ -71,7 +75,7 @@
   - Use timers and instant scrolls in test scripts. The Glossary's `?term=` deep link already uses an instant scroll for this reason.
   - Run long axe scans asynchronously and poll a `window.__results` object, because `javascript_tool` times out after 45 s.
 - **Shell escaping in agent sessions:** `\\` inside a Bash heredoc reaches Python as `\`. For edits involving backslashes (regexes, `\n` in JS strings), write the script to a file first.
-- **Dependabot npm PRs that change `package.json` always fail the `security` check** until the exact-version allowlist in `scripts/security-audit.mjs` is patched in the same PR (check out the branch, edit, push). Lockfile-only bumps of transitive dependencies (e.g. #127, #128) are not affected. GitHub Actions PRs pass as-is.
+- **Dependabot npm PRs that change `package.json` always fail the `security` check** until the exact-version allowlist in `scripts/security-audit.mjs` is patched in the same PR (check out the branch, edit, push). Lockfile-only bumps of transitive dependencies fail it too, on the lockfile diff guard (see Open PRs). GitHub Actions PRs pass as-is.
 - **codeql-action init/analyze must move together** (same SHA), or CodeQL fails with "configuration error".
 - **The owner can't self-approve their own PRs.** Use the admin "Merge without waiting for requirements" checkbox for self-authored PRs. Agents never merge or bypass.
 - **Merge races:** after "Update branch", required checks restart, so use "Enable auto-merge (squash)" rather than clicking merge immediately.
