@@ -1,4 +1,4 @@
-# Session handoff — updated 2026-10-04
+# Session handoff — updated 2026-11-21
 
 > **Launching?** Start with [LAUNCH-CHECKLIST.md](LAUNCH-CHECKLIST.md). Items 1–2 are done; the remaining owner steps start at item 3.
 
@@ -6,41 +6,29 @@
 
 ## Where things stand
 
-- **Deployed:** rdmtoolkit.ca (GitHub Pages, auto-deploy on push to master). Master is at `d2157ec` (#134).
-- **Site-content plan: complete.** Brainstormed and approved 2026-10-03; spec `docs/superpowers/specs/2026-10-03-site-content-improvements-design.md`, plan `docs/superpowers/plans/2026-10-03-site-content-improvements.md`. Shipped as five squash-merged PRs:
-  - **#130 Task-based navigation:**
-    - 9 common tasks (`src/data/workflows.js`) and a `#tasks` page;
-    - a step-by-step `WorkflowBar` (state lives in `?task=&step=` in the hash);
-    - a sidebar **By file type / By task** switch, remembered by `usePreferences`;
-    - a homepage "Start from a task" section;
-    - site search across tools, tasks, pages and glossary terms.
-  - **#131 Pages and guidance:**
-    - AI-tool guidance on How This Works and File to Markdown;
-    - a new `#thesis` page (FGS requires PDF/A, unlocked and unsigned; no tool here makes PDF/A);
-    - a `#glossary` page (33 terms);
-    - a "Content last checked" line under every research page, plus the claims register in [CONTENT-REVIEW.md](CONTENT-REVIEW.md);
-    - the homepage lists all nine guides;
-    - How This Works gets an "On this page" contents list;
-    - the Tri-Agency page gets a DMP crosswalk.
-  - **#132 Tool pages:** "Use this one when…" pointers for 6 confusable pairs; explainers grew from 23 to 38 tools; search synonyms.
-  - **#133 "Try a sample file"** on De-identify, PDF Redaction and Strip Image Metadata (`src/utils/sampleFiles.js`).
-  - **#134 Bug fixes:** Convert Image Format now writes a real BMP (`src/utils/bmpEncoder.js`) and gives a clear message for TIFF; CSV Encoding Fixer decodes UTF-16 (`src/utils/csvEncoding.js`) and has an opt-in byte-order mark for Excel.
-- **Tests:** `npm test` → 101 passing. `npm run security:audit` clean (46 tools).
-- **Security:** `npm audit --omit=dev` (the CI gate): **0 vulnerabilities**. The Dependabot dashboard has **12 open alerts, all `scope=development`**: 9 axios, 1 ip-address, 2 brace-expansion. Open PRs #128 and #127 fix the first two; brace-expansion likely comes with the #124 group.
+- **Deployed:** rdmtoolkit.ca (GitHub Pages, auto-deploy on push to master). Master is at `2f02b11` (#144) and the live site matches it (checked 2026-11-21: deploy run green; page, `security.txt`, `robots.txt`, `sitemap.xml` and `third-party-licenses.txt` all load).
+- **Shipped since the 2026-10-04 handoff:**
+  - **#138, #139, #143 — October security audit fixes.** PDF Redaction, Delete Pages and Split PDF no longer carry removed pages (C1, C3, C7); photos lose EXIF/XMP in Image to PDF and Strip File Metadata (C5, C6); Password Protect PDF encrypts every string and De-identify reads multi-line CSV cells (C9, C8). Still open: C2, C4, C10, C11, listed in [security/LAKEHEAD-IT-ASSESSMENT.md](security/LAKEHEAD-IT-ASSESSMENT.md).
+  - **#145 — Privacy statement, Terms of use and a site footer** (decisions in [LEGAL-PAGES.md](LEGAL-PAGES.md)).
+  - **#149 — third-party licence texts ship with every build**, and the service worker no longer answers plain files with the app.
+  - **#142, #144 — Lakehead IT assessment** rewritten with a full assessment record. Lakehead's web team declined to host the site and pointed to TSC for a VM; the site stays on GitHub Pages for now.
+- **2026-11-21 site review** (this session): the Tri-Agency page said the deposit implementation approach was expected "late 2026"; the agencies changed that to "early 2027" on 2026-11-17, and the page now says so. PDF Redaction no longer says "Suitable for PHIPA, PIPEDA, and TCPS 2 disclosure". DOMPurify 3.4.17 → 3.4.18. All 62 routes render with no console errors, and all 86 external links return 200.
+- **Tests:** `npm test` → 180 passing. `npm run security:audit` clean (46 tools).
+- **Security:** `npm audit --omit=dev` (the CI gate): **0 vulnerabilities**. The Dependabot dashboard has **22 open alerts, all `scope=development`**: axios (9), vite (5), fast-uri (4), follow-redirects (3), brace-expansion (2), and one each for basic-ftp, ip-address and source-map-js. The open Dependabot PRs below clear most of them.
 - **Scorecard alerts:** 5 open, all posture items, not code: BranchProtection, CodeReview, Fuzzing, CII-BestPractices and Vulnerabilities. The last one clears when the Dependabot PRs merge.
-- **Accessibility:** axe-core (wcag2a/2aa/21aa/22aa) reports 0 violations on every route touched this cycle, plus the July baseline routes. The `#accessibility` statement page exists. AODA Phases 2–6 are still outstanding (see below).
+- **DNS:** `rdmtoolkit.ca` still has no SPF or DMARC record (checked 2026-11-21). LAUNCH-CHECKLIST item 5 is still to do.
+- **Accessibility:** axe-core (wcag2a/2aa/21aa/22aa) reported 0 violations on every route at the September launch pass and on each page added since. AODA Phases 2–6 are still outstanding (see below).
 - **Branch protection:** unchanged since the 2026-09-18 read-back. PRs are required, 4 required checks, 0 approvals, "require up to date" off, and history must be linear, so merge by squash.
-- **Bundle:** the entry chunk grew about 16% across #130–#134 (516.7 KB → ~599 KB), because informational pages are imported statically. Each PR passed the gate against its own base. See "Next work" item 6 before adding more pages.
 
-## Open PRs (as of 2026-10-04)
+## Open PRs (as of 2026-11-21)
 
 | PR | What | Notes |
 |---|---|---|
-| #129 | Acrobat Alternative: Acrobat Standard, registry-driven chips, editorial styling (owner, opened 2026-10-03) | Touches `CLAUDE.md`, `global.css` and `AcrobatAlternative.jsx`. All three changed on master since it was opened (#131 added a content-review line and AI copy; #130–#134 appended CSS and Recent Changes rows), so expect conflicts. Update the branch first, and keep master's `CONTENT_REVIEW['acrobat-alternative']` date only if the page was fully re-checked. |
-| #128 | axios 1.18.1 → 1.20.0 (dev, lockfile only) | Clears 9 dev-only alerts |
-| #127 | ip-address 10.7.0 → 10.7.3 (dev, lockfile only) | Clears 1 dev-only alert |
-| #124 | npm-monthly group (8 updates, touches `package.json`) | Will fail `security` until the exact-version allowlist in `scripts/security-audit.mjs` is patched on the branch |
-| #121 | actions-monthly group (7 updates) | Actions PRs pass as-is; check codeql-action init/analyze move together |
+| #129 | Acrobat Alternative: Acrobat Standard, registry-driven chips, editorial styling (owner, opened 2026-10-03) | **Conflicts with master.** Touches `CLAUDE.md`, `global.css` and `AcrobatAlternative.jsx`, all changed since. Rebase it or close it |
+| #141 | npm-monthly group (9 updates, touches `package.json`; includes pdfjs-dist 6.4 and vite 8.3.5) | Fails `security` until the exact-version allowlist in `scripts/security-audit.mjs` is patched on the branch. Supersedes #140 |
+| #140 | vite 8.1.5 → 8.3.5 (dev) | Clears the 5 vite alerts; needs the allowlist patch. Close it if #141 merges first |
+| #147 | actions-monthly group (9 updates) | Actions PRs pass as-is; check codeql-action init/analyze move together |
+| #128, #127, #136, #146, #148 | axios, ip-address, source-map-js, fast-uri, follow-redirects (dev, lockfile only) | Clear the matching dev-only alerts |
 
 ## Next work, in rough priority order
 
@@ -63,7 +51,6 @@
 7. **Content follow-ups:**
    - Fill the empty "Collect" stage. A natural task is "Make a fillable consent or intake form": Fillable PDF Form, then Password Protect PDF.
    - Have testers try "By task" mode ([TESTER-RECRUITMENT.md](TESTER-RECRUITMENT.md)).
-   - PDF Redaction's registry description still says "Suitable for PHIPA, PIPEDA, and TCPS 2 disclosure". That's the kind of compliance claim the September accuracy passes softened elsewhere, so reword it.
 8. **Yearly content review each September**, before grant season: work through [CONTENT-REVIEW.md](CONTENT-REVIEW.md) and update `src/data/contentReview.js`. This is a good candidate for a scheduled reminder.
 9. **SSH commit signing**, then re-enable "Require signed commits"; and a **manual NVDA pass** on the top 5 tools before formal user testing.
 
