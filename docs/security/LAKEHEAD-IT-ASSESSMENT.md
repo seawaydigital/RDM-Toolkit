@@ -5,8 +5,8 @@
 | | |
 |---|---|
 | Application | RDM Toolkit, source at `github.com/seawaydigital/RDM-Toolkit` |
-| Version this document describes | Commit `3f01eda` on `master`, 23 October 2026 (pull request #143, fixes for C8 and C9). The live site at rdmtoolkit.ca was deployed from this commit. Earlier reviews ran on earlier commits, listed in section 1. |
-| Document date | 23 October 2026 |
+| Version this document describes | Commit `c737ee1` on `master`, 21 November 2026. The live site at rdmtoolkit.ca was deployed from this commit. Earlier reviews ran on earlier commits, listed in section 1. |
+| Document date | 21 November 2026 |
 | Prepared by | Andrew Austin, developer and maintainer of RDM Toolkit. He is responsible for this document. |
 | Type of assessment | Developer self-assessment. The reviews listed below were carried out by AI coding agents (Anthropic's Claude Code) under Andrew Austin's direction. He decided which findings to fix and merged the fixes. |
 | Independent review | **None.** No one outside the project has tested this application. No penetration test has been done. |
@@ -32,7 +32,9 @@ None sent traffic to the live site except where stated.
 | 2026-10-22 | Full automated security audit | `40ac3ac` | Cloudflare's open-source `security-audit` skill (commit `c1c8a8c`) run by Claude Code: 60 agent runs, each candidate checked by two further agents. Code ran only in an isolated sandbox with no network. No browser was available. | 11 confirmed (1 high, 8 medium, 2 low), 4 leads needing a browser to confirm, 48 hardening notes | C1, C3, C7 in `9b79071` (22 Oct). C5, C6 in `36c136b` (23 Oct). C8, C9 in `3f01eda` (23 Oct). The rest are listed in section 2. |
 | 2026-10-23 | Dependency advisories published after the October audit | `9b79071` | `npm audit` | DOMPurify 3.4.16 had three advisories (GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr, GHSA-c6gr-qvv4-5v3f; npm rates them critical). Each needs a DOMPurify option or hook (`SAFE_FOR_TEMPLATES`, `IN_PLACE` with a hook, or `PARSER_MEDIA_TYPE` set to XHTML) that this code does not use, checked by searching the source. | Upgraded to 3.4.17 in `36c136b` (23 Oct) |
 | 2026-10-23 | Recheck after the C5/C6 fixes | `36c136b` | Claude Code ran the test suite, the project guardrail script and `npm audit --omit=dev` | 127 of 127 tests pass, guardrails pass, 0 known vulnerabilities in production dependencies | — |
-| 2026-10-23 | Fixes for C8 and C9, and recheck of the version this document describes | `3f01eda` (checked on its pull request, #143, whose files are identical) | Claude Code. Each fix started with a test built from the audit's reproduction, watched failing first. Both tools were then run in the dev server on the same inputs. | 136 of 136 tests pass, guardrails pass, production build unchanged (69 JS chunks). Password Protect PDF output on the C9 fixture: AES-256, none of the 10 test strings readable without the password; pdf.js reads them all back with it. De-identify on a CSV with a multi-line cell: every selected email replaced; a file with an unclosed quote or a misaligned row is refused. | — |
+| 2026-10-23 | Fixes for C8 and C9 | `3f01eda` (checked on its pull request, #143, whose files are identical) | Claude Code. Each fix started with a test built from the audit's reproduction, watched failing first. Both tools were then run in the dev server on the same inputs. | 136 of 136 tests pass, guardrails pass, production build unchanged (69 JS chunks). Password Protect PDF output on the C9 fixture: AES-256, none of the 10 test strings readable without the password; pdf.js reads them all back with it. De-identify on a CSV with a multi-line cell: every selected email replaced; a file with an unclosed quote or a misaligned row is refused. | — |
+| 2026-11-20 | Privacy statement, terms of use and licence texts (pull requests #145 and #149) | `5cb02e8`, `c737ee1` | Claude Code sessions that built those changes, testing the production build in headless Chrome 158 with a real service worker and the production headers. #149's code had no separate review; Andrew Austin merged it on that session's tests and passing CI. | Found that with the service worker active, `/.well-known/security.txt`, `robots.txt` and `sitemap.xml` opened the app instead of the file (Chrome 158). Added a guardrail that fails CI if either copy of the CSP names any other origin, or if `default-src`, `connect-src` or `form-action` is anything but `'self'`, because the privacy statement promises the page cannot contact another server. | `c737ee1` (21 Nov) |
+| 2026-11-21 | Recheck of the version this document describes | `c737ee1` | Claude Code ran the test suite, the project guardrail script and `npm audit --omit=dev`, and fetched `/.well-known/security.txt` from the live site | 180 of 180 tests pass, guardrails pass, 0 known vulnerabilities in production dependencies. The live security.txt returns the file. | — |
 
 The skill's authors say one run of it finds roughly half of what repeated
 runs find. The October audit was its first run on this code.
@@ -164,10 +166,11 @@ section 2, which this review did not.
   signatures in CI.
 - CI on every change: the project guardrail script (bans network APIs, `eval`,
   cookies, `innerHTML`-style sinks, unreviewed `dangerouslySetInnerHTML` or
-  storage use, and header drift between `_headers` and the three server
-  configs), `npm audit` at high severity, CodeQL, OpenSSF Scorecard, Lighthouse
-  (fails on any CSP regression), a bundle-size and new-chunk gate, and the
-  unit tests (136 at this version).
+  storage use, header drift between `_headers` and the three server configs,
+  and any CSP source that names another origin), `npm audit` at high
+  severity, CodeQL, OpenSSF Scorecard, Lighthouse (fails on any CSP
+  regression), a bundle-size and new-chunk gate, and the unit tests (180 at
+  this version).
 - `master` is protected: changes go through pull requests and must pass the
   required CI checks. There is a single maintainer, so no second person
   approves changes.
@@ -238,13 +241,13 @@ assigned; `rdmtoolkit.lakeheadu.ca` is used there as an example.
 
 ## 10. Evidence
 
-Reproducible from the repository at commit `3f01eda`:
+Reproducible from the repository at commit `c737ee1`:
 
 ```bash
 npm ci --ignore-scripts
 npm run security:audit     # guardrails + header drift check
-npm test                   # 136 tests, incl. PDF encryption verified by pdf.js
-npm audit --omit=dev       # 0 vulnerabilities on 23 October 2026
+npm test                   # 180 tests, incl. PDF encryption verified by pdf.js
+npm audit --omit=dev       # 0 vulnerabilities on 21 November 2026
 npm audit signatures
 npm run build:handoff
 ```
