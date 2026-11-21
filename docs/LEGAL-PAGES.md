@@ -7,12 +7,14 @@ linked from the site footer
 ([SiteFooter.jsx](../src/components/layout/SiteFooter.jsx)), together with the
 accessibility statement.
 
-**Status, 20 November 2026: ready to publish when the maintainer says so.**
-The decisions that held publishing back were made that day by Andrew Austin,
-who develops and maintains the site and works in Lakehead University's Office
-of Research Services. They are recorded below as he gave them. No lawyer has
-reviewed either page, and no Lakehead office other than his own has been asked
-about them.
+**Status: published on 20 November 2026** (PR #145, commit `5cb02e8`), on the
+maintainer's go-ahead. `LEGAL_UPDATED` in
+[src/data/legal.js](../src/data/legal.js) is that date. The decisions that had
+held publishing back were made the same day by Andrew Austin, who develops and
+maintains the site and works in Lakehead University's Office of Research
+Services. They are recorded below as he gave them. No lawyer has reviewed
+either page, and no Lakehead office other than his own has been asked about
+them.
 
 ---
 
@@ -24,6 +26,7 @@ about them.
 | D2 | Use of Lakehead's name and colours | They may be used. The pages say who develops the site and where he works. They do not call the site an official Lakehead service, because that was not part of the decision. | Both pages |
 | D3 | Warranty and liability wording | Keep the plain-language "No warranty" and "Limitation of liability" sections. The liability clause names the site's developer, Lakehead University and other contributors. That mirrors the code's MIT licence, which protects "the authors or copyright holders", and `LICENSE` names Lakehead University as the copyright holder. | Terms |
 | D5 | Feedback email and Lakehead | The site must collect nothing and send nothing to Lakehead's servers. That is how it works, apart from email people choose to send. See "What reaches Lakehead" below. | Privacy → "The short version", "What the web host records", "When you contact us" |
+| D7 | Whether the licences file should also list the helper code the build tools generate | Leave it as it is. The file covers the packages the site serves, not the build tools' generated helper code. See "Third-party licence texts" below. | `/third-party-licenses.txt`; `SERVED_BUILD_PACKAGES` in [scripts/third-party-licenses.mjs](../scripts/third-party-licenses.mjs) |
 
 ## Still open (none of these blocks publishing)
 
@@ -106,12 +109,6 @@ and the two "not hosted by Lakehead" lines in "The short version".
 
 ---
 
-## Before publishing
-
-1. The maintainer says to publish.
-2. If that is on a later day, set `LEGAL_UPDATED` in
-   [src/data/legal.js](../src/data/legal.js) to the publication date.
-
 ## Keeping the pages true
 
 - **Browser storage.** The list comes from `STORED_ITEMS` in
@@ -122,6 +119,12 @@ and the two "not hosted by Lakehead" lines in "The short version".
   production dependency in `package.json` is not credited, if a credit names
   something that is no longer a dependency, or if a credited licence is not one
   the package itself offers.
+- **Licence texts.** Terms → "Open-source software" links to
+  `/third-party-licenses.txt`, which every production build writes. The build
+  fails if a package that ships has no licence text. `tests/legal.test.mjs`
+  fails if the page links to a different file, or credits a project under a
+  licence the file does not list it under. See "Third-party licence texts"
+  below.
 - **No outside connections.** The `security:audit` check described above.
 - **Hosting.** See "This depends on where the site is hosted". On Cloudflare,
   do not turn on Cloudflare Web Analytics: it adds a script, which the
@@ -132,27 +135,79 @@ and the two "not hosted by Lakehead" lines in "The short version".
 The claims and their sources are also listed in
 [CONTENT-REVIEW.md](CONTENT-REVIEW.md).
 
-## Known gap: third-party licence texts are not shipped
+## Third-party licence texts
 
-Checked on the 20 November 2026 build. The minifier removes comments, so the
-built JavaScript carries no third-party copyright or licence notices. Only the
-PDF.js worker file keeps its banner. The MIT, ISC and Apache licences ask for
-their notice to travel with copies of the software.
+This was recorded here as a known gap on 20 November 2026 and closed in the
+change that followed.
 
-The Terms page now credits each project and names its licence, and it links to
-`package.json`. It does not ship the licence texts. Doing that is a separate
-change, for two reasons:
+**What was wrong.** The minifier removes comments, so the built JavaScript
+carried no third-party copyright or licence notices. Only the PDF.js worker
+file kept its banner. The MIT, ISC, BSD and Apache licences ask for their
+notice to travel with copies of the software.
 
-- It needs a build step that collects the licence text of every package that
-  ships and writes them to one file.
-- The service worker answers every page navigation with the app
-  (`NavigationRoute` bound to `index.html`, with no denylist, as read from the
-  built `sw.js`). A link to a plain file that is not in the precache would
-  therefore open the app, not the file, for anyone whose browser has the
-  service worker running. The same applies today to `/robots.txt`,
-  `/sitemap.xml` and `/.well-known/security.txt`. Tools such as `curl`, search
-  crawlers and security scanners are not affected. This was read from the
-  code, not observed in a browser.
+**What ships now.** Every production build writes
+`/third-party-licenses.txt`: the name, version, licence and full licence text
+of 45 packages (about 153 KB). The Terms page links to it. It covers:
+
+- every package a production install brings in (40 of them): the 18
+  dependencies in `package.json` and the packages those depend on, the three
+  font packages included. Optional packages are left out: they are
+  pdfjs-dist's native canvas add-ons for Node and DOMPurify's type
+  declarations, and none of them reaches a browser. The build checks this
+  against what it actually bundled;
+- the four Workbox packages that make up the service worker's runtime
+  (`workbox-*.js`), and `@trickfilm400/rollup-plugin-off-main-thread`
+  (Apache-2.0), whose module loader is the first statement of `sw.js`. These
+  are build tools, but their code is served.
+
+Two packages publish no licence file. `isarray` prints its licence in its
+README. `@pdf-lib/fontkit` only names MIT in its `package.json`; the text used
+is the LICENSE of foliojs/fontkit, the project it is a fork of. Both texts are
+kept in `scripts/licence-fallbacks/`, each tied to one exact version, and the
+file says where each came from.
+
+For a package offered under more than one licence (DOMPurify, JSZip) the file
+reproduces every licence text the package ships. Which one the site uses is
+stated on the Terms page.
+
+**What the file does not cover.** Small pieces of helper code that the build
+tools write into every build: Vite's preload helper, Rolldown's module
+runtime, the class-field helpers Rolldown inlines from `@oxc-project/runtime`
+(its licence file is Babel's MIT licence), vite-plugin-pwa's `registerSW.js`,
+and workbox-build's own lines in `sw.js`. All five tools are MIT-licensed.
+They are left out as generated tool output, not a copy of a library. The
+maintainer was asked on 20 November 2026 whether to list them too, and decided
+to leave the file as it is (D7). The comment on `SERVED_BUILD_PACKAGES` in
+`scripts/third-party-licenses.mjs` says how to list them, and what it would
+cost, if that is ever revisited.
+
+**The service worker used to hide plain files.** With the worker running, a
+browser that opened `/robots.txt`, `/sitemap.xml` or
+`/.well-known/security.txt` got the app, not the file, because the worker
+answered every page navigation with `index.html`. On 20 November 2026 this was
+observed in Chrome 158 (until then it had only been read from the built
+`sw.js`). A link to the licences file would have done the same. The worker now
+leaves alone anything under `/.well-known/` and any address that ends in a
+file extension other than `.html` (`scripts/sw-navigation.mjs`), and it
+precaches the licences file, so the link also works offline. Tools such as
+`curl`, search crawlers and security scanners were never affected.
+
+**How it stays true.** `npm run build` fails if a shipped package has no
+licence text, if the bundle holds code from a package the file does not list,
+or if the generated service worker does not precache the file or has lost its
+navigation denylist. `security:audit` fails if either build step is taken out
+of `vite.config.js`. After a dependency upgrade, a package that still
+publishes no licence file fails the build until its fallback text is checked
+and re-keyed to the new version.
+
+**Checked in a browser.** Headless Chrome 158 with a real service worker,
+against the production build served with its production headers, 20 November
+2026: with the worker running, the licences file, `robots.txt`, `sitemap.xml`
+and `security.txt` each opened as themselves, in the same tab and in a new one;
+a mouse click on the Terms page link opened the licences file in a new tab;
+with the server stopped, the app, a lazily loaded tool, the licences file and
+that link all still opened; and replacing the current build with this one
+reloaded an open tab onto the new build with its address kept.
 
 ## Noticed while drafting
 

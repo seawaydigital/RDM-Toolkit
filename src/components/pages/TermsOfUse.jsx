@@ -1,7 +1,11 @@
 import { AlertCircle, FileText } from 'lucide-react';
 import { INSTITUTION, MAILTO, PROJECT } from '../../data/institutionConfig';
-import { LEGAL_UPDATED, LICENCE_NAMES, OPEN_SOURCE } from '../../data/legal';
+import { LEGAL_UPDATED, LICENCE_NAMES, OPEN_SOURCE, THIRD_PARTY_LICENCES_FILE } from '../../data/legal';
 import { formatReviewDate } from '../../data/contentReview';
+
+// A plain file at the site root, written by every production build. It is a
+// link, not something the page loads: the site makes no requests of its own.
+const LICENCES_URL = `${import.meta.env.BASE_URL}${THIRD_PARTY_LICENCES_FILE}`;
 
 // The decisions behind this page's wording (who is named, the warranty and
 // liability sections, what is still optional) are recorded in
@@ -185,7 +189,12 @@ export default function TermsOfUse() {
           ))}
         </ul>
         <p className="legal-lede">
-          Each package and its version is listed in the site’s{' '}
+          The licence texts and copyright notices for these projects, and for
+          the smaller packages they rely on, are in the{' '}
+          <a href={LICENCES_URL} target="_blank" rel="noopener noreferrer">
+            third-party software licences
+          </a>{' '}
+          file. Each package and its version is listed in the site’s{' '}
           <a href={`${PROJECT.sourceBaseUrl}package.json`} target="_blank" rel="noopener noreferrer">
             package.json
           </a>

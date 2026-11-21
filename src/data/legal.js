@@ -70,6 +70,15 @@ export const LICENCE_NAMES = {
   'OFL-1.1': 'SIL Open Font Licence 1.1',
 };
 
+/**
+ * The plain-text file of licence texts and copyright notices that every
+ * production build writes to the site root (scripts/third-party-licenses.mjs).
+ * It covers the projects in OPEN_SOURCE and the packages they depend on. The
+ * Terms of use page links to it; tests/legal.test.mjs fails if this name and
+ * the one the build writes ever differ.
+ */
+export const THIRD_PARTY_LICENCES_FILE = 'third-party-licenses.txt';
+
 /** Footer links to the site's policy pages. Each hash must be a route. */
 export const POLICY_PAGES = [
   { hash: 'privacy', label: 'Privacy' },
