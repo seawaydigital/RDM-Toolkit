@@ -190,7 +190,7 @@ const EXPLAINERS = {
   },
 
   'pdf-redaction': {
-    whatItDoes: 'Permanently removes sensitive content from a PDF by rasterizing affected pages — the original text bytes are not carried into the output, so copy/paste, search, and text-extraction tools cannot recover what was behind the black rectangles. Suitable for PHIPA, PIPEDA, and TCPS 2 disclosure workflows.',
+    whatItDoes: 'Permanently removes sensitive content from a PDF by rasterizing affected pages — the original text bytes are not carried into the output, so copy/paste, search, and text-extraction tools cannot recover what was behind the black rectangles. Meant for documents that must have health or personal information removed before they are shared; check the result yourself before you share it.',
     howItWorks: [
       'You drop in a PDF, click a page, and drag rectangles over the content you want to redact. When you click "Redact", only the pages you marked are rasterized — they\u2019re rendered to a high-resolution image, the black rectangles are painted onto the image, and the result is embedded as a JPEG into a fresh PDF. Pages without redactions are copied over intact so their text stays selectable.',
       'Before the download is handed to you, the output is re-opened with a PDF parser and every redacted page is checked for extractable text. If any survives, the download is refused.',
@@ -353,7 +353,7 @@ const EXPLAINERS = {
       'Only the sanitized HTML is inserted into the preview. You can read the result side-by-side with your source, or download it as a standalone .html file.',
     ],
     technicalDetails: {
-      library: '<code>dompurify</code> v3.4.16 for sanitization; a custom lightweight Markdown parser.',
+      library: '<code>dompurify</code> v3.4.18 for sanitization; a custom lightweight Markdown parser.',
       flow: [
         '<code>parseMarkdown(text)</code> handles headings, bold/italic, inline/block code, blockquotes, bullet and numbered lists, and links.',
         '<code>DOMPurify.sanitize(html, { ALLOWED_TAGS, ALLOWED_ATTR: [\'href\', \'src\', \'alt\', \'target\', \'rel\'], ALLOWED_URI_REGEXP, RETURN_TRUSTED_TYPE: true })</code> — a strict allowlist of 20 formatting tags and 5 attributes (no <code>style</code>, no event handlers). Links may only use http(s), mailto, tel or relative URLs, so script-style and embedded-data URLs are removed. The result is a Trusted Types object, the only form the page’s Content Security Policy lets into the DOM.',

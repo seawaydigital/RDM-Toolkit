@@ -22,7 +22,7 @@ Suggested cadence: every page each September (before fall grant season) and when
 |---|---|
 | Institutional strategies (Pillar 1) were due 1 March 2023 | [Tri-Agency RDM Policy](https://science.gc.ca/site/science/en/interagency-research-funding/policies-and-guidelines/research-data-management/tri-agency-research-data-management-policy) |
 | DMP-required programs (SSHRC Partnership Grants Stage 2 + Policy Innovation Partnership Grants; NSERC Subatomic Physics Discovery + Alliance Society; CIHR checked per call on ResearchNet) | Agency RDM pages / funding opportunity listings |
-| Deposit (Pillar 3) is still phasing in; no compliance date set; implementation approach expected late 2026 | Tri-Agency RDM pages; 2025 *What We Heard* report |
+| Deposit (Pillar 3) is still phasing in; no compliance date set; implementation approach expected early 2027 (this one row re-checked 2026-11-21; the agencies' page, modified 2026-11-17, moved it from "late 2026") | [Tri-Agency RDM landing page → Progress update](https://science.gc.ca/site/science/en/interagency-research-funding/policies-and-guidelines/research-data-management); 2025 *What We Heard* report |
 | Student obligations are recommendations, not requirements | Policy text |
 | CARE released 2019 (Global Indigenous Data Alliance) | [GIDA CARE principles](https://www.gida-global.org/careprinciples) |
 | DMP crosswalk headings match DMP Assistant's default template (Data Collection … Ethics and Legal Compliance) | [DMP Assistant](https://dmp-pgd.ca/) — sign in and open the default template |
