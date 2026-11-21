@@ -117,13 +117,19 @@ export default function PDFRedaction({ tool, navigateTo }) {
       }
 
       const count = pdfDoc.getPageCount();
+
+      // Open the pdf.js document before the page grid is shown. LazyThumbnail
+      // reads pdfJsDocRef when it mounts and gives up if it is still empty, and
+      // a ref changing later does not run its effect again, so setting the page
+      // count first left every preview blank until something else re-rendered.
+      if (pdfJsDocRef.current) destroyPdfDocument(pdfJsDocRef.current);
+      pdfJsDocRef.current = null;
+      const pdfJsDoc = await loadPdfDocument(bytesCopy.slice());
+      pdfJsDocRef.current = pdfJsDoc;
+
       setFile(selectedFile);
       setFileBytes(bytesCopy);
       setPageCount(count);
-
-      if (pdfJsDocRef.current) destroyPdfDocument(pdfJsDocRef.current);
-      const pdfJsDoc = await loadPdfDocument(bytesCopy.slice());
-      pdfJsDocRef.current = pdfJsDoc;
     } catch (e) {
       console.error('[PDFRedaction] file load error:', e);
       setError('Something went wrong while reading the PDF. Please try a different file.');
