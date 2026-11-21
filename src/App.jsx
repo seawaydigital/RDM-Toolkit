@@ -13,6 +13,9 @@ import AcrobatAlternative from './components/pages/AcrobatAlternative';
 import LakeheadDataverse from './components/pages/LakeheadDataverse';
 import GrantsAndIdentifiers from './components/pages/GrantsAndIdentifiers';
 import AccessibilityStatement from './components/pages/AccessibilityStatement';
+import PrivacyStatement from './components/pages/PrivacyStatement';
+import TermsOfUse from './components/pages/TermsOfUse';
+import SiteFooter from './components/layout/SiteFooter';
 import Tasks from './components/pages/Tasks';
 import ThesisAndDissertation from './components/pages/ThesisAndDissertation';
 import Glossary from './components/pages/Glossary';
@@ -26,6 +29,7 @@ import FeedbackModal from './components/ui/FeedbackModal';
 import WelcomeTour, { hasDismissedTour } from './components/ui/WelcomeTour';
 import { ALL_TOOLS } from './data/toolRegistry';
 import { PAGE_IDS, getPageMeta } from './data/pages';
+import { getReviewDate } from './data/contentReview';
 import { getTaskFromParams } from './data/workflows';
 import { parseHash } from './utils/route';
 import { useRecentTools } from './hooks/useRecentTools';
@@ -298,6 +302,10 @@ export default function App() {
   useEffect(() => {
     function onHashChange() {
       const newRoute = getRouteFromHash();
+      // A new route opens at the top. <main> is the scroll container, so
+      // without this a footer link opens the next page at its bottom. Pages
+      // that jump to an anchor (glossary ?term=) do so after they render.
+      document.getElementById('main-content')?.scrollTo(0, 0);
       setRoute(newRoute);
       setErrorResetKey(k => k + 1);
       // Track recently used tools on every navigation (sidebar clicks, hash changes, etc.)
@@ -515,7 +523,9 @@ export default function App() {
           {currentPage === 'lakehead-dataverse' && <LakeheadDataverse />}
           {currentPage === 'grants-identifiers' && <GrantsAndIdentifiers />}
           {currentPage === 'accessibility' && <AccessibilityStatement />}
-          {currentPage && (
+          {currentPage === 'privacy' && <PrivacyStatement />}
+          {currentPage === 'terms' && <TermsOfUse />}
+          {currentPage && getReviewDate(currentPage) && (
             <div className="content-reviewed-wrap">
               <ContentReviewed page={currentPage} />
             </div>
@@ -575,6 +585,7 @@ export default function App() {
               </div>
             </div>
           )}
+          <SiteFooter currentPage={currentPage} />
         </MainContent>
       </div>
 
