@@ -63,10 +63,10 @@ const allowedDependencies = new Map([
   ['exifr', '7.1.3'],
   ['jszip', '3.10.2'],
   ['lucide-react', '0.577.0'],
-  ['pdfjs-dist', '6.4.299'],
+  ['pdfjs-dist', '6.5.438'],
   ['react', '18.3.1'],
   ['react-dom', '18.3.1'],
-  ['turndown', '7.2.4'],
+  ['turndown', '7.2.5'],
   ['turndown-plugin-gfm', '1.0.2'],
   ['zxcvbn', '4.4.2'],
 ]);
@@ -74,7 +74,7 @@ const allowedDependencies = new Map([
 const allowedDevDependencies = new Map([
   ['@axe-core/cli', '4.14.0'],
   ['@axe-core/react', '4.14.0'],
-  ['@vitejs/plugin-react', '6.1.2'],
+  ['@vitejs/plugin-react', '6.3.0'],
   ['http-server', '14.1.1'],
   ['vite', '8.3.8'],
   ['vite-plugin-pwa', '1.3.0'],
