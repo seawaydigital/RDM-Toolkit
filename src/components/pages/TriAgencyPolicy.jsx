@@ -205,7 +205,7 @@ const TIMELINE = [
     date: 'Phasing in',
     status: 'pending',
     title: 'Data Deposit (general)',
-    body: 'No compliance date has been set. After community engagement in 2023–2025, the agencies say they expect to finalize and release the implementation approach in late 2026.',
+    body: 'No compliance date has been set. After community engagement in 2023–2025, the agencies say they expect to finalize and release the implementation approach in early 2027.',
   },
   {
     date: 'Since Jan 1, 2008',
@@ -395,7 +395,7 @@ export default function TriAgencyPolicy() {
                 <Clock size={14} className="tap-matrix-icon tap-matrix-icon--pending" />
                 <div>
                   <strong>Pillar 3 — Deposit</strong>
-                  <p>Not yet in force. The agencies expect to release the implementation approach in late 2026; no compliance date has been set. Depositing data that supports published findings is already good practice wherever disciplinary norms allow.</p>
+                  <p>Not yet in force. The agencies expect to release the implementation approach in early 2027; no compliance date has been set. Depositing data that supports published findings is already good practice wherever disciplinary norms allow.</p>
                 </div>
               </li>
             </ul>
@@ -425,7 +425,7 @@ export default function TriAgencyPolicy() {
                 <Clock size={14} className="tap-matrix-icon tap-matrix-icon--pending" />
                 <div>
                   <strong>Pillar 3 — Deposit</strong>
-                  <p>Not yet in force. The agencies expect to release the implementation approach in late 2026; no compliance date has been set. Subject to disciplinary norms — qualitative data with confidentiality constraints is rarely deposited openly, and restricted deposit is usually appropriate.</p>
+                  <p>Not yet in force. The agencies expect to release the implementation approach in early 2027; no compliance date has been set. Subject to disciplinary norms — qualitative data with confidentiality constraints is rarely deposited openly, and restricted deposit is usually appropriate.</p>
                 </div>
               </li>
             </ul>
