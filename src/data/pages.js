@@ -89,6 +89,18 @@ export const PAGE_META = [
     description: 'How the site is tested for accessibility, known limits, and how to report a barrier.',
     keywords: ['aoda', 'wcag', 'screen reader', 'accessibility'],
   },
+  {
+    hash: 'privacy',
+    title: 'Privacy Statement',
+    description: 'What the site keeps in your browser, what the web host logs, and what happens when you email us.',
+    keywords: ['privacy policy', 'cookies', 'tracking', 'analytics', 'personal information', 'fippa', 'ip address'],
+  },
+  {
+    hash: 'terms',
+    title: 'Terms of Use',
+    description: 'The terms for using the tools and guides, including checking results yourself before you rely on them.',
+    keywords: ['terms of service', 'disclaimer', 'warranty', 'liability', 'licence', 'license', 'legal'],
+  },
 ];
 
 export const PAGE_IDS = new Set(PAGE_META.map(p => p.hash));

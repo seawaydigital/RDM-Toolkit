@@ -9634,7 +9634,7 @@ input:focus, textarea:focus, select:focus {
 
 @media print {
   /* Hide navigation */
-  .topbar, .sidebar, .sidebar-backdrop {
+  .topbar, .sidebar, .sidebar-backdrop, .site-footer {
     display: none !important;
   }
   .app-layout {
@@ -12484,27 +12484,17 @@ input:focus, textarea:focus, select:focus {
 
 .aa-hero {
   text-align: center;
-  padding: var(--space-2xl) 0 var(--space-xl);
-}
-
-.aa-hero-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  margin-bottom: var(--space-md);
+  padding: var(--space-xl) 0;
 }
 
 .aa-hero-title {
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.1;
+  font-family: var(--font-display);
+  font-size: 40px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 72, "SOFT" 40;
   letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--text-parchment);
   margin-bottom: var(--space-md);
 }
 
@@ -12554,14 +12544,9 @@ input:focus, textarea:focus, select:focus {
 
 /* ── Savings Calculator ───────────────────────────────────────────────────── */
 
-.aa-calc-section .aa-section-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .aa-calc-section .aa-section-title svg {
   color: var(--accent-primary);
+  align-self: center;
 }
 
 .aa-calc {
@@ -12818,6 +12803,9 @@ input:focus, textarea:focus, select:focus {
   .aa-calc-result-amount {
     font-size: 2rem;
   }
+  .aa-hero-title {
+    font-size: 32px;
+  }
 }
 
 /* ── Sections ─────────────────────────────────────────────────────────────── */
@@ -12827,10 +12815,23 @@ input:focus, textarea:focus, select:focus {
 }
 
 .aa-section-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: var(--space-sm);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 36, "SOFT" 40;
+  letter-spacing: -0.01em;
+  color: var(--text-parchment);
+  margin-bottom: 14px;
+}
+
+.aa-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-hairline) 0%, transparent 100%);
 }
 
 .aa-section-intro {
@@ -13087,6 +13088,10 @@ input:focus, textarea:focus, select:focus {
   margin-bottom: var(--space-sm);
 }
 
+.aa-honest-header .aa-section-title {
+  flex: 1;
+}
+
 .aa-honest-rule {
   font-size: 0.8125rem;
   color: var(--text-secondary);
@@ -13192,6 +13197,13 @@ input:focus, textarea:focus, select:focus {
 .aa-honest-prowins strong {
   color: var(--accent-amber);
   font-weight: 600;
+}
+
+.aa-honest-standard {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: var(--space-xs) 0 0;
 }
 
 /* ── Beyond Acrobat callout ───────────────────────────────────────────────── */
@@ -16598,4 +16610,164 @@ select:focus-visible,
   width: 16px;
   height: 16px;
   accent-color: var(--accent-primary);
+}
+
+/* ---- Privacy statement and Terms of use pages ---- */
+.legal-section {
+  margin-bottom: var(--space-2xl);
+}
+
+.legal-section:last-child {
+  margin-bottom: 0;
+}
+
+.legal-lede {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+  max-width: 680px;
+  margin-bottom: var(--space-md);
+}
+
+.legal-lede--spaced {
+  margin-top: var(--space-lg);
+}
+
+/* Underlined: gold alone is too close to the body grey to mark a link
+   (axe link-in-text-block). Covers the accessibility statement too. */
+.legal-lede a,
+.acc-lede a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.legal-summary {
+  list-style: none;
+  margin: var(--space-md) 0 0;
+  padding: var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-width: 680px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-left: 2px solid var(--accent-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.legal-summary li {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  color: var(--text-primary);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.legal-summary li svg {
+  color: var(--accent-green);
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.legal-stored {
+  list-style: none;
+  margin: var(--space-lg) 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-md);
+}
+
+.legal-stored li {
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.legal-stored strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-parchment);
+  margin-bottom: var(--space-sm);
+}
+
+.legal-stored p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.65;
+  margin: 0 0 var(--space-sm);
+}
+
+.legal-stored .legal-stored-why {
+  margin: 0;
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-hairline);
+}
+
+.legal-checks {
+  max-width: 680px;
+}
+
+/* Open-source credits on the Terms of use page: one line per licence. */
+.legal-credits {
+  list-style: none;
+  margin: 0 0 var(--space-md);
+  padding: 0;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.legal-credits strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* ---- Site footer (every route) ---- */
+.site-footer {
+  max-width: 960px;
+  margin: var(--space-2xl) auto 0;
+  padding: var(--space-lg) 0 var(--space-sm);
+  border-top: 1px solid var(--border-hairline);
+}
+
+.site-footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-xs) var(--space-lg);
+}
+
+.site-footer-links a {
+  display: inline-block;
+  min-height: 24px;
+  padding: 4px 2px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+}
+
+.site-footer-links a:hover {
+  color: var(--text-primary);
+  text-decoration-color: currentColor;
+}
+
+.site-footer-links a[aria-current='page'] {
+  color: var(--accent-primary);
+  text-decoration-color: currentColor;
 }

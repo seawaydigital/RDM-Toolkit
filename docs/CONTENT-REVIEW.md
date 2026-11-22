@@ -22,7 +22,7 @@ Suggested cadence: every page each September (before fall grant season) and when
 |---|---|
 | Institutional strategies (Pillar 1) were due 1 March 2023 | [Tri-Agency RDM Policy](https://science.gc.ca/site/science/en/interagency-research-funding/policies-and-guidelines/research-data-management/tri-agency-research-data-management-policy) |
 | DMP-required programs (SSHRC Partnership Grants Stage 2 + Policy Innovation Partnership Grants; NSERC Subatomic Physics Discovery + Alliance Society; CIHR checked per call on ResearchNet) | Agency RDM pages / funding opportunity listings |
-| Deposit (Pillar 3) is still phasing in; no compliance date set; implementation approach expected late 2026 | Tri-Agency RDM pages; 2025 *What We Heard* report |
+| Deposit (Pillar 3) is still phasing in; no compliance date set; implementation approach expected early 2027 (this one row re-checked 2026-11-21; the agencies' page, modified 2026-11-17, moved it from "late 2026") | [Tri-Agency RDM landing page → Progress update](https://science.gc.ca/site/science/en/interagency-research-funding/policies-and-guidelines/research-data-management); 2025 *What We Heard* report |
 | Student obligations are recommendations, not requirements | Policy text |
 | CARE released 2019 (Global Indigenous Data Alliance) | [GIDA CARE principles](https://www.gida-global.org/careprinciples) |
 | DMP crosswalk headings match DMP Assistant's default template (Data Collection … Ethics and Legal Compliance) | [DMP Assistant](https://dmp-pgd.ca/) — sign in and open the default template |
@@ -110,3 +110,22 @@ Content is the standard itself, kept verbatim at the owner's request. Check only
 | OCAP® is a registered trademark of FNIGC | [FNIGC](https://fnigc.ca/ocap-training/) |
 | Tri-Agency deposit requirement is phasing in | Same source as Tri-Agency above |
 | Lakehead's three classification tiers | Lakehead classification standard (above) |
+
+## Privacy statement (`#privacy`) and Terms of use (`#terms`) — last checked 2026-11-20
+
+These pages show their own "Last updated" date (`LEGAL_UPDATED` in `src/data/legal.js`), not a review line. The decisions behind their wording are in [LEGAL-PAGES.md](LEGAL-PAGES.md).
+
+| Claim | Source |
+|---|---|
+| GitHub Pages logs every visitor's IP address "for security purposes" | [What is GitHub Pages? → Data collection](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages) |
+| GitHub handles those logs under its General Privacy Statement | [GitHub General Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement) (effective 27 April 2026 when checked) |
+| What the browser stores, and why | `STORED_ITEMS` in `src/data/legal.js`, kept in step with the code by `tests/legal.test.mjs` |
+| What the feedback email draft contains | `buildIssueBody()` in `src/components/ui/FeedbackModal.jsx` |
+| The Storage Calculator share link holds only numbers, yes/no settings and its own labels | `src/utils/storageConfig.js` |
+| The source code is MIT-licensed | `LICENSE` |
+| OCAP® is a registered trademark of FNIGC | Same source as Glossary above |
+| The site is hosted on GitHub Pages, not on a Lakehead server | `curl -sI https://rdmtoolkit.ca/` shows `Server: GitHub.com`; the A records are GitHub's (185.199.108–111.153) |
+| The site sets no cookies and sends nothing to Lakehead | No `Set-Cookie` in the live response; the CSP check in `scripts/security-audit.mjs`; the network measurement recorded in LEGAL-PAGES.md |
+| Who develops and maintains the site, and the contact address | `PROJECT.maintainer` and `INSTITUTION.rdmEmail` in `src/data/institutionConfig.js`, as the maintainer gave them |
+| Each open-source project and its licence | `OPEN_SOURCE` in `src/data/legal.js`, checked against `package.json` and each package's own licence by `tests/legal.test.mjs` |
+| The licence texts and copyright notices are in the linked third-party software licences file | `/third-party-licenses.txt`, written by every production build from the installed packages (`scripts/third-party-licenses.mjs`); the build fails if a shipped package has no licence text. What the file covers and leaves out is in LEGAL-PAGES.md → "Third-party licence texts" |
